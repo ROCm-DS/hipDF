@@ -111,9 +111,9 @@ message(VERBOSE "HIPDF: Configure CMake to build tests: ${BUILD_TESTS}")
 message(VERBOSE "HIPDF: Configure CMake to build (google & nvbench) benchmarks: ${BUILD_BENCHMARKS}")
 message(VERBOSE "HIPDF: Build cuDF shared libraries: ${BUILD_SHARED_LIBS}")
 message(VERBOSE "HIPDF: Use a file cache for JIT compiled kernels: ${JITIFY_USE_CACHE}")
-message(VERBOSE "HIPDF: Build and statically link Arrow libraries: ${CUDF_USE_ARROW_STATIC}")
-message(VERBOSE "HIPDF: Build and enable S3 filesystem support for Arrow: ${CUDF_ENABLE_ARROW_S3}")
-message(VERBOSE "HIPDF: Build with per-thread default stream: ${CUDF_USE_PER_THREAD_DEFAULT_STREAM}")
+message(VERBOSE "HIPDF: Build and statically link Arrow libraries: ${HIPDF_USE_ARROW_STATIC}")
+message(VERBOSE "HIPDF: Build and enable S3 filesystem support for Arrow: ${HIPDF_ENABLE_ARROW_S3}")
+message(VERBOSE "HIPDF: Build with per-thread default stream: ${HIPDF_USE_PER_THREAD_DEFAULT_STREAM}")
 message(
   VERBOSE
   "HIPDF: Replace the current optimization flags by the options '-rdynamic -Og' (useful for debugging with stacktrace retrieval): ${CUDF_BUILD_STACKTRACE_DEBUG}"
