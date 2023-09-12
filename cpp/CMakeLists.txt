@@ -230,10 +230,13 @@ endif()
 # preprocess jitify-able kernels
 include(cmake/Modules/JitifyPreprocessKernels.cmake)
 
+if(CUDA_BACKEND)
 # find cuFile
 include(cmake/thirdparty/get_cufile.cmake)
 # find KvikIO
 include(cmake/thirdparty/get_kvikio.cmake)
+endif()
+
 # find fmt
 include(cmake/thirdparty/get_fmt.cmake)
 # find spdlog
