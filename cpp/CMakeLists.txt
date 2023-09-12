@@ -222,13 +222,14 @@ include(cmake/thirdparty/get_dlpack.cmake)
 # find libhip++
 include(cmake/thirdparty/get_libhipcxx.cmake)
 # find cuCollections Should come after including thrust and libhipcxx
-include(cmake/thirdparty/get_cucollections.cmake)
+include(cmake/thirdparty/get_hipcollections.cmake)
 # find or install GoogleTest
 if(HIPDF_BUILD_TESTUTIL)
   include(cmake/thirdparty/get_gtest.cmake)
 endif()
 # preprocess jitify-able kernels
 include(cmake/Modules/JitifyPreprocessKernels.cmake)
+
 # find cuFile
 include(cmake/thirdparty/get_cufile.cmake)
 # find KvikIO
