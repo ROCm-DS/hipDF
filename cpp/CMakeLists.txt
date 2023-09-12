@@ -30,7 +30,7 @@ else()
 endif()
 
 project(
-  hipdf 
+  HIPDF 
   VERSION 23.10.00 #todo(hip): which version to choose?
   LANGUAGES C CXX
 )
@@ -160,7 +160,7 @@ set_property(
 message(VERBOSE "HIPDF: LIBCUDF_LOGGING_LEVEL = '${LIBCUDF_LOGGING_LEVEL}'.")
 
 if(NOT HIPDF_GENERATED_INCLUDE_DIR)
-  set(HIPDF_GENERATED_INCLUDE_DIR ${CUDF_BINARY_DIR})
+  set(HIPDF_GENERATED_INCLUDE_DIR ${HIPDF_BINARY_DIR})
 endif()
 
 # ##################################################################################################
@@ -734,7 +734,7 @@ add_dependencies(hipdf jitify_preprocess_run)
 target_link_libraries(
   hipdf
   PUBLIC ${ARROW_LIBRARIES} libhipcxx::libhipcxx hipdf::Thrust rmm::rmm
-  PRIVATE cuco::cuco ZLIB::ZLIB hipcomp::hipcomp kvikio::kvikio
+  PRIVATE hipco::hipco ZLIB::ZLIB hipcomp::hipcomp $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
           $<TARGET_NAME_IF_EXISTS:cuFile_interface>
 )
 
@@ -743,17 +743,20 @@ if(TARGET conda_env)
   target_link_libraries(hipdf PRIVATE conda_env)
 endif()
 
-file(
-  WRITE "${HIPDF_BINARY_DIR}/fatbin.ld"
-  [=[
-SECTIONS
-{
-  .nvFatBinSegment : { *(.nvFatBinSegment) }
-  .nv_fatbin : { *(.nv_fatbin) }
-}
-]=]
-)
-target_link_options(hipdf PRIVATE "$<HOST_LINK:${HIPDF_BINARY_DIR}/fatbin.ld>")
+#todo(hip): do we need a linker script for HIP?
+if(CUDA_BACKEND)
+  file(
+    WRITE "${HIPDF_BINARY_DIR}/fatbin.ld"
+    [=[
+  SECTIONS
+  {
+    .nvFatBinSegment : { *(.nvFatBinSegment) }
+    .nv_fatbin : { *(.nv_fatbin) }
+  }
+  ]=]
+  )
+  target_link_options(hipdf PRIVATE "$<HOST_LINK:${HIPDF_BINARY_DIR}/fatbin.ld>")
+endif()
 
 add_library(hipdf::hipdf ALIAS hipdf)
 
