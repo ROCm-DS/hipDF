@@ -21,7 +21,13 @@ include(rapids-hip)
 include(rapids-export)
 include(rapids-find)
 
+option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
+
+if(CUDA_BACKEND)
+  rapids_cuda_init_architectures(HIPDF)
+else()
 rapids_hip_init_architectures(HIPDF)
+endif()
 
 project(
   hipdf 
@@ -29,18 +35,17 @@ project(
   LANGUAGES C CXX
 )
 
-option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
-
 if(CUDA_BACKEND)
   enable_language(CUDA)
-
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
     message(
       FATAL_ERROR
-        "libhipdf requires CUDA Toolkit 11.5+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
+        "libcudf requires CUDA Toolkit 11.5+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
     )
   endif()
-else(CUDA_BACKEND)
+
+  option(USE_NVTX "Build with NVTX support" ON)
+else()
   enable_language(HIP)
 endif()
 
@@ -52,7 +57,6 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
-option(USE_NVTX "Build with NVTX support" ON)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
@@ -79,17 +83,17 @@ option(
   OFF
 )
 option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated declarations." OFF)
-# Option to enable line info in CUDA device compilation to allow introspection when profiling /
+# Option to enable line info in CUDA/HIP device compilation to allow introspection when profiling /
 # memchecking
-option(CUDA_ENABLE_LINEINFO
-       "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler)" OFF
+option(GPU_ENABLE_LINEINFO
+       "Generate line-number information for GPU device code." OFF
 )
-option(CUDA_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all CUDA compilation" ON)
+option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
-option(CUDA_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
+option(GPU_STATIC_RUNTIME "Statically link the CUDA/HIP runtime" OFF)
 
 set(DEFAULT_HIPDF_BUILD_STREAMS_TEST_UTIL ON)
-if(CUDA_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
+if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
   set(DEFAULT_HIPDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
 option(
@@ -120,9 +124,9 @@ message(
 )
 message(
   VERBOSE
-  "HIPDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${CUDA_ENABLE_LINEINFO}"
+  "HIPDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
 )
-message(VERBOSE "HIPDF: Statically link the CUDA runtime: ${CUDA_STATIC_RUNTIME}")
+message(VERBOSE "HIPDF: Statically link the CUDA/HIP runtime: ${GPU_STATIC_RUNTIME}")
 
 # Set a default build type if none was specified
 rapids_cmake_build_type("Release")
@@ -140,9 +144,9 @@ if(HIPDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 #
 set(HIPDF_CXX_FLAGS "")
-set(HIPDF_CUDA_FLAGS "")
+set(HIPDF_GPU_FLAGS "")
 set(HIPDF_CXX_DEFINITIONS "")
-set(HIPDF_CUDA_DEFINITIONS "")
+set(HIPDF_GPU_DEFINITIONS "")
 
 # Set logging level
 set(LIBHIPDF_LOGGING_LEVEL
@@ -164,13 +168,23 @@ endif()
 rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
 
 # ##################################################################################################
-# * compiler options ------------------------------------------------------------------------------
-rapids_find_package(
-  CUDAToolkit REQUIRED
-  BUILD_EXPORT_SET hipdf-exports
-  INSTALL_EXPORT_SET hipdf-exports
-)
-include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
+
+if(CUDA_BACKEND)
+  # * compiler options ----------------------------------------------------------------------------
+  rapids_find_package(
+    CUDAToolkit REQUIRED
+    BUILD_EXPORT_SET hipdf-exports
+    INSTALL_EXPORT_SET hipdf-exports
+  )
+  include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
+else()
+  rapids_find_package(
+    HIP REQUIRED
+    BUILD_EXPORT_SET hipdf-exports
+    INSTALL_EXPORT_SET hipdf-exports
+  )
+  include(cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
+endif()
 
 # ##################################################################################################
 # * dependencies ----------------------------------------------------------------------------------
@@ -192,7 +206,7 @@ rapids_cpm_init()
 # find jitify
 include(cmake/thirdparty/get_jitify.cmake)
 # find nvCOMP
-include(cmake/thirdparty/get_nvcomp.cmake)
+include(cmake/thirdparty/get_hipcomp.cmake)
 # find thrust/cub
 include(cmake/thirdparty/get_thrust.cmake)
 # find rmm
@@ -660,50 +674,7 @@ set_source_files_properties(
   PROPERTIES COMPILE_DEFINITIONS "_FILE_OFFSET_BITS=64"
 )
 
-set_target_properties(
-  hipdf
-  PROPERTIES BUILD_RPATH "\$ORIGIN"
-             INSTALL_RPATH "\$ORIGIN"
-             # set target compile options
-             CXX_STANDARD 17
-             CXX_STANDARD_REQUIRED ON
-             # For std:: support of __int128_t. Can be removed once using cuda::std
-             CXX_EXTENSIONS ON
-             CUDA_STANDARD 17
-             CUDA_STANDARD_REQUIRED ON
-             POSITION_INDEPENDENT_CODE ON
-             INTERFACE_POSITION_INDEPENDENT_CODE ON
-)
-
-target_compile_options(
-  hipdf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>"
-               "$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_CUDA_FLAGS}>"
-)
-
-if(HIPDF_BUILD_STACKTRACE_DEBUG)
-  # Remove any optimization level to avoid nvcc warning "incompatible redefinition for option
-  # 'optimize'".
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_RELEASE "${CMAKE_CUDA_FLAGS_RELEASE}")
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_MINSIZEREL
-                       "${CMAKE_CUDA_FLAGS_MINSIZEREL}"
-  )
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_RELWITHDEBINFO
-                       "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO}"
-  )
-
-  add_library(hipdf_backtrace INTERFACE)
-  target_compile_definitions(hipdf_backtrace INTERFACE _BUILD_STACKTRACE_DEBUG)
-  target_compile_options(
-    hipdf_backtrace INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:-Og>"
-                             "$<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Og>"
-  )
-  target_link_options(
-    hipdf_backtrace INTERFACE "$<$<LINK_LANGUAGE:CXX>:-rdynamic>"
-    "$<$<LINK_LANGUAGE:CUDA>:-Xlinker=-rdynamic>"
-  )
-  target_link_libraries(hipdf PRIVATE hipdf_backtrace)
-endif()
+set_hipdf_target_properties()
 
 # Specify include paths for the current target and dependents
 target_include_directories(
@@ -714,11 +685,6 @@ target_include_directories(
          "$<BUILD_INTERFACE:${HIPDF_GENERATED_INCLUDE_DIR}/include>"
   PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
   INTERFACE "$<INSTALL_INTERFACE:include>"
-)
-
-target_compile_definitions(
-  hipdf PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_DEFINITIONS}>"
-              "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_CUDA_DEFINITIONS}>>"
 )
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
@@ -738,7 +704,7 @@ endif()
 # Per-thread default stream
 if(HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
-    hipdf PUBLIC CUDA_API_PER_THREAD_DEFAULT_STREAM HIPDF_USE_PER_THREAD_DEFAULT_STREAM
+    hipdf PUBLIC GPU_API_PER_THREAD_DEFAULT_STREAM HIPDF_USE_PER_THREAD_DEFAULT_STREAM
   )
 endif()
 
@@ -760,25 +726,13 @@ add_dependencies(hipdf jitify_preprocess_run)
 target_link_libraries(
   hipdf
   PUBLIC ${ARROW_LIBRARIES} libhipcxx::libhipcxx hipdf::Thrust rmm::rmm
-  PRIVATE cuco::cuco ZLIB::ZLIB nvcomp::nvcomp kvikio::kvikio
+  PRIVATE cuco::cuco ZLIB::ZLIB hipcomp::hipcomp kvikio::kvikio
           $<TARGET_NAME_IF_EXISTS:cuFile_interface>
 )
 
 # Add Conda library, and include paths if specified
 if(TARGET conda_env)
   target_link_libraries(hipdf PRIVATE conda_env)
-endif()
-
-if(CUDA_STATIC_RUNTIME)
-  # Tell CMake what CUDA language runtime to use
-  set_target_properties(hipdf PROPERTIES CUDA_RUNTIME_LIBRARY Static)
-  # Make sure to export to consumers what runtime we used
-  target_link_libraries(hipdf PUBLIC CUDA::cudart_static)
-else()
-  # Tell CMake what CUDA language runtime to use
-  set_target_properties(hipdf PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
-  # Make sure to export to consumers what runtime we used
-  target_link_libraries(hipdf PUBLIC CUDA::cudart)
 endif()
 
 file(
@@ -810,18 +764,9 @@ if(HIPDF_BUILD_TESTUTIL)
     # other similar features in the future.
     tests/utilities/default_stream.cpp
   )
-  set_target_properties(
-    hipdftest_default_stream
-    PROPERTIES BUILD_RPATH "\$ORIGIN"
-               INSTALL_RPATH "\$ORIGIN"
-               # set target compile options
-               CXX_STANDARD 17
-               CXX_STANDARD_REQUIRED ON
-               CUDA_STANDARD 17
-               CUDA_STANDARD_REQUIRED ON
-               POSITION_INDEPENDENT_CODE ON
-               INTERFACE_POSITION_INDEPENDENT_CODE ON
-  )
+  
+  set_hidftest_default_stream_target()
+
   target_link_libraries(
     hipdftest_default_stream
     PUBLIC hipf
@@ -841,22 +786,11 @@ if(HIPDF_BUILD_TESTUTIL)
     tests/utilities/tdigest_utilities.cu
   )
 
-  set_target_properties(
-    hipdftestutil
-    PROPERTIES BUILD_RPATH "\$ORIGIN"
-               INSTALL_RPATH "\$ORIGIN"
-               # set target compile options
-               CXX_STANDARD 17
-               CXX_STANDARD_REQUIRED ON
-               CUDA_STANDARD 17
-               CUDA_STANDARD_REQUIRED ON
-               POSITION_INDEPENDENT_CODE ON
-               INTERFACE_POSITION_INDEPENDENT_CODE ON
-  )
+  set_hipdftestutil_target()
 
   target_compile_options(
     hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
-                        "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_CUDA_FLAGS}>>"
+                        "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_GPU_FLAGS}>>"
   )
 
   target_link_libraries(
@@ -876,10 +810,10 @@ endif()
 # * build hipdf_identify_stream_usage --------------------------------------------------------------
 
 if(HIPDF_BUILD_STREAMS_TEST_UTIL)
-  if(CUDA_STATIC_RUNTIME)
+  if(GPU_STATIC_RUNTIME)
     message(
       FATAL_ERROR
-        "Stream identification cannot be used with a static CUDA runtime. Please set CUDA_STATIC_RUNTIME=OFF or HIPDF_BUILD_STREAMS_TEST_UTIL=OFF."
+        "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or HIPDF_BUILD_STREAMS_TEST_UTIL=OFF."
     )
   endif()
 
@@ -903,7 +837,12 @@ if(HIPDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>")
-    target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm)
+    if(ENABLE_CUDA)
+      target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm)
+    else()
+      target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm)
+    endif()
+
     if(_BUILD_STACKTRACE_DEBUG)
       target_link_libraries(${_tgt} PRIVATE hipdf_backtrace)
     endif()
@@ -923,10 +862,14 @@ if(HIPDF_BUILD_TESTS)
   include(CTest)
 
   # ctest cuda memcheck
-  find_program(CUDA_SANITIZER compute-sanitizer)
-  set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
-  set(MEMORYCHECK_TYPE CudaSanitizer)
-  set(CUDA_SANITIZER_COMMAND_OPTIONS "--tool memcheck")
+  if(ENABLE_CUDA)
+    find_program(CUDA_SANITIZER compute-sanitizer)
+    set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
+    set(MEMORYCHECK_TYPE CudaSanitizer)
+    set(CUDA_SANITIZER_COMMAND_OPTIONS "--tool memcheck")
+  else()
+    #TODO
+  endif()
 
   # Always print verbose output when tests fail if run using `make test`.
   list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
@@ -991,7 +934,7 @@ manipulating data.
 
 hipDF provides a pandas-like API that will be familiar to data engineers &
 data scientists, so they can use it to easily accelerate their workflows
-without going into the details of CUDA programming.
+without going into the details of CUDA/HIP programming.
 
 
 Imported Targets
@@ -1031,15 +974,28 @@ if(HIPDF_ENABLE_ARROW_PARQUET)
   )
 endif()
 
-string(
-  APPEND
-  install_code_string
-  [=[
-if(testing IN_LIST hipdf_FIND_COMPONENTS)
-  enable_language(CUDA)
+if(ENABLE_CUDA)
+  string(
+    APPEND
+    install_code_string
+    [=[
+  if(testing IN_LIST hipdf_FIND_COMPONENTS)
+    enable_language(CUDA)
+  endif()
+  ]=]
+  )
+else()
+  string(
+    APPEND
+    install_code_string
+    [=[
+  if(testing IN_LIST hipdf_FIND_COMPONENTS)
+    enable_language(HIP)
+  endif()
+  ]=]
+  )
 endif()
-]=]
-)
+
 string(APPEND install_code_string "${common_code_string}")
 
 rapids_export(
