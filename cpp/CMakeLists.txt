@@ -116,7 +116,7 @@ message(VERBOSE "HIPDF: Build and enable S3 filesystem support for Arrow: ${HIPD
 message(VERBOSE "HIPDF: Build with per-thread default stream: ${HIPDF_USE_PER_THREAD_DEFAULT_STREAM}")
 message(
   VERBOSE
-  "HIPDF: Replace the current optimization flags by the options '-rdynamic -Og' (useful for debugging with stacktrace retrieval): ${CUDF_BUILD_STACKTRACE_DEBUG}"
+  "HIPDF: Replace the current optimization flags by the options '-rdynamic -Og' (useful for debugging with stacktrace retrieval): ${HIPDF_BUILD_STACKTRACE_DEBUG}"
 )
 message(
   VERBOSE
@@ -157,7 +157,7 @@ set_property(
   CACHE LIBHIPDF_LOGGING_LEVEL PROPERTY STRINGS "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "CRITICAL"
                                        "OFF"
 )
-message(VERBOSE "HIPDF: LIBCUDF_LOGGING_LEVEL = '${LIBCUDF_LOGGING_LEVEL}'.")
+message(VERBOSE "HIPDF: LIBHIPDF_LOGGING_LEVEL = '${LIBHIPDF_LOGGING_LEVEL}'.")
 
 if(NOT HIPDF_GENERATED_INCLUDE_DIR)
   set(HIPDF_GENERATED_INCLUDE_DIR ${HIPDF_BINARY_DIR})
@@ -227,8 +227,13 @@ include(cmake/thirdparty/get_hipcollections.cmake)
 if(HIPDF_BUILD_TESTUTIL)
   include(cmake/thirdparty/get_gtest.cmake)
 endif()
+
 # preprocess jitify-able kernels
-include(cmake/Modules/JitifyPreprocessKernels.cmake)
+if(CUDA_BACKEND)
+  include(cmake/Modules/JitifyPreprocessKernels.cmake)
+else()
+  include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
+endif()
 
 if(CUDA_BACKEND)
 # find cuFile
@@ -730,7 +735,7 @@ target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBH
 # Compile stringified JIT sources first
 add_dependencies(hipdf jitify_preprocess_run)
 
-# WAR for thrust_create_target not being available in rocThrust
+# todo(hip): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
 set(THRUST_LIBRARY hipdf::Thrust)
 else()
