@@ -331,7 +331,13 @@ include(cmake/thirdparty/get_nvtx.cmake)
 # find nvCOMP
 include(cmake/thirdparty/get_nvcomp.cmake)
 # find CCCL before rmm so that we get cudf's patched version of CCCL
-include(cmake/thirdparty/get_cccl.cmake)
+# include(cmake/thirdparty/get_cccl.cmake)
+# find thrust/cub
+if(CUDA_BACKEND)
+ include(cmake/thirdparty/get_thrust.cmake)
+else()
+ include(cmake/thirdparty/get_rocthrust.cmake)
+endif()
 # find rmm
 include(cmake/thirdparty/get_rmm.cmake)
 # find flatbuffers
@@ -1072,7 +1078,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    if(ENABLE_CUDA)
+    if(CUDA_BACKEND)
       target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
     else()
       target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
