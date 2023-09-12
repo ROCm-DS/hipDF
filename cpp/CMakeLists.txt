@@ -955,17 +955,20 @@ endif()
 
 rapids_cuda_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
-file(
-  WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
-  [=[
-SECTIONS
-{
-  .nvFatBinSegment : { *(.nvFatBinSegment) }
-  .nv_fatbin : { *(.nv_fatbin) }
-}
-]=]
-)
-target_link_options(cudf PRIVATE "$<HOST_LINK:${CUDF_BINARY_DIR}/fatbin.ld>")
+#todo(hip): do we need a linker script for HIP?
+if(CUDA_BACKEND)
+  file(
+    WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
+    [=[
+  SECTIONS
+  {
+    .nvFatBinSegment : { *(.nvFatBinSegment) }
+    .nv_fatbin : { *(.nv_fatbin) }
+  }
+  ]=]
+  )
+  target_link_options(cudf PRIVATE "$<HOST_LINK:${CUDF_BINARY_DIR}/fatbin.ld>")
+endif()
 
 add_library(cudf::cudf ALIAS cudf)
 
