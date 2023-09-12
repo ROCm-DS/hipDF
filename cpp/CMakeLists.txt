@@ -26,7 +26,7 @@ option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AM
 if(CUDA_BACKEND)
   rapids_cuda_init_architectures(HIPDF)
 else()
-rapids_hip_init_architectures(HIPDF)
+  rapids_hip_init_architectures(HIPDF)
 endif()
 
 project(
