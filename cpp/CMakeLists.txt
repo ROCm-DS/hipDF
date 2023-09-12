@@ -352,8 +352,14 @@ include(cmake/thirdparty/get_cucollections.cmake)
 if(CUDF_BUILD_TESTUTIL)
   include(cmake/thirdparty/get_gtest.cmake)
 endif()
+
 # preprocess jitify-able kernels
-include(cmake/Modules/JitifyPreprocessKernels.cmake)
+if(CUDA_BACKEND)
+  include(cmake/Modules/JitifyPreprocessKernels.cmake)
+else()
+  include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
+endif()
+
 # find KvikIO
 if(CUDA_BACKEND)
 include(cmake/thirdparty/get_kvikio.cmake)
@@ -933,7 +939,7 @@ target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
 # Compile stringified JIT sources first
 add_dependencies(cudf jitify_preprocess_run)
 
-# WAR for thrust_create_target not being available in rocThrust
+# todo(hip): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
 set(THRUST_LIBRARY cudf::Thrust)
 else()
