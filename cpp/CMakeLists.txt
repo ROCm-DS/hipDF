@@ -344,7 +344,9 @@ include(cmake/thirdparty/get_rmm.cmake)
 include(cmake/thirdparty/get_flatbuffers.cmake)
 # find dlpack
 include(cmake/thirdparty/get_dlpack.cmake)
-# find cuCollections, should come after including CCCL
+# find libhip++
+include(cmake/thirdparty/get_libcudacxx.cmake)
+# find cuCollections Should come after including thrust and libhipcxx
 include(cmake/thirdparty/get_cucollections.cmake)
 # find or install GoogleTest
 if(CUDF_BUILD_TESTUTIL)
