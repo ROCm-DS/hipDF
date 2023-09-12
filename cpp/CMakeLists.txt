@@ -933,6 +933,13 @@ target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
 # Compile stringified JIT sources first
 add_dependencies(cudf jitify_preprocess_run)
 
+# WAR for thrust_create_target not being available in rocThrust
+if(CUDA_BACKEND)
+set(THRUST_LIBRARY cudf::Thrust)
+else()
+set(THRUST_LIBRARY roc::rocthrust)
+endif()
+
 # Specify the target module library dependencies
 target_link_libraries(
   cudf
