@@ -219,9 +219,9 @@ include(cmake/thirdparty/get_rmm.cmake)
 include(cmake/thirdparty/get_arrow.cmake)
 # find dlpack
 include(cmake/thirdparty/get_dlpack.cmake)
-# find libcu++
-include(cmake/thirdparty/get_libcudacxx.cmake)
-# find cuCollections Should come after including thrust and libcudacxx
+# find libhip++
+include(cmake/thirdparty/get_libhipcxx.cmake)
+# find cuCollections Should come after including thrust and libhipcxx
 include(cmake/thirdparty/get_cucollections.cmake)
 # find or install GoogleTest
 if(HIPDF_BUILD_TESTUTIL)
