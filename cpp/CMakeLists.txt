@@ -730,10 +730,17 @@ target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBH
 # Compile stringified JIT sources first
 add_dependencies(hipdf jitify_preprocess_run)
 
+# WAR for thrust_create_target not being available in rocThrust
+if(CUDA_BACKEND)
+set(THRUST_LIBRARY hipdf::Thrust)
+else()
+set(THRUST_LIBRARY roc::rocthrust)
+endif()
+
 # Specify the target module library dependencies
 target_link_libraries(
   hipdf
-  PUBLIC ${ARROW_LIBRARIES} libhipcxx::libhipcxx hipdf::Thrust rmm::rmm
+  PUBLIC ${ARROW_LIBRARIES} libhipcxx::libhipcxx ${THRUST_LIBRARY} rmm::rmm
   PRIVATE hipco::hipco ZLIB::ZLIB hipcomp::hipcomp $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
           $<TARGET_NAME_IF_EXISTS:cuFile_interface>
 )

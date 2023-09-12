@@ -69,7 +69,7 @@ macro(set_hipdf_target_properties)
     # Tell CMake what HIP language runtime to use
     set_target_properties(hipdf PROPERTIES HIP_RUNTIME_LIBRARY Shared)
     # Make sure to export to consumers what runtime we used
-    target_link_libraries(hipdf PUBLIC hip::hip_host)
+    target_link_libraries(hipdf PUBLIC hip::host)
   endif()
 endmacro()
 
