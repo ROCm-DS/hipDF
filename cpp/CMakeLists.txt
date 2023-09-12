@@ -45,7 +45,13 @@ include(rapids-hip)
 include(rapids-export)
 include(rapids-find)
 
-rapids_hip_init_architectures(CUDF)
+option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
+
+if(CUDA_BACKEND)
+  rapids_cuda_init_architectures(CUDF)
+else()
+  rapids_hip_init_architectures(CUDF)
+endif()
 
 project(
   CUDF
@@ -53,18 +59,17 @@ project(
   LANGUAGES C CXX
 )
 
-option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
-
 if(CUDA_BACKEND)
   enable_language(CUDA)
-
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
     message(
       FATAL_ERROR
         "libcudf requires CUDA Toolkit 11.5+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
     )
   endif()
-else(CUDA_BACKEND)
+
+  option(USE_NVTX "Build with NVTX support" ON)
+else()
   enable_language(HIP)
 endif()
 
@@ -78,7 +83,6 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
-option(USE_NVTX "Build with NVTX support" ON)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
@@ -103,18 +107,18 @@ option(
   OFF
 )
 option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated declarations." OFF)
-# Option to enable line info in CUDA device compilation to allow introspection when profiling /
+# Option to enable line info in CUDA/HIP device compilation to allow introspection when profiling /
 # memchecking
-option(CUDA_ENABLE_LINEINFO
-       "Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler)" OFF
+option(GPU_ENABLE_LINEINFO
+       "Generate line-number information for GPU device code." OFF
 )
-option(CUDA_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all CUDA compilation" ON)
+option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
-option(CUDA_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
+option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 option(CUDA_STATIC_CUFILE "Statically link cuFile" OFF)
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
-if(CUDA_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
+if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
   set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
 option(
@@ -149,9 +153,9 @@ message(
 )
 message(
   VERBOSE
-  "CUDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${CUDA_ENABLE_LINEINFO}"
+  "CUDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
 )
-message(VERBOSE "CUDF: Statically link the CUDA runtime: ${CUDA_STATIC_RUNTIME}")
+message(VERBOSE "CUDF: Statically link the CUDA runtime: ${GPU_STATIC_RUNTIME}")
 message(VERBOSE
         "CUDF: Build with remote IO (e.g. AWS S3) support through KvikIO: ${CUDF_KVIKIO_REMOTE_IO}"
 )
@@ -172,9 +176,9 @@ if(CUDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 #
 set(CUDF_CXX_FLAGS "")
-set(CUDF_CUDA_FLAGS "")
+set(CUDF_GPU_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
-set(CUDF_CUDA_DEFINITIONS "")
+set(CUDF_GPU_DEFINITIONS "")
 
 # Set logging level
 set(LIBCUDF_LOGGING_LEVEL
@@ -281,12 +285,22 @@ rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
 # ##################################################################################################
 # * compiler options ------------------------------------------------------------------------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
-rapids_find_package(
-  CUDAToolkit REQUIRED
-  BUILD_EXPORT_SET cudf-exports
-  INSTALL_EXPORT_SET cudf-exports
-)
-include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
+if(CUDA_BACKEND)
+  # * compiler options ----------------------------------------------------------------------------
+  rapids_find_package(
+    CUDAToolkit REQUIRED
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+  )
+  include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
+else()
+  rapids_find_package(
+    HIP REQUIRED
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+  )
+  include(cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
+endif()
 
 # ##################################################################################################
 # * dependencies ----------------------------------------------------------------------------------
@@ -838,66 +852,7 @@ set_property(
   PROPERTY COMPILE_DEFINITIONS "CUDF_VERSION=${PROJECT_VERSION}"
 )
 
-set_target_properties(
-  cudf
-  PROPERTIES BUILD_RPATH "\$ORIGIN"
-             INSTALL_RPATH "\$ORIGIN"
-             # set target compile options
-             CXX_STANDARD 17
-             CXX_STANDARD_REQUIRED ON
-             # For std:: support of __int128_t. Can be removed once using cuda::std
-             CXX_EXTENSIONS ON
-             CXX_VISIBILITY_PRESET hidden
-             CUDA_STANDARD 17
-             CUDA_STANDARD_REQUIRED ON
-             CUDA_VISIBILITY_PRESET hidden
-             POSITION_INDEPENDENT_CODE ON
-             INTERFACE_POSITION_INDEPENDENT_CODE ON
-)
-
-# Note: This must come before the target_compile_options below so that the function can modify the
-# flags if necessary.
-if(CUDF_CLANG_TIDY OR CUDF_IWYU)
-  set(linters)
-  if(CUDF_CLANG_TIDY)
-    list(APPEND linters CLANG_TIDY)
-  endif()
-  if(CUDF_IWYU)
-    list(APPEND linters IWYU)
-  endif()
-  enable_static_checkers(
-    cudf SKIPPED_FILES src/io/comp/cpu_unbz2.cpp src/io/comp/brotli_dict.cpp ${linters}
-  )
-endif()
-target_compile_options(
-  cudf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-               "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
-)
-
-if(CUDF_BUILD_STACKTRACE_DEBUG)
-  # Remove any optimization level to avoid nvcc warning "incompatible redefinition for option
-  # 'optimize'".
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_RELEASE "${CMAKE_CUDA_FLAGS_RELEASE}")
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_MINSIZEREL
-                       "${CMAKE_CUDA_FLAGS_MINSIZEREL}"
-  )
-  string(REGEX REPLACE "(\-O[0123])" "" CMAKE_CUDA_FLAGS_RELWITHDEBINFO
-                       "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO}"
-  )
-
-  add_library(cudf_backtrace INTERFACE)
-  target_compile_definitions(cudf_backtrace INTERFACE CUDF_BUILD_STACKTRACE_DEBUG)
-  target_compile_options(
-    cudf_backtrace INTERFACE "$<$<COMPILE_LANGUAGE:CXX>:-Og>"
-                             "$<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-Og>"
-  )
-  target_link_options(
-    cudf_backtrace INTERFACE "$<$<LINK_LANGUAGE:CXX>:-rdynamic>"
-    "$<$<LINK_LANGUAGE:CUDA>:-Xlinker=-rdynamic>"
-  )
-  target_link_libraries(cudf PRIVATE cudf_backtrace)
-endif()
+set_cudf_target_properties()
 
 # Specify include paths for the current target and dependents
 target_include_directories(
@@ -910,11 +865,6 @@ target_include_directories(
           "$<BUILD_INTERFACE:${nanoarrow_SOURCE_DIR}/src>"
           "$<BUILD_INTERFACE:${FlatBuffers_SOURCE_DIR}/include>"
   INTERFACE "$<INSTALL_INTERFACE:include>"
-)
-
-target_compile_definitions(
-  cudf PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
-              "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_DEFINITIONS}>>"
 )
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
@@ -934,7 +884,7 @@ endif()
 # Per-thread default stream
 if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
-    cudf PUBLIC CUDA_API_PER_THREAD_DEFAULT_STREAM CUDF_USE_PER_THREAD_DEFAULT_STREAM
+    cudf PUBLIC GPU_API_PER_THREAD_DEFAULT_STREAM CUDF_USE_PER_THREAD_DEFAULT_STREAM
   )
 endif()
 
@@ -992,7 +942,7 @@ if(TARGET conda_env)
   target_link_libraries(cudf PRIVATE conda_env)
 endif()
 
-rapids_cuda_set_runtime(cudf USE_STATIC ${CUDA_STATIC_RUNTIME})
+rapids_cuda_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
 file(
   WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
@@ -1023,18 +973,9 @@ if(CUDF_BUILD_TESTUTIL)
     # other similar features in the future.
     tests/utilities/default_stream.cpp
   )
-  set_target_properties(
-    cudftest_default_stream
-    PROPERTIES BUILD_RPATH "\$ORIGIN"
-               INSTALL_RPATH "\$ORIGIN"
-               # set target compile options
-               CXX_STANDARD 17
-               CXX_STANDARD_REQUIRED ON
-               CUDA_STANDARD 17
-               CUDA_STANDARD_REQUIRED ON
-               POSITION_INDEPENDENT_CODE ON
-               INTERFACE_POSITION_INDEPENDENT_CODE ON
-  )
+  
+  set_cudftest_default_stream_target()
+
   target_link_libraries(
     cudftest_default_stream
     PUBLIC cudf
@@ -1046,20 +987,11 @@ if(CUDF_BUILD_TESTUTIL)
 
   add_library(cudftestutil INTERFACE)
 
-  set_target_properties(
-    cudftestutil
-    PROPERTIES BUILD_RPATH "\$ORIGIN"
-               INSTALL_RPATH "\$ORIGIN"
-               # set target compile options
-               CXX_STANDARD 17
-               CXX_STANDARD_REQUIRED ON
-               CUDA_STANDARD 17
-               CUDA_STANDARD_REQUIRED ON
-  )
+  set_cudftestutil_target()
 
   target_compile_options(
-    cudftestutil INTERFACE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
-                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>>"
+    cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+                        "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_FLAGS}>>"
   )
 
   target_link_libraries(
@@ -1108,10 +1040,10 @@ endif()
 # * build cudf_identify_stream_usage --------------------------------------------------------------
 
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
-  if(CUDA_STATIC_RUNTIME)
+  if(GPU_STATIC_RUNTIME)
     message(
       FATAL_ERROR
-        "Stream identification cannot be used with a static CUDA runtime. Please set CUDA_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
+        "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
     )
   endif()
 
@@ -1140,7 +1072,12 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
+    if(ENABLE_CUDA)
+      target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
+    else()
+      target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
+    endif()
+
     if(CUDF_BUILD_STACKTRACE_DEBUG)
       target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
     endif()
@@ -1161,10 +1098,14 @@ if(CUDF_BUILD_TESTS)
   include(CTest)
 
   # ctest cuda memcheck
-  find_program(CUDA_SANITIZER compute-sanitizer)
-  set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
-  set(MEMORYCHECK_TYPE CudaSanitizer)
-  set(CUDA_SANITIZER_COMMAND_OPTIONS "--tool memcheck")
+  if(ENABLE_CUDA)
+    find_program(CUDA_SANITIZER compute-sanitizer)
+    set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
+    set(MEMORYCHECK_TYPE CudaSanitizer)
+    set(CUDA_SANITIZER_COMMAND_OPTIONS "--tool memcheck")
+  else()
+    #TODO
+  endif()
 
   # Always print verbose output when tests fail if run using `make test`.
   list(APPEND CMAKE_CTEST_ARGUMENTS "--output-on-failure")
@@ -1232,7 +1173,7 @@ manipulating data.
 
 cuDF provides a pandas-like API that will be familiar to data engineers &
 data scientists, so they can use it to easily accelerate their workflows
-without going into the details of CUDA programming.
+without going into the details of CUDA/HIP programming.
 
 
 Imported Targets
