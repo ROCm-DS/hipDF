@@ -355,7 +355,10 @@ endif()
 # preprocess jitify-able kernels
 include(cmake/Modules/JitifyPreprocessKernels.cmake)
 # find KvikIO
+if(CUDA_BACKEND)
 include(cmake/thirdparty/get_kvikio.cmake)
+endif()
+
 # find fmt
 include(cmake/thirdparty/get_fmt.cmake)
 # find nanoarrow
