@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "nvcomp_adapter.cuh"
+#include "hipcomp_adapter.cuh"
 
 #include <cudf/detail/utilities/integer_utils.hpp>
 
@@ -23,9 +23,9 @@
 #include <thrust/transform.h>
 #include <thrust/tuple.h>
 
-namespace cudf::io::nvcomp {
+namespace cudf::io::hipcomp {
 
-batched_args create_batched_nvcomp_args(device_span<device_span<uint8_t const> const> inputs,
+batched_args create_batched_hipcomp_args(device_span<device_span<uint8_t const> const> inputs,
                                         device_span<device_span<uint8_t> const> outputs,
                                         rmm::cuda_stream_view stream)
 {
@@ -57,21 +57,21 @@ batched_args create_batched_nvcomp_args(device_span<device_span<uint8_t const> c
           std::move(output_data_sizes)};
 }
 
-void update_compression_results(device_span<nvcompStatus_t const> nvcomp_stats,
+void update_compression_results(device_span<hipcompStatus_t const> hipcomp_stats,
                                 device_span<size_t const> actual_output_sizes,
                                 device_span<compression_result> results,
                                 rmm::cuda_stream_view stream)
 {
   thrust::transform_if(
     rmm::exec_policy(stream),
-    nvcomp_stats.begin(),
-    nvcomp_stats.end(),
+    hipcomp_stats.begin(),
+    hipcomp_stats.end(),
     actual_output_sizes.begin(),
     results.begin(),
     results.begin(),
-    [] __device__(auto const& nvcomp_status, auto const& size) {
+    [] __device__(auto const& hipcomp_status, auto const& size) {
       return compression_result{size,
-                                nvcomp_status == nvcompStatus_t::nvcompSuccess
+                                hipcomp_status == hipcompStatus_t::hipcompSuccess
                                   ? compression_status::SUCCESS
                                   : compression_status::FAILURE};
     },
@@ -127,4 +127,4 @@ std::pair<size_t, size_t> max_chunk_and_total_input_size(device_span<size_t cons
   return {max, sum};
 }
 
-}  // namespace cudf::io::nvcomp
+}  // namespace cudf::io::hipcomp
