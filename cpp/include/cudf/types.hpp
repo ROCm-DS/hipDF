@@ -16,7 +16,8 @@
 
 #pragma once
 
-#ifdef __CUDACC__
+// TODO is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
+#ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
 #else
 #define CUDF_HOST_DEVICE

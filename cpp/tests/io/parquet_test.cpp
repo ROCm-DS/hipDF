@@ -6577,7 +6577,7 @@ TEST_F(ParquetReaderTest, FilterFloatNAN)
 
 TEST_F(ParquetWriterTest, TimestampMicrosINT96NoOverflow)
 {
-  using namespace cuda::std::chrono;
+  using namespace hip::std::chrono;
   using namespace cudf::io;
 
   column_wrapper<cudf::timestamp_us> big_ts_col{

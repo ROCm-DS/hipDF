@@ -1,4 +1,3 @@
-#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *

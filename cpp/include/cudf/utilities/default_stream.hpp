@@ -18,7 +18,11 @@
 
 #include <cudf/detail/utilities/default_stream.hpp>
 
+#ifdef RMM_USE_CUDA
 #include <rmm/cuda_stream.hpp>
+#else
+#include <rmm/hip_stream.hpp>
+#endif
 #include <rmm/cuda_stream_view.hpp>
 
 namespace cudf {

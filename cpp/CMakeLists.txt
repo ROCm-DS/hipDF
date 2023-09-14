@@ -63,7 +63,8 @@ option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
 mark_as_advanced(HIPDF_BUILD_TESTUTIL)
-option(HIPDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
+#TODO : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
+# option(HIPDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
 option(HIPDF_USE_ARROW_STATIC "Build and statically link Arrow libraries" OFF)
 option(HIPDF_ENABLE_ARROW_ORC "Build the Arrow ORC adapter" OFF)
 option(HIPDF_ENABLE_ARROW_PYTHON "Find (or build) Arrow with Python support" OFF)
@@ -205,7 +206,7 @@ endif()
 rapids_cpm_init()
 # find jitify
 include(cmake/thirdparty/get_jitify.cmake)
-# find nvCOMP
+# find hipCOMP
 include(cmake/thirdparty/get_hipcomp.cmake)
 # find thrust/cub
 if(CUDA_BACKEND)
@@ -251,7 +252,7 @@ include(cmake/thirdparty/get_spdlog.cmake)
 if(NOT BUILD_SHARED_LIBS)
   include("${rapids-cmake-dir}/export/find_package_file.cmake")
   list(APPEND METADATA_KINDS BUILD INSTALL)
-  list(APPEND dependencies KvikIO ZLIB nvcomp)
+  list(APPEND dependencies KvikIO ZLIB hipcomp)
   if(TARGET cufile::cuFile_interface)
     list(APPEND dependencies cuFile)
   endif()
@@ -395,8 +396,8 @@ add_library(
   src/io/comp/cpu_unbz2.cpp
   src/io/comp/debrotli.cu
   src/io/comp/gpuinflate.cu
-  src/io/comp/nvcomp_adapter.cpp
-  src/io/comp/nvcomp_adapter.cu
+  src/io/comp/hipcomp_adapter.cpp
+  src/io/comp/hipcomp_adapter.cu
   src/io/comp/snap.cu
   src/io/comp/statistics.cu
   src/io/comp/uncomp.cpp
@@ -703,6 +704,11 @@ target_include_directories(
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(hipdf PRIVATE "JITIFY_PRINT_LOG=0")
 
+if(ENABLE_CUDA)
+  target_compile_definitions(hipdf PRIVATE "RMM_USE_CUDA")
+else()
+  target_compile_definitions(hipdf PRIVATE "RMM_USE_HIP")
+endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of hipdf we are building so it can compute a cal-ver cache
   # directory. We isolate this definition to the single source so it doesn't effect compiling
@@ -796,6 +802,9 @@ if(HIPDF_BUILD_TESTUTIL)
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
 
+  target_include_directories(hipdftest_default_stream PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>")
+  target_link_libraries(hipdftest_default_stream PRIVATE rmm::rmm)
+
   add_library(hipdf::hipdftest_default_stream ALIAS hipdftest_default_stream)
 
   # Needs to be static so that we support usage of static builds of gtest which doesn't compile with
@@ -811,10 +820,17 @@ if(HIPDF_BUILD_TESTUTIL)
 
   set_hipdftestutil_target()
 
-  target_compile_options(
-    hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
-                        "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_GPU_FLAGS}>>"
-  )
+  if(CUDA_BACKEND)
+    target_compile_options(
+      hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_GPU_FLAGS}>>"
+    )
+  else()
+    target_compile_options(
+      hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${HIPDF_GPU_FLAGS}>>"
+    )
+  endif()
 
   target_link_libraries(
     hipdftestutil
@@ -824,7 +840,7 @@ if(HIPDF_BUILD_TESTUTIL)
 
   target_include_directories(
     hipdftestutil PUBLIC "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}>"
-                        "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
+                         "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
   )
   add_library(hipdf::hipdftestutil ALIAS hipdftestutil)
 

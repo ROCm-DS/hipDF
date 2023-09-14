@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <rmm/cuda_stream.hpp>
+#include <rmm/hip_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
 namespace cudf {

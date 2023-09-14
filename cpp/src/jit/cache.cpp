@@ -16,7 +16,7 @@
 
 #include <cudf/utilities/error.hpp>
 
-#include <cuda.h>
+#include <hip/hip_runtime.h>
 #include <jitify2.hpp>
 
 #include <cstddef>
@@ -77,9 +77,9 @@ std::filesystem::path get_cache_dir()
     int device;
     int cc_major;
     int cc_minor;
-    CUDF_CUDA_TRY(cudaGetDevice(&device));
-    CUDF_CUDA_TRY(cudaDeviceGetAttribute(&cc_major, cudaDevAttrComputeCapabilityMajor, device));
-    CUDF_CUDA_TRY(cudaDeviceGetAttribute(&cc_minor, cudaDevAttrComputeCapabilityMinor, device));
+    CUDF_CUDA_TRY(hipGetDevice(&device));
+    CUDF_CUDA_TRY(hipDeviceGetAttribute(&cc_major, hipDeviceAttributeComputeCapabilityMajor, device));
+    CUDF_CUDA_TRY(hipDeviceGetAttribute(&cc_minor, hipDeviceAttributeComputeCapabilityMinor, device));
     int cc = cc_major * 10 + cc_minor;
 
     kernel_cache_path /= std::to_string(cc);
