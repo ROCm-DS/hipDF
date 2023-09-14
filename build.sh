@@ -2,6 +2,28 @@
 
 # Copyright (c) 2019-2024, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 # cuDF build script
 
 # This script is used to build the component(s) in this repo from
@@ -50,6 +72,34 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf
    default action (no args) is to build and install 'libcudf' then 'cudf'
    then 'dask_cudf' targets
 "
+# HELP="$0 [clean] [libcudf] [cudf] [cudfjar] [dask_cudf] [benchmarks] [tests] [libcudf_kafka] [cudf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
+#    clean                         - remove all existing build artifacts and configuration (start
+#                                    over)
+#    libcudf                       - build the cudf C++ code only
+#    cudf                          - build the cudf Python package
+#    cudfjar                       - build cudf JAR with static libcudf using devtoolset toolchain
+#    dask_cudf                     - build the dask_cudf Python package
+#    benchmarks                    - build benchmarks
+#    tests                         - build tests
+#    libcudf_kafka                 - build the libcudf_kafka C++ code only
+#    cudf_kafka                    - build the cudf_kafka Python package
+#    custreamz                     - build the custreamz Python package
+#    -v                            - verbose build mode
+#    -g                            - build for debug
+#    -n                            - no install step (does not affect Python)
+#    --allgpuarch                  - build for all supported GPU architectures
+#    --disable_nvtx                - disable inserting NVTX profiling ranges
+#    --opensource_nvcomp           - disable use of proprietary nvcomp extensions
+#    --show_depr_warn              - show cmake deprecation warnings
+#    --ptds                        - enable per-thread default stream
+#    --build_metrics               - generate build metrics report for libcudf
+#    --incl_cache_stats            - include cache statistics in build metrics report
+#    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
+#    -h | --h[elp]                 - print this text
+
+#    default action (no args) is to build and install 'libcudf' then 'cudf'
+#    then 'dask_cudf' targets
+# "
 LIB_BUILD_DIR=${LIB_BUILD_DIR:=${REPODIR}/cpp/build}
 KAFKA_LIB_BUILD_DIR=${KAFKA_LIB_BUILD_DIR:=${REPODIR}/cpp/libcudf_kafka/build}
 CUDF_KAFKA_BUILD_DIR=${REPODIR}/python/cudf_kafka/build
@@ -150,7 +200,7 @@ function buildLibCudfJniInDocker {
                 -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
                 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                 -DCUDA_STATIC_RUNTIME=ON \
-                -DCMAKE_CUDA_ARCHITECTURES=${CUDF_CMAKE_CUDA_ARCHITECTURES} \
+                -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
                 -DCMAKE_INSTALL_PREFIX=/usr/local/rapids \
                 -DUSE_NVTX=ON \
                 -DCUDF_USE_PROPRIETARY_NVCOMP=ON \
@@ -175,7 +225,7 @@ function buildLibCudfJniInDocker {
                 -DCUDA_STATIC_RUNTIME=ON \
                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
                 -DUSE_GDS=ON \
-                -DGPU_ARCHS=${CUDF_CMAKE_CUDA_ARCHITECTURES} \
+                -DGPU_ARCHS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
                 -DCUDF_JNI_LIBCUDF_STATIC=ON \
                 -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
 }
@@ -268,14 +318,14 @@ fi
 
 if buildAll || hasArg libcudf || hasArg pylibcudf || hasArg cudf || hasArg cudfjar; then
     if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
-        CUDF_CMAKE_CUDA_ARCHITECTURES="${CUDF_CMAKE_CUDA_ARCHITECTURES:-NATIVE}"
-        if [[ "$CUDF_CMAKE_CUDA_ARCHITECTURES" == "NATIVE" ]]; then
+        CUDF_CMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES:-gfx90a}" #TODO(HIP): native not working with rapids-cmake port of HIP
+        if [[ "$CUDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
             echo "Building for the architecture of the GPU in the system..."
         else
-            echo "Building for the GPU architecture(s) $CUDF_CMAKE_CUDA_ARCHITECTURES ..."
+            echo "Building for the GPU architecture(s) $CUDF_CMAKE_HIP_ARCHITECTURES ..."
         fi
     else
-        CUDF_CMAKE_CUDA_ARCHITECTURES="RAPIDS"
+        CUDF_CMAKE_HIP_ARCHITECTURES="RAPIDS"
         echo "Building for *ALL* supported GPU architectures..."
     fi
 fi
@@ -287,9 +337,12 @@ if buildAll || hasArg libcudf; then
         sccache --zero-stats
     fi
 
+    #TODO(HIP): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
     cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
-          -DCMAKE_CUDA_ARCHITECTURES=${CUDF_CMAKE_CUDA_ARCHITECTURES} \
+          -DCMAKE_CXX_COMPILER=hipcc \
+          -DCMAKE_C_COMPILER=hipcc \
+          -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
           -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \
@@ -350,7 +403,7 @@ fi
 if buildAll || hasArg cudf; then
 
     cd ${REPODIR}/python/cudf
-    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};-DCMAKE_CUDA_ARCHITECTURES=${CUDF_CMAKE_CUDA_ARCHITECTURES};${EXTRA_CMAKE_ARGS}" \
+    SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};-DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES};${EXTRA_CMAKE_ARGS}" \
         python ${PYTHON_ARGS_FOR_INSTALL} .
 fi
 
