@@ -405,7 +405,7 @@ size_t decompress_snappy(host_span<uint8_t const> src, host_span<uint8_t> dst)
 }
 
 /**
- * @brief ZSTD decompressor that uses nvcomp
+ * @brief ZSTD decompressor that uses hipcomp
  */
 size_t decompress_zstd(host_span<uint8_t const> src,
                        host_span<uint8_t> dst,
