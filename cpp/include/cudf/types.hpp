@@ -38,10 +38,8 @@
 
 #pragma once
 
-#ifdef __CUDACC__
-/**
- * @brief Indicates that the function or method is usable on host and device
- */
+// TODO is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
+#ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
 /**
  * @brief Indicates that the function is a CUDA kernel

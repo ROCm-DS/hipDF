@@ -39,7 +39,7 @@
 #include <cudf/detail/utilities/stacktrace.hpp>
 #include <cudf/detail/utilities/stream_pool.hpp>
 
-#include <rmm/cuda_stream.hpp>
+#include <rmm/hip_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cudf/cuda_runtime.h>
@@ -135,8 +135,8 @@ bool stream_is_invalid(cudaStream_t stream)
   // `thrust::device` and the default value of
   // `cudf::get_default_stream().value()` are actually the same. At present, the
   // former is `cudaStreamLegacy` while the latter is 0.
-  return (stream == cudaStreamDefault) || (stream == cudaStreamLegacy) ||
-         (stream == cudaStreamPerThread);
+  // TODO PORTING cudaStreamLegacy 
+  return (stream == cudaStreamDefault) || (stream == cudaStreamPerThread);
 #endif
 }
 
@@ -238,7 +238,7 @@ DEFINE_OVERLOAD(cudaLaunchKernel,
                     size_t sharedMem,
                     cudaStream_t stream),
                 ARG(func, gridDim, blockDim, args, sharedMem, stream));
-DEFINE_OVERLOAD(cudaLaunchCooperativeKernel,
+DEFINE_OVERLOAD(hipLaunchCooperativeKernel,
                 ARG(void const* func,
                     dim3 gridDim,
                     dim3 blockDim,
@@ -246,7 +246,7 @@ DEFINE_OVERLOAD(cudaLaunchCooperativeKernel,
                     size_t sharedMem,
                     cudaStream_t stream),
                 ARG(func, gridDim, blockDim, args, sharedMem, stream));
-DEFINE_OVERLOAD(cudaLaunchHostFunc,
+DEFINE_OVERLOAD(hipLaunchHostFunc,
                 ARG(cudaStream_t stream, cudaHostFn_t fn, void* userData),
                 ARG(stream, fn, userData));
 
@@ -268,7 +268,7 @@ DEFINE_OVERLOAD(cudaMemcpy2DAsync,
 DEFINE_OVERLOAD(cudaMemcpy2DFromArrayAsync,
                 ARG(void* dst,
                     size_t dpitch,
-                    cudaArray_const_t src,
+                    hipArray_const_t src,
                     size_t wOffset,
                     size_t hOffset,
                     size_t width,
@@ -277,7 +277,7 @@ DEFINE_OVERLOAD(cudaMemcpy2DFromArrayAsync,
                     cudaStream_t stream),
                 ARG(dst, dpitch, src, wOffset, hOffset, width, height, kind, stream));
 DEFINE_OVERLOAD(cudaMemcpy2DToArrayAsync,
-                ARG(cudaArray_t dst,
+                ARG(hipArray_t dst,
                     size_t wOffset,
                     size_t hOffset,
                     void const* src,
@@ -290,9 +290,11 @@ DEFINE_OVERLOAD(cudaMemcpy2DToArrayAsync,
 DEFINE_OVERLOAD(cudaMemcpy3DAsync,
                 ARG(cudaMemcpy3DParms const* p, cudaStream_t stream),
                 ARG(p, stream));
+#if 0 // TODO PORTING
 DEFINE_OVERLOAD(cudaMemcpy3DPeerAsync,
                 ARG(cudaMemcpy3DPeerParms const* p, cudaStream_t stream),
                 ARG(p, stream));
+#endif
 DEFINE_OVERLOAD(
   cudaMemcpyAsync,
   ARG(void* dst, void const* src, size_t count, cudaMemcpyKind kind, cudaStream_t stream),
@@ -319,7 +321,7 @@ DEFINE_OVERLOAD(
   ARG(devPtr, pitch, value, width, height, stream));
 DEFINE_OVERLOAD(
   cudaMemset3DAsync,
-  ARG(cudaPitchedPtr pitchedDevPtr, int value, cudaExtent extent, cudaStream_t stream),
+  ARG(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, cudaStream_t stream),
   ARG(pitchedDevPtr, value, extent, stream));
 DEFINE_OVERLOAD(cudaMemsetAsync,
                 ARG(void* devPtr, int value, size_t count, cudaStream_t stream),

@@ -71,7 +71,7 @@ class string_view {
    *
    * @return The number of bytes in this string
    */
-  CUDF_HOST_DEVICE [[nodiscard]] inline size_type size_bytes() const { return _bytes; }
+  [[nodiscard]] CUDF_HOST_DEVICE inline size_type size_bytes() const { return _bytes; }
   /**
    * @brief Return the number of characters in this string
    *
@@ -83,14 +83,14 @@ class string_view {
    *
    * @return A pointer to the internal device array
    */
-  CUDF_HOST_DEVICE [[nodiscard]] inline char const* data() const { return _data; }
+  [[nodiscard]] CUDF_HOST_DEVICE inline char const* data() const { return _data; }
 
   /**
    * @brief Return true if string has no characters
    *
    * @return true if string has no characters
    */
-  CUDF_HOST_DEVICE [[nodiscard]] inline bool empty() const { return size_bytes() == 0; }
+  [[nodiscard]] CUDF_HOST_DEVICE inline bool empty() const { return size_bytes() == 0; }
 
   /**
    * @brief Handy iterator for navigating through encoded characters.

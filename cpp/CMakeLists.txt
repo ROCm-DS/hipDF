@@ -376,7 +376,7 @@ include(cmake/thirdparty/get_thread_pool.cmake)
 if(NOT BUILD_SHARED_LIBS)
   include("${rapids-cmake-dir}/export/find_package_file.cmake")
   list(APPEND METADATA_KINDS BUILD INSTALL)
-  list(APPEND dependencies KvikIO ZLIB nvcomp nanoarrow)
+  list(APPEND dependencies KvikIO ZLIB hipcomp nanoarrow)
 
   foreach(METADATA_KIND IN LISTS METADATA_KINDS)
     foreach(dep IN LISTS dependencies)
@@ -887,6 +887,11 @@ target_include_directories(
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(cudf PRIVATE "JITIFY_PRINT_LOG=0")
 
+if(ENABLE_CUDA)
+  target_compile_definitions(cudf PRIVATE "RMM_USE_CUDA")
+else()
+  target_compile_definitions(cudf PRIVATE "RMM_USE_HIP")
+endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of cudf we are building so it can compute a cal-ver cache
   # directory. We isolate this definition to the single source so it doesn't effect compiling
@@ -1010,16 +1015,26 @@ if(CUDF_BUILD_TESTUTIL)
   )
   rapids_cuda_set_runtime(cudftest_default_stream USE_STATIC ${CUDA_STATIC_RUNTIME})
 
+  target_include_directories(cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
+  target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
+
   add_library(cudf::cudftest_default_stream ALIAS cudftest_default_stream)
 
   add_library(cudftestutil INTERFACE)
 
   set_cudftestutil_target()
 
-  target_compile_options(
-    cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
-                        "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_FLAGS}>>"
-  )
+  if(CUDA_BACKEND)
+    target_compile_options(
+      cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_FLAGS}>>"
+    )
+  else()
+    target_compile_options(
+      cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
+    )
+  endif()
 
   target_link_libraries(
     cudftestutil INTERFACE cuco::cuco Threads::Threads cudf cudftest_default_stream
