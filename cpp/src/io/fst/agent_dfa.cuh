@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2023, NVIDIA CORPORATION.
  *
@@ -17,7 +18,7 @@
 
 #include "in_reg_array.cuh"
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <thrust/execution_policy.h>
 #include <thrust/sequence.h>
@@ -207,7 +208,7 @@ struct AgentDFA {
     };
   };
 
-  struct TempStorage : cub::Uninitialized<_TempStorage> {};
+  struct TempStorage : hipcub::Uninitialized<_TempStorage> {};
 
   //------------------------------------------------------------------------------
   // MEMBER VARIABLES
@@ -230,7 +231,7 @@ struct AgentDFA {
                                                      CharT const* chars,
                                                      SymbolIndexT const& max_num_chars,
                                                      CallbackOpT callback_op,
-                                                     cub::Int2Type<IS_FULL_BLOCK> /*IS_FULL_BLOCK*/)
+                                                     hipcub::Int2Type<IS_FULL_BLOCK> /*IS_FULL_BLOCK*/)
   {
     // Iterate over symbols
 #pragma unroll
@@ -251,10 +252,10 @@ struct AgentDFA {
     CharT const* chars,
     SymbolIndexT const& max_num_chars,
     StateTransitionOpT& state_transition_op,
-    cub::Int2Type<IS_FULL_BLOCK> /*IS_FULL_BLOCK*/)
+    hipcub::Int2Type<IS_FULL_BLOCK> /*IS_FULL_BLOCK*/)
   {
     ThreadParse<NUM_SYMBOLS>(
-      symbol_matcher, chars, max_num_chars, state_transition_op, cub::Int2Type<IS_FULL_BLOCK>());
+      symbol_matcher, chars, max_num_chars, state_transition_op, hipcub::Int2Type<IS_FULL_BLOCK>());
   }
 
   //---------------------------------------------------------------------
@@ -264,13 +265,13 @@ struct AgentDFA {
   __device__ __forceinline__ void LoadBlock(CharInItT d_chars,
                                             OffsetT const block_offset,
                                             OffsetT const num_total_symbols,
-                                            cub::Int2Type<true> /*IS_FULL_BLOCK*/,
-                                            cub::Int2Type<1> /*ALIGNMENT*/)
+                                            hipcub::Int2Type<true> /*IS_FULL_BLOCK*/,
+                                            hipcub::Int2Type<1> /*ALIGNMENT*/)
   {
     CharT thread_chars[SYMBOLS_PER_THREAD];
 
     CharInItT d_block_symbols = d_chars + block_offset;
-    cub::LoadDirectStriped<BLOCK_THREADS>(threadIdx.x, d_block_symbols, thread_chars);
+    hipcub::LoadDirectStriped<BLOCK_THREADS>(threadIdx.x, d_block_symbols, thread_chars);
 
 #pragma unroll
     for (int32_t i = 0; i < SYMBOLS_PER_THREAD; ++i) {
@@ -285,8 +286,8 @@ struct AgentDFA {
   __device__ __forceinline__ void LoadBlock(CharInItT d_chars,
                                             OffsetT const block_offset,
                                             OffsetT const num_total_symbols,
-                                            cub::Int2Type<false> /*IS_FULL_BLOCK*/,
-                                            cub::Int2Type<1> /*ALIGNMENT*/)
+                                            hipcub::Int2Type<false> /*IS_FULL_BLOCK*/,
+                                            hipcub::Int2Type<1> /*ALIGNMENT*/)
   {
     CharT thread_chars[SYMBOLS_PER_THREAD];
 
@@ -296,7 +297,7 @@ struct AgentDFA {
     OffsetT num_total_chars = num_total_symbols - block_offset;
 
     CharInItT d_block_symbols = d_chars + block_offset;
-    cub::LoadDirectStriped<BLOCK_THREADS>(
+    hipcub::LoadDirectStriped<BLOCK_THREADS>(
       threadIdx.x, d_block_symbols, thread_chars, num_total_chars);
 
 #pragma unroll
@@ -311,14 +312,14 @@ struct AgentDFA {
   __device__ __forceinline__ void LoadBlock(CharT const* d_chars,
                                             OffsetT const block_offset,
                                             OffsetT const num_total_symbols,
-                                            cub::Int2Type<true> /*IS_FULL_BLOCK*/,
-                                            cub::Int2Type<sizeof(AliasedLoadT)> /*ALIGNMENT*/)
+                                            hipcub::Int2Type<true> /*IS_FULL_BLOCK*/,
+                                            hipcub::Int2Type<sizeof(AliasedLoadT)> /*ALIGNMENT*/)
   {
     AliasedLoadT thread_units[UINTS_PER_THREAD];
 
     AliasedLoadT const* d_block_symbols =
       reinterpret_cast<AliasedLoadT const*>(d_chars + block_offset);
-    cub::LoadDirectStriped<BLOCK_THREADS>(threadIdx.x, d_block_symbols, thread_units);
+    hipcub::LoadDirectStriped<BLOCK_THREADS>(threadIdx.x, d_block_symbols, thread_units);
 
 #pragma unroll
     for (int32_t i = 0; i < UINTS_PER_THREAD; ++i) {
@@ -332,8 +333,8 @@ struct AgentDFA {
   __device__ __forceinline__ void LoadBlock(CharT const* d_chars,
                                             OffsetT const block_offset,
                                             OffsetT const num_total_symbols,
-                                            cub::Int2Type<false> /*IS_FULL_BLOCK*/,
-                                            cub::Int2Type<sizeof(AliasedLoadT)> /*ALIGNMENT*/)
+                                            hipcub::Int2Type<false> /*IS_FULL_BLOCK*/,
+                                            hipcub::Int2Type<sizeof(AliasedLoadT)> /*ALIGNMENT*/)
   {
     AliasedLoadT thread_units[UINTS_PER_THREAD];
 
@@ -345,7 +346,7 @@ struct AgentDFA {
 
     AliasedLoadT const* d_block_symbols =
       reinterpret_cast<AliasedLoadT const*>(d_chars + block_offset);
-    cub::LoadDirectStriped<BLOCK_THREADS>(
+    hipcub::LoadDirectStriped<BLOCK_THREADS>(
       threadIdx.x, d_block_symbols, thread_units, num_total_units);
 
 #pragma unroll
@@ -365,18 +366,18 @@ struct AgentDFA {
     if (((uintptr_t)(void const*)(d_chars + block_offset) % 4) == 0) {
       if (block_offset + SYMBOLS_PER_UINT_BLOCK < num_total_symbols) {
         LoadBlock(
-          d_chars, block_offset, num_total_symbols, cub::Int2Type<true>(), cub::Int2Type<4>());
+          d_chars, block_offset, num_total_symbols, hipcub::Int2Type<true>(), hipcub::Int2Type<4>());
       } else {
         LoadBlock(
-          d_chars, block_offset, num_total_symbols, cub::Int2Type<false>(), cub::Int2Type<1>());
+          d_chars, block_offset, num_total_symbols, hipcub::Int2Type<false>(), hipcub::Int2Type<1>());
       }
     } else {
       if (block_offset + SYMBOLS_PER_UINT_BLOCK < num_total_symbols) {
         LoadBlock(
-          d_chars, block_offset, num_total_symbols, cub::Int2Type<true>(), cub::Int2Type<1>());
+          d_chars, block_offset, num_total_symbols, hipcub::Int2Type<true>(), hipcub::Int2Type<1>());
       } else {
         LoadBlock(
-          d_chars, block_offset, num_total_symbols, cub::Int2Type<false>(), cub::Int2Type<1>());
+          d_chars, block_offset, num_total_symbols, hipcub::Int2Type<false>(), hipcub::Int2Type<1>());
       }
     }
   }
@@ -389,10 +390,10 @@ struct AgentDFA {
     // Check if we are loading a full tile of data
     if (block_offset + SYMBOLS_PER_UINT_BLOCK < num_total_symbols) {
       LoadBlock(
-        d_chars, block_offset, num_total_symbols, cub::Int2Type<true>(), cub::Int2Type<1>());
+        d_chars, block_offset, num_total_symbols, hipcub::Int2Type<true>(), hipcub::Int2Type<1>());
     } else {
       LoadBlock(
-        d_chars, block_offset, num_total_symbols, cub::Int2Type<false>(), cub::Int2Type<1>());
+        d_chars, block_offset, num_total_symbols, hipcub::Int2Type<false>(), hipcub::Int2Type<1>());
     }
   }
 
@@ -426,10 +427,10 @@ struct AgentDFA {
     // Parse thread's symbols and transition the state-vector
     if (is_full_block) {
       GetThreadStateTransitions<SYMBOLS_PER_THREAD>(
-        symbol_matcher, t_chars, num_block_chars, transition_op, cub::Int2Type<true>());
+        symbol_matcher, t_chars, num_block_chars, transition_op, hipcub::Int2Type<true>());
     } else {
       GetThreadStateTransitions<SYMBOLS_PER_THREAD>(
-        symbol_matcher, t_chars, num_block_chars, transition_op, cub::Int2Type<false>());
+        symbol_matcher, t_chars, num_block_chars, transition_op, hipcub::Int2Type<false>());
     }
   }
 
@@ -445,7 +446,7 @@ struct AgentDFA {
     OffsetT const num_total_symbols,
     StateIndexT& state,
     CallbackOpT& callback_op,
-    cub::Int2Type<BYPASS_LOAD>)
+    hipcub::Int2Type<BYPASS_LOAD>)
   {
     using StateTransitionOpT = StateTransitionOp<CallbackOpT, TransitionTableT>;
 
@@ -471,10 +472,10 @@ struct AgentDFA {
     // Parse thread's symbols and transition the state-vector
     if (is_full_block) {
       GetThreadStateTransitions<SYMBOLS_PER_THREAD>(
-        symbol_matcher, t_chars, num_block_chars, transition_op, cub::Int2Type<true>());
+        symbol_matcher, t_chars, num_block_chars, transition_op, hipcub::Int2Type<true>());
     } else {
       GetThreadStateTransitions<SYMBOLS_PER_THREAD>(
-        symbol_matcher, t_chars, num_block_chars, transition_op, cub::Int2Type<false>());
+        symbol_matcher, t_chars, num_block_chars, transition_op, hipcub::Int2Type<false>());
     }
 
     callback_op.TearDown();
@@ -582,10 +583,10 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
       using StateVectorCompositeOpT = VectorCompositeOp<NUM_STATES>;
 
       using PrefixCallbackOpT_ =
-        cub::TilePrefixCallbackOp<StateVectorT, StateVectorCompositeOpT, TileStateT>;
+        hipcub::TilePrefixCallbackOp<StateVectorT, StateVectorCompositeOpT, TileStateT>;
 
       using ItemsBlockScan =
-        cub::BlockScan<StateVectorT, BLOCK_THREADS, cub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;
+        hipcub::BlockScan<StateVectorT, BLOCK_THREADS, hipcub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;
 
       __shared__ typename ItemsBlockScan::TempStorage scan_temp_storage;
       __shared__ typename PrefixCallbackOpT_::TempStorage prefix_callback_temp_storage;
@@ -637,15 +638,15 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
                                         num_chars,
                                         state,
                                         callback_wrapper,
-                                        cub::Int2Type<IS_SINGLE_PASS>());
+                                        hipcub::Int2Type<IS_SINGLE_PASS>());
 
     __syncthreads();
 
     using OffsetPrefixScanCallbackOpT_ =
-      cub::TilePrefixCallbackOp<OffsetT, cub::Sum, OutOffsetScanTileState>;
+      hipcub::TilePrefixCallbackOp<OffsetT, hipcub::Sum, OutOffsetScanTileState>;
 
     using OutOffsetBlockScan =
-      cub::BlockScan<OffsetT, BLOCK_THREADS, cub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;
+      hipcub::BlockScan<OffsetT, BLOCK_THREADS, hipcub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;
 
     __shared__ typename OutOffsetBlockScan::TempStorage scan_temp_storage;
     __shared__ typename OffsetPrefixScanCallbackOpT_::TempStorage prefix_callback_temp_storage;
@@ -657,7 +658,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
         .ExclusiveScan(callback_wrapper.out_count,
                        callback_wrapper.out_count,
                        static_cast<OffsetT>(0),
-                       cub::Sum{},
+                       hipcub::Sum{},
                        block_aggregate);
 
       if (threadIdx.x == 0 /*and not IS_LAST_TILE*/) {
@@ -669,11 +670,11 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
       }
     } else {
       auto prefix_op = OffsetPrefixScanCallbackOpT_(
-        offset_tile_state, prefix_callback_temp_storage, cub::Sum{}, tile_idx);
+        offset_tile_state, prefix_callback_temp_storage, hipcub::Sum{}, tile_idx);
 
       OutOffsetBlockScan(scan_temp_storage)
         .ExclusiveScan(
-          callback_wrapper.out_count, callback_wrapper.out_count, cub::Sum{}, prefix_op);
+          callback_wrapper.out_count, callback_wrapper.out_count, hipcub::Sum{}, prefix_op);
 
       if (tile_idx == gridDim.x - 1 && threadIdx.x == 0) {
         *d_num_transduced_out_it = prefix_op.GetInclusivePrefix();
@@ -688,7 +689,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
                                         num_chars,
                                         t_start_state,
                                         callback_wrapper,
-                                        cub::Int2Type<true>());
+                                        hipcub::Int2Type<true>());
   }
 }
 

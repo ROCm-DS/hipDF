@@ -18,7 +18,7 @@
 #include <cudf/detail/utilities/integer_utils.hpp>
 #include <cudf/types.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <cstdint>
 
@@ -39,7 +39,7 @@ class MultiFragmentInRegArray {
  private:
   /// Minimum number of bits required to represent all values from [0, MAX_ITEM_VALUE]
   static constexpr uint32_t MIN_BITS_PER_ITEM =
-    (MAX_ITEM_VALUE == 0) ? 1 : cub::Log2<(MAX_ITEM_VALUE + 1)>::VALUE;
+    (MAX_ITEM_VALUE == 0) ? 1 : hipcub::Log2<(MAX_ITEM_VALUE + 1)>::VALUE;
 
   /// Number of bits that each fragment can store
   static constexpr uint32_t NUM_BITS_PER_FRAGMENT = sizeof(BackingFragmentT) * 8;
@@ -50,7 +50,7 @@ class MultiFragmentInRegArray {
   /// The number of bits per item per fragment to be a power of two to avoid costly integer
   /// multiplication
   static constexpr uint32_t BITS_PER_FRAG_ITEM =
-    0x01U << (cub::Log2<(AVAIL_BITS_PER_FRAG_ITEM + 1)>::VALUE - 1);
+    0x01U << (hipcub::Log2<(AVAIL_BITS_PER_FRAG_ITEM + 1)>::VALUE - 1);
 
   // The total number of fragments required to store all the items
   static constexpr uint32_t FRAGMENTS_PER_ITEM =
@@ -66,8 +66,8 @@ class MultiFragmentInRegArray {
                                               uint32_t bit_start,
                                               uint32_t num_bits) const
   {
-#if CUB_PTX_ARCH > 0
-    return cub::BFE(data, bit_start, num_bits);
+#if HIPCUB_ARCH > 0
+    return hipcub::BFE(data, bit_start, num_bits);
 #else
     uint32_t const MASK = (1 << num_bits) - 1;
     return (data >> bit_start) & MASK;
@@ -83,8 +83,8 @@ class MultiFragmentInRegArray {
                             uint32_t bit_start,
                             uint32_t num_bits) const
   {
-#if CUB_PTX_ARCH > 0
-    cub::BFI(data, data, bits, bit_start, num_bits);
+#if HIPCUB_ARCH > 0
+    hipcub::BFI(data, data, bits, bit_start, num_bits);
 #else
     uint32_t x      = bits << bit_start;
     uint32_t y      = data;

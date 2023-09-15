@@ -20,7 +20,7 @@ function(find_and_configure_jitify)
     jitify 2.0.0
     GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/jitify
     #TODO(HIP): change to main/dev branch when PRs are merged
-    GIT_TAG fix_extraction_of_parent_includes
+    GIT_TAG fix_regex_for_parent_include_names
     GIT_SHALLOW TRUE
     DOWNLOAD_ONLY TRUE
   )

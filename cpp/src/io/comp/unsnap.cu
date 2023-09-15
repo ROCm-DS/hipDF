@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2018-2023, NVIDIA CORPORATION.
  *
@@ -20,7 +21,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 namespace cudf {
 namespace io {
@@ -529,7 +530,7 @@ __device__ void snappy_process_symbols(unsnap_state_s* s, int t, Storage& temp_s
         uint32_t bofs      = WarpReducePos32(blen_t, t);
         uint32_t stop_mask = ballot((uint32_t)dist_t < bofs);
         uint32_t start_mask =
-          cub::WarpReduce<uint32_t>(temp_storage).Sum((bofs < 32 && t < batch_len) ? 1 << bofs : 0);
+          hipcub::WarpReduce<uint32_t>(temp_storage).Sum((bofs < 32 && t < batch_len) ? 1 << bofs : 0);
         start_mask = shuffle(start_mask);
         n          = min(min((uint32_t)__popc(start_mask), (uint32_t)(__ffs(stop_mask) - 1u)),
                 (uint32_t)batch_len);
@@ -630,7 +631,7 @@ __global__ void __launch_bounds__(block_size)
                 device_span<compression_result> results)
 {
   __shared__ __align__(16) unsnap_state_s state_g;
-  __shared__ cub::WarpReduce<uint32_t>::TempStorage temp_storage;
+  __shared__ hipcub::WarpReduce<uint32_t>::TempStorage temp_storage;
   int t             = threadIdx.x;
   unsnap_state_s* s = &state_g;
   int strm_id       = blockIdx.x;

@@ -42,9 +42,10 @@ function(ConfigureTest CMAKE_TEST_NAME)
     ${CMAKE_TEST_NAME} PRIVATE hipdftestutil GTest::gmock_main GTest::gtest_main
                                $<TARGET_NAME_IF_EXISTS:conda_env>
   )
-  target_include_directories(${CMAKE_TEST_NAME}
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
-    "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>")
+  # TODO(HIP): Is this needed?
+  #target_include_directories(${CMAKE_TEST_NAME}
+  #  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
+  #  "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>")
   add_test(NAME ${CMAKE_TEST_NAME} COMMAND ${CMAKE_TEST_NAME})
   set_tests_properties(
      ${CMAKE_TEST_NAME}
