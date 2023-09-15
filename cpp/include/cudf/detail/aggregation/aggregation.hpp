@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/aggregation.hpp>
@@ -1542,7 +1564,7 @@ AGG_KIND_MAPPING(aggregation::VARIANCE, var_aggregation);
  * @param args Parameter pack forwarded to the `operator()` invocation
  * @return Forwards the return value of the callable.
  */
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
 template <typename F, typename... Ts>
@@ -1634,7 +1656,7 @@ CUDF_HOST_DEVICE inline decltype(auto) aggregation_dispatcher(aggregation::Kind 
 
 template <typename Element>
 struct dispatch_aggregation {
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
   template <aggregation::Kind k, typename F, typename... Ts>
@@ -1645,7 +1667,7 @@ struct dispatch_aggregation {
 };
 
 struct dispatch_source {
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
   template <typename Element, typename F, typename... Ts>
@@ -1672,7 +1694,7 @@ struct dispatch_source {
  * @param args Parameter pack forwarded to the `operator()` invocation
  * `F`.
  */
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
 template <typename F, typename... Ts>

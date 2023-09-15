@@ -42,7 +42,7 @@
 #include "agent_dfa.cuh"
 #include "in_reg_array.cuh"
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <cstdint>
 
@@ -75,7 +75,7 @@ struct DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // Architecture-specific tuning policies
   //------------------------------------------------------------------------------
-  struct Policy900 : cub::ChainedPolicy<900, Policy900, Policy900> {
+  struct Policy900 : hipcub::ChainedPolicy<900, Policy900, Policy900> {
     enum {
       BLOCK_THREADS    = 128,
       ITEMS_PER_THREAD = 16,
@@ -150,7 +150,7 @@ struct DispatchFSM : DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // CONSTRUCTOR
   //------------------------------------------------------------------------------
-  CUB_RUNTIME_FUNCTION __forceinline__ DispatchFSM(void* d_temp_storage,
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ DispatchFSM(void* d_temp_storage,
                                                    size_t& temp_storage_bytes,
                                                    DfaT dfa,
                                                    StateIndexT seed_state,
@@ -178,7 +178,7 @@ struct DispatchFSM : DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // DISPATCH INTERFACE
   //------------------------------------------------------------------------------
-  CUB_RUNTIME_FUNCTION __forceinline__ static cudaError_t Dispatch(
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ static cudaError_t Dispatch(
     void* d_temp_storage,
     size_t& temp_storage_bytes,
     DfaT dfa,
@@ -196,7 +196,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Get PTX version
     int ptx_version;
-    error = cub::PtxVersion(ptx_version);
+    error = hipcub::PtxVersion(ptx_version);
     if (error != cudaSuccess) return error;
 
     // Create dispatch functor
@@ -224,7 +224,7 @@ struct DispatchFSM : DeviceFSMPolicy {
             typename TileStateT,
             typename FstScanTileStateT,
             typename StateVectorT>
-  CUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
   InvokeDFASimulationKernel(DFASimulationKernelT dfa_kernel,
                             int32_t sm_count,
                             StateIndexT seed_state,
@@ -234,10 +234,10 @@ struct DispatchFSM : DeviceFSMPolicy {
 
   {
     cudaError_t error = cudaSuccess;
-    cub::KernelConfig dfa_simulation_config;
+    hipcub::KernelConfig dfa_simulation_config;
 
     using PolicyT = typename ActivePolicyT::AgentDFAPolicy;
-    if (CubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
+    if (HipcubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
 
     // Kernel invocation
     uint32_t grid_size = std::max(
@@ -256,7 +256,7 @@ struct DispatchFSM : DeviceFSMPolicy {
                                                         d_num_transduced_out_it);
 
     // Check for errors
-    if (CubDebug(error = cudaPeekAtLastError())) return error;
+    if (HipcubDebug(error = cudaPeekAtLastError())) return error;
 
     return error;
   }
@@ -268,7 +268,7 @@ struct DispatchFSM : DeviceFSMPolicy {
             typename TileStateT,
             typename FstScanTileStateT,
             typename StateVectorT>
-  CUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
   ComputeStateTransitionVector(uint32_t sm_count,
                                TileStateT tile_state,
                                FstScanTileStateT fst_tile_state,
@@ -303,7 +303,7 @@ struct DispatchFSM : DeviceFSMPolicy {
             typename TileStateT,
             typename FstScanTileStateT,
             typename StateVectorT>
-  CUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
   SimulateDFA(uint32_t sm_count,
               TileStateT tile_state,
               FstScanTileStateT fst_tile_state,
@@ -334,7 +334,7 @@ struct DispatchFSM : DeviceFSMPolicy {
   // POLICY INVOCATION
   //------------------------------------------------------------------------------
   template <typename ActivePolicyT>
-  CUB_RUNTIME_FUNCTION __forceinline__ cudaError_t Invoke()
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t Invoke()
   {
     cudaError_t error = cudaSuccess;
 
@@ -356,10 +356,10 @@ struct DispatchFSM : DeviceFSMPolicy {
     using StateVectorT = MultiFragmentInRegArray<MAX_NUM_STATES, MAX_NUM_STATES - 1>;
 
     // Scan tile state used for propagating composed state transition vectors
-    using ScanTileStateT = typename cub::ScanTileState<StateVectorT>;
+    using ScanTileStateT = typename hipcub::ScanTileState<StateVectorT>;
 
     // Scan tile state used for propagating transduced output offsets
-    using FstScanTileStateT = typename cub::ScanTileState<OffsetT>;
+    using FstScanTileStateT = typename hipcub::ScanTileState<OffsetT>;
 
     // STATE-TRANSITION IDENTITY VECTOR
     StateVectorT state_identity_vector;
@@ -391,7 +391,7 @@ struct DispatchFSM : DeviceFSMPolicy {
     size_t vector_scan_storage_bytes = 0;
 
     // [MEMORY REQUIREMENTS] STATE-TRANSITION SCAN
-    cub::DeviceScan::ExclusiveScan(nullptr,
+    hipcub::DeviceScan::ExclusiveScan(nullptr,
                                    vector_scan_storage_bytes,
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
@@ -419,7 +419,7 @@ struct DispatchFSM : DeviceFSMPolicy {
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
     error =
-      cub::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
+      hipcub::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
     if (error != cudaSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation
@@ -465,7 +465,7 @@ struct DispatchFSM : DeviceFSMPolicy {
         sm_count, stv_tile_state, fst_offset_tile_state, d_thread_state_transition);
 
       // State-transition vector scan computing using the composition operator
-      cub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
+      hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
                                      allocation_sizes[MEM_SCAN],
                                      d_thread_state_transition,
                                      d_thread_state_transition,

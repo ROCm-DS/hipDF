@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/utilities/parsing_utils.cuh"
 #include "io/utilities/string_parsing.hpp"
 #include "nested_json.hpp"
@@ -166,17 +188,17 @@ std::pair<rmm::device_uvector<KeyType>, rmm::device_uvector<IndexType>> stable_s
   rmm::device_uvector<KeyType> keys_buffer2(keys.size(), stream);
   rmm::device_uvector<IndexType> order_buffer1(keys.size(), stream);
   rmm::device_uvector<IndexType> order_buffer2(keys.size(), stream);
-  cub::DoubleBuffer<IndexType> order_buffer(order_buffer1.data(), order_buffer2.data());
-  cub::DoubleBuffer<KeyType> keys_buffer(keys_buffer1.data(), keys_buffer2.data());
+  hipcub::DoubleBuffer<IndexType> order_buffer(order_buffer1.data(), order_buffer2.data());
+  hipcub::DoubleBuffer<KeyType> keys_buffer(keys_buffer1.data(), keys_buffer2.data());
   size_t temp_storage_bytes = 0;
-  cub::DeviceRadixSort::SortPairs(
+  hipcub::DeviceRadixSort::SortPairs(
     nullptr, temp_storage_bytes, keys_buffer, order_buffer, keys.size());
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   thrust::copy(rmm::exec_policy(stream), keys.begin(), keys.end(), keys_buffer1.begin());
   thrust::sequence(rmm::exec_policy(stream), order_buffer1.begin(), order_buffer1.end());
 
-  cub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
+  hipcub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   keys_buffer,
                                   order_buffer,

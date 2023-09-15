@@ -13,12 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/detail/utilities/integer_utils.hpp>
 #include <cudf/types.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <cstdint>
 
@@ -39,7 +62,7 @@ class MultiFragmentInRegArray {
  private:
   /// Minimum number of bits required to represent all values from [0, MAX_ITEM_VALUE]
   static constexpr uint32_t MIN_BITS_PER_ITEM =
-    (MAX_ITEM_VALUE == 0) ? 1 : cub::Log2<(MAX_ITEM_VALUE + 1)>::VALUE;
+    (MAX_ITEM_VALUE == 0) ? 1 : hipcub::Log2<(MAX_ITEM_VALUE + 1)>::VALUE;
 
   /// Number of bits that each fragment can store
   static constexpr uint32_t NUM_BITS_PER_FRAGMENT = sizeof(BackingFragmentT) * 8;
@@ -50,7 +73,7 @@ class MultiFragmentInRegArray {
   /// The number of bits per item per fragment to be a power of two to avoid costly integer
   /// multiplication
   static constexpr uint32_t BITS_PER_FRAG_ITEM =
-    0x01U << (cub::Log2<(AVAIL_BITS_PER_FRAG_ITEM + 1)>::VALUE - 1);
+    0x01U << (hipcub::Log2<(AVAIL_BITS_PER_FRAG_ITEM + 1)>::VALUE - 1);
 
   // The total number of fragments required to store all the items
   static constexpr uint32_t FRAGMENTS_PER_ITEM =

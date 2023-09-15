@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf_test/print_utilities.cuh>
@@ -32,6 +55,8 @@
 #include <thrust/fill.h>
 #include <thrust/iterator/transform_output_iterator.h>
 #include <thrust/scatter.h>
+
+#include <hipcub/hipcub.hpp>
 
 #include <algorithm>
 #include <cstdint>
@@ -334,7 +359,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
 
   // TransformInputIterator converting stack symbols to stack operations
   using TransformInputItT =
-    cub::TransformInputIterator<StackOpT, StackSymbolToStackOpT, StackSymbolItT>;
+    hipcub::TransformInputIterator<StackOpT, StackSymbolToStackOpT, StackSymbolItT>;
 
   constexpr bool supports_reset_op = SupportResetOperation == stack_op_support::WITH_RESET_SUPPORT;
 
@@ -347,15 +372,15 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
 
   // Double-buffer for sorting along the given sequence of symbol positions (the sparse
   // representation)
-  cub::DoubleBuffer<SymbolPositionT> d_symbol_positions_db{nullptr, nullptr};
+  hipcub::DoubleBuffer<SymbolPositionT> d_symbol_positions_db{nullptr, nullptr};
 
   // Double-buffer for sorting the stack operations by the stack level to which such operation
   // applies
-  cub::DoubleBuffer<StackOpT> d_kv_operations{nullptr, nullptr};
+  hipcub::DoubleBuffer<StackOpT> d_kv_operations{nullptr, nullptr};
 
   // A double-buffer that aliases memory from d_kv_operations with unsigned types in order to
   // be able to perform a radix sort
-  cub::DoubleBuffer<StackOpUnsignedT> d_kv_operations_unsigned{nullptr, nullptr};
+  hipcub::DoubleBuffer<StackOpUnsignedT> d_kv_operations_unsigned{nullptr, nullptr};
 
   constexpr std::size_t bits_per_byte = 8;
   constexpr std::size_t begin_bit     = offsetof(StackOpT, stack_level) * bits_per_byte;
@@ -365,7 +390,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
   // with the empty_stack_symbol
   StackOpT const empty_stack{0, empty_stack_symbol};
 
-  cub::TransformInputIterator<StackOpT, detail::RemapEmptyStack<StackOpT>, StackOpT*>
+  hipcub::TransformInputIterator<StackOpT, detail::RemapEmptyStack<StackOpT>, StackOpT*>
     kv_ops_scan_in(nullptr, detail::RemapEmptyStack<StackOpT>{empty_stack});
   StackOpT* kv_ops_scan_out = nullptr;
 
@@ -385,7 +410,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
     auto const fake_key_segment_it      = static_cast<StackSegmentT*>(nullptr);
     std::size_t gen_segments_scan_bytes = 0;
     std::size_t scan_by_key_bytes       = 0;
-    CUDF_CUDA_TRY(cub::DeviceScan::InclusiveSum(
+    CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveSum(
       nullptr,
       gen_segments_scan_bytes,
       reset_segments_it,
@@ -393,7 +418,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
                                              detail::ModToTargetTypeOpT<StackSegmentT>{}),
       num_symbols_in,
       stream));
-    CUDF_CUDA_TRY(cub::DeviceScan::InclusiveScanByKey(
+    CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveScanByKey(
       nullptr,
       scan_by_key_bytes,
       fake_key_segment_it,
@@ -405,7 +430,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
       stream));
     stack_level_scan_bytes = std::max(gen_segments_scan_bytes, scan_by_key_bytes);
   } else {
-    CUDF_CUDA_TRY(cub::DeviceScan::InclusiveScan(
+    CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveScan(
       nullptr,
       stack_level_scan_bytes,
       stack_symbols_in,
@@ -417,7 +442,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
 
   // Getting temporary storage requirements for the stable radix sort (sorting by stack level of the
   // operations)
-  CUDF_CUDA_TRY(cub::DeviceRadixSort::SortPairs(nullptr,
+  CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(nullptr,
                                                 stack_level_sort_bytes,
                                                 d_kv_operations_unsigned,
                                                 d_symbol_positions_db,
@@ -428,7 +453,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
 
   // Getting temporary storage requirements for the scan to match pop operations with the latest
   // push of the same level
-  CUDF_CUDA_TRY(cub::DeviceScan::InclusiveScan(
+  CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveScan(
     nullptr,
     match_level_scan_bytes,
     kv_ops_scan_in,
@@ -440,7 +465,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
   // Getting temporary storage requirements for the scan to propagate top-of-stack for spots that
   // didn't push or pop
   CUDF_CUDA_TRY(
-    cub::DeviceScan::ExclusiveScan(nullptr,
+    hipcub::DeviceScan::ExclusiveScan(nullptr,
                                    propagate_writes_scan_bytes,
                                    d_top_of_stack,
                                    d_top_of_stack,
@@ -471,10 +496,10 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
   //------------------------------------------------------------------------------
   // Initialize double-buffer for sorting the indexes of the sequence of sparse stack operations
   d_symbol_positions_db =
-    cub::DoubleBuffer<SymbolPositionT>{d_symbol_positions.data(), d_symbol_position_alt.data()};
+    hipcub::DoubleBuffer<SymbolPositionT>{d_symbol_positions.data(), d_symbol_position_alt.data()};
 
   // Initialize double-buffer for sorting the indexes of the sequence of sparse stack operations
-  d_kv_operations = cub::DoubleBuffer<StackOpT>{d_kv_ops_current.data(), d_kv_ops_alt.data()};
+  d_kv_operations = hipcub::DoubleBuffer<StackOpT>{d_kv_ops_current.data(), d_kv_ops_alt.data()};
 
   // Compute prefix sum of the stack level after each operation
   if constexpr (supports_reset_op) {
@@ -484,7 +509,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
       detail::NewlineToResetStackSegmentOp<StackSymbolToStackOpTypeT>{symbol_to_stack_op});
 
     rmm::device_uvector<StackSegmentT> key_segments{num_symbols_in, stream};
-    CUDF_CUDA_TRY(cub::DeviceScan::InclusiveSum(
+    CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveSum(
       temp_storage.data(),
       total_temp_storage_bytes,
       reset_segments_it,
@@ -492,7 +517,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
                                              detail::ModToTargetTypeOpT<StackSegmentT>{}),
       num_symbols_in,
       stream));
-    CUDF_CUDA_TRY(cub::DeviceScan::InclusiveScanByKey(
+    CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveScanByKey(
       temp_storage.data(),
       total_temp_storage_bytes,
       key_segments.data(),
@@ -500,10 +525,10 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
       d_kv_operations.Current(),
       detail::AddStackLevelFromStackOp<StackSymbolToStackOpTypeT>{symbol_to_stack_op},
       num_symbols_in,
-      cub::Equality{},
+      hipcub::Equality{},
       stream));
   } else {
-    CUDF_CUDA_TRY(cub::DeviceScan::InclusiveScan(
+    CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveScan(
       temp_storage.data(),
       total_temp_storage_bytes,
       stack_symbols_in,
@@ -520,10 +545,10 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
   }
 
   // Stable radix sort, sorting by stack level of the operations
-  d_kv_operations_unsigned = cub::DoubleBuffer<StackOpUnsignedT>{
+  d_kv_operations_unsigned = hipcub::DoubleBuffer<StackOpUnsignedT>{
     reinterpret_cast<StackOpUnsignedT*>(d_kv_operations.Current()),
     reinterpret_cast<StackOpUnsignedT*>(d_kv_operations.Alternate())};
-  CUDF_CUDA_TRY(cub::DeviceRadixSort::SortPairs(temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(temp_storage.data(),
                                                 total_temp_storage_bytes,
                                                 d_kv_operations_unsigned,
                                                 d_symbol_positions_db,
@@ -538,7 +563,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
   kv_ops_scan_out = reinterpret_cast<StackOpT*>(d_kv_operations_unsigned.Alternate());
 
   // Inclusive scan to match pop operations with the latest push operation of that level
-  CUDF_CUDA_TRY(cub::DeviceScan::InclusiveScan(
+  CUDF_CUDA_TRY(hipcub::DeviceScan::InclusiveScan(
     temp_storage.data(),
     total_temp_storage_bytes,
     kv_ops_scan_in,
@@ -554,7 +579,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
                read_symbol);
 
   // Transform the stack operations to the stack symbol they represent
-  cub::TransformInputIterator<StackSymbolT, detail::StackOpToStackSymbol, StackOpT*>
+  hipcub::TransformInputIterator<StackSymbolT, detail::StackOpToStackSymbol, StackOpT*>
     kv_op_to_stack_sym_it(kv_ops_scan_out, detail::StackOpToStackSymbol{});
 
   // Scatter the stack symbols to the output tape (spots that are not scattered to have been
@@ -569,7 +594,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
   // be reading the empty stack before there's the first push occurrence in the sequence.
   // Also, we're interested in the top-of-the-stack symbol before the operation was applied.
   CUDF_CUDA_TRY(
-    cub::DeviceScan::ExclusiveScan(temp_storage.data(),
+    hipcub::DeviceScan::ExclusiveScan(temp_storage.data(),
                                    total_temp_storage_bytes,
                                    d_top_of_stack,
                                    d_top_of_stack,

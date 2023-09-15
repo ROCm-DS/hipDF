@@ -46,7 +46,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/type_traits>
 
 namespace cudf {
@@ -200,9 +200,9 @@ __device__ T single_lane_block_sum_reduce(T lane_value)
   // threadId.x == 0
   T result{0};
   if (warp_id == 0) {
-    __shared__ typename cub::WarpReduce<T>::TempStorage temp;
+    __shared__ typename hipcub::WarpReduce<T>::TempStorage temp;
     lane_value = (lane_id < warps_per_block) ? lane_values[lane_id] : T{0};
-    result     = cub::WarpReduce<T>(temp).Sum(lane_value);
+    result     = hipcub::WarpReduce<T>(temp).Sum(lane_value);
   }
   // Shared memory has block scope, so sync here to ensure no data
   // races between successive calls to this function in the same
