@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023, NVIDIA CORPORATION.
  *
@@ -98,8 +99,8 @@ static __device__ void gpuUpdatePageSizes(page_state_s* s,
   constexpr int num_warps      = preprocess_block_size / 32;
   constexpr int max_batch_size = num_warps * 32;
 
-  using block_reduce = cub::BlockReduce<int, preprocess_block_size>;
-  using block_scan   = cub::BlockScan<int, preprocess_block_size>;
+  using block_reduce = hipcub::BlockReduce<int, preprocess_block_size>;
+  using block_scan   = hipcub::BlockScan<int, preprocess_block_size>;
   __shared__ union {
     typename block_reduce::TempStorage reduce_storage;
     typename block_scan::TempStorage scan_storage;
