@@ -64,6 +64,7 @@
 #include <cstdint>
 #include <iterator>
 
+
 /**
  * @file
  * @brief Type declarations for libcudf.
@@ -130,7 +131,13 @@ using char_utf8         = uint32_t;  ///< UTF-8 characters are 1-4 bytes
 template <typename T>
 size_type distance(T f, T l)
 {
+  //TODO(HIP): HIPRTC doesn't define std::distance, while NVRTC does (even if iterator is not included!)
+  // investigate further workarounds if required
+  // We could e.g. add an sample implementation to the jitsafe iterator
+  // header in jitify (header <iterator> is supposed to provide std::distance)
+  #ifndef __HIPCC_RTC__
   return static_cast<size_type>(std::distance(f, l));
+  #endif
 }
 
 /**
