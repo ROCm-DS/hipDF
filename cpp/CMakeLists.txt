@@ -798,7 +798,7 @@ if(HIPDF_BUILD_TESTUTIL)
 
   target_link_libraries(
     hipdftest_default_stream
-    PUBLIC hipf
+    PUBLIC hipdf
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
 
