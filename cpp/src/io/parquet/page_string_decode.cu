@@ -88,8 +88,8 @@ __device__ thrust::pair<int, int> page_bounds(
   bool has_repetition,
   rle_stream<level_t, rle_buf_size, preproc_buf_size>* decoders)
 {
-  using block_reduce = cub::BlockReduce<int, preprocess_block_size>;
-  using block_scan   = cub::BlockScan<int, preprocess_block_size>;
+  using block_reduce = hipcub::BlockReduce<int, preprocess_block_size>;
+  using block_scan   = hipcub::BlockScan<int, preprocess_block_size>;
   __shared__ union {
     typename block_reduce::TempStorage reduce_storage;
     typename block_scan::TempStorage scan_storage;
@@ -449,7 +449,7 @@ __device__ size_t totalDictEntriesSize(uint8_t const* data,
   }
   __syncthreads();
 
-  using block_reduce = cub::BlockReduce<size_t, preprocess_block_size>;
+  using block_reduce = hipcub::BlockReduce<size_t, preprocess_block_size>;
   __shared__ typename block_reduce::TempStorage reduce_storage;
   size_t sum_l = block_reduce(reduce_storage).Sum(l_str_len);
 

@@ -52,7 +52,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/std/chrono>
 #include <cuda/std/functional>
 #include <cuda/std/limits>
@@ -208,7 +208,7 @@ void __device__ init_frag_state(frag_init_state_s* const s,
 template <int block_size>
 void __device__ calculate_frag_size(frag_init_state_s* const s, int t)
 {
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ typename block_reduce::TempStorage reduce_storage;
 
   auto const physical_type   = s->col.physical_type;
@@ -311,7 +311,7 @@ template <int block_size, typename state_buf>
 void __device__
 generate_page_histogram(uint32_t* hist, state_buf const* s, uint8_t const* lvl_data, int lvl_end)
 {
-  using block_reduce = cub::BlockReduce<int, block_size>;
+  using block_reduce = hipcub::BlockReduce<int, block_size>;
   __shared__ typename block_reduce::TempStorage temp_storage;
 
   auto const t                  = threadIdx.x;
@@ -353,7 +353,7 @@ void __device__ generate_def_level_histogram(uint32_t* hist,
                                              uint32_t rle_numvals,
                                              uint32_t maxlvl)
 {
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ typename block_reduce::TempStorage temp_storage;
   auto const t = threadIdx.x;
 
@@ -2530,7 +2530,7 @@ CUDF_KERNEL void __launch_bounds__(decide_compression_block_size)
 {
   __shared__ __align__(8) EncColumnChunk ck_g[decide_compression_warps_in_block];
   __shared__ __align__(4) unsigned int compression_error[decide_compression_warps_in_block];
-  using warp_reduce = cub::WarpReduce<uint32_t>;
+  using warp_reduce = hipcub::WarpReduce<uint32_t>;
   __shared__ typename warp_reduce::TempStorage temp_storage[decide_compression_warps_in_block][2];
 
   auto const lane_id  = threadIdx.x % cudf::detail::warp_size;

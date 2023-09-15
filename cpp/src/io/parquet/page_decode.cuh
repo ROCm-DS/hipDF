@@ -365,7 +365,7 @@ __device__ cuda::std::pair<int, int> gpuDecodeDictionaryIndices(page_state_s* s,
         return 0;
       }();
 
-      using WarpReduce = cub::WarpReduce<size_type>;
+      using WarpReduce = hipcub::WarpReduce<size_type>;
       __shared__ typename WarpReduce::TempStorage temp_storage;
       // note: str_len will only be valid on thread 0.
       str_len += WarpReduce(temp_storage).Sum(len);

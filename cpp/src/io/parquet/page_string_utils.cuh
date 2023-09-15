@@ -104,7 +104,7 @@ inline __device__ void wideStrcpy(uint8_t* dst, uint8_t const* src, size_t len, 
 template <int block_size>
 __device__ inline void block_excl_sum(size_type* arr, size_type length, size_type initial_value)
 {
-  using block_scan = cub::BlockScan<size_type, block_size>;
+  using block_scan = hipcub::BlockScan<size_type, block_size>;
   __shared__ typename block_scan::TempStorage scan_storage;
   int const t = threadIdx.x;
 
