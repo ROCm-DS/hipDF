@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "file_io_utilities.hpp"
 #include "getenv_or.hpp"
 
@@ -25,7 +47,9 @@
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/span.hpp>
 
+#ifdef HAS_KVIKIO
 #include <kvikio/file_handle.hpp>
+#endif
 
 #include <rmm/device_buffer.hpp>
 
@@ -53,10 +77,15 @@ class file_source : public datasource {
   {
     detail::force_init_cuda_context();
     if (cufile_integration::is_kvikio_enabled()) {
+#ifdef HAS_KVIKIO
       cufile_integration::set_up_kvikio();
       _kvikio_file = kvikio::FileHandle(filepath);
       CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode %s.",
                     _kvikio_file.is_compat_mode_preferred() ? "on" : "off");
+#else
+      //TODO(HIP): improve error handling
+      throw std::runtime_error("Error: Kvikio is not supported\n");
+#endif
     } else {
       _cufile_in = detail::make_cufile_input(filepath);
     }
@@ -90,7 +119,11 @@ class file_source : public datasource {
 
   [[nodiscard]] bool supports_device_read() const override
   {
-    return !_kvikio_file.closed() || _cufile_in != nullptr;
+#ifdef HAS_KVIKIO
+    return \ !_kvikio_file.closed() ||  _cufile_in != nullptr;
+#else
+    return _cufile_in != nullptr;
+#endif 
   }
 
   [[nodiscard]] bool is_device_read_preferred(size_t size) const override
@@ -111,7 +144,9 @@ class file_source : public datasource {
     CUDF_EXPECTS(supports_device_read(), "Device reads are not supported for this file.");
 
     auto const read_size = std::min(size, _file.size() - offset);
+#ifdef HAS_KVIKIO
     if (!_kvikio_file.closed()) { return _kvikio_file.pread(dst, read_size, offset); }
+#endif
     return _cufile_in->read_async(offset, read_size, dst, stream);
   }
 
@@ -141,7 +176,9 @@ class file_source : public datasource {
 
  private:
   std::unique_ptr<detail::cufile_input_impl> _cufile_in;
+#ifdef HAS_KVIKIO
   kvikio::FileHandle _kvikio_file;
+#endif
   // The read size above which GDS is faster then posix-read + h2d-copy
   static constexpr size_t _gds_read_preferred_threshold = 128 << 10;  // 128KB
 };
