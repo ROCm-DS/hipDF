@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_wrapper.hpp>
 #include <cudf_test/iterator_utilities.hpp>
@@ -1127,7 +1149,7 @@ TEST_F(ReductionEmptyTest, empty_column)
 struct ReductionParamTest : public ReductionTest<double>,
                             public ::testing::WithParamInterface<cudf::size_type> {};
 
-INSTANTIATE_TEST_CASE_P(ddofParam, ReductionParamTest, ::testing::Range(1, 5));
+INSTANTIATE_TEST_SUITE_P(ddofParam, ReductionParamTest, ::testing::Range(1, 5));
 
 // This test is disabled for only a Debug build because a compiler error
 // documented in cpp/src/reductions/std.cu and cpp/src/reductions/var.cu
@@ -2228,7 +2250,7 @@ struct DictionaryStringReductionTest : public StringReductionTest {};
 std::vector<std::vector<std::string>> data_list = {
   {"nine", "two", "five", "three", "five", "six", "two", "eight", "nine"},
 };
-INSTANTIATE_TEST_CASE_P(dictionary_cases,
+INSTANTIATE_TEST_SUITE_P(dictionary_cases,
                         DictionaryStringReductionTest,
                         testing::ValuesIn(data_list));
 TEST_P(DictionaryStringReductionTest, MinMax)

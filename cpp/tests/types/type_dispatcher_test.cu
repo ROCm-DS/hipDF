@@ -104,7 +104,7 @@ TYPED_TEST(TypedDispatcherTest, DeviceDispatch)
 struct IdDispatcherTest : public DispatcherTest,
                           public testing::WithParamInterface<cudf::type_id> {};
 
-INSTANTIATE_TEST_CASE_P(TestAllIds, IdDispatcherTest, testing::ValuesIn(cudf::test::all_type_ids));
+INSTANTIATE_TEST_SUITE_P(TestAllIds, IdDispatcherTest, testing::ValuesIn(cudf::test::all_type_ids));
 
 TEST_P(IdDispatcherTest, IdToType)
 {
@@ -165,7 +165,7 @@ TYPED_TEST(TypedDoubleDispatcherTest, DeviceDoubleDispatch)
 struct IdDoubleDispatcherTest : public DispatcherTest,
                                 public testing::WithParamInterface<cudf::type_id> {};
 
-INSTANTIATE_TEST_CASE_P(TestAllIds,
+INSTANTIATE_TEST_SUITE_P(TestAllIds,
                         IdDoubleDispatcherTest,
                         testing::ValuesIn(cudf::test::all_type_ids));
 
@@ -180,7 +180,7 @@ TEST_P(IdDoubleDispatcherTest, IdToType)
 struct IdFixedDoubleDispatcherTest : public DispatcherTest,
                                      public testing::WithParamInterface<cudf::type_id> {};
 
-INSTANTIATE_TEST_CASE_P(TestAllIds,
+INSTANTIATE_TEST_SUITE_P(TestAllIds,
                         IdFixedDoubleDispatcherTest,
                         testing::ValuesIn(cudf::test::all_type_ids));
 
