@@ -448,7 +448,7 @@ TEST_F(FromArrowTest, FixedPoint128TableNullsLarge)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(FromArrowTest,
+INSTANTIATE_TEST_SUITE_P(FromArrowTest,
                         FromArrowTestSlice,
                         ::testing::Values(std::make_tuple(0, 10000),
                                           std::make_tuple(2912, 2915),

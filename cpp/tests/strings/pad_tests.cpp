@@ -126,7 +126,7 @@ TEST_P(PadParameters, Padding)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
 }
 
-INSTANTIATE_TEST_CASE_P(StringsPadTest,
+INSTANTIATE_TEST_SUITE_P(StringsPadTest,
                         PadParameters,
                         testing::ValuesIn(std::array<cudf::size_type, 3>{5, 6, 7}));
 

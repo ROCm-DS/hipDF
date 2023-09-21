@@ -70,7 +70,7 @@ TEST_P(MaskToBoolsTest, LargeDataSizeTest)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, out->view());
 }
 
-INSTANTIATE_TEST_CASE_P(MaskToBools,
+INSTANTIATE_TEST_SUITE_P(MaskToBools,
                         MaskToBoolsTest,
                         ::testing::Values(std::make_tuple(0, 0),
                                           std::make_tuple(0, 500),

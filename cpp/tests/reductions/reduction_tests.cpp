@@ -914,7 +914,7 @@ TEST_F(ReductionEmptyTest, empty_column)
 struct ReductionParamTest : public ReductionTest<double>,
                             public ::testing::WithParamInterface<cudf::size_type> {};
 
-INSTANTIATE_TEST_CASE_P(ddofParam, ReductionParamTest, ::testing::Range(1, 5));
+INSTANTIATE_TEST_SUITE_P(ddofParam, ReductionParamTest, ::testing::Range(1, 5));
 
 // This test is disabled for only a Debug build because a compiler error
 // documented in cpp/src/reductions/std.cu and cpp/src/reductions/var.cu
@@ -1053,7 +1053,7 @@ std::vector<std::string> string_list[] = {
   {"one", "two", "three", "four", "\xF7\xBF\xBF\xBF", "six", "seven", "eight", "nine"},
   {"one", "two", "\xF7\xBF\xBF\xBF", "four", "five", "six", "seven", "eight", "nine"},
 };
-INSTANTIATE_TEST_CASE_P(string_cases, StringReductionTest, testing::ValuesIn(string_list));
+INSTANTIATE_TEST_SUITE_P(string_cases, StringReductionTest, testing::ValuesIn(string_list));
 TEST_P(StringReductionTest, MinMax)
 {
   // data and valid arrays
@@ -2026,7 +2026,7 @@ struct DictionaryStringReductionTest : public StringReductionTest {};
 std::vector<std::string> data_list[] = {
   {"nine", "two", "five", "three", "five", "six", "two", "eight", "nine"},
 };
-INSTANTIATE_TEST_CASE_P(dictionary_cases,
+INSTANTIATE_TEST_SUITE_P(dictionary_cases,
                         DictionaryStringReductionTest,
                         testing::ValuesIn(data_list));
 TEST_P(DictionaryStringReductionTest, MinMax)

@@ -1184,7 +1184,7 @@ TEST_P(OrcWriterTestDecimal, Decimal64)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(tbl.column(0), result.tbl->view().column(0));
 }
 
-INSTANTIATE_TEST_CASE_P(OrcWriterTest,
+INSTANTIATE_TEST_SUITE_P(OrcWriterTest,
                         OrcWriterTestDecimal,
                         ::testing::Combine(::testing::Values(1, 10000, 10001, 34567),
                                            ::testing::Values(-2, 0, 2)));
@@ -1367,7 +1367,7 @@ TEST_P(OrcWriterTestStripes, StripeSize)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(OrcWriterTest,
+INSTANTIATE_TEST_SUITE_P(OrcWriterTest,
                         OrcWriterTestStripes,
                         ::testing::Values(std::make_tuple(800000ul, 1000000),
                                           std::make_tuple(2000000ul, 1000000),

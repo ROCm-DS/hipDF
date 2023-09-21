@@ -280,7 +280,7 @@ TYPED_TEST_SUITE(JsonFixedPointReaderTest, cudf::test::FixedPointTypes);
 TYPED_TEST_SUITE(JsonValidFixedPointReaderTest, cudf::test::FixedPointTypes);
 
 // Parametrize qualifying JSON tests for executing both nested reader and legacy JSON lines reader
-INSTANTIATE_TEST_CASE_P(JsonReaderParamTest,
+INSTANTIATE_TEST_SUITE_P(JsonReaderParamTest,
                         JsonReaderParamTest,
                         ::testing::Values(json_test_t::legacy_lines_row_orient,
                                           json_test_t::legacy_lines_record_orient,
@@ -288,13 +288,13 @@ INSTANTIATE_TEST_CASE_P(JsonReaderParamTest,
                                           json_test_t::json_experimental_row_orient));
 
 // Parametrize qualifying JSON tests for executing both nested reader and legacy JSON lines reader
-INSTANTIATE_TEST_CASE_P(JsonReaderDualTest,
+INSTANTIATE_TEST_SUITE_P(JsonReaderDualTest,
                         JsonReaderDualTest,
                         ::testing::Values(json_test_t::legacy_lines_record_orient,
                                           json_test_t::json_experimental_record_orient));
 
 // Parametrize qualifying JSON tests for executing nested reader only
-INSTANTIATE_TEST_CASE_P(JsonReaderNoLegacy,
+INSTANTIATE_TEST_SUITE_P(JsonReaderNoLegacy,
                         JsonReaderNoLegacy,
                         ::testing::Values(json_test_t::json_experimental_row_orient,
                                           json_test_t::json_experimental_record_orient));
