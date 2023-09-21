@@ -27,7 +27,7 @@
 namespace cudf {
 namespace test {
 using time_point_ms =
-  cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::milliseconds>;
+  hip::std::chrono::time_point<hip::std::chrono::system_clock, hip::std::chrono::milliseconds>;
 
 /**
  * @brief Creates a `fixed_width_column_wrapper` with ascending timestamps in the
@@ -37,11 +37,11 @@ using time_point_ms =
  * and `stop`.
  *
  * @tparam Rep The arithmetic type representing the number of ticks
- * @tparam Period A cuda::std::ratio representing the tick period (i.e. the
+ * @tparam Period A hip::std::ratio representing the tick period (i.e. the
  *number of seconds per tick)
  * @param count The number of timestamps to create
- * @param start The first timestamp as a cuda::std::chrono::time_point
- * @param stop The last timestamp as a cuda::std::chrono::time_point
+ * @param start The first timestamp as a hip::std::chrono::time_point
+ * @param stop The last timestamp as a hip::std::chrono::time_point
  */
 template <typename T, bool nullable = false>
 inline cudf::test::fixed_width_column_wrapper<T, int64_t> generate_timestamps(int32_t count,
@@ -50,7 +50,7 @@ inline cudf::test::fixed_width_column_wrapper<T, int64_t> generate_timestamps(in
 {
   using Rep        = typename T::rep;
   using Period     = typename T::period;
-  using ToDuration = cuda::std::chrono::duration<Rep, Period>;
+  using ToDuration = hip::std::chrono::duration<Rep, Period>;
 
   auto lhs = start.time_since_epoch().count();
   auto rhs = stop.time_since_epoch().count();
@@ -59,8 +59,8 @@ inline cudf::test::fixed_width_column_wrapper<T, int64_t> generate_timestamps(in
   auto const max   = std::max(lhs, rhs);
   auto const range = max - min;
   auto iter        = cudf::detail::make_counting_transform_iterator(0, [=](auto i) {
-    return cuda::std::chrono::floor<ToDuration>(
-             cuda::std::chrono::milliseconds(min + (range / count) * i))
+    return hip::std::chrono::floor<ToDuration>(
+             hip::std::chrono::milliseconds(min + (range / count) * i))
       .count();
   });
 
