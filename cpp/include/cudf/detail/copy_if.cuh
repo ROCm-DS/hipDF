@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *
@@ -41,7 +42,7 @@
 #include <thrust/copy.h>
 #include <thrust/iterator/counting_iterator.h>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <cuda/atomic>
 
@@ -75,7 +76,7 @@ __device__ cudf::size_type block_scan_mask(bool mask_true, cudf::size_type& bloc
 {
   int offset = 0;
 
-  using BlockScan = cub::BlockScan<cudf::size_type, block_size>;
+  using BlockScan = hipcub::BlockScan<cudf::size_type, block_size>;
   __shared__ typename BlockScan::TempStorage temp_storage;
   BlockScan(temp_storage).ExclusiveSum(mask_true, offset, block_sum);
 
@@ -260,7 +261,7 @@ struct scatter_gather_functor {
     if (output.nullable()) {
       // Have to initialize the output mask to all zeros because we may update
       // it with atomicOr().
-      CUDF_CUDA_TRY(cudaMemsetAsync(static_cast<void*>(output.null_mask()),
+      CUDF_CUDA_TRY(hipMemsetAsync(static_cast<void*>(output.null_mask()),
                                     0,
                                     cudf::bitmask_allocation_size_bytes(output.size()),
                                     stream.value()));
@@ -348,13 +349,13 @@ std::unique_ptr<table> copy_if(table_view const& input,
 
   // initialize just the first element of block_offsets to 0 since the InclusiveSum below
   // starts at the second element.
-  CUDF_CUDA_TRY(cudaMemsetAsync(block_offsets.begin(), 0, sizeof(cudf::size_type), stream.value()));
+  CUDF_CUDA_TRY(hipMemsetAsync(block_offsets.begin(), 0, sizeof(cudf::size_type), stream.value()));
 
   // 2. Find the offset for each block's output using a scan of block counts
   if (grid.num_blocks > 1) {
     // Determine and allocate temporary device storage
     size_t temp_storage_bytes = 0;
-    cub::DeviceScan::InclusiveSum(nullptr,
+    hipcub::DeviceScan::InclusiveSum(nullptr,
                                   temp_storage_bytes,
                                   block_counts.begin(),
                                   block_offsets.begin() + 1,
@@ -363,7 +364,7 @@ std::unique_ptr<table> copy_if(table_view const& input,
     rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
     // Run exclusive prefix sum
-    cub::DeviceScan::InclusiveSum(d_temp_storage.data(),
+    hipcub::DeviceScan::InclusiveSum(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   block_counts.begin(),
                                   block_offsets.begin() + 1,
@@ -374,11 +375,11 @@ std::unique_ptr<table> copy_if(table_view const& input,
   // As it is InclusiveSum, last value in block_offsets will be output_size
   // unless num_blocks == 1, in which case output_size is just block_counts[0]
   cudf::size_type output_size{0};
-  CUDF_CUDA_TRY(cudaMemcpyAsync(
+  CUDF_CUDA_TRY(hipMemcpyAsync(
     &output_size,
     grid.num_blocks > 1 ? block_offsets.begin() + grid.num_blocks : block_counts.begin(),
     sizeof(cudf::size_type),
-    cudaMemcpyDefault,
+    hipMemcpyDefault,
     stream.value()));
 
   stream.synchronize();

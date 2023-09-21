@@ -88,7 +88,7 @@ rmm::device_uvector<cudf::bitmask_type> make_mask(cudf::size_type size, bool fil
       size, cudf::get_default_stream(), rmm::mr::get_current_device_resource());
   } else {
     auto ret = rmm::device_uvector<cudf::bitmask_type>(size, cudf::get_default_stream());
-    CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(),
+    CUDF_CUDA_TRY(hipMemsetAsync(ret.data(),
                                   ~cudf::bitmask_type{0},
                                   size * sizeof(cudf::bitmask_type),
                                   cudf::get_default_stream().value()));
@@ -535,10 +535,10 @@ void cleanEndWord(rmm::device_buffer& mask, int begin_bit, int end_bit)
   if (number_of_bits % 32 != 0) {
     cudf::bitmask_type end_mask = 0;
     CUDF_CUDA_TRY(
-      cudaMemcpy(&end_mask, ptr + number_of_mask_words - 1, sizeof(end_mask), cudaMemcpyDefault));
+      hipMemcpy(&end_mask, ptr + number_of_mask_words - 1, sizeof(end_mask), hipMemcpyDefault));
     end_mask = end_mask & ((1 << (number_of_bits % 32)) - 1);
     CUDF_CUDA_TRY(
-      cudaMemcpy(ptr + number_of_mask_words - 1, &end_mask, sizeof(end_mask), cudaMemcpyDefault));
+      hipMemcpy(ptr + number_of_mask_words - 1, &end_mask, sizeof(end_mask), hipMemcpyDefault));
   }
 }
 

@@ -47,9 +47,9 @@ struct TypedColumnTest : public cudf::test::BaseFixture {
     std::vector<char> h_data(std::max(data.size(), mask.size()));
     std::iota(h_data.begin(), h_data.end(), 0);
     CUDF_CUDA_TRY(
-      cudaMemcpyAsync(data.data(), h_data.data(), data.size(), cudaMemcpyDefault, stream.value()));
+      hipMemcpyAsync(data.data(), h_data.data(), data.size(), hipMemcpyDefault, stream.value()));
     CUDF_CUDA_TRY(
-      cudaMemcpyAsync(mask.data(), h_data.data(), mask.size(), cudaMemcpyDefault, stream.value()));
+      hipMemcpyAsync(mask.data(), h_data.data(), mask.size(), hipMemcpyDefault, stream.value()));
   }
 
   cudf::size_type num_elements() { return _num_elements; }

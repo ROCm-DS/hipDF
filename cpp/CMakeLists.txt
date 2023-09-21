@@ -317,12 +317,12 @@ add_library(
   src/labeling/label_bins.cu
   src/bitmask/null_mask.cu
   src/bitmask/is_element_valid.cpp
-  src/column/column.cu
+  src/column/column.hip
   src/column/column_device_view.cu
   src/column/column_factories.cpp
   src/column/column_factories.cu
   src/column/column_view.cpp
-  src/copying/concatenate.cu
+  src/copying/concatenate.hip
   src/copying/contiguous_split.cu
   src/copying/copy.cpp
   src/copying/copy.cu
@@ -339,17 +339,17 @@ add_library(
   src/copying/split.cpp
   src/copying/segmented_shift.cu
   src/datetime/datetime_ops.cu
-  src/dictionary/add_keys.cu
-  src/dictionary/decode.cu
-  src/dictionary/detail/concatenate.cu
-  src/dictionary/detail/merge.cu
+  src/dictionary/add_keys.hip
+  src/dictionary/decode.hip
+  src/dictionary/detail/concatenate.hip
+  src/dictionary/detail/merge.hip
   src/dictionary/dictionary_column_view.cpp
-  src/dictionary/dictionary_factories.cu
-  src/dictionary/encode.cu
-  src/dictionary/remove_keys.cu
-  src/dictionary/replace.cu
-  src/dictionary/search.cu
-  src/dictionary/set_keys.cu
+  src/dictionary/dictionary_factories.hip
+  src/dictionary/encode.hip
+  src/dictionary/remove_keys.hip
+  src/dictionary/replace.hip
+  src/dictionary/search.hip
+  src/dictionary/set_keys.hip
   src/filling/calendrical_month_sequence.cu
   src/filling/fill.cu
   src/filling/repeat.cu

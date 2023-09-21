@@ -1,5 +1,5 @@
 if(GPU_WARNINGS_AS_ERRORS)
-  list(APPEND HIPDF_GPU_FLAGS -Werror=all-warnings)
+  list(APPEND HIPDF_GPU_FLAGS -Werror)
 endif()
 
 if(GPU_ENABLE_LINEINFO)
