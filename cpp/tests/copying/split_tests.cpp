@@ -1329,10 +1329,10 @@ std::vector<cudf::packed_table> do_chunked_pack(cudf::table_view const& input)
   std::size_t final_buff_offset = 0;
   while (chunked_pack->has_next()) {
     auto bytes_copied = chunked_pack->next(bounce_buff_span);
-    cudaMemcpyAsync((uint8_t*)final_buff.data() + final_buff_offset,
+    hipMemcpyAsync((uint8_t*)final_buff.data() + final_buff_offset,
                     bounce_buff.data(),
                     bytes_copied,
-                    cudaMemcpyDefault,
+                    hipMemcpyDefault,
                     cudf::get_default_stream());
     final_buff_offset += bytes_copied;
   }
