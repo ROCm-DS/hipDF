@@ -429,7 +429,7 @@ set_tests_properties(
 # * iterator tests --------------------------------------------------------------------------------
 ConfigureTest(
   ITERATOR_TEST
-  iterator/indexalator_test.cu
+  iterator/indexalator_test.hip
   iterator/optional_iterator_test_chrono.cu
   iterator/optional_iterator_test_numeric.cu
   iterator/pair_iterator_test_chrono.cu
