@@ -44,7 +44,7 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 #include <algorithm>
 

@@ -23,7 +23,8 @@
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
-#include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
+// Todo(HIP)
+// #include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>

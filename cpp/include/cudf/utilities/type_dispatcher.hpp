@@ -529,7 +529,7 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
       return f.template operator()<typename IdTypeMap<type_id::STRUCT>::type>(
         std::forward<Ts>(args)...);
     default: {
-#ifndef __CUDA_ARCH__
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__) 
       CUDF_FAIL("Invalid type_id.");
 #else
       CUDF_UNREACHABLE("Invalid type_id.");
