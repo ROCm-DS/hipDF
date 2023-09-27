@@ -18,8 +18,7 @@
  */
 
 #include "compiled/binary_ops.hpp"
-//Todo(HIP)
-// #include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
+#include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
