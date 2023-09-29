@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/detail/copy.hpp>
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/scalar/scalar_factories.hpp>
@@ -63,7 +85,9 @@ std::unique_ptr<scalar> make_numeric_scalar(data_type type,
 {
   CUDF_EXPECTS(is_numeric(type), "Invalid, non-numeric type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 // Allocate storage for a single timestamp element
@@ -73,7 +97,9 @@ std::unique_ptr<scalar> make_timestamp_scalar(data_type type,
 {
   CUDF_EXPECTS(is_timestamp(type), "Invalid, non-timestamp type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 // Allocate storage for a single duration element
@@ -83,7 +109,9 @@ std::unique_ptr<scalar> make_duration_scalar(data_type type,
 {
   CUDF_EXPECTS(is_duration(type), "Invalid, non-duration type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 // Allocate storage for a single fixed width element
@@ -93,7 +121,9 @@ std::unique_ptr<scalar> make_fixed_width_scalar(data_type type,
 {
   CUDF_EXPECTS(is_fixed_width(type), "Invalid, non-fixed-width type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 std::unique_ptr<scalar> make_list_scalar(column_view elements,
@@ -173,7 +203,9 @@ std::unique_ptr<scalar> make_default_constructed_scalar(data_type type,
                                                         rmm::cuda_stream_view stream,
                                                         rmm::device_async_resource_ref mr)
 {
-  return type_dispatcher(type, default_scalar_functor{type}, stream, mr);
+  //TODO(HIP)
+  //return type_dispatcher(type, default_scalar_functor{type}, stream, mr);
+  return {};
 }
 
 std::unique_ptr<scalar> make_empty_scalar_like(column_view const& column,
