@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/detail/device_scalar.hpp>
 #include <cudf/detail/null_mask.cuh>
@@ -35,7 +57,7 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/mr/device/device_memory_resource.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
 #include <thrust/device_ptr.h>
@@ -301,7 +323,7 @@ CUDF_KERNEL void count_set_bits_kernel(bitmask_type const* bitmask,
     }
   }
 
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   size_type block_count{BlockReduce(temp_storage).Sum(thread_count)};
 
@@ -385,7 +407,10 @@ std::vector<size_type> segmented_count_set_bits(bitmask_type const* bitmask,
                                                 host_span<size_type const> indices,
                                                 rmm::cuda_stream_view stream)
 {
-  return detail::segmented_count_set_bits(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_count_set_bits(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Count zero bits in the specified ranges of a bitmask
@@ -393,7 +418,10 @@ std::vector<size_type> segmented_count_unset_bits(bitmask_type const* bitmask,
                                                   host_span<size_type const> indices,
                                                   rmm::cuda_stream_view stream)
 {
-  return detail::segmented_count_unset_bits(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_count_unset_bits(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Count valid elements in the specified ranges of a validity bitmask
@@ -401,7 +429,10 @@ std::vector<size_type> segmented_valid_count(bitmask_type const* bitmask,
                                              host_span<size_type const> indices,
                                              rmm::cuda_stream_view stream)
 {
-  return detail::segmented_valid_count(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_valid_count(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Count null elements in the specified ranges of a validity bitmask
@@ -409,7 +440,10 @@ std::vector<size_type> segmented_null_count(bitmask_type const* bitmask,
                                             host_span<size_type const> indices,
                                             rmm::cuda_stream_view stream)
 {
-  return detail::segmented_null_count(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_null_count(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Inplace Bitwise AND of the masks

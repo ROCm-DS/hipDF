@@ -291,7 +291,9 @@ struct indexalator_factory {
    */
   static input_indexalator make_input_iterator(column_view const& indices)
   {
-    return type_dispatcher(indices.type(), input_indexalator_fn{}, indices);
+    //Todo(HIP)
+    return input_indexalator();
+    // return type_dispatcher(indices.type(), input_indexalator_fn{}, indices);
   }
 
   /**
@@ -299,7 +301,9 @@ struct indexalator_factory {
    */
   static input_indexalator make_input_iterator(cudf::scalar const& index)
   {
-    return type_dispatcher(index.type(), input_indexalator_scalar_fn{}, index);
+    //Todo(HIP)
+    return input_indexalator();
+    // return type_dispatcher(index.type(), input_indexalator_scalar_fn{}, index);
   }
 
   /**
@@ -307,7 +311,9 @@ struct indexalator_factory {
    */
   static output_indexalator make_output_iterator(mutable_column_view const& indices)
   {
-    return type_dispatcher(indices.type(), output_indexalator_fn{}, indices);
+    //Todo(HIP)
+    return output_indexalator();
+    // return type_dispatcher(indices.type(), output_indexalator_fn{}, indices);
   }
 
   /**

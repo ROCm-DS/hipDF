@@ -35,8 +35,9 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
-
-include(../rapids_config.cmake)
+set( AMDGPU_TARGETS "gfx90a" CACHE STRING "Compile for gfx90a only")
+include(../fetch_rapids.cmake)
+#include(../rapids_config.cmake) #TODO(HIP/AMD): is this the same file as fetch_rapids.cmake?
 include(rapids-cmake)
 include(rapids-cpm)
 include(rapids-hip)
@@ -393,7 +394,7 @@ endif()
 
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
-
+#Todo(HIP)
 add_library(
   cudf
   src/aggregation/aggregation.cpp

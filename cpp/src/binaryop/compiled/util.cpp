@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "operation.cuh"
 
 #include <cudf/binaryop.hpp>
@@ -205,9 +227,10 @@ std::optional<data_type> get_common_type(data_type out, data_type lhs, data_type
   // Specifically, std::common_type_t<TypeOut, TypeLhs, TypeRhs> is the same as
   // std::common_type_t<std::common_type_t<TypeOut, TypeLhs>, TypeRhs>.
   auto common_type = double_type_dispatcher(out, lhs, common_type_functor{});
-  if (common_type.has_value()) {
-    common_type = double_type_dispatcher(common_type.value(), rhs, common_type_functor{});
-  }
+  //Todo(HIP)
+  // if (common_type.has_value()) {
+  //   common_type = double_type_dispatcher(common_type.value(), rhs, common_type_functor{});
+  // }
   // If no common type of (out, lhs, rhs) exists, fall back to the common type
   // of (lhs, rhs).
   if (!common_type.has_value()) {

@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/column/column_device_view.cuh>
@@ -28,8 +51,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/block/block_reduce.cuh>
-#include <cub/device/device_segmented_reduce.cuh>
+#include <hipcub/block/block_reduce.hpp>
+#include <hipcub/device/device_segmented_reduce.hpp>
 #include <cuda/functional>
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -102,7 +125,7 @@ CUDF_KERNEL void offset_bitmask_binop(Binop op,
     thread_count += __popc(destination_word);
   }
 
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   size_type block_count = BlockReduce(temp_storage).Sum(thread_count);
 
@@ -277,11 +300,13 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
                                                     rmm::cuda_stream_view stream,
                                                     rmm::device_async_resource_ref mr)
 {
-  auto const num_ranges =
-    static_cast<size_type>(std::distance(first_bit_indices_begin, first_bit_indices_end));
+  //Todo(HIP)
+  auto const num_ranges = 0;
+    // static_cast<size_type>(std::distance(first_bit_indices_begin, first_bit_indices_end));
   rmm::device_uvector<size_type> d_bit_counts(num_ranges, stream);
-
-  auto num_set_bits_in_word = thrust::make_transform_iterator(bitmask, popc{});
+  //Todo(HIP)
+  auto num_set_bits_in_word = 0;
+  //thrust::make_transform_iterator(bitmask, popc{});
   auto first_word_indices =
     thrust::make_transform_iterator(first_bit_indices_begin, bit_to_word_index{true});
   auto last_word_indices =
@@ -289,7 +314,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
 
   // Allocate temporary memory.
   size_t temp_storage_bytes{0};
-  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(nullptr,
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
                                                 temp_storage_bytes,
                                                 num_set_bits_in_word,
                                                 d_bit_counts.begin(),
@@ -300,7 +325,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   // Perform segmented reduction.
-  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(d_temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(d_temp_storage.data(),
                                                 temp_storage_bytes,
                                                 num_set_bits_in_word,
                                                 d_bit_counts.begin(),
@@ -429,11 +454,15 @@ std::vector<size_type> segmented_count_bits(bitmask_type const* bitmask,
     make_device_uvector_async(h_indices, stream, cudf::get_current_device_resource_ref());
 
   // Compute the bit counts over each segment.
-  auto first_bit_indices_begin = thrust::make_transform_iterator(
-    thrust::make_counting_iterator(0), index_alternator{false, d_indices.data()});
+  // Todo(HIP)
+  auto first_bit_indices_begin = 0;
+  // thrust::make_transform_iterator(
+  //   thrust::make_counting_iterator(0), index_alternator{false, d_indices.data()});
   auto const first_bit_indices_end = first_bit_indices_begin + num_segments;
-  auto last_bit_indices_begin      = thrust::make_transform_iterator(
-    thrust::make_counting_iterator(0), index_alternator{true, d_indices.data()});
+  //Todo(HIP)
+  auto last_bit_indices_begin      = 0;
+  // thrust::make_transform_iterator(
+  //   thrust::make_counting_iterator(0), index_alternator{true, d_indices.data()});
   rmm::device_uvector<size_type> d_bit_counts =
     cudf::detail::segmented_count_bits(bitmask,
                                        first_bit_indices_begin,

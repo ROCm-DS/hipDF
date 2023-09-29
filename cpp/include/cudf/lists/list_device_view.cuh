@@ -277,6 +277,8 @@ class list_device_view {
    *
    * @tparam T The element-type of the list row
    */
+  //Todo(HIP)
+  public:
   template <typename T>
   struct pair_accessor {
     list_device_view const& list;  ///< The list_device_view to access
@@ -398,7 +400,8 @@ struct list_size_functor {
  */
 CUDF_HOST_DEVICE auto inline make_list_size_iterator(detail::lists_column_device_view const& c)
 {
-  return detail::make_counting_transform_iterator(0, list_size_functor{c});
+  //Todo(HIP)
+  return 0;//detail::make_counting_transform_iterator(0, list_size_functor{c});
 }
 
 }  // namespace CUDF_EXPORT cudf
