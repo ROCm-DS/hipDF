@@ -59,7 +59,9 @@ class list_device_view {
   using lists_column_device_view = cudf::detail::lists_column_device_view;
 
  public:
-  list_device_view() = default;
+ //Todo(HIP)
+ //list_device_view() = default;
+  list_device_view() ;
 
   /**
    * @brief Constructs a list_device_view from a list column and index.
