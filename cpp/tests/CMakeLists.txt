@@ -148,14 +148,14 @@ ConfigureTest(
   column/bit_cast_test.cpp
   # column/column_device_view_test.hip
   # column/column_test.cpp
-  # column/column_view_device_span_test.cpp
+  column/column_view_device_span_test.cpp
   # column/column_view_shallow_test.cpp
-  # column/compound_test.cu
+  column/compound_test.hip
 )
 
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
-# ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.cu)
+ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.hip)
 
 # ##################################################################################################
 # * timestamps tests ------------------------------------------------------------------------------

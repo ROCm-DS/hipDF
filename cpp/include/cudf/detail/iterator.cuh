@@ -70,10 +70,8 @@ template <typename UnaryFunction>
 CUDF_HOST_DEVICE inline auto make_counting_transform_iterator(cudf::size_type start,
                                                               UnaryFunction f)
 {
-  //Todo(HIP)
-  // return thrust::make_transform_iterator(thrust::make_counting_iterator(start), f);
-  return thrust::make_transform_iterator(0, f);
-
+  //TODO(HIP)
+  return thrust::make_transform_iterator(thrust::make_counting_iterator(start), f);
 }
 
 /**

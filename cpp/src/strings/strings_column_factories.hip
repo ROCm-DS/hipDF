@@ -53,7 +53,9 @@ std::unique_ptr<column> make_strings_column(
 {
   CUDF_FUNC_RANGE();
 
-  return cudf::strings::detail::make_strings_column(strings.begin(), strings.end(), stream, mr);
+  //TODO(HIP)
+  // return cudf::strings::detail::make_strings_column(strings.begin(), strings.end(), stream, mr);
+  return {};
 }
 
 std::unique_ptr<column> make_strings_column(device_span<char> chars,
@@ -82,10 +84,14 @@ std::unique_ptr<column> make_strings_column(device_span<string_view const> strin
 {
   CUDF_FUNC_RANGE();
 
+  // TODO(HIP)
+#if 0
   auto it_pair =
     thrust::make_transform_iterator(string_views.begin(), string_view_to_pair{null_placeholder});
   return cudf::strings::detail::make_strings_column(
     it_pair, it_pair + string_views.size(), stream, mr);
+#endif
+  return {};
 }
 
 // Create a strings-type column from device vector of chars and vector of offsets.

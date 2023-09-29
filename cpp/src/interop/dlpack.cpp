@@ -53,7 +53,9 @@ void const* get_column_data_impl::operator()<string_view>(column_view const& col
 
 void const* get_column_data(column_view const& col)
 {
-  return type_dispatcher(col.type(), get_column_data_impl{}, col);
+  //TODO(HIP)
+  return (void const *)nullptr;
+  // return type_dispatcher(col.type(), get_column_data_impl{}, col);
 }
 
 data_type DLDataType_to_data_type(DLDataType type)
@@ -111,7 +113,9 @@ struct data_type_to_DLDataType_impl {
 
 DLDataType data_type_to_DLDataType(data_type type)
 {
-  return type_dispatcher(type, data_type_to_DLDataType_impl{});
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, data_type_to_DLDataType_impl{});
 }
 
 // Context object to own memory allocated for DLManagedTensor

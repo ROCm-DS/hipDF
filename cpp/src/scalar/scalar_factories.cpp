@@ -64,7 +64,9 @@ std::unique_ptr<scalar> make_numeric_scalar(data_type type,
 {
   CUDF_EXPECTS(is_numeric(type), "Invalid, non-numeric type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 // Allocate storage for a single timestamp element
@@ -74,7 +76,9 @@ std::unique_ptr<scalar> make_timestamp_scalar(data_type type,
 {
   CUDF_EXPECTS(is_timestamp(type), "Invalid, non-timestamp type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 // Allocate storage for a single duration element
@@ -84,7 +88,9 @@ std::unique_ptr<scalar> make_duration_scalar(data_type type,
 {
   CUDF_EXPECTS(is_duration(type), "Invalid, non-duration type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 // Allocate storage for a single fixed width element
@@ -94,7 +100,9 @@ std::unique_ptr<scalar> make_fixed_width_scalar(data_type type,
 {
   CUDF_EXPECTS(is_fixed_width(type), "Invalid, non-fixed-width type.");
 
-  return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
+  //TODO(HIP)
+  return {};
+  //return type_dispatcher(type, scalar_construction_helper{}, stream, mr);
 }
 
 std::unique_ptr<scalar> make_list_scalar(column_view elements,
@@ -174,7 +182,9 @@ std::unique_ptr<scalar> make_default_constructed_scalar(data_type type,
                                                         rmm::cuda_stream_view stream,
                                                         rmm::mr::device_memory_resource* mr)
 {
-  return type_dispatcher(type, default_scalar_functor{type}, stream, mr);
+  //TODO(HIP)
+  //return type_dispatcher(type, default_scalar_functor{type}, stream, mr);
+  return {};
 }
 
 std::unique_ptr<scalar> make_empty_scalar_like(column_view const& column,

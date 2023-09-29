@@ -387,7 +387,7 @@ add_library(
   # src/hash/murmurhash3_x64_128.cu
   # src/hash/spark_murmurhash3_x86_32.cu
   # src/hash/xxhash_64.cu
-  # src/interop/dlpack.cpp
+  src/interop/dlpack.cpp
   # src/interop/from_arrow.cu
   # src/interop/to_arrow.cu
   # src/interop/detail/arrow_allocator.cpp
@@ -488,8 +488,8 @@ add_library(
   # src/lists/explode.cu
   # src/lists/extract.cu
   # src/lists/interleave_columns.cu
-  # src/lists/lists_column_factories.cu
-  # src/lists/lists_column_view.cu
+  # src/lists/lists_column_factories.hip
+  src/lists/lists_column_view.hip
   # src/lists/reverse.cu
   # src/lists/segmented_sort.cu
   # src/lists/sequences.cu
@@ -552,8 +552,8 @@ add_library(
   # src/rolling/range_window_bounds.cpp
   # src/rolling/rolling.cu
   # src/round/round.cu
-  # src/scalar/scalar.cpp
-  # src/scalar/scalar_factories.cpp
+  src/scalar/scalar.cpp
+  src/scalar/scalar_factories.cpp
   # src/search/contains_column.cu
   # src/search/contains_scalar.cu
   # src/search/contains_table.cu
@@ -624,21 +624,21 @@ add_library(
   # src/strings/split/split.cu
   # src/strings/split/split_re.cu
   # src/strings/split/split_record.cu
-  # src/strings/strings_column_factories.cu
-  # src/strings/strings_column_view.cpp
-  # src/strings/strings_scalar_factories.cpp
+  src/strings/strings_column_factories.hip
+  src/strings/strings_column_view.cpp
+  src/strings/strings_scalar_factories.cpp
   # src/strings/strip.cu
   # src/strings/translate.cu
   # src/strings/utilities.cu
   # src/strings/wrap.cu
   # src/structs/copying/concatenate.cu
-  # src/structs/structs_column_factories.cu
-  # src/structs/structs_column_view.cpp
+  src/structs/structs_column_factories.hip
+  src/structs/structs_column_view.cpp
   # src/structs/utilities.cpp
   # src/table/row_operators.cu
   # src/table/table.cpp
   # src/table/table_device_view.cu
-  # src/table/table_view.cpp
+  src/table/table_view.cpp
   # src/text/detokenize.cu
   # src/text/edit_distance.cu
   # src/text/generate_ngrams.cu
