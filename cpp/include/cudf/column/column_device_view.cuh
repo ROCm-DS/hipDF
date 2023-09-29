@@ -501,7 +501,9 @@ class alignas(16) column_device_view : public detail::column_device_view_base {
   {
     size_type index    = element_index + offset();  // account for this view's _offset
     auto const indices = d_children[0];
-    return dictionary32{type_dispatcher(indices.type(), index_element_fn{}, indices, index)};
+    //Todo(HIP)
+  return dictionary32{};
+    // return dictionary32{type_dispatcher(indices.type(), index_element_fn{}, indices, index)};
   }
 
   /**
@@ -1201,8 +1203,9 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
 };
 
 namespace detail {
-
-#ifdef __CUDACC__  // because set_bit in bit.hpp is wrapped with __CUDACC__
+//Todo(HIP)
+#if defined(__CUDACC__) || defined(__HIPCC__)
+// because set_bit in bit.hpp is wrapped with __CUDACC__
 
 /**
  * @brief Convenience function to get offset word from a bitmask

@@ -119,22 +119,25 @@ std::unique_ptr<column> generate_child_row_indices(lists_column_view const& c,
   // Desired output:  [6, 7, 11, 12, 13]
 
   // compute total # of child row indices we will be emitting.
-  auto row_size_iter = cudf::detail::make_counting_transform_iterator(
-    0,
-    [row_indices = row_indices.begin<size_type>(),
-     validity    = c.null_mask(),
-     offsets     = c.offsets().begin<size_type>(),
-     offset      = c.offset()] __device__(int index) {
-      // both null mask and offsets data are not pre-sliced. so we need to add the column offset to
-      // every incoming index.
-      auto const true_index = row_indices[index] + offset;
-      return !validity || cudf::bit_is_set(validity, true_index)
-               ? (offsets[true_index + 1] - offsets[true_index])
-               : 0;
-    });
-  auto const output_size = thrust::reduce(rmm::exec_policy(cudf::test::get_default_stream()),
-                                          row_size_iter,
-                                          row_size_iter + row_indices.size());
+  //Todo(HIP)
+  auto row_size_iter = 0;//cudf::detail::make_counting_transform_iterator(
+    // 0,
+    // [row_indices = row_indices.begin<size_type>(),
+    //  validity    = c.null_mask(),
+    //  offsets     = c.offsets().begin<size_type>(),
+    //  offset      = c.offset()] __device__(int index) {
+    //   // both null mask and offsets data are not pre-sliced. so we need to add the column offset to
+    //   // every incoming index.
+    //   auto const true_index = row_indices[index] + offset;
+    //   return !validity || cudf::bit_is_set(validity, true_index)
+    //            ? (offsets[true_index + 1] - offsets[true_index])
+    //            : 0;
+    // });
+    //Todo(HIP)
+  // auto const output_size = thrust::reduce(rmm::exec_policy(cudf::test::get_default_stream()),
+  //                                         row_size_iter,
+  //                                         row_size_iter + row_indices.size());
+  auto const output_size = 0;
   // no output. done.
   auto result =
     cudf::make_fixed_width_column(data_type{type_id::INT32}, output_size, mask_state::UNALLOCATED);
@@ -145,12 +148,13 @@ std::unique_ptr<column> generate_child_row_indices(lists_column_view const& c,
   // output_row_start = [0, 0, 0, 2, 2, 5, 5]
   //                           |     |              <-- non-null input rows
   //
+  //Todo(HIP)
   auto output_row_start = cudf::make_fixed_width_column(
     data_type{type_id::INT32}, row_indices.size(), mask_state::UNALLOCATED);
-  thrust::exclusive_scan(rmm::exec_policy(cudf::test::get_default_stream()),
-                         row_size_iter,
-                         row_size_iter + row_indices.size(),
-                         output_row_start->mutable_view().begin<size_type>());
+  // thrust::exclusive_scan(rmm::exec_policy(cudf::test::get_default_stream()),
+  //                        row_size_iter,
+  //                        row_size_iter + row_indices.size(),
+  //                        output_row_start->mutable_view().begin<size_type>());
 
   // fill result column with 1s
   //
@@ -165,23 +169,25 @@ std::unique_ptr<column> generate_child_row_indices(lists_column_view const& c,
   //
   // result = [6, 1, 11, 1, 1]
   //
-  auto output_row_iter = cudf::detail::make_counting_transform_iterator(
-    0,
-    [row_indices  = row_indices.begin<size_type>(),
-     offsets      = c.offsets().begin<size_type>(),
-     offset       = c.offset(),
-     first_offset = cudf::detail::get_value<size_type>(
-       c.offsets(), c.offset(), cudf::test::get_default_stream())] __device__(int index) {
-      auto const true_index = row_indices[index] + offset;
-      return offsets[true_index] - first_offset;
-    });
-  thrust::scatter_if(rmm::exec_policy(cudf::test::get_default_stream()),
-                     output_row_iter,
-                     output_row_iter + row_indices.size(),
-                     output_row_start->view().begin<size_type>(),
-                     row_size_iter,
-                     result->mutable_view().begin<size_type>(),
-                     [] __device__(auto row_size) { return row_size != 0; });
+  //Todo(HIP)
+  auto output_row_iter = 0;
+  // cudf::detail::make_counting_transform_iterator(
+  //   0,
+  //   [row_indices  = row_indices.begin<size_type>(),
+  //    offsets      = c.offsets().begin<size_type>(),
+  //    offset       = c.offset(),
+  //    first_offset = cudf::detail::get_value<size_type>(
+  //      c.offsets(), c.offset(), cudf::test::get_default_stream())] __device__(int index) {
+  //     auto const true_index = row_indices[index] + offset;
+  //     return offsets[true_index] - first_offset;
+  //   });
+  // thrust::scatter_if(rmm::exec_policy(cudf::test::get_default_stream()),
+  //                    output_row_iter,
+  //                    output_row_iter + row_indices.size(),
+  //                    output_row_start->view().begin<size_type>(),
+  //                    row_size_iter,
+  //                    result->mutable_view().begin<size_type>(),
+  //                    [] __device__(auto row_size) { return row_size != 0; });
 
   // generate keys for each output row
   //
@@ -193,13 +199,14 @@ std::unique_ptr<column> generate_child_row_indices(lists_column_view const& c,
                    keys->mutable_view().begin<size_type>(),
                    keys->mutable_view().end<size_type>(),
                    [] __device__() { return 0; });
-  thrust::scatter_if(rmm::exec_policy(cudf::test::get_default_stream()),
-                     row_size_iter,
-                     row_size_iter + row_indices.size(),
-                     output_row_start->view().begin<size_type>(),
-                     row_size_iter,
-                     keys->mutable_view().begin<size_type>(),
-                     [] __device__(auto row_size) { return row_size != 0; });
+  //Todo(HIP)
+  // thrust::scatter_if(rmm::exec_policy(cudf::test::get_default_stream()),
+  //                    row_size_iter,
+  //                    row_size_iter + row_indices.size(),
+  //                    output_row_start->view().begin<size_type>(),
+  //                    row_size_iter,
+  //                    keys->mutable_view().begin<size_type>(),
+  //                    [] __device__(auto row_size) { return row_size != 0; });
   thrust::inclusive_scan(rmm::exec_policy(cudf::test::get_default_stream()),
                          keys->view().begin<size_type>(),
                          keys->view().end<size_type>(),
@@ -912,14 +919,14 @@ std::vector<bitmask_type> bitmask_to_host(cudf::column_view const& c)
     auto num_bitmasks = num_bitmask_words(c.size());
     std::vector<bitmask_type> host_bitmask(num_bitmasks);
     if (c.offset() == 0) {
-      CUDF_CUDA_TRY(cudaMemcpy(host_bitmask.data(),
+      CUDF_CUDA_TRY(hipMemcpy(host_bitmask.data(),
                                c.null_mask(),
                                num_bitmasks * sizeof(bitmask_type),
-                               cudaMemcpyDefault));
+                               hipMemcpyDefault));
     } else {
       auto mask = copy_bitmask(c.null_mask(), c.offset(), c.offset() + c.size());
-      CUDF_CUDA_TRY(cudaMemcpy(
-        host_bitmask.data(), mask.data(), num_bitmasks * sizeof(bitmask_type), cudaMemcpyDefault));
+      CUDF_CUDA_TRY(hipMemcpy(
+        host_bitmask.data(), mask.data(), num_bitmasks * sizeof(bitmask_type), hipMemcpyDefault));
     }
 
     return host_bitmask;

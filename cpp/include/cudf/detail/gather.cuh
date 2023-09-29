@@ -662,15 +662,17 @@ std::unique_ptr<table> gather(table_view const& source_table,
 
   for (auto const& source_column : source_table) {
     // The data gather for n columns will be put on the first n streams
-    destination_columns.push_back(
-      cudf::type_dispatcher<dispatch_storage_type>(source_column.type(),
-                                                   column_gatherer{},
-                                                   source_column,
-                                                   gather_map_begin,
-                                                   gather_map_end,
-                                                   bounds_policy == out_of_bounds_policy::NULLIFY,
-                                                   stream,
-                                                   mr));
+    //Todo(HIP)
+    destination_columns.push_back(0
+      // cudf::type_dispatcher<dispatch_storage_type>(source_column.type(),
+      //                                              column_gatherer{},
+      //                                              source_column,
+      //                                              gather_map_begin,
+      //                                              gather_map_end,
+      //                                              bounds_policy == out_of_bounds_policy::NULLIFY,
+      //                                              stream,
+      //                                              mr)
+                                                   );
   }
 
   auto const nullable = bounds_policy == out_of_bounds_policy::NULLIFY ||

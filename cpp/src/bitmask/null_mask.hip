@@ -39,7 +39,7 @@
 #include <thrust/device_ptr.h>
 #include <thrust/extrema.h>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -90,7 +90,7 @@ rmm::device_buffer create_null_mask(size_type size,
 
   if (state != mask_state::UNINITIALIZED) {
     uint8_t fill_value = (state == mask_state::ALL_VALID) ? 0xff : 0x00;
-    CUDF_CUDA_TRY(cudaMemsetAsync(
+    CUDF_CUDA_TRY(hipMemsetAsync(
       static_cast<bitmask_type*>(mask.data()), fill_value, mask_size, stream.value()));
   }
 
@@ -296,7 +296,7 @@ __global__ void count_set_bits_kernel(bitmask_type const* bitmask,
     }
   }
 
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   size_type block_count{BlockReduce(temp_storage).Sum(thread_count)};
 
@@ -380,7 +380,10 @@ std::vector<size_type> segmented_count_set_bits(bitmask_type const* bitmask,
                                                 host_span<size_type const> indices,
                                                 rmm::cuda_stream_view stream)
 {
-  return detail::segmented_count_set_bits(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_count_set_bits(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Count zero bits in the specified ranges of a bitmask
@@ -388,7 +391,10 @@ std::vector<size_type> segmented_count_unset_bits(bitmask_type const* bitmask,
                                                   host_span<size_type const> indices,
                                                   rmm::cuda_stream_view stream)
 {
-  return detail::segmented_count_unset_bits(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_count_unset_bits(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Count valid elements in the specified ranges of a validity bitmask
@@ -396,7 +402,10 @@ std::vector<size_type> segmented_valid_count(bitmask_type const* bitmask,
                                              host_span<size_type const> indices,
                                              rmm::cuda_stream_view stream)
 {
-  return detail::segmented_valid_count(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_valid_count(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Count null elements in the specified ranges of a validity bitmask
@@ -404,7 +413,10 @@ std::vector<size_type> segmented_null_count(bitmask_type const* bitmask,
                                             host_span<size_type const> indices,
                                             rmm::cuda_stream_view stream)
 {
-  return detail::segmented_null_count(bitmask, indices.begin(), indices.end(), stream);
+  //Todo(HIP)
+  std::vector<size_type> dummy;
+  return dummy;
+  // return detail::segmented_null_count(bitmask, indices.begin(), indices.end(), stream);
 }
 
 // Inplace Bitwise AND of the masks

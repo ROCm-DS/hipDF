@@ -115,7 +115,9 @@ std::unique_ptr<column> make_column_from_scalar(scalar const& s,
                                                 rmm::cuda_stream_view stream,
                                                 rmm::mr::device_memory_resource* mr)
 {
-  return type_dispatcher(s.type(), column_from_scalar_dispatch{}, s, size, stream, mr);
+  //Todo(HIP)
+  //return type_dispatcher(s.type(), column_from_scalar_dispatch{}, s, size, stream, mr);
+  return 0;
 }
 
 }  // namespace cudf

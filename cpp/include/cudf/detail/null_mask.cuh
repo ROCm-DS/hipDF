@@ -27,8 +27,8 @@
 #include <rmm/device_scalar.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/block/block_reduce.cuh>
-#include <cub/device/device_segmented_reduce.cuh>
+#include <hipcub/block/block_reduce.hpp>
+#include <hipcub/device/device_segmented_reduce.hpp>
 
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -101,7 +101,7 @@ __global__ void offset_bitmask_binop(Binop op,
     thread_count += __popc(destination_word);
   }
 
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   size_type block_count = BlockReduce(temp_storage).Sum(thread_count);
 
@@ -168,12 +168,12 @@ size_type inplace_bitmask_binop(Binop op,
   rmm::device_uvector<bitmask_type const*> d_masks(masks.size(), stream, mr);
   rmm::device_uvector<size_type> d_begin_bits(masks_begin_bits.size(), stream, mr);
 
-  CUDF_CUDA_TRY(cudaMemcpyAsync(
-    d_masks.data(), masks.data(), masks.size_bytes(), cudaMemcpyDefault, stream.value()));
-  CUDF_CUDA_TRY(cudaMemcpyAsync(d_begin_bits.data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(
+    d_masks.data(), masks.data(), masks.size_bytes(), hipMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(hipMemcpyAsync(d_begin_bits.data(),
                                 masks_begin_bits.data(),
                                 masks_begin_bits.size_bytes(),
-                                cudaMemcpyDefault,
+                                hipMemcpyDefault,
                                 stream.value()));
 
   auto constexpr block_size = 256;
@@ -284,11 +284,13 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
                                                     rmm::cuda_stream_view stream,
                                                     rmm::mr::device_memory_resource* mr)
 {
-  auto const num_ranges =
-    static_cast<size_type>(std::distance(first_bit_indices_begin, first_bit_indices_end));
+  //Todo(HIP)
+  auto const num_ranges = 0;
+    // static_cast<size_type>(std::distance(first_bit_indices_begin, first_bit_indices_end));
   rmm::device_uvector<size_type> d_bit_counts(num_ranges, stream);
-
-  auto num_set_bits_in_word = thrust::make_transform_iterator(bitmask, popc{});
+  //Todo(HIP)
+  auto num_set_bits_in_word = 0;
+  //thrust::make_transform_iterator(bitmask, popc{});
   auto first_word_indices =
     thrust::make_transform_iterator(first_bit_indices_begin, bit_to_word_index{true});
   auto last_word_indices =
@@ -296,7 +298,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
 
   // Allocate temporary memory.
   size_t temp_storage_bytes{0};
-  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(nullptr,
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
                                                 temp_storage_bytes,
                                                 num_set_bits_in_word,
                                                 d_bit_counts.begin(),
@@ -307,7 +309,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   // Perform segmented reduction.
-  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(d_temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(d_temp_storage.data(),
                                                 temp_storage_bytes,
                                                 num_set_bits_in_word,
                                                 d_bit_counts.begin(),
@@ -430,11 +432,15 @@ std::vector<size_type> segmented_count_bits(bitmask_type const* bitmask,
     make_device_uvector_async(h_indices, stream, rmm::mr::get_current_device_resource());
 
   // Compute the bit counts over each segment.
-  auto first_bit_indices_begin = thrust::make_transform_iterator(
-    thrust::make_counting_iterator(0), index_alternator{false, d_indices.data()});
+  // Todo(HIP)
+  auto first_bit_indices_begin = 0;
+  // thrust::make_transform_iterator(
+  //   thrust::make_counting_iterator(0), index_alternator{false, d_indices.data()});
   auto const first_bit_indices_end = first_bit_indices_begin + num_segments;
-  auto last_bit_indices_begin      = thrust::make_transform_iterator(
-    thrust::make_counting_iterator(0), index_alternator{true, d_indices.data()});
+  //Todo(HIP)
+  auto last_bit_indices_begin      = 0;
+  // thrust::make_transform_iterator(
+  //   thrust::make_counting_iterator(0), index_alternator{true, d_indices.data()});
   rmm::device_uvector<size_type> d_bit_counts =
     cudf::detail::segmented_count_bits(bitmask,
                                        first_bit_indices_begin,

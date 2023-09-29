@@ -46,8 +46,8 @@
 #include <thrust/swap.h>
 #include <thrust/transform_reduce.h>
 
-#include <cuda/std/tuple>
-#include <cuda/std/utility>
+#include <hip/std/tuple>
+#include <hip/std/utility>
 
 #include <limits>
 #include <memory>
@@ -353,7 +353,7 @@ class device_row_comparator {
      */
     template <typename Element,
               CUDF_ENABLE_IF(cudf::is_relationally_comparable<Element, Element>())>
-    __device__ cuda::std::pair<weak_ordering, int> operator()(
+    __device__ hip::std::pair<weak_ordering, int> operator()(
       size_type const lhs_element_index, size_type const rhs_element_index) const noexcept
     {
       if (_check_nulls) {
@@ -361,11 +361,11 @@ class device_row_comparator {
         bool const rhs_is_null{_rhs.is_null(rhs_element_index)};
 
         if (lhs_is_null or rhs_is_null) {  // at least one is null
-          return cuda::std::pair(null_compare(lhs_is_null, rhs_is_null, _null_precedence), _depth);
+          return hip::std::pair(null_compare(lhs_is_null, rhs_is_null, _null_precedence), _depth);
         }
       }
 
-      return cuda::std::pair(_comparator(_lhs.element<Element>(lhs_element_index),
+      return hip::std::pair(_comparator(_lhs.element<Element>(lhs_element_index),
                                          _rhs.element<Element>(rhs_element_index)),
                              std::numeric_limits<int>::max());
     }
@@ -373,7 +373,7 @@ class device_row_comparator {
     template <typename Element,
               CUDF_ENABLE_IF(not cudf::is_relationally_comparable<Element, Element>() and
                              (not has_nested_columns or not cudf::is_nested<Element>()))>
-    __device__ cuda::std::pair<weak_ordering, int> operator()(size_type const,
+    __device__ hip::std::pair<weak_ordering, int> operator()(size_type const,
                                                               size_type const) const noexcept
     {
       CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
@@ -381,7 +381,7 @@ class device_row_comparator {
 
     template <typename Element,
               CUDF_ENABLE_IF(has_nested_columns and std::is_same_v<Element, cudf::struct_view>)>
-    __device__ cuda::std::pair<weak_ordering, int> operator()(
+    __device__ hip::std::pair<weak_ordering, int> operator()(
       size_type const lhs_element_index, size_type const rhs_element_index) const noexcept
     {
       column_device_view lcol = _lhs;
@@ -393,11 +393,11 @@ class device_row_comparator {
 
         if (lhs_is_null or rhs_is_null) {  // at least one is null
           weak_ordering state = null_compare(lhs_is_null, rhs_is_null, _null_precedence);
-          return cuda::std::pair(state, depth);
+          return hip::std::pair(state, depth);
         }
 
         if (lcol.num_child_columns() == 0) {
-          return cuda::std::pair(weak_ordering::EQUIVALENT, std::numeric_limits<int>::max());
+          return hip::std::pair(weak_ordering::EQUIVALENT, std::numeric_limits<int>::max());
         }
 
         // Non-empty structs have been modified to only have 1 child when using this.
@@ -415,14 +415,14 @@ class device_row_comparator {
 
     template <typename Element,
               CUDF_ENABLE_IF(has_nested_columns and std::is_same_v<Element, cudf::list_view>)>
-    __device__ cuda::std::pair<weak_ordering, int> operator()(size_type lhs_element_index,
+    __device__ hip::std::pair<weak_ordering, int> operator()(size_type lhs_element_index,
                                                               size_type rhs_element_index)
     {
       // only order top-NULLs according to null_order
       auto const is_l_row_null = _lhs.is_null(lhs_element_index);
       auto const is_r_row_null = _rhs.is_null(rhs_element_index);
       if (is_l_row_null || is_r_row_null) {
-        return cuda::std::pair(null_compare(is_l_row_null, is_r_row_null, _null_precedence),
+        return hip::std::pair(null_compare(is_l_row_null, is_r_row_null, _null_precedence),
                                _depth);
       }
 
@@ -471,8 +471,8 @@ class device_row_comparator {
         // early exit for smaller sub-list
         if (l_rep_level != r_rep_level) {
           // the lower repetition level is a smaller sub-list
-          return l_rep_level < r_rep_level ? cuda::std::pair(weak_ordering::LESS, _depth)
-                                           : cuda::std::pair(weak_ordering::GREATER, _depth);
+          return l_rep_level < r_rep_level ? hip::std::pair(weak_ordering::LESS, _depth)
+                                           : hip::std::pair(weak_ordering::GREATER, _depth);
         }
 
         // only compare if left and right are at same nesting level
@@ -494,16 +494,16 @@ class device_row_comparator {
           if (l_def_level == r_def_level) { continue; }
           // We require [] < [NULL] < [leaf] for nested nulls.
           // The null_precedence only affects top level nulls.
-          return l_def_level < r_def_level ? cuda::std::pair(weak_ordering::LESS, _depth)
-                                           : cuda::std::pair(weak_ordering::GREATER, _depth);
+          return l_def_level < r_def_level ? hip::std::pair(weak_ordering::LESS, _depth)
+                                           : hip::std::pair(weak_ordering::GREATER, _depth);
         }
 
         // finally, compare leaf to leaf
         weak_ordering state{weak_ordering::EQUIVALENT};
         int last_null_depth                    = _depth;
-        cuda::std::tie(state, last_null_depth) = cudf::type_dispatcher<dispatch_void_if_nested>(
+        hip::std::tie(state, last_null_depth) = cudf::type_dispatcher<dispatch_void_if_nested>(
           lcol.type(), comparator, element_index, element_index);
-        if (state != weak_ordering::EQUIVALENT) { return cuda::std::pair(state, _depth); }
+        if (state != weak_ordering::EQUIVALENT) { return hip::std::pair(state, _depth); }
         ++element_index;
       }
 
@@ -514,7 +514,7 @@ class device_row_comparator {
       // they are of the same length. Otherwise, the shorter of the two is less
       // than the longer. This final check determines the appropriate resulting
       // ordering by checking how many total elements each list is composed of.
-      return cuda::std::pair(detail::compare_elements(l_end - l_start, r_end - r_start), _depth);
+      return hip::std::pair(detail::compare_elements(l_end - l_start, r_end - r_start), _depth);
     }
 
    private:
@@ -574,7 +574,7 @@ class device_row_comparator {
                                              r_dremel_i};
 
       weak_ordering state;
-      cuda::std::tie(state, last_null_depth) =
+      hip::std::tie(state, last_null_depth) =
         cudf::type_dispatcher(_lhs.column(i).type(), element_comp, lhs_index, rhs_index);
 
       if (state == weak_ordering::EQUIVALENT) { continue; }
@@ -1394,8 +1394,9 @@ class device_row_comparator {
       column_device_view rcol = rhs.slice(rhs_element_index, 1);
       while (lcol.type().id() == type_id::STRUCT || lcol.type().id() == type_id::LIST) {
         if (check_nulls) {
-          auto lvalid = detail::make_validity_iterator<true>(lcol);
-          auto rvalid = detail::make_validity_iterator<true>(rcol);
+          //Todo(HIP)
+          auto lvalid = 0; //detail::make_validity_iterator<true>(lcol);
+          auto rvalid = 0; //detail::make_validity_iterator<true>(rcol);
           if (nulls_are_equal == null_equality::UNEQUAL) {
             if (thrust::any_of(
                   thrust::seq, lvalid, lvalid + lcol.size(), thrust::logical_not<bool>()) or
@@ -1850,7 +1851,8 @@ class device_row_hasher {
       column_device_view curr_col = col.slice(row_index, 1);
       while (curr_col.type().id() == type_id::STRUCT || curr_col.type().id() == type_id::LIST) {
         if (_check_nulls) {
-          auto validity_it = detail::make_validity_iterator<true>(curr_col);
+          //Todo(HIP)
+          auto validity_it = 0; //detail::make_validity_iterator<true>(curr_col);
           hash             = detail::accumulate(
             validity_it, validity_it + curr_col.size(), hash, [](auto hash, auto is_valid) {
               return cudf::hashing::detail::hash_combine(hash,

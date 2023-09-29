@@ -311,8 +311,10 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
 
   // build chars column
   auto const offsets_view = out_offsets_column->view();
-  auto out_chars_column   = gather_chars(
-    d_strings->begin<string_view>(), begin, end, offsets_view, total_bytes, stream, mr);
+  //Todo(HIP)
+  auto out_chars_column   = 0;
+  // gather_chars(
+  //   d_strings->begin<string_view>(), begin, end, offsets_view, total_bytes, stream, mr);
 
   return make_strings_column(output_count,
                              std::move(out_offsets_column),
