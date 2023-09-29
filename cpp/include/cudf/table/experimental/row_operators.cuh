@@ -572,8 +572,9 @@ class device_row_comparator {
                                              _comparator,
                                              l_dremel_i,
                                              r_dremel_i};
-
-      weak_ordering state;
+      //Todo(HIP)
+      //weak_ordering state;
+      weak_ordering state{};
       hip::std::tie(state, last_null_depth) =
         cudf::type_dispatcher(_lhs.column(i).type(), element_comp, lhs_index, rhs_index);
 
