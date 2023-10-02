@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/concatenate.hpp>
 #include <cudf/detail/indexalator.cuh>
@@ -150,12 +172,13 @@ struct dispatch_compute_indices {
 
     auto indices_itr = cudf::detail::indexalator_factory::make_input_iterator(all_indices);
     // map the concatenated indices to the concatenated keys
+    // TODO(HIP): why is __host__ necessary in lambda to avoid a thrust-related compiler error?
     auto all_itr = thrust::make_permutation_iterator(
       keys_view->begin<Element>(),
       thrust::make_transform_iterator(
         thrust::make_counting_iterator<size_type>(0),
         cuda::proclaim_return_type<size_type>(
-          [d_offsets, d_map_to_keys, d_all_indices, indices_itr] __device__(size_type idx) {
+          [d_offsets, d_map_to_keys, d_all_indices, indices_itr] __host__ __device__(size_type idx) { //FIXME(HIP/AMD): __host__ keyword needed?
             if (d_all_indices.is_null(idx)) return 0;
             return indices_itr[idx] + d_offsets[d_map_to_keys[idx]].first;
           })));
