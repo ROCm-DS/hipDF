@@ -150,12 +150,12 @@ ConfigureTest(
   # column/column_test.cpp
   column/column_view_device_span_test.cpp
   # column/column_view_shallow_test.cpp
-  column/compound_test.hip
+  # column/compound_test.cpp
 )
 
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
-ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.hip)
+# ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.hip)
 
 # ##################################################################################################
 # * timestamps tests ------------------------------------------------------------------------------

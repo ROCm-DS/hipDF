@@ -21,7 +21,11 @@
 namespace cudf {
 namespace test {
 
-rmm::cuda_stream_view const get_default_stream() { return cudf::get_default_stream(); }
+rmm::cuda_stream_view const get_default_stream() { 
+    //Todo(HIP)
+    // return cudf::get_default_stream(); 
+    return rmm::cuda_stream_view{};
+    }
 
 }  // namespace test
 }  // namespace cudf
