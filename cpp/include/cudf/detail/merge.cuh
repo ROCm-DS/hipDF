@@ -117,7 +117,7 @@ struct row_lexicographic_tagged_comparator {
     CUDF_EXPECTS(_lhs.num_columns() == _rhs.num_columns(), "Mismatched number of columns.");
   }
 
-  __device__ bool operator()(index_type lhs_tagged_index,
+  __host__ __device__ bool operator()(index_type lhs_tagged_index,
                              index_type rhs_tagged_index) const noexcept
   {
     for (size_type i = 0; i < _lhs.num_columns(); ++i) {

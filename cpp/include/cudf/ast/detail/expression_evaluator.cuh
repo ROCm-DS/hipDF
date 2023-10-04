@@ -214,7 +214,7 @@ struct single_dispatch_binary_operator {
    * @param args Forwarded arguments to `operator()` of `f`.
    */
   template <typename LHS, typename F, typename... Ts>
-  __device__ inline auto operator()(F&& f, Ts&&... args)
+  __host__ __device__ inline auto operator()(F&& f, Ts&&... args)
   {
     f.template operator()<LHS, LHS>(std::forward<Ts>(args)...);
   }
@@ -348,7 +348,7 @@ struct expression_evaluator {
    * @param op The operator to act with.
    */
   template <typename Input, typename ResultSubclass, typename T, bool result_has_nulls>
-  __device__ inline void operator()(
+  __host__ __device__ inline void operator()(
     expression_result<ResultSubclass, T, result_has_nulls>& output_object,
     cudf::size_type const input_row_index,
     detail::device_data_reference const& input,
@@ -385,7 +385,7 @@ struct expression_evaluator {
    * @param op The operator to act with.
    */
   template <typename LHS, typename RHS, typename ResultSubclass, typename T, bool result_has_nulls>
-  __device__ inline void operator()(
+  __host__ __device__ inline void operator()(
     expression_result<ResultSubclass, T, result_has_nulls>& output_object,
     cudf::size_type const left_row_index,
     cudf::size_type const right_row_index,
@@ -594,7 +594,7 @@ struct expression_evaluator {
               std::enable_if_t<
                 detail::is_valid_unary_op<detail::operator_functor<op, has_nulls>,
                                           possibly_null_value_t<Input, has_nulls>>>* = nullptr>
-    __device__ inline void operator()(
+    __host__ __device__ inline void operator()(
       expression_result<ResultSubclass, T, result_has_nulls>& output_object,
       cudf::size_type const output_row_index,
       possibly_null_value_t<Input, has_nulls> const& input,
@@ -618,7 +618,7 @@ struct expression_evaluator {
               std::enable_if_t<
                 !detail::is_valid_unary_op<detail::operator_functor<op, has_nulls>,
                                            possibly_null_value_t<Input, has_nulls>>>* = nullptr>
-    __device__ inline void operator()(
+    __host__ __device__ inline void operator()(
       expression_result<ResultSubclass, T, result_has_nulls>& output_object,
       cudf::size_type const output_row_index,
       possibly_null_value_t<Input, has_nulls> const& input,
@@ -659,7 +659,7 @@ struct expression_evaluator {
                                                           possibly_null_value_t<LHS, has_nulls>,
                                                           possibly_null_value_t<RHS, has_nulls>>>* =
                 nullptr>
-    __device__ inline void operator()(
+    __host__ __device__ inline void operator()(
       expression_result<ResultSubclass, T, result_has_nulls>& output_object,
       cudf::size_type const output_row_index,
       possibly_null_value_t<LHS, has_nulls> const& lhs,
@@ -685,7 +685,7 @@ struct expression_evaluator {
                 !detail::is_valid_binary_op<detail::operator_functor<op, has_nulls>,
                                             possibly_null_value_t<LHS, has_nulls>,
                                             possibly_null_value_t<RHS, has_nulls>>>* = nullptr>
-    __device__ inline void operator()(
+    __host__ __device__ inline void operator()(
       expression_result<ResultSubclass, T, result_has_nulls>& output_object,
       cudf::size_type const output_row_index,
       possibly_null_value_t<LHS, has_nulls> const& lhs,

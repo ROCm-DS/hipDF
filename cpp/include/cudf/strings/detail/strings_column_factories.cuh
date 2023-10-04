@@ -79,7 +79,7 @@ std::unique_ptr<column> make_strings_column(IndexPairIterator begin,
   if (strings_count == 0) return make_empty_column(type_id::STRING);
 
   // build offsets column from the strings sizes
-  auto offsets_transformer = [] __device__(string_index_pair item) -> size_type {
+  auto offsets_transformer = [] __host__ __device__(string_index_pair item) -> size_type {
     return (item.first != nullptr ? static_cast<size_type>(item.second) : size_type{0});
   };
   auto offsets_transformer_itr = thrust::make_transform_iterator(begin, offsets_transformer);
@@ -88,7 +88,7 @@ std::unique_ptr<column> make_strings_column(IndexPairIterator begin,
   auto offsets_view = offsets_column->view();
 
   // create null mask
-  auto validator = [] __device__(string_index_pair const item) { return item.first != nullptr; };
+  auto validator = []  __host__ __device__(string_index_pair const item) { return item.first != nullptr; };
   auto new_nulls = cudf::detail::valid_if(begin, end, validator, stream, mr);
   auto const null_count = new_nulls.second;
   auto null_mask =
@@ -103,7 +103,7 @@ std::unique_ptr<column> make_strings_column(IndexPairIterator begin,
         auto const d_data = offsets_view.template data<size_type>();
         auto const d_offsets =
           device_span<size_type const>{d_data, static_cast<std::size_t>(offsets_view.size())};
-        auto const str_begin = thrust::make_transform_iterator(begin, [] __device__(auto ip) {
+        auto const str_begin = thrust::make_transform_iterator(begin, [] __host__ __device__(auto ip) {
           return string_view{ip.first, ip.second};
         });
 
@@ -118,7 +118,7 @@ std::unique_ptr<column> make_strings_column(IndexPairIterator begin,
         // this approach is 2-3x faster for a large number of smaller string lengths
         auto chars_column = create_chars_child_column(bytes, stream, mr);
         auto d_chars      = chars_column->mutable_view().template data<char>();
-        auto copy_chars   = [d_chars] __device__(auto item) {
+        auto copy_chars   = [d_chars] __host__ __device__(auto item) {
           string_index_pair const str = thrust::get<0>(item);
           size_type const offset      = thrust::get<1>(item);
           if (str.first != nullptr) memcpy(d_chars + offset, str.first, str.second);
@@ -180,7 +180,7 @@ std::unique_ptr<column> make_strings_column(CharIterator chars_begin,
                     offsets_begin,
                     offsets_end,
                     offsets_view.data<int32_t>(),
-                    [] __device__(auto offset) { return static_cast<int32_t>(offset); });
+                    [] __host__ __device__(auto offset) { return static_cast<int32_t>(offset); });
 
   // build chars column
   auto chars_column = strings::detail::create_chars_child_column(bytes, stream, mr);

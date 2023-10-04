@@ -36,14 +36,14 @@ struct value_func {
   T* data;
   cudf::size_type offset;
 
-  __device__ T operator()(int idx) { return data[idx - offset]; }
+  __host__ __device__ T operator()(int idx) { return data[idx - offset]; }
 };
 
 struct validity_func {
   cudf::size_type size;
   cudf::size_type offset;
 
-  __device__ bool operator()(int idx)
+  __host__ __device__ bool operator()(int idx)
   {
     auto source_idx = idx - offset;
     return source_idx < 0 || source_idx >= size;

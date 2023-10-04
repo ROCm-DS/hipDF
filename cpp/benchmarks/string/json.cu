@@ -109,7 +109,7 @@ struct json_benchmark_row_builder {
     }
   }
 
-  __device__ void operator()(cudf::size_type idx)
+  __host__ __device__ void operator()(cudf::size_type idx)
   {
     int num_books       = 2;
     int num_bicycles    = 2;

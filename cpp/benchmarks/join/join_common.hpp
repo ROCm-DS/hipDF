@@ -45,7 +45,7 @@ struct null75_generator {
   thrust::minstd_rand engine;
   thrust::uniform_int_distribution<unsigned> rand_gen;
   null75_generator() : engine(), rand_gen() {}
-  __device__ bool operator()(size_t i)
+  __host__ __device__ bool operator()(size_t i)
   {
     engine.discard(i);
     // roughly 75% nulls

@@ -304,7 +304,7 @@ struct string_parse {
   size_type* d_offsets{};
   char* d_chars{};
 
-  __device__ void operator()(size_type idx)
+  __host__ __device__ void operator()(size_type idx)
   {
     if (null_mask != nullptr && not bit_is_set(null_mask, idx)) {
       if (!d_chars) d_offsets[idx] = 0;

@@ -113,7 +113,7 @@ struct scan_tile_state_callback {
   {
   }
 
-  __device__ inline T operator()(T const& block_aggregate)
+  __host__ __device__ inline T operator()(T const& block_aggregate)
   {
     T exclusive_prefix;
 

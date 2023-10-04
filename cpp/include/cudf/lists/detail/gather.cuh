@@ -88,7 +88,7 @@ gather_data make_gather_data(cudf::lists_column_view const& source_column,
      gather_map,
      output_count,
      src_offsets,
-     src_size] __device__(int32_t index) -> int32_t {
+     src_size] __host__ __device__(int32_t index) -> int32_t {
       int32_t offset_index = index < output_count ? gather_map[index] : 0;
 
       // if this is an invalid index, this will be a NULL list
@@ -124,7 +124,7 @@ gather_data make_gather_data(cudf::lists_column_view const& source_column,
      source_column_offset = source_column.offset(),
      src_offsets,
      src_size,
-     shift] __device__(int32_t index) {
+     shift] __host__ __device__(int32_t index) {
       // if this is an invalid index, this will be a NULL list
       if (NullifyOutOfBounds && ((index < 0) || (index >= src_size))) { return 0; }
 

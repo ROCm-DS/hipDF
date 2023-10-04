@@ -34,7 +34,7 @@ using idx_valid_pair_t = thrust::tuple<cudf::size_type, bool>;
  * row is valid, otherwise a tuple of the nearest non-null row index and a discarded boolean.
  */
 struct replace_policy_functor {
-  __device__ idx_valid_pair_t operator()(idx_valid_pair_t const& lhs, idx_valid_pair_t const& rhs)
+  __host__ __device__ idx_valid_pair_t operator()(idx_valid_pair_t const& lhs, idx_valid_pair_t const& rhs)
   {
     return thrust::get<1>(rhs) ? rhs : lhs;
   }

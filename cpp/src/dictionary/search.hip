@@ -116,9 +116,8 @@ struct find_insert_index_fn {
                                      rmm::cuda_stream_view stream,
                                      rmm::mr::device_memory_resource* mr) const
   {
-    //Todo(HIP)
     if (!key.is_valid(stream))
-      return 0;// type_dispatcher(input.indices().type(), dispatch_scalar_index{}, 0, false, stream, mr);
+      return type_dispatcher(input.indices().type(), dispatch_scalar_index{}, 0, false, stream, mr);
     CUDF_EXPECTS(input.keys().type() == key.type(),
                  "search key type must match dictionary keys type");
 
@@ -155,10 +154,9 @@ std::unique_ptr<scalar> get_index(dictionary_column_view const& dictionary,
                                   rmm::cuda_stream_view stream,
                                   rmm::mr::device_memory_resource* mr)
 {
-  //Todo(HIP)
   if (dictionary.is_empty())
     return std::make_unique<numeric_scalar<uint32_t>>(0, false, stream, mr);
-  return 0;//type_dispatcher<dispatch_storage_type>(
+  return type_dispatcher<dispatch_storage_type>(
     //dictionary.keys().type(), find_index_fn(), dictionary, key, stream, mr);
 }
 
@@ -167,10 +165,9 @@ std::unique_ptr<scalar> get_insert_index(dictionary_column_view const& dictionar
                                          rmm::cuda_stream_view stream,
                                          rmm::mr::device_memory_resource* mr)
 {
-  //Todo(HIP)
   if (dictionary.is_empty())
     return std::make_unique<numeric_scalar<uint32_t>>(0, false, stream, mr);
-  return 0;//type_dispatcher<dispatch_storage_type>(
+  return type_dispatcher<dispatch_storage_type>(
     //dictionary.keys().type(), find_insert_index_fn(), dictionary, key, stream, mr);
 }
 

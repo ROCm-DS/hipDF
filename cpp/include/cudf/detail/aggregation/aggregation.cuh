@@ -119,7 +119,7 @@ template <typename Source,
           bool source_has_nulls,
           typename Enable = void>
 struct update_target_element {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -136,7 +136,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_fixed_width<Source>() && cudf::has_atomic_support<Source>() &&
                    !is_fixed_point<Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -159,7 +159,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_fixed_point<Source>() &&
                    cudf::has_atomic_support<device_storage_type_t<Source>>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -185,7 +185,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_fixed_width<Source>() && cudf::has_atomic_support<Source>() &&
                    !is_fixed_point<Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -208,7 +208,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_fixed_point<Source>() &&
                    cudf::has_atomic_support<device_storage_type_t<Source>>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -234,7 +234,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<cudf::is_fixed_width<Source>() && cudf::has_atomic_support<Source>() &&
                    !cudf::is_fixed_point<Source>() && !cudf::is_timestamp<Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -257,7 +257,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_fixed_point<Source>() &&
                    cudf::has_atomic_support<device_storage_type_t<Source>>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -288,7 +288,7 @@ struct update_target_from_dictionary {
   template <typename Source,
             aggregation::Kind k,
             std::enable_if_t<!is_dictionary<Source>()>* = nullptr>
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -299,7 +299,7 @@ struct update_target_from_dictionary {
   template <typename Source,
             aggregation::Kind k,
             std::enable_if_t<is_dictionary<Source>()>* = nullptr>
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -329,7 +329,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<not(k == aggregation::ARGMIN or k == aggregation::ARGMAX or
                        k == aggregation::COUNT_VALID or k == aggregation::COUNT_ALL)>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -359,7 +359,7 @@ struct update_target_element<Source,
                              target_has_nulls,
                              source_has_nulls,
                              std::enable_if_t<is_product_supported<Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -379,7 +379,7 @@ struct update_target_element<Source,
                              target_has_nulls,
                              source_has_nulls,
                              std::enable_if_t<is_product_supported<Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -400,7 +400,7 @@ struct update_target_element<
   target_has_nulls,
   source_has_nulls,
   std::enable_if_t<is_valid_aggregation<Source, aggregation::COUNT_VALID>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -421,7 +421,7 @@ struct update_target_element<
   target_has_nulls,
   source_has_nulls,
   std::enable_if_t<is_valid_aggregation<Source, aggregation::COUNT_ALL>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -441,7 +441,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_valid_aggregation<Source, aggregation::ARGMAX>() and
                    cudf::is_relationally_comparable<Source, Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -468,7 +468,7 @@ struct update_target_element<
   source_has_nulls,
   std::enable_if_t<is_valid_aggregation<Source, aggregation::ARGMIN>() and
                    cudf::is_relationally_comparable<Source, Source>()>> {
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept
@@ -498,7 +498,7 @@ struct update_target_element<
 template <bool target_has_nulls = true, bool source_has_nulls = true>
 struct elementwise_aggregator {
   template <typename Source, aggregation::Kind k>
-  __device__ void operator()(mutable_column_device_view target,
+  __host__ __device__ void operator()(mutable_column_device_view target,
                              size_type target_index,
                              column_device_view source,
                              size_type source_index) const noexcept

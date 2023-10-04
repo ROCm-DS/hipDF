@@ -18,9 +18,6 @@
 
 namespace cudf {
 
-std::string type_to_name(data_type type) { 
-    // Todo(HIP)
-    return "";//type_dispatcher(type, type_to_name_impl{}); 
-    }
+std::string type_to_name(data_type type) { return type_dispatcher(type, type_to_name_impl{}); }
 
 }  // namespace cudf

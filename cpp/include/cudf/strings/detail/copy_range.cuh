@@ -42,7 +42,7 @@ struct compute_element_size {
   cudf::size_type target_begin;
   cudf::size_type target_end;
 
-  __device__ cudf::size_type operator()(cudf::size_type idx)
+  __host__ __device__ cudf::size_type operator()(cudf::size_type idx)
   {
     if (idx >= target_begin && idx < target_end) {
       if (source_has_nulls) {

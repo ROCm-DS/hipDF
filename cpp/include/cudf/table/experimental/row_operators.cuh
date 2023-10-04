@@ -166,7 +166,7 @@ struct physical_element_comparator {
    * @return Relation between elements
    */
   template <typename Element>
-  __device__ constexpr weak_ordering operator()(Element const lhs, Element const rhs) const noexcept
+  __host__ __device__ constexpr weak_ordering operator()(Element const lhs, Element const rhs) const noexcept
   {
     return detail::compare_elements(lhs, rhs);
   }
@@ -186,7 +186,7 @@ struct sorting_physical_element_comparator {
    * @return Relation between elements
    */
   template <typename Element, CUDF_ENABLE_IF(not std::is_floating_point_v<Element>)>
-  __device__ constexpr weak_ordering operator()(Element const lhs, Element const rhs) const noexcept
+  __host__ __device__ constexpr weak_ordering operator()(Element const lhs, Element const rhs) const noexcept
   {
     return detail::compare_elements(lhs, rhs);
   }
@@ -199,7 +199,7 @@ struct sorting_physical_element_comparator {
    * @return Relation between elements
    */
   template <typename Element, CUDF_ENABLE_IF(std::is_floating_point_v<Element>)>
-  __device__ constexpr weak_ordering operator()(Element const lhs, Element const rhs) const noexcept
+  __host__ __device__ constexpr weak_ordering operator()(Element const lhs, Element const rhs) const noexcept
   {
     if (isnan(lhs)) {
       return isnan(rhs) ? weak_ordering::EQUIVALENT : weak_ordering::GREATER;
@@ -353,7 +353,7 @@ class device_row_comparator {
      */
     template <typename Element,
               CUDF_ENABLE_IF(cudf::is_relationally_comparable<Element, Element>())>
-    __device__ hip::std::pair<weak_ordering, int> operator()(
+    __host__ __device__ hip::std::pair<weak_ordering, int> operator()(
       size_type const lhs_element_index, size_type const rhs_element_index) const noexcept
     {
       if (_check_nulls) {
@@ -373,7 +373,7 @@ class device_row_comparator {
     template <typename Element,
               CUDF_ENABLE_IF(not cudf::is_relationally_comparable<Element, Element>() and
                              (not has_nested_columns or not cudf::is_nested<Element>()))>
-    __device__ hip::std::pair<weak_ordering, int> operator()(size_type const,
+    __host__ __device__ hip::std::pair<weak_ordering, int> operator()(size_type const,
                                                               size_type const) const noexcept
     {
       CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
@@ -381,7 +381,7 @@ class device_row_comparator {
 
     template <typename Element,
               CUDF_ENABLE_IF(has_nested_columns and std::is_same_v<Element, cudf::struct_view>)>
-    __device__ hip::std::pair<weak_ordering, int> operator()(
+    __host__ __device__ hip::std::pair<weak_ordering, int> operator()(
       size_type const lhs_element_index, size_type const rhs_element_index) const noexcept
     {
       column_device_view lcol = _lhs;
@@ -415,7 +415,7 @@ class device_row_comparator {
 
     template <typename Element,
               CUDF_ENABLE_IF(has_nested_columns and std::is_same_v<Element, cudf::list_view>)>
-    __device__ hip::std::pair<weak_ordering, int> operator()(size_type lhs_element_index,
+    __host__ __device__ hip::std::pair<weak_ordering, int> operator()(size_type lhs_element_index,
                                                               size_type rhs_element_index)
     {
       // only order top-NULLs according to null_order
@@ -538,7 +538,7 @@ class device_row_comparator {
    * @return weak ordering comparison of the row in the `lhs` table relative to the row in the `rhs`
    * table
    */
-  __device__ constexpr weak_ordering operator()(size_type const lhs_index,
+  __host__ __device__ constexpr weak_ordering operator()(size_type const lhs_index,
                                                 size_type const rhs_index) const noexcept
   {
     int last_null_depth = std::numeric_limits<int>::max();
@@ -573,8 +573,8 @@ class device_row_comparator {
                                              l_dremel_i,
                                              r_dremel_i};
       //Todo(HIP)
-      //weak_ordering state;
       weak_ordering state{};
+      // weak_ordering state;
       hip::std::tie(state, last_null_depth) =
         cudf::type_dispatcher(_lhs.column(i).type(), element_comp, lhs_index, rhs_index);
 
@@ -616,7 +616,7 @@ struct weak_ordering_comparator_impl {
                 "`row_equality_comparator` should be used instead");
 
   template <typename LhsType, typename RhsType>
-  __device__ constexpr bool operator()(LhsType const lhs_index,
+  __host__ __device__ constexpr bool operator()(LhsType const lhs_index,
                                        RhsType const rhs_index) const noexcept
   {
     weak_ordering const result = comparator(lhs_index, rhs_index);
@@ -1013,14 +1013,14 @@ template <typename Comparator>
 struct strong_index_comparator_adapter {
   strong_index_comparator_adapter(Comparator const& comparator) : comparator{comparator} {}
 
-  __device__ constexpr weak_ordering operator()(lhs_index_type const lhs_index,
+  __host__ __device__ constexpr weak_ordering operator()(lhs_index_type const lhs_index,
                                                 rhs_index_type const rhs_index) const noexcept
   {
     return comparator(static_cast<cudf::size_type>(lhs_index),
                       static_cast<cudf::size_type>(rhs_index));
   }
 
-  __device__ constexpr weak_ordering operator()(rhs_index_type const rhs_index,
+  __host__ __device__ constexpr weak_ordering operator()(rhs_index_type const rhs_index,
                                                 lhs_index_type const lhs_index) const noexcept
   {
     auto const left_right_ordering =
@@ -1207,7 +1207,7 @@ struct physical_equality_comparator {
    * @return `true` if `lhs == rhs` else `false`
    */
   template <typename Element>
-  __device__ constexpr bool operator()(Element const lhs, Element const rhs) const noexcept
+  __host__ __device__ constexpr bool operator()(Element const lhs, Element const rhs) const noexcept
   {
     return lhs == rhs;
   }
@@ -1226,7 +1226,7 @@ struct nan_equal_physical_equality_comparator {
    * @return `true` if `lhs == rhs` else `false`
    */
   template <typename Element, CUDF_ENABLE_IF(not std::is_floating_point_v<Element>)>
-  __device__ constexpr bool operator()(Element const lhs, Element const rhs) const noexcept
+  __host__ __device__ constexpr bool operator()(Element const lhs, Element const rhs) const noexcept
   {
     return lhs == rhs;
   }
@@ -1241,7 +1241,7 @@ struct nan_equal_physical_equality_comparator {
    * @return `true` if `lhs` == `rhs` else `false`
    */
   template <typename Element, CUDF_ENABLE_IF(std::is_floating_point_v<Element>)>
-  __device__ constexpr bool operator()(Element const lhs, Element const rhs) const noexcept
+  __host__ __device__ constexpr bool operator()(Element const lhs, Element const rhs) const noexcept
   {
     return isnan(lhs) and isnan(rhs) ? true : lhs == rhs;
   }
@@ -1284,7 +1284,7 @@ class device_row_comparator {
    * @param rhs_index The index of the row in the `rhs` table to examine
    * @return `true` if row from the `lhs` table is equal to the row in the `rhs` table
    */
-  __device__ constexpr bool operator()(size_type const lhs_index,
+  __host__ __device__ constexpr bool operator()(size_type const lhs_index,
                                        size_type const rhs_index) const noexcept
   {
     auto equal_elements = [=](column_device_view l, column_device_view r) {
@@ -1361,7 +1361,7 @@ class device_row_comparator {
      * considered equal (`nulls_are_equal` == `null_equality::EQUAL`)
      */
     template <typename Element, CUDF_ENABLE_IF(cudf::is_equality_comparable<Element, Element>())>
-    __device__ bool operator()(size_type const lhs_element_index,
+    __host__ __device__ bool operator()(size_type const lhs_element_index,
                                size_type const rhs_element_index) const noexcept
     {
       if (check_nulls) {
@@ -1382,22 +1382,22 @@ class device_row_comparator {
               CUDF_ENABLE_IF(not cudf::is_equality_comparable<Element, Element>() and
                              (not has_nested_columns or not cudf::is_nested<Element>())),
               typename... Args>
-    __device__ bool operator()(Args...)
+    __host__ __device__ bool operator()(Args...)
     {
       CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
     }
 
     template <typename Element, CUDF_ENABLE_IF(has_nested_columns and cudf::is_nested<Element>())>
-    __device__ bool operator()(size_type const lhs_element_index,
+    __host__ __device__ bool operator()(size_type const lhs_element_index,
                                size_type const rhs_element_index) const noexcept
     {
       column_device_view lcol = lhs.slice(lhs_element_index, 1);
       column_device_view rcol = rhs.slice(rhs_element_index, 1);
       while (lcol.type().id() == type_id::STRUCT || lcol.type().id() == type_id::LIST) {
         if (check_nulls) {
-          //Todo(HIP)
-          auto lvalid = 0; //detail::make_validity_iterator<true>(lcol);
-          auto rvalid = 0; //detail::make_validity_iterator<true>(rcol);
+          //Todo(HIP)-
+          auto lvalid = detail::make_validity_iterator<true>(lcol);
+          auto rvalid = detail::make_validity_iterator<true>(rcol);
           if (nulls_are_equal == null_equality::UNEQUAL) {
             if (thrust::any_of(
                   thrust::seq, lvalid, lvalid + lcol.size(), thrust::logical_not<bool>()) or
@@ -1455,7 +1455,7 @@ class device_row_comparator {
        * @return True if ALL elements compare equal, false otherwise
        */
       template <typename Element, CUDF_ENABLE_IF(cudf::is_equality_comparable<Element, Element>())>
-      __device__ bool operator()() const noexcept
+      __host__ __device__ bool operator()() const noexcept
       {
         return thrust::all_of(thrust::seq,
                               thrust::make_counting_iterator(0),
@@ -1466,7 +1466,7 @@ class device_row_comparator {
       template <typename Element,
                 CUDF_ENABLE_IF(not cudf::is_equality_comparable<Element, Element>()),
                 typename... Args>
-      __device__ bool operator()(Args...) const noexcept
+      __host__ __device__ bool operator()(Args...) const noexcept
       {
         CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
       }
@@ -1610,14 +1610,14 @@ template <typename Comparator>
 struct strong_index_comparator_adapter {
   strong_index_comparator_adapter(Comparator const& comparator) : comparator{comparator} {}
 
-  __device__ constexpr bool operator()(lhs_index_type const lhs_index,
+  __host__ __device__ constexpr bool operator()(lhs_index_type const lhs_index,
                                        rhs_index_type const rhs_index) const noexcept
   {
     return comparator(static_cast<cudf::size_type>(lhs_index),
                       static_cast<cudf::size_type>(rhs_index));
   }
 
-  __device__ constexpr bool operator()(rhs_index_type const rhs_index,
+  __host__ __device__ constexpr bool operator()(rhs_index_type const rhs_index,
                                        lhs_index_type const lhs_index) const noexcept
   {
     return this->operator()(lhs_index, rhs_index);
@@ -1758,7 +1758,7 @@ class element_hasher {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(column_device_view::has_element_accessor<T>())>
-  __device__ hash_value_type operator()(column_device_view const& col,
+  __host__ __device__ hash_value_type operator()(column_device_view const& col,
                                         size_type row_index) const noexcept
   {
     if (_check_nulls && col.is_null(row_index)) { return _null_hash; }
@@ -1774,7 +1774,7 @@ class element_hasher {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(not column_device_view::has_element_accessor<T>())>
-  __device__ hash_value_type operator()(column_device_view const& col,
+  __host__ __device__ hash_value_type operator()(column_device_view const& col,
                                         size_type row_index) const noexcept
   {
     CUDF_UNREACHABLE("Unsupported type in hash.");
@@ -1802,7 +1802,7 @@ class device_row_hasher {
    * @param row_index The row index to compute the hash value of
    * @return The hash value of the row
    */
-  __device__ auto operator()(size_type row_index) const noexcept
+  __host__ __device__ auto operator()(size_type row_index) const noexcept
   {
     auto it = thrust::make_transform_iterator(_table.begin(), [=](auto const& column) {
       return cudf::type_dispatcher<dispatch_storage_type>(
@@ -1838,22 +1838,21 @@ class device_row_hasher {
     }
 
     template <typename T, CUDF_ENABLE_IF(not cudf::is_nested<T>())>
-    __device__ hash_value_type operator()(column_device_view const& col,
+    __host__ __device__ hash_value_type operator()(column_device_view const& col,
                                           size_type row_index) const noexcept
     {
       return _element_hasher.template operator()<T>(col, row_index);
     }
 
     template <typename T, CUDF_ENABLE_IF(cudf::is_nested<T>())>
-    __device__ hash_value_type operator()(column_device_view const& col,
+    __host__ __device__ hash_value_type operator()(column_device_view const& col,
                                           size_type row_index) const noexcept
     {
       auto hash                   = hash_value_type{0};
       column_device_view curr_col = col.slice(row_index, 1);
       while (curr_col.type().id() == type_id::STRUCT || curr_col.type().id() == type_id::LIST) {
         if (_check_nulls) {
-          //Todo(HIP)
-          auto validity_it = 0; //detail::make_validity_iterator<true>(curr_col);
+          auto validity_it = detail::make_validity_iterator<true>(curr_col);
           hash             = detail::accumulate(
             validity_it, validity_it + curr_col.size(), hash, [](auto hash, auto is_valid) {
               return cudf::hashing::detail::hash_combine(hash,

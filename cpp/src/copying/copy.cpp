@@ -157,9 +157,7 @@ std::unique_ptr<column> empty_like(column_view const& input)
 std::unique_ptr<column> empty_like(scalar const& input)
 {
   CUDF_FUNC_RANGE();
-  //Todo(HIP)
-  return 0;
-  // return type_dispatcher(input.type(), detail::scalar_empty_like_functor{}, input);
+  return type_dispatcher(input.type(), detail::scalar_empty_like_functor{}, input);
 };
 
 /*

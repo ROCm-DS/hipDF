@@ -52,9 +52,7 @@ struct unary_relationally_comparable_functor {
  */
 bool is_relationally_comparable(data_type type)
 {
-  //Todo(HIP)
-  return true;
-  // return type_dispatcher(type, unary_relationally_comparable_functor{});
+  return type_dispatcher(type, unary_relationally_comparable_functor{});
 }
 
 namespace {
@@ -86,9 +84,7 @@ struct unary_equality_comparable_functor {
  */
 bool is_equality_comparable(data_type type)
 {
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, unary_equality_comparable_functor{});
+  return cudf::type_dispatcher(type, unary_equality_comparable_functor{});
 }
 
 struct is_numeric_impl {
@@ -111,9 +107,7 @@ struct is_numeric_impl {
  * @return false `type` is not numeric
  */
 bool is_numeric(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_numeric_impl{}); 
+  return cudf::type_dispatcher(type, is_numeric_impl{}); 
   }
 
 struct is_index_type_impl {
@@ -136,9 +130,7 @@ struct is_index_type_impl {
  * @return false `type` is not index type
  */
 bool is_index_type(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_index_type_impl{}); 
+  return cudf::type_dispatcher(type, is_index_type_impl{}); 
   }
 
 struct is_unsigned_impl {
@@ -158,10 +150,8 @@ struct is_unsigned_impl {
  * @return true `type` is unsigned numeric
  * @return false `type` is signed numeric
  */
-bool is_unsigned(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_unsigned_impl{}); 
+bool is_unsigned(data_type type) {
+  return cudf::type_dispatcher(type, is_unsigned_impl{}); 
   }
 
 struct is_integral_impl {
@@ -173,9 +163,7 @@ struct is_integral_impl {
 };
 
 bool is_integral(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_integral_impl{}); 
+  return cudf::type_dispatcher(type, is_integral_impl{}); 
   }
 
 struct is_floating_point_impl {
@@ -197,9 +185,7 @@ struct is_floating_point_impl {
  */
 bool is_floating_point(data_type type)
 {
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_floating_point_impl{});
+  return cudf::type_dispatcher(type, is_floating_point_impl{});
 }
 
 struct is_boolean_impl {
@@ -218,9 +204,7 @@ struct is_boolean_impl {
  * @return false `type` is not a Boolean
  */
 bool is_boolean(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_boolean_impl{}); 
+  return cudf::type_dispatcher(type, is_boolean_impl{}); 
   }
 
 struct is_fixed_point_impl {
@@ -239,9 +223,7 @@ struct is_fixed_point_impl {
  * @return false `type` is not a fixed point type
  */
 bool is_fixed_point(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_fixed_point_impl{}); 
+  return cudf::type_dispatcher(type, is_fixed_point_impl{}); 
   }
 
 struct is_timestamp_impl {
@@ -261,11 +243,7 @@ struct is_timestamp_impl {
  * @return true `type` is a timestamp
  * @return false `type` is not a timestamp
  */
-bool is_timestamp(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_timestamp_impl{}); 
-  }
+bool is_timestamp(data_type type) { return cudf::type_dispatcher(type, is_timestamp_impl{});}
 
 struct is_duration_impl {
   template <typename T>
@@ -285,10 +263,8 @@ struct is_duration_impl {
  * @return false `type` is not a duration
  */
 bool is_duration(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_duration_impl{}); 
-  }
+  return cudf::type_dispatcher(type, is_duration_impl{}); 
+}
 
 struct is_chrono_impl {
   template <typename T>
@@ -309,9 +285,7 @@ struct is_chrono_impl {
  * @return false `type` is not a chrono type
  */
 bool is_chrono(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_chrono_impl{}); 
+  return cudf::type_dispatcher(type, is_chrono_impl{}); 
   }
 
 struct is_dictionary_impl {
@@ -330,9 +304,7 @@ struct is_dictionary_impl {
  * @return false `type` is not a dictionary type
  */
 bool is_dictionary(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_dictionary_impl{}); 
+  return cudf::type_dispatcher(type, is_dictionary_impl{}); 
   }
 
 struct is_fixed_width_impl {
@@ -353,9 +325,7 @@ struct is_fixed_width_impl {
  * @return false  `type` is variable-width
  */
 bool is_fixed_width(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_fixed_width_impl{}); 
+  return cudf::type_dispatcher(type, is_fixed_width_impl{}); 
   }
 
 struct is_compound_impl {
@@ -379,9 +349,7 @@ struct is_compound_impl {
  * @return false `type` is a simple type
  */
 bool is_compound(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_compound_impl{}); 
+  return cudf::type_dispatcher(type, is_compound_impl{}); 
   }
 
 struct is_nested_impl {
@@ -403,10 +371,8 @@ struct is_nested_impl {
  * @return true `type` is a nested type
  * @return false `type` is not a nested type
  */
-bool is_nested(data_type type) { 
-  //Todo(HIP)
-  return true;
-  // return cudf::type_dispatcher(type, is_nested_impl{}); 
+bool is_nested(data_type type) {
+  return cudf::type_dispatcher(type, is_nested_impl{}); 
   }
 
 namespace {
@@ -441,9 +407,7 @@ struct is_bit_castable_from_impl {
   template <typename FromType, std::enable_if_t<not is_compound<FromType>()>* = nullptr>
   constexpr bool operator()(data_type to)
   {
-    //Todo(HIP)
-  return true;
-    // return cudf::type_dispatcher(to, is_bit_castable_to_impl<FromType>{});
+    return cudf::type_dispatcher(to, is_bit_castable_to_impl<FromType>{});
   }
 };
 }  // namespace
@@ -461,11 +425,6 @@ struct is_bit_castable_from_impl {
  * @param to The `data_type` to convert to
  * @return `true` if the types are castable
  */
-bool is_bit_castable(data_type from, data_type to)
-{
-  //Todo(HIP)
-  return true;
-  // return type_dispatcher(from, is_bit_castable_from_impl{}, to);
-}
+bool is_bit_castable(data_type from, data_type to){ return type_dispatcher(from, is_bit_castable_from_impl{}, to); }
 
 }  // namespace cudf

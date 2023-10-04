@@ -311,7 +311,7 @@ std::pair<std::unique_ptr<column>, size_type> make_offsets_child_column(
   // using exclusive-scan technically requires count+1 input values even though
   // the final input value is never used.
   // The input iterator is wrapped here to allow the last value to be safely read.
-  auto map_fn = [begin, count] __device__(size_type idx) -> size_type {
+  auto map_fn = [begin, count] __host__ __device__(size_type idx) -> size_type {
     return idx < count ? static_cast<size_type>(begin[idx]) : size_type{0};
   };
   auto input_itr = cudf::detail::make_counting_transform_iterator(0, map_fn);
