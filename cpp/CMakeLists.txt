@@ -322,7 +322,7 @@ add_library(
   # src/labeling/label_bins.cu
   src/bitmask/null_mask.hip
   # src/bitmask/is_element_valid.cpp
-  # src/copying/concatenate.hip
+  src/copying/concatenate.hip
   # src/copying/contiguous_split.cu
   # src/copying/copy.cpp
   # src/copying/copy.cu
@@ -341,7 +341,7 @@ add_library(
   # src/datetime/datetime_ops.cu
   # src/dictionary/add_keys.hip
   # src/dictionary/decode.hip
-  # src/dictionary/detail/concatenate.hip
+  src/dictionary/detail/concatenate.hip
   # src/dictionary/detail/merge.hip
   # src/dictionary/dictionary_column_view.cpp
   # src/dictionary/dictionary_factories.hip

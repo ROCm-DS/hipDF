@@ -34,7 +34,7 @@ template <typename KeyType>
 struct dictionary_access_fn {
   dictionary_access_fn(column_device_view const& d_dictionary) : d_dictionary{d_dictionary} {}
 
-  __device__ KeyType operator()(size_type idx) const
+  __host__ __device__ KeyType operator()(size_type idx) const
   {
     if (d_dictionary.is_null(idx)) return KeyType{};
     auto keys = d_dictionary.child(dictionary_column_view::keys_column_index);

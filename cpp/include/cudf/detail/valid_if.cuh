@@ -29,6 +29,8 @@
 
 #include <thrust/distance.h>
 
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+
 namespace cudf {
 namespace detail {
 /**

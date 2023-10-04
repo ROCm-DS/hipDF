@@ -381,7 +381,8 @@ struct output_indexalator : base_indexalator<output_indexalator> {
   __device__ inline output_indexalator const& operator=(size_type const value) const
   {
     void* tp = p_;
-    type_dispatcher(dtype_, size_type_to_index{}, tp, value);
+    //TODO FIXME
+    // type_dispatcher(dtype_, size_type_to_index{}, tp, value);
     return *this;
   }
 
