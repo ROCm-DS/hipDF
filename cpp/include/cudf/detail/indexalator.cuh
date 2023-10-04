@@ -367,8 +367,9 @@ struct output_indexalator : base_indexalator<output_indexalator> {
     {
       (*static_cast<T*>(tp)) = static_cast<T>(value);
     }
+    //TODO(HIP): check why __host__ is necessary to avoid a thrust-related compiler error?
     template <typename T, std::enable_if_t<not is_index_type<T>()>* = nullptr>
-    __device__ void operator()(void* tp, size_type const value)
+    __host__  __device__ void operator()(void* tp, size_type const value)
     {
       CUDF_UNREACHABLE("only index types are supported");
     }
@@ -512,8 +513,9 @@ struct indexalator_factory {
       if (has_nulls) { CUDF_EXPECTS(col.nullable(), "Unexpected non-nullable column."); }
       iter = make_input_iterator(col);
     }
-
-    __device__ thrust::pair<size_type, bool> operator()(size_type i) const
+ 
+    //TODO(HIP): check why __host__ is necessary to avoid a thrust-related compiler error?
+    __host__ __device__ thrust::pair<size_type, bool> operator()(size_type i) const
     {
       return {iter[i], (has_nulls ? bit_is_set(null_mask, i + offset) : true)};
     }
@@ -536,7 +538,8 @@ struct indexalator_factory {
       iter = indexalator_factory::make_input_iterator(input);
     }
 
-    __device__ thrust::pair<size_type, bool> operator()(size_type) const
+    //TODO(HIP): check why __host__ is necessary to avoid a thrust-related compiler error?
+    __host__  __device__ thrust::pair<size_type, bool> operator()(size_type) const
     {
       return {*iter, is_null};
     }
@@ -584,7 +587,8 @@ struct indexalator_factory {
       iter = make_input_iterator(col);
     }
 
-    __device__ thrust::optional<size_type> operator()(size_type i) const
+    //TODO(HIP): check why __host__ is necessary to avoid a thrust-related compiler error?
+    __host__  __device__ thrust::optional<size_type> operator()(size_type i) const
     {
       return has_nulls && !bit_is_set(null_mask, i + offset) ? thrust::nullopt
                                                              : thrust::make_optional(iter[i]);
@@ -608,7 +612,8 @@ struct indexalator_factory {
       iter = indexalator_factory::make_input_iterator(input);
     }
 
-    __device__ thrust::optional<size_type> operator()(size_type) const
+    //TODO(HIP): check why __host__ is necessary to avoid a thrust-related compiler error?
+    __host__  __device__ thrust::optional<size_type> operator()(size_type) const
     {
       return is_null ? thrust::nullopt : thrust::make_optional(*iter);
     }
