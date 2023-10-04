@@ -166,6 +166,8 @@ struct dispatch_compute_indices {
              rmm::cuda_stream_view stream,
              rmm::device_async_resource_ref mr)
   {
+// TODO FIXME
+#if 0
     auto keys_view     = column_device_view::create(all_keys, stream);
     auto indices_view  = column_device_view::create(all_indices, stream);
     auto d_all_indices = *indices_view;
@@ -216,6 +218,9 @@ struct dispatch_compute_indices {
                         return static_cast<size_type>(thrust::distance(begin, itr));
                       });
 #endif
+    return result;
+#endif
+    std::enable_if_t<cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>> result{};
     return result;
   }
 

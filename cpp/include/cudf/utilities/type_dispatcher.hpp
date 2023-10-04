@@ -479,103 +479,104 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
                                                                           Functor f,
                                                                           Ts&&... args)
 {
-  return 0;
     //Todo(HIP)
-  // switch (dtype.id()) {
-    // case type_id::INT8:
-    //   return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
-    //     std::forward<Ts>(args)...);
-    //   // return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::INT16:
-    //   // return f.template operator()<typename IdTypeMap<type_id::INT16>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::INT32:
-    //   // return f.template operator()<typename IdTypeMap<type_id::INT32>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::INT64:
-    //   // return f.template operator()<typename IdTypeMap<type_id::INT64>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::UINT8:
-    //   // return f.template operator()<typename IdTypeMap<type_id::UINT8>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::UINT16:
-    //   // return f.template operator()<typename IdTypeMap<type_id::UINT16>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::UINT32:
-    //   // return f.template operator()<typename IdTypeMap<type_id::UINT32>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::UINT64:
-    //   // return f.template operator()<typename IdTypeMap<type_id::UINT64>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::FLOAT32:
-    //   // return f.template operator()<typename IdTypeMap<type_id::FLOAT32>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::FLOAT64:
-    //   // return f.template operator()<typename IdTypeMap<type_id::FLOAT64>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::BOOL8:
-    //   // return f.template operator()<typename IdTypeMap<type_id::BOOL8>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::TIMESTAMP_DAYS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_DAYS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::TIMESTAMP_SECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_SECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::TIMESTAMP_MILLISECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_MILLISECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::TIMESTAMP_MICROSECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_MICROSECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::TIMESTAMP_NANOSECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_NANOSECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DURATION_DAYS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DURATION_DAYS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DURATION_SECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DURATION_SECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DURATION_MILLISECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DURATION_MILLISECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DURATION_MICROSECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DURATION_MICROSECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DURATION_NANOSECONDS:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DURATION_NANOSECONDS>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DICTIONARY32:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DICTIONARY32>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::STRING:
-    //   // return f.template operator()<typename IdTypeMap<type_id::STRING>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::LIST:
-    //   // return f.template operator()<typename IdTypeMap<type_id::LIST>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DECIMAL32:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DECIMAL32>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DECIMAL64:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DECIMAL64>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::DECIMAL128:
-    //   // return f.template operator()<typename IdTypeMap<type_id::DECIMAL128>::type>(
-    //   //   std::forward<Ts>(args)...);
-    // case type_id::STRUCT:
-    //   // return f.template operator()<typename IdTypeMap<type_id::STRUCT>::type>(
-    //   //   std::forward<Ts>(args)...);
-//     default: {
-// // #if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__) 
+  switch (dtype.id()) {
+    case type_id::INT8:
+      return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
+        std::forward<Ts>(args)...);
+      // return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
+      //   std::forward<Ts>(args)...);
+    case type_id::INT16:
+       return f.template operator()<typename IdTypeMap<type_id::INT16>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::INT32:
+       return f.template operator()<typename IdTypeMap<type_id::INT32>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::INT64:
+       return f.template operator()<typename IdTypeMap<type_id::INT64>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::UINT8:
+       return f.template operator()<typename IdTypeMap<type_id::UINT8>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::UINT16:
+       return f.template operator()<typename IdTypeMap<type_id::UINT16>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::UINT32:
+       return f.template operator()<typename IdTypeMap<type_id::UINT32>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::UINT64:
+       return f.template operator()<typename IdTypeMap<type_id::UINT64>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::FLOAT32:
+       return f.template operator()<typename IdTypeMap<type_id::FLOAT32>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::FLOAT64:
+       return f.template operator()<typename IdTypeMap<type_id::FLOAT64>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::BOOL8:
+       return f.template operator()<typename IdTypeMap<type_id::BOOL8>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::TIMESTAMP_DAYS:
+       return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_DAYS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::TIMESTAMP_SECONDS:
+       return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_SECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::TIMESTAMP_MILLISECONDS:
+       return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_MILLISECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::TIMESTAMP_MICROSECONDS:
+       return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_MICROSECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::TIMESTAMP_NANOSECONDS:
+       return f.template operator()<typename IdTypeMap<type_id::TIMESTAMP_NANOSECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DURATION_DAYS:
+       return f.template operator()<typename IdTypeMap<type_id::DURATION_DAYS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DURATION_SECONDS:
+      return f.template operator()<typename IdTypeMap<type_id::DURATION_SECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DURATION_MILLISECONDS:
+      return f.template operator()<typename IdTypeMap<type_id::DURATION_MILLISECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DURATION_MICROSECONDS:
+       return f.template operator()<typename IdTypeMap<type_id::DURATION_MICROSECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DURATION_NANOSECONDS:
+       return f.template operator()<typename IdTypeMap<type_id::DURATION_NANOSECONDS>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DICTIONARY32:
+       return f.template operator()<typename IdTypeMap<type_id::DICTIONARY32>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::STRING:
+       return f.template operator()<typename IdTypeMap<type_id::STRING>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::LIST:
+       return f.template operator()<typename IdTypeMap<type_id::LIST>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DECIMAL32:
+       return f.template operator()<typename IdTypeMap<type_id::DECIMAL32>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DECIMAL64:
+       return f.template operator()<typename IdTypeMap<type_id::DECIMAL64>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::DECIMAL128:
+       return f.template operator()<typename IdTypeMap<type_id::DECIMAL128>::type>(
+         std::forward<Ts>(args)...);
+    case type_id::STRUCT:
+       return f.template operator()<typename IdTypeMap<type_id::STRUCT>::type>(
+         std::forward<Ts>(args)...);
+    default: 
+       CUDF_UNREACHABLE("Invalid type_id.");
+// TODO(HIP): do we need separate treatment for device and host path?
+//  #if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__) 
 //       CUDF_FAIL("Invalid type_id.");
-// // #else
-// //       CUDF_UNREACHABLE("Invalid type_id.");
-// // #endif
+//  #else
+//        CUDF_UNREACHABLE("Invalid type_id.");
+//  #endif
 //     }
-//  }
+  }
 }
 
 // @cond

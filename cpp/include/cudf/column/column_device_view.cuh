@@ -1108,7 +1108,7 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
    * @return Pointer to the first element after casting
    */
   template <typename T, CUDF_ENABLE_IF(mutable_column_device_view::has_element_accessor<T>())>
-  iterator<T> begin()
+  __host__ __device__ iterator<T> begin()
   {
     return iterator<T>{count_it{0}, detail::mutable_value_accessor<T>{*this}};
   }
@@ -1124,7 +1124,7 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
    * @return Pointer to one past the last element after casting
    */
   template <typename T, CUDF_ENABLE_IF(mutable_column_device_view::has_element_accessor<T>())>
-  iterator<T> end()
+  __host__ __device__ iterator<T> end()
   {
     return iterator<T>{count_it{size()}, detail::mutable_value_accessor<T>{*this}};
   }
