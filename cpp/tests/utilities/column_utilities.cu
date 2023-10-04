@@ -168,13 +168,12 @@ std::unique_ptr<column> generate_child_row_indices(lists_column_view const& c,
   // output_row_start = [0, 0, 0, 2, 2, 5, 5]
   //                           |     |              <-- non-null input rows
   //
-  //Todo(HIP)
   auto output_row_start = cudf::make_fixed_width_column(
     data_type{type_id::INT32}, row_indices.size(), mask_state::UNALLOCATED);
-  // thrust::exclusive_scan(rmm::exec_policy(cudf::test::get_default_stream()),
-  //                        row_size_iter,
-  //                        row_size_iter + row_indices.size(),
-  //                        output_row_start->mutable_view().begin<size_type>());
+  thrust::exclusive_scan(rmm::exec_policy(cudf::test::get_default_stream()),
+                         row_size_iter,
+                         row_size_iter + row_indices.size(),
+                         output_row_start->mutable_view().begin<size_type>());
 
   // fill result column with 1s
   //
@@ -384,7 +383,7 @@ class corresponding_rows_unequal {
   {
   }
 
-  __device__ bool operator()(size_type index)
+  __host__ __device__ bool operator()(size_type index)
   {
     using cudf::experimental::row::lhs_index_type;
     using cudf::experimental::row::rhs_index_type;
@@ -425,7 +424,7 @@ class corresponding_rows_not_equivalent {
 
   struct typed_element_not_equivalent {
     template <typename T>
-    __device__ std::enable_if_t<std::is_floating_point_v<T>, bool> operator()(
+    __host__ __device__ std::enable_if_t<std::is_floating_point_v<T>, bool> operator()(
       column_device_view const& lhs,
       column_device_view const& rhs,
       size_type lhs_index,
@@ -455,14 +454,14 @@ class corresponding_rows_not_equivalent {
     }
 
     template <typename T, typename... Args>
-    __device__ std::enable_if_t<not std::is_floating_point_v<T>, bool> operator()(Args...)
+    __host__ __device__ std::enable_if_t<not std::is_floating_point_v<T>, bool> operator()(Args...)
     {
       // Non-floating point inequality is checked already
       return true;
     }
   };
 
-  __device__ bool operator()(size_type index)
+  __host__ __device__ bool operator()(size_type index)
   {
     using cudf::experimental::row::lhs_index_type;
     using cudf::experimental::row::rhs_index_type;
@@ -677,7 +676,7 @@ struct column_comparator_impl<list_view, check_exact_equality> {
        lhs_valids,
        rhs_valids,
        lhs_indices = lhs_row_indices.begin<size_type>(),
-       rhs_indices = rhs_row_indices.begin<size_type>()] __device__(size_type index) {
+       rhs_indices = rhs_row_indices.begin<size_type>()] __host__ __device__(size_type index) {
         auto const lhs_index = lhs_indices[index];
         auto const rhs_index = rhs_indices[index];
 

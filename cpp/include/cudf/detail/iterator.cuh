@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 /**
  * @brief provides column input iterator with nulls replaced with a specified value
  * @file iterator.cuh
@@ -118,7 +140,7 @@ struct null_replaced_value_accessor {
     if (has_nulls) CUDF_EXPECTS(col.nullable(), "column with nulls must have a validity bitmask");
   }
 
-  __device__ inline Element const operator()(cudf::size_type i) const
+  __host__ __device__ inline Element const operator()(cudf::size_type i) const
   {
     return has_nulls && col.is_null_nocheck(i) ? null_replacement : col.element<Element>(i);
   }
@@ -154,7 +176,7 @@ struct validity_accessor {
     }
   }
 
-  __device__ inline bool operator()(cudf::size_type i) const
+  __host__ __device__ inline bool operator()(cudf::size_type i) const
   {
     if constexpr (safe) {
       return col.is_valid(i);
@@ -369,7 +391,7 @@ struct scalar_value_accessor {
                  "the data type mismatch");
   }
 
-  __device__ inline Element const operator()(size_type) const { return dscalar.value(); }
+  __host__ __device__ inline Element const operator()(size_type) const { return dscalar.value(); }
 };
 
 /**
@@ -433,7 +455,7 @@ struct scalar_optional_accessor : public scalar_value_accessor<Element> {
   {
   }
 
-  __device__ inline value_type const operator()(size_type) const
+  __host__ __device__ inline value_type const operator()(size_type) const
   {
     if (has_nulls && !super_t::dscalar.is_valid()) { return value_type{cuda::std::nullopt}; }
 
@@ -465,7 +487,7 @@ struct scalar_pair_accessor : public scalar_value_accessor<Element> {
   using value_type = thrust::pair<Element, bool>;
   scalar_pair_accessor(scalar const& scalar_value) : scalar_value_accessor<Element>(scalar_value) {}
 
-  __device__ inline value_type const operator()(size_type) const
+  __host__ __device__ inline value_type const operator()(size_type) const
   {
     return {Element(super_t::dscalar.value()), super_t::dscalar.is_valid()};
   }
@@ -503,7 +525,7 @@ struct scalar_representation_pair_accessor : public scalar_value_accessor<Elemen
 
   scalar_representation_pair_accessor(scalar const& scalar_value) : base(scalar_value) {}
 
-  __device__ inline value_type const operator()(size_type) const
+  __host__ __device__ inline value_type const operator()(size_type) const
   {
     return {get_rep(base::dscalar), base::dscalar.is_valid()};
   }

@@ -130,9 +130,9 @@ column_device_view::create(column_view source, rmm::cuda_stream_view stream)
     // Can't use make_unique since the ctor is protected
     return std::unique_ptr<column_device_view>(new column_device_view(source));
   }
-  //Todo(HIP)
-  //return create_device_view_from_view<column_view, column_device_view>(source, stream);
-  return std::unique_ptr<column_device_view>(new column_device_view(source));
+  //Todo(HIP)-
+  return create_device_view_from_view<column_view, column_device_view>(source, stream);
+  //return std::unique_ptr<column_device_view>(new column_device_view(source));
 }
 
 std::size_t column_device_view::extent(column_view const& source)
@@ -176,12 +176,12 @@ void mutable_column_device_view::destroy() { delete this; }
 std::unique_ptr<mutable_column_device_view, std::function<void(mutable_column_device_view*)>>
 mutable_column_device_view::create(mutable_column_view source, rmm::cuda_stream_view stream)
 {
-  //Todo(HIP)
-  return 0;
-  //return source.num_children() == 0
-  //         ? std::unique_ptr<mutable_column_device_view>(new mutable_column_device_view(source))
-  //         : create_device_view_from_view<mutable_column_view, mutable_column_device_view>(source,
-  //                                                                                         stream);
+  //Todo(HIP)-
+  //return 0;
+  return source.num_children() == 0
+           ? std::unique_ptr<mutable_column_device_view>(new mutable_column_device_view(source))
+           : create_device_view_from_view<mutable_column_view, mutable_column_device_view>(source,
+                                                                                           stream);
 }
 
 std::size_t mutable_column_device_view::extent(mutable_column_view source)

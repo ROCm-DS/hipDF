@@ -226,7 +226,7 @@ namespace {
 struct string_view_to_pair {
   string_view null_placeholder;
   string_view_to_pair(string_view n) : null_placeholder(n) {}
-  __device__ thrust::pair<char const*, size_type> operator()(string_view const& i)
+  __host__ __device__ thrust::pair<char const*, size_type> operator()(string_view const& i)
   {
     return (i.data() == null_placeholder.data())
              ? thrust::pair<char const*, size_type>{nullptr, 0}
@@ -243,14 +243,10 @@ std::unique_ptr<column> make_strings_column(device_span<string_view const> strin
 {
   CUDF_FUNC_RANGE();
 
-  // TODO(HIP)
-#if 0
   auto it_pair =
     thrust::make_transform_iterator(string_views.begin(), string_view_to_pair{null_placeholder});
   return cudf::strings::detail::make_strings_column(
     it_pair, it_pair + string_views.size(), stream, mr);
-#endif
-  return {};
 }
 
 std::unique_ptr<column> make_strings_column(size_type num_strings,

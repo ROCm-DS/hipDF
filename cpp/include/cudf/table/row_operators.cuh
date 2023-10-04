@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/column/column_device_view.cuh>
@@ -190,7 +212,7 @@ class element_equality_comparator {
    */
   template <typename Element,
             std::enable_if_t<cudf::is_equality_comparable<Element, Element>()>* = nullptr>
-  __device__ bool operator()(size_type lhs_element_index,
+  __host__ __device__ bool operator()(size_type lhs_element_index,
                              size_type rhs_element_index) const noexcept
   {
     if (nulls) {
@@ -210,7 +232,7 @@ class element_equality_comparator {
   // @cond
   template <typename Element,
             std::enable_if_t<not cudf::is_equality_comparable<Element, Element>()>* = nullptr>
-  __device__ bool operator()(size_type lhs_element_index, size_type rhs_element_index)
+  __host__ __device__ bool operator()(size_type lhs_element_index, size_type rhs_element_index)
   {
     CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
   }
@@ -255,7 +277,7 @@ class row_equality_comparator {
    * @param rhs_row_index The index of the second row to compare (in the rhs table)
    * @return true if both rows are equal, otherwise false
    */
-  __device__ bool operator()(size_type lhs_row_index, size_type rhs_row_index) const noexcept
+  __host__ __device__ bool operator()(size_type lhs_row_index, size_type rhs_row_index) const noexcept
   {
     auto equal_elements = [=](column_device_view l, column_device_view r) {
       return cudf::type_dispatcher(l.type(),
@@ -326,7 +348,7 @@ class element_relational_comparator {
    */
   template <typename Element,
             std::enable_if_t<cudf::is_relationally_comparable<Element, Element>()>* = nullptr>
-  __device__ weak_ordering operator()(size_type lhs_element_index,
+  __host__ __device__ weak_ordering operator()(size_type lhs_element_index,
                                       size_type rhs_element_index) const noexcept
   {
     if (nulls) {
@@ -345,7 +367,7 @@ class element_relational_comparator {
   // @cond
   template <typename Element,
             std::enable_if_t<not cudf::is_relationally_comparable<Element, Element>()>* = nullptr>
-  __device__ weak_ordering operator()(size_type lhs_element_index, size_type rhs_element_index)
+  __host__ __device__ weak_ordering operator()(size_type lhs_element_index, size_type rhs_element_index)
   {
     CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
   }
@@ -418,7 +440,7 @@ class row_lexicographic_comparator {
    * @return `true` if row from the `lhs` table compares less than row in the
    * `rhs` table
    */
-  __device__ bool operator()(size_type lhs_index, size_type rhs_index) const noexcept
+  __host__ __device__ bool operator()(size_type lhs_index, size_type rhs_index) const noexcept
   {
     for (size_type i = 0; i < _lhs.num_columns(); ++i) {
       bool ascending = (_column_order == nullptr) or (_column_order[i] == order::ASCENDING);
@@ -465,7 +487,7 @@ class element_hasher {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(column_device_view::has_element_accessor<T>())>
-  __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
+  __host__ __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
   {
     if (has_nulls && col.is_null(row_index)) {
       return cuda::std::numeric_limits<hash_value_type>::max();
@@ -482,7 +504,7 @@ class element_hasher {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(not column_device_view::has_element_accessor<T>())>
-  __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
+  __host__ __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
   {
     CUDF_UNREACHABLE("Unsupported type in hash.");
   }
@@ -531,7 +553,7 @@ class element_hasher_with_seed {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(column_device_view::has_element_accessor<T>())>
-  __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
+  __host__ __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
   {
     if (_has_nulls && col.is_null(row_index)) { return _null_hash; }
     return hash_function<T>{_seed}(col.element<T>(row_index));
@@ -546,7 +568,7 @@ class element_hasher_with_seed {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(not column_device_view::has_element_accessor<T>())>
-  __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
+  __host__ __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
   {
     CUDF_UNREACHABLE("Unsupported type in hash.");
   }
@@ -596,7 +618,7 @@ class row_hasher {
    * @param row_index The index of the row in the `table` to hash
    * @return The hash value of the row at `row_index` in the `table`
    */
-  __device__ auto operator()(size_type row_index) const
+  __host__ __device__ auto operator()(size_type row_index) const
   {
     // Hash the first column w/ the seed
     auto const initial_hash = cudf::hashing::detail::hash_combine(

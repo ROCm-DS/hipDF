@@ -81,9 +81,9 @@ struct bounds_checker {
   size_type begin;
   size_type end;
 
-  __device__ bounds_checker(size_type begin_, size_type end_) : begin{begin_}, end{end_} {}
+  __host__ __device__ bounds_checker(size_type begin_, size_type end_) : begin{begin_}, end{end_} {}
 
-  __device__ bool operator()(map_type const index) { return ((index >= begin) && (index < end)); }
+  __host__ __device__ bool operator()(map_type const index) { return ((index >= begin) && (index < end)); }
 };
 
 /**
@@ -101,7 +101,7 @@ struct gather_bitmask_functor {
   bitmask_type** masks;
   MapIterator gather_map;
 
-  __device__ bool operator()(size_type mask_idx, size_type bit_idx)
+  __host__ __device__ bool operator()(size_type mask_idx, size_type bit_idx)
   {
     auto row_idx = gather_map[bit_idx];
     auto col     = input.column(mask_idx);
@@ -683,16 +683,14 @@ std::unique_ptr<table> gather(table_view const& source_table,
 
   for (auto const& source_column : source_table) {
     // The data gather for n columns will be put on the first n streams
-    //Todo(HIP)
-    destination_columns.push_back(0
-      // cudf::type_dispatcher<dispatch_storage_type>(source_column.type(),
-      //                                              column_gatherer{},
-      //                                              source_column,
-      //                                              gather_map_begin,
-      //                                              gather_map_end,
-      //                                              bounds_policy == out_of_bounds_policy::NULLIFY,
-      //                                              stream,
-      //                                              mr)
+    destination_columns.push_back(cudf::type_dispatcher<dispatch_storage_type>(source_column.type(),
+                                                   column_gatherer{},
+                                                   source_column,
+                                                   gather_map_begin,
+                                                   gather_map_end,
+                                                   bounds_policy == out_of_bounds_policy::NULLIFY,
+                                                   stream,
+                                                   mr)
                                                    );
   }
 

@@ -227,10 +227,10 @@ std::optional<data_type> get_common_type(data_type out, data_type lhs, data_type
   // Specifically, std::common_type_t<TypeOut, TypeLhs, TypeRhs> is the same as
   // std::common_type_t<std::common_type_t<TypeOut, TypeLhs>, TypeRhs>.
   auto common_type = double_type_dispatcher(out, lhs, common_type_functor{});
-  //Todo(HIP)
-  // if (common_type.has_value()) {
-  //   common_type = double_type_dispatcher(common_type.value(), rhs, common_type_functor{});
-  // }
+  //Todo(HIP)-
+  if (common_type.has_value()) {
+    common_type = double_type_dispatcher(common_type.value(), rhs, common_type_functor{});
+  }
   // If no common type of (out, lhs, rhs) exists, fall back to the common type
   // of (lhs, rhs).
   if (!common_type.has_value()) {

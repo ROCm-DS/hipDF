@@ -60,8 +60,8 @@ class list_device_view {
 
  public:
  //Todo(HIP)
- //list_device_view() = default;
   list_device_view() ;
+//  list_device_view() = default;
 
   /**
    * @brief Constructs a list_device_view from a list column and index.
@@ -298,7 +298,7 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-    __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
+    __host__ __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
     {
       return {list.element<T>(i), !list.is_null(i)};
     }
@@ -337,7 +337,7 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-    __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
+    __host__ __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
     {
       return {get_rep<T>(i), !list.is_null(i)};
     }
@@ -378,7 +378,7 @@ struct list_size_functor {
    * @param idx row index
    * @return size of the list
    */
-  __device__ inline size_type operator()(size_type idx)
+  __host__ __device__ inline size_type operator()(size_type idx)
   {
     if (d_column.is_null(idx)) return size_type{0};
     return d_column.offset_at(idx + 1) - d_column.offset_at(idx);
@@ -402,8 +402,7 @@ struct list_size_functor {
  */
 CUDF_HOST_DEVICE auto inline make_list_size_iterator(detail::lists_column_device_view const& c)
 {
-  //Todo(HIP)
-  return 0;//detail::make_counting_transform_iterator(0, list_size_functor{c});
+  return detail::make_counting_transform_iterator(0, list_size_functor{c});
 }
 
 }  // namespace CUDF_EXPORT cudf
