@@ -324,10 +324,10 @@ add_library(
   # src/bitmask/is_element_valid.cpp
   src/copying/concatenate.hip
   # src/copying/contiguous_split.cu
-  # src/copying/copy.cpp
+  src/copying/copy.cpp
   # src/copying/copy.cu
   # src/copying/copy_range.cu
-  # src/copying/gather.cu
+  src/copying/gather.hip
   # src/copying/get_element.cu
   # src/copying/pack.cpp
   # src/copying/purge_nonempty_nulls.cu
@@ -335,7 +335,7 @@ add_library(
   # src/copying/sample.cu
   # src/copying/scatter.cu
   # src/copying/shift.cu
-  # src/copying/slice.cu
+  src/copying/slice.hip
   # src/copying/split.cpp
   # src/copying/segmented_shift.cu
   # src/datetime/datetime_ops.cu
@@ -343,7 +343,7 @@ add_library(
   # src/dictionary/decode.hip
   src/dictionary/detail/concatenate.hip
   # src/dictionary/detail/merge.hip
-  # src/dictionary/dictionary_column_view.cpp
+  src/dictionary/dictionary_column_view.cpp
   # src/dictionary/dictionary_factories.hip
   # src/dictionary/encode.hip
   # src/dictionary/remove_keys.hip
@@ -635,7 +635,7 @@ add_library(
   src/structs/structs_column_factories.hip
   src/structs/structs_column_view.cpp
   # src/structs/utilities.cpp
-  # src/table/row_operators.cu
+  src/table/row_operators.hip
   # src/table/table.cpp
   # src/table/table_device_view.cu
   src/table/table_view.cpp
@@ -668,13 +668,13 @@ add_library(
   # src/unary/math_ops.cu
   # src/unary/nan_ops.cu
   # src/unary/null_ops.cu
-  # src/utilities/default_stream.cpp
+  src/utilities/default_stream.cpp
   # src/utilities/linked_column.cpp
   # src/utilities/logger.cpp
   src/utilities/stacktrace.cpp
-  # src/utilities/traits.cpp
+  src/utilities/traits.cpp
   # src/utilities/type_checks.cpp
-  # src/utilities/type_dispatcher.cpp
+  src/utilities/type_dispatcher.cpp
 )
 
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
