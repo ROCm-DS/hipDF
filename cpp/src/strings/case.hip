@@ -32,7 +32,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace cudf {
 namespace strings {
@@ -153,7 +153,8 @@ struct count_bytes_fn {
 
     // initialize the output for the atomicAdd
     if (lane_idx == 0) { d_offsets[str_idx] = 0; }
-    __syncwarp();
+    //TODO(HIP): double check that this is not necessary
+    //__syncwarp();
 
     if (d_strings.is_null(str_idx)) { return; }
     auto const d_str   = d_strings.element<string_view>(str_idx);
@@ -169,8 +170,8 @@ struct count_bytes_fn {
     }
     // this is every so slightly faster than using the cub::warp_reduce
     if (size > 0) {
-      cuda::atomic_ref<size_type, cuda::thread_scope_block> ref{*(d_offsets + str_idx)};
-      ref.fetch_add(size, cuda::std::memory_order_relaxed);
+      hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_offsets + str_idx)};
+      ref.fetch_add(size, hip::std::memory_order_relaxed);
     }
   }
 };

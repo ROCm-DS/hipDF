@@ -576,61 +576,61 @@ add_library(
   # src/stream_compaction/unique.cu
   # src/stream_compaction/unique_count.cu
   # src/stream_compaction/unique_count_column.cu
-  # src/strings/attributes.cu
-  # src/strings/capitalize.cu
-  # src/strings/case.cu
-  # src/strings/char_types/char_cases.cu
-  # src/strings/char_types/char_types.cu
-  # src/strings/combine/concatenate.cu
-  # src/strings/combine/join.cu
-  # src/strings/combine/join_list_elements.cu
-  # src/strings/contains.cu
-  # src/strings/convert/convert_booleans.cu
-  # src/strings/convert/convert_datetime.cu
-  # src/strings/convert/convert_durations.cu
-  # src/strings/convert/convert_fixed_point.cu
-  # src/strings/convert/convert_floats.cu
-  # src/strings/convert/convert_hex.cu
-  # src/strings/convert/convert_integers.cu
-  # src/strings/convert/convert_ipv4.cu
-  # src/strings/convert/convert_urls.cu
-  # src/strings/convert/convert_lists.cu
-  # src/strings/copying/concatenate.cu
-  # src/strings/copying/copying.cu
-  # src/strings/copying/shift.cu
-  # src/strings/count_matches.cu
-  # src/strings/extract/extract.cu
-  # src/strings/extract/extract_all.cu
-  # src/strings/filling/fill.cu
-  # src/strings/filter_chars.cu
-  # src/strings/like.cu
-  # src/strings/padding.cu
-  # src/strings/json/json_path.cu
+  # src/strings/attributes.hip
+  # src/strings/capitalize.hip
+  # src/strings/case.hip
+  # src/strings/char_types/char_cases.hip
+  # src/strings/char_types/char_types.hip
+  # src/strings/combine/concatenate.hip
+  # src/strings/combine/join.hip
+  # src/strings/combine/join_list_elements.hip
+  # src/strings/contains.hip
+  # src/strings/convert/convert_booleans.hip
+  # src/strings/convert/convert_datetime.hip
+  src/strings/convert/convert_durations.hip
+  src/strings/convert/convert_fixed_point.hip
+  # src/strings/convert/convert_floats.hip
+  # src/strings/convert/convert_hex.hip
+  # src/strings/convert/convert_integers.hip
+  # src/strings/convert/convert_ipv4.hip
+  # src/strings/convert/convert_urls.hip
+  # src/strings/convert/convert_lists.hip
+  # src/strings/copying/concatenate.hip
+  # src/strings/copying/copying.hip
+  # src/strings/copying/shift.hip
+  # src/strings/count_matches.hip
+  # src/strings/extract/extract.hip
+  # src/strings/extract/extract_all.hip
+  # src/strings/filling/fill.hip
+  # src/strings/filter_chars.hip
+  # src/strings/like.hip
+  # src/strings/padding.hip
+  # src/strings/json/json_path.hip
   # src/strings/regex/regcomp.cpp
   # src/strings/regex/regexec.cpp
   # src/strings/regex/regex_program.cpp
-  # src/strings/repeat_strings.cu
-  # src/strings/replace/backref_re.cu
-  # src/strings/replace/multi.cu
-  # src/strings/replace/multi_re.cu
-  # src/strings/replace/replace.cu
-  # src/strings/replace/replace_re.cu
-  # src/strings/reverse.cu
-  # src/strings/search/findall.cu
-  # src/strings/search/find.cu
-  # src/strings/search/find_multiple.cu
-  # src/strings/slice.cu
-  # src/strings/split/partition.cu
-  # src/strings/split/split.cu
-  # src/strings/split/split_re.cu
-  # src/strings/split/split_record.cu
+  # src/strings/repeat_strings.hip
+  # src/strings/replace/backref_re.hip
+  # src/strings/replace/multi.hip
+  # src/strings/replace/multi_re.hip
+  # src/strings/replace/replace.hip
+  # src/strings/replace/replace_re.hip
+  # src/strings/reverse.hip
+  # src/strings/search/findall.hip
+  # src/strings/search/find.hip
+  # src/strings/search/find_multiple.hip
+  # src/strings/slice.hip
+  # src/strings/split/partition.hip
+  # src/strings/split/split.hip
+  # src/strings/split/split_re.hip
+  # src/strings/split/split_record.hip
   src/strings/strings_column_factories.hip
   src/strings/strings_column_view.cpp
   src/strings/strings_scalar_factories.cpp
-  # src/strings/strip.cu
-  # src/strings/translate.cu
-  # src/strings/utilities.cu
-  # src/strings/wrap.cu
+  # src/strings/strip.hip
+  # src/strings/translate.hip
+  # src/strings/utilities.hip
+  # src/strings/wrap.hip
   # src/structs/copying/concatenate.cu
   src/structs/structs_column_factories.hip
   src/structs/structs_column_view.cpp

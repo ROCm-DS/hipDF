@@ -39,9 +39,9 @@
 #include <thrust/optional.h>
 #include <thrust/transform.h>
 
-#include <cuda/std/climits>
-#include <cuda/std/limits>
-#include <cuda/std/type_traits>
+#include <hip/std/climits>
+#include <hip/std/limits>
+#include <hip/std/type_traits>
 
 namespace cudf {
 namespace strings {
@@ -103,7 +103,7 @@ struct string_to_decimal_check_fn {
 
     auto const iter_end = d_str.data() + d_str.size_bytes();
 
-    using UnsignedDecimalType = cuda::std::make_unsigned_t<DecimalType>;
+    using UnsignedDecimalType = hip::std::make_unsigned_t<DecimalType>;
     auto [value, exp_offset]  = parse_integer<UnsignedDecimalType>(iter, iter_end);
 
     // only exponent notation is expected here
@@ -114,6 +114,7 @@ struct string_to_decimal_check_fn {
     if (iter < iter_end) {
       auto exp_result = parse_exponent<true>(iter, iter_end);
       if (!exp_result) { return false; }
+      //TODO(HIP): thrust::optional::value requires a patched version of rocthrust
       exp_ten = exp_result.value();
     }
     exp_ten += exp_offset;
@@ -121,7 +122,7 @@ struct string_to_decimal_check_fn {
     // finally, check for overflow based on the exp_ten and scale values
     return (exp_ten < scale) or
            value <= static_cast<UnsignedDecimalType>(
-                      cuda::std::numeric_limits<DecimalType>::max() /
+                      hip::std::numeric_limits<DecimalType>::max() /
                       static_cast<DecimalType>(exp10(static_cast<double>(exp_ten - scale))));
   }
 };

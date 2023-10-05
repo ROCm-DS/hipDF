@@ -40,7 +40,7 @@
 #include <thrust/transform.h>
 #include <thrust/transform_scan.h>
 
-#include <cub/warp/warp_reduce.cuh>
+#include <hipcub/hipcub.hpp>
 
 namespace cudf {
 namespace strings {
@@ -112,7 +112,7 @@ __global__ void count_characters_parallel_fn(column_device_view const d_strings,
                                              size_type* d_lengths)
 {
   auto const idx    = cudf::detail::grid_1d::global_thread_id();
-  using warp_reduce = cub::WarpReduce<size_type>;
+  using warp_reduce = hipcub::WarpReduce<size_type>;
   __shared__ typename warp_reduce::TempStorage temp_storage;
 
   if (idx >= (d_strings.size() * cudf::detail::warp_size)) { return; }
@@ -228,7 +228,7 @@ std::unique_ptr<column> code_points(strings_column_view const& input,
     thrust::make_counting_iterator<size_type>(0),
     thrust::make_counting_iterator<size_type>(input.size()),
     offsets.begin() + 1,
-    [d_column] __device__(size_type idx) {
+    [d_column] __host__ __device__(size_type idx) {
       size_type length = 0;
       if (!d_column.is_null(idx)) length = d_column.element<string_view>(idx).length();
       return length;

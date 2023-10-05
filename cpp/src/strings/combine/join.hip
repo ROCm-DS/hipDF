@@ -117,7 +117,7 @@ struct join_gather_fn : public join_base_fn {
   {
   }
 
-  __device__ string_index_pair operator()(size_type idx) const
+  __host__ __device__ string_index_pair operator()(size_type idx) const
   {
     auto const [d_str, d_sep] = process_string(idx / 2);
     // every other string is the separator
