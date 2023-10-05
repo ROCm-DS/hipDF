@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "strings/char_types/char_cases.h"
 #include "strings/char_types/char_flags.h"
 
@@ -113,8 +135,8 @@ character_flags_table_type const* get_character_flags_table()
 {
   return d_character_codepoint_flags.find_or_initialize([&](void) {
     character_flags_table_type* table = nullptr;
-    CUDF_CUDA_TRY(cudaMemcpyToSymbol(
-      character_codepoint_flags, g_character_codepoint_flags, sizeof(g_character_codepoint_flags)));
+    CUDF_CUDA_TRY(cudaMemcpyToSymbol(HIP_SYMBOL(
+      character_codepoint_flags), g_character_codepoint_flags, sizeof(g_character_codepoint_flags)));
     CUDF_CUDA_TRY(cudaGetSymbolAddress((void**)&table, character_codepoint_flags));
     return table;
   });
@@ -127,8 +149,8 @@ character_cases_table_type const* get_character_cases_table()
 {
   return d_character_cases_table.find_or_initialize([&](void) {
     character_cases_table_type* table = nullptr;
-    CUDF_CUDA_TRY(cudaMemcpyToSymbol(
-      character_cases_table, g_character_cases_table, sizeof(g_character_cases_table)));
+    CUDF_CUDA_TRY(cudaMemcpyToSymbol(HIP_SYMBOL(
+      character_cases_table), g_character_cases_table, sizeof(g_character_cases_table)));
     CUDF_CUDA_TRY(cudaGetSymbolAddress((void**)&table, character_cases_table));
     return table;
   });
@@ -141,8 +163,8 @@ special_case_mapping const* get_special_case_mapping_table()
 {
   return d_special_case_mappings.find_or_initialize([&](void) {
     special_case_mapping* table = nullptr;
-    CUDF_CUDA_TRY(cudaMemcpyToSymbol(
-      character_special_case_mappings, g_special_case_mappings, sizeof(g_special_case_mappings)));
+    CUDF_CUDA_TRY(cudaMemcpyToSymbol(HIP_SYMBOL(
+      character_special_case_mappings), g_special_case_mappings, sizeof(g_special_case_mappings)));
     CUDF_CUDA_TRY(cudaGetSymbolAddress((void**)&table, character_special_case_mappings));
     return table;
   });

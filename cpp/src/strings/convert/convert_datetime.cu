@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/iterator.cuh>
@@ -398,7 +420,7 @@ struct parse_datetime {
 
     auto const timeparts = parse_into_parts(d_str);
 
-    return T{T::duration(timestamp_from_parts(timeparts))};
+    return T{typename T::duration(timestamp_from_parts(timeparts))};
   }
 };
 
@@ -652,7 +674,7 @@ struct check_datetime_format {
     return dateparts;
   }
 
-  __device__ bool operator()(size_type idx)
+  __host__ __device__ bool operator()(size_type idx)
   {
     if (d_strings.is_null(idx)) return false;
 
@@ -661,7 +683,8 @@ struct check_datetime_format {
 
     auto const dateparts = check_string(d_str);
     if (!dateparts.has_value()) return false;
-
+    
+    //TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a ticket
     auto const year  = dateparts.value().year;
     auto const month = static_cast<uint32_t>(dateparts.value().month);
     auto const day   = static_cast<uint32_t>(dateparts.value().day);
@@ -826,7 +849,7 @@ struct datetime_formatter_fn {
     auto days_from_timestamp = [tstamp]() {
       auto const count = tstamp.time_since_epoch().count();
       return cuda::std::chrono::sys_days(static_cast<cudf::timestamp_D::duration>(
-        floor<cuda::std::chrono::days>(T::duration(count))));
+        floor<cuda::std::chrono::days>(typename T::duration(count))));
     };
 
     size_type bytes = 0;  // output size
@@ -841,8 +864,8 @@ struct datetime_formatter_fn {
         case 'a':    // weekday abbreviated
         case 'A': {  // weekday full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          auto const day_of_week =
-            cuda::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
+          //TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
+          auto const day_of_week = cuda::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
           auto const day_idx =
             day_of_week + offset_weekdays + (item.value == 'a' ? days_in_week : 0);
           if (day_idx < d_format_names.size())
@@ -852,8 +875,8 @@ struct datetime_formatter_fn {
         case 'b':    // month abbreviated
         case 'B': {  // month full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          auto const month =
-            static_cast<uint32_t>(cuda::std::chrono::year_month_day(days.value()).month());
+          //TODO(HIP): thrust::optional::value requires a patched version of rocthrust
+          auto const month =  static_cast<uint32_t>(cuda::std::chrono::year_month_day(days.value()).month());
           auto const month_idx =
             month - 1 + offset_months + (item.value == 'b' ? months_in_year : 0);
           if (month_idx < d_format_names.size())
@@ -948,7 +971,7 @@ struct datetime_formatter_fn {
   {
     auto const days = cuda::std::chrono::sys_days(
       static_cast<cudf::timestamp_D::duration>(cuda::std::chrono::floor<cuda::std::chrono::days>(
-        T::duration(tstamp.time_since_epoch().count()))));
+        typename T::duration(tstamp.time_since_epoch().count()))));
     auto const ymd = cuda::std::chrono::year_month_day(days);
 
     auto timeparts = get_time_components(tstamp.time_since_epoch().count());
