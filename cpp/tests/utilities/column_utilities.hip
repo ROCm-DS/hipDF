@@ -568,7 +568,7 @@ struct column_comparator_impl {
       rmm::device_uvector<bool>(lhs_row_indices.size(), cudf::test::get_default_stream());
 
 // TODO FIXME
-#if 0
+//#if 0
     thrust::transform(
       rmm::exec_policy(cudf::test::get_default_stream()),
       input_iter,
@@ -576,7 +576,7 @@ struct column_comparator_impl {
       diff_map.begin(),
       ComparatorType(
         *d_lhs_row_indices, *d_rhs_row_indices, fp_ulps, device_comparator, *d_lhs, *d_rhs));
-#endif
+//#endif
 
     auto diff_iter = thrust::copy_if(rmm::exec_policy(cudf::test::get_default_stream()),
                                      input_iter,
