@@ -551,12 +551,12 @@ struct column_comparator_impl {
     auto const device_comparator = comparator.equal_to<false>(cudf::nullate::DYNAMIC{has_nulls});
 
 // TODO FIXME
-#if 0
+//#if 0
     using ComparatorType =
       std::conditional_t<check_exact_equality,
                          corresponding_rows_unequal<decltype(device_comparator)>,
                          corresponding_rows_not_equivalent<decltype(device_comparator)>>;
-#endif                                    
+//#endif                                    
 
     auto differences = rmm::device_uvector<int>(
       lhs_row_indices.size(),
