@@ -280,397 +280,397 @@ add_library(
   src/column/column_factories.cpp
   src/column/column_factories.hip
   src/column/column_view.cpp
-  src/aggregation/aggregation.cpp
-  src/aggregation/aggregation.hip
-  src/aggregation/result_cache.cpp
-  src/ast/expression_parser.cpp
-  src/ast/expressions.cpp
-  src/binaryop/binaryop.cpp
-  src/binaryop/compiled/ATan2.hip
-  src/binaryop/compiled/Add.hip
-  src/binaryop/compiled/BitwiseAnd.hip
-  src/binaryop/compiled/BitwiseOr.hip
-  src/binaryop/compiled/BitwiseXor.hip
-  src/binaryop/compiled/Div.hip
-  src/binaryop/compiled/FloorDiv.hip
-  src/binaryop/compiled/Greater.hip
-  src/binaryop/compiled/GreaterEqual.hip
-  src/binaryop/compiled/IntPow.hip
-  src/binaryop/compiled/Less.hip
-  src/binaryop/compiled/LessEqual.hip
-  src/binaryop/compiled/LogBase.hip
-  src/binaryop/compiled/LogicalAnd.hip
-  src/binaryop/compiled/LogicalOr.hip
-  src/binaryop/compiled/Mod.hip
-  src/binaryop/compiled/Mul.hip
-  src/binaryop/compiled/NullEquals.hip
-  src/binaryop/compiled/NullLogicalAnd.hip
-  src/binaryop/compiled/NullLogicalOr.hip
-  src/binaryop/compiled/NullMax.hip
-  src/binaryop/compiled/NullMin.hip
-  src/binaryop/compiled/PMod.hip
-  src/binaryop/compiled/Pow.hip
-  src/binaryop/compiled/PyMod.hip
-  src/binaryop/compiled/ShiftLeft.hip
-  src/binaryop/compiled/ShiftRight.hip
-  src/binaryop/compiled/ShiftRightUnsigned.hip
-  src/binaryop/compiled/Sub.hip
-  src/binaryop/compiled/TrueDiv.hip
-  src/binaryop/compiled/binary_ops.hip
-  src/binaryop/compiled/equality_ops.hip
-  src/binaryop/compiled/util.cpp
-  src/labeling/label_bins.hip
+  # src/aggregation/aggregation.cpp
+  # src/aggregation/aggregation.hip
+  # src/aggregation/result_cache.cpp
+  # src/ast/expression_parser.cpp
+  # src/ast/expressions.cpp
+  # src/binaryop/binaryop.cpp
+  # src/binaryop/compiled/ATan2.hip
+  # src/binaryop/compiled/Add.hip
+  # src/binaryop/compiled/BitwiseAnd.hip
+  # src/binaryop/compiled/BitwiseOr.hip
+  # src/binaryop/compiled/BitwiseXor.hip
+  # src/binaryop/compiled/Div.hip
+  # src/binaryop/compiled/FloorDiv.hip
+  # src/binaryop/compiled/Greater.hip
+  # src/binaryop/compiled/GreaterEqual.hip
+  # src/binaryop/compiled/IntPow.hip
+  # src/binaryop/compiled/Less.hip
+  # src/binaryop/compiled/LessEqual.hip
+  # src/binaryop/compiled/LogBase.hip
+  # src/binaryop/compiled/LogicalAnd.hip
+  # src/binaryop/compiled/LogicalOr.hip
+  # src/binaryop/compiled/Mod.hip
+  # src/binaryop/compiled/Mul.hip
+  # src/binaryop/compiled/NullEquals.hip
+  # src/binaryop/compiled/NullLogicalAnd.hip
+  # src/binaryop/compiled/NullLogicalOr.hip
+  # src/binaryop/compiled/NullMax.hip
+  # src/binaryop/compiled/NullMin.hip
+  # src/binaryop/compiled/PMod.hip
+  # src/binaryop/compiled/Pow.hip
+  # src/binaryop/compiled/PyMod.hip
+  # src/binaryop/compiled/ShiftLeft.hip
+  # src/binaryop/compiled/ShiftRight.hip
+  # src/binaryop/compiled/ShiftRightUnsigned.hip
+  # src/binaryop/compiled/Sub.hip
+  # src/binaryop/compiled/TrueDiv.hip
+  # src/binaryop/compiled/binary_ops.hip
+  # src/binaryop/compiled/equality_ops.hip
+  # src/binaryop/compiled/util.cpp
+  # src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
-  src/bitmask/is_element_valid.cpp
+  # src/bitmask/is_element_valid.cpp
   src/copying/concatenate.hip
-  src/copying/contiguous_split.hip
+  # src/copying/contiguous_split.hip
   src/copying/copy.cpp
-  src/copying/copy.hip
-  src/copying/copy_range.hip
+  # src/copying/copy.hip
+  # src/copying/copy_range.hip
   src/copying/gather.hip
-  src/copying/get_element.hip
-  src/copying/pack.cpp
+  # src/copying/get_element.hip
+  # src/copying/pack.cpp
   src/copying/purge_nonempty_nulls.hip
-  src/copying/reverse.hip
-  src/copying/sample.hip
-  src/copying/scatter.hip
-  src/copying/shift.hip
+  #  src/copying/reverse.hip
+  # src/copying/sample.hip
+  # src/copying/scatter.hip
+  # src/copying/shift.hip
   src/copying/slice.hip
-  src/copying/split.cpp
-  src/copying/segmented_shift.hip
-  src/datetime/datetime_ops.hip
-  src/dictionary/add_keys.hip
-  src/dictionary/decode.hip
+  # src/copying/split.cpp
+  # src/copying/segmented_shift.hip
+  # src/datetime/datetime_ops.hip
+  # src/dictionary/add_keys.hip
+  # src/dictionary/decode.hip
   src/dictionary/detail/concatenate.hip
-  src/dictionary/detail/merge.hip
+  # src/dictionary/detail/merge.hip
   src/dictionary/dictionary_column_view.cpp
-  src/dictionary/dictionary_factories.hip
-  src/dictionary/encode.hip
-  src/dictionary/remove_keys.hip
-  src/dictionary/replace.hip
-  src/dictionary/search.hip
-  src/dictionary/set_keys.hip
-  src/filling/calendrical_month_sequence.hip
-  src/filling/fill.hip
-  src/filling/repeat.hip
-  src/filling/sequence.hip
-  src/groupby/groupby.hip
-  src/groupby/hash/groupby.hip
-  src/groupby/sort/aggregate.cpp
-  src/groupby/sort/group_argmax.hip
-  src/groupby/sort/group_argmin.hip
-  src/groupby/sort/group_collect.hip
-  src/groupby/sort/group_correlation.hip
-  src/groupby/sort/group_count.hip
-  src/groupby/sort/group_m2.hip
-  src/groupby/sort/group_max.hip
-  src/groupby/sort/group_min.hip
-  src/groupby/sort/group_merge_lists.hip
-  src/groupby/sort/group_merge_m2.hip
-  src/groupby/sort/group_nth_element.hip
-  src/groupby/sort/group_nunique.hip
-  src/groupby/sort/group_product.hip
-  src/groupby/sort/group_quantiles.hip
-  src/groupby/sort/group_std.hip
-  src/groupby/sort/group_sum.hip
-  src/groupby/sort/scan.cpp
-  src/groupby/sort/group_count_scan.hip
-  src/groupby/sort/group_max_scan.hip
-  src/groupby/sort/group_min_scan.hip
-  src/groupby/sort/group_rank_scan.hip
-  src/groupby/sort/group_replace_nulls.hip
-  src/groupby/sort/group_sum_scan.hip
-  src/groupby/sort/sort_helper.hip
-  src/hash/hashing.hip
-  src/hash/md5_hash.hip
-  src/hash/murmurhash3_x86_32.hip
-  src/hash/murmurhash3_x64_128.hip
-  src/hash/spark_murmurhash3_x86_32.hip
-  src/hash/xxhash_64.hip
+  # src/dictionary/dictionary_factories.hip
+  # src/dictionary/encode.hip
+  # src/dictionary/remove_keys.hip
+  # src/dictionary/replace.hip
+  # src/dictionary/search.hip
+  # src/dictionary/set_keys.hip
+  # src/filling/calendrical_month_sequence.hip
+  # src/filling/fill.hip
+  # src/filling/repeat.hip
+  # src/filling/sequence.hip
+  # src/groupby/groupby.hip
+  # src/groupby/hash/groupby.hip
+  # src/groupby/sort/aggregate.cpp
+  # src/groupby/sort/group_argmax.hip
+  # src/groupby/sort/group_argmin.hip
+  # src/groupby/sort/group_collect.hip
+  # src/groupby/sort/group_correlation.hip
+  # src/groupby/sort/group_count.hip
+  # src/groupby/sort/group_m2.hip
+  # src/groupby/sort/group_max.hip
+  # src/groupby/sort/group_min.hip
+  # src/groupby/sort/group_merge_lists.hip
+  # src/groupby/sort/group_merge_m2.hip
+  # src/groupby/sort/group_nth_element.hip
+  # src/groupby/sort/group_nunique.hip
+  # src/groupby/sort/group_product.hip
+  # src/groupby/sort/group_quantiles.hip
+  # src/groupby/sort/group_std.hip
+  # src/groupby/sort/group_sum.hip
+  # src/groupby/sort/scan.cpp
+  # src/groupby/sort/group_count_scan.hip
+  # src/groupby/sort/group_max_scan.hip
+  # src/groupby/sort/group_min_scan.hip
+  # src/groupby/sort/group_rank_scan.hip
+  # src/groupby/sort/group_replace_nulls.hip
+  # src/groupby/sort/group_sum_scan.hip
+  # src/groupby/sort/sort_helper.hip
+  # src/hash/hashing.hip
+  # src/hash/md5_hash.hip
+  # src/hash/murmurhash3_x86_32.hip
+  # src/hash/murmurhash3_x64_128.hip
+  # src/hash/spark_murmurhash3_x86_32.hip
+  # src/hash/xxhash_64.hip
   src/interop/dlpack.cpp
-  src/interop/from_arrow.hip
-  src/interop/to_arrow.hip
-  src/interop/detail/arrow_allocator.cpp
-  src/io/avro/avro.cpp
-  src/io/avro/avro_gpu.hip
-  src/io/avro/reader_impl.hip
-  src/io/comp/brotli_dict.cpp
-  src/io/comp/cpu_unbz2.cpp
-  src/io/comp/debrotli.hip
-  src/io/comp/gpuinflate.hip
-  src/io/comp/hipcomp_adapter.cpp
-  src/io/comp/hipcomp_adapter.hip
-  src/io/comp/snap.hip
-  src/io/comp/statistics.hip
-  src/io/comp/uncomp.cpp
-  src/io/comp/unsnap.hip
-  src/io/csv/csv_gpu.hip
-  src/io/csv/durations.hip
-  src/io/csv/reader_impl.hip
-  src/io/csv/writer_impl.hip
-  src/io/functions.cpp
-  src/io/json/byte_range_info.hip
-  src/io/json/json_column.hip
-  src/io/json/json_tree.hip
-  src/io/json/nested_json_gpu.hip
-  src/io/json/read_json.hip
-  src/io/json/legacy/json_gpu.hip
-  src/io/json/legacy/reader_impl.hip
-  src/io/json/write_json.hip
-  src/io/orc/aggregate_orc_metadata.cpp
-  src/io/orc/dict_enc.hip
-  src/io/orc/orc.cpp
-  src/io/orc/reader_impl.hip
-  src/io/orc/stats_enc.hip
-  src/io/orc/stripe_data.hip
-  src/io/orc/stripe_enc.hip
-  src/io/orc/stripe_init.hip
-  src/datetime/timezone.cpp
-  src/io/orc/writer_impl.hip
-  src/io/parquet/compact_protocol_reader.cpp
-  src/io/parquet/compact_protocol_writer.cpp
-  src/io/parquet/decode_preprocess.hip
-  src/io/parquet/page_data.hip
-  src/io/parquet/chunk_dict.hip
-  src/io/parquet/page_enc.hip
-  src/io/parquet/page_hdr.hip
-  src/io/parquet/page_delta_decode.hip
-  src/io/parquet/page_string_decode.hip
-  src/io/parquet/predicate_pushdown.cpp
-  src/io/parquet/reader.cpp
-  src/io/parquet/reader_impl.cpp
-  src/io/parquet/reader_impl_helpers.cpp
-  src/io/parquet/reader_impl_preprocess.hip
-  src/io/parquet/writer_impl.hip
-  src/io/statistics/orc_column_statistics.hip
-  src/io/statistics/parquet_column_statistics.hip
-  src/io/text/byte_range_info.cpp
-  src/io/text/data_chunk_source_factories.cpp
-  src/io/text/bgzip_data_chunk_source.hip
-  src/io/text/bgzip_utils.cpp
-  src/io/text/multibyte_split.hip
-  src/io/utilities/arrow_io_source.cpp
-  src/io/utilities/column_buffer.cpp
-  src/io/utilities/config_utils.cpp
-  src/io/utilities/data_sink.cpp
-  src/io/utilities/datasource.cpp
-  src/io/utilities/file_io_utilities.cpp
-  src/io/utilities/parsing_utils.hip
-  src/io/utilities/row_selection.cpp
-  src/io/utilities/trie.hip
-  src/jit/cache.cpp
-  src/jit/parser.cpp
-  src/jit/util.cpp
-  src/join/conditional_join.hip
-  src/join/cross_join.hip
-  src/join/hash_join.hip
-  src/join/join.hip
-  src/join/join_utils.hip
-  src/join/mixed_join.hip
-  src/join/mixed_join_kernel.hip
-  src/join/mixed_join_kernel_nulls.hip
-  src/join/mixed_join_kernels_semi.hip
-  src/join/mixed_join_semi.hip
-  src/join/mixed_join_size_kernel.hip
-  src/join/mixed_join_size_kernel_nulls.hip
-  src/join/mixed_join_size_kernels_semi.hip
-  src/join/semi_join.hip
-  src/lists/contains.hip
-  src/lists/combine/concatenate_list_elements.hip
-  src/lists/combine/concatenate_rows.hip
-  src/lists/copying/concatenate.hip
-  src/lists/copying/copying.hip
-  src/lists/copying/gather.hip
-  src/lists/copying/segmented_gather.hip
-  src/lists/copying/scatter_helper.hip
-  src/lists/count_elements.hip
-  src/lists/dremel.hip
-  src/lists/explode.hip
-  src/lists/extract.hip
-  src/lists/interleave_columns.hip
-  src/lists/lists_column_factories.hip
+  # src/interop/from_arrow.hip
+  # src/interop/to_arrow.hip
+  # src/interop/detail/arrow_allocator.cpp
+  # src/io/avro/avro.cpp
+  # src/io/avro/avro_gpu.hip
+  # src/io/avro/reader_impl.hip
+  # src/io/comp/brotli_dict.cpp
+  # src/io/comp/cpu_unbz2.cpp
+  # src/io/comp/debrotli.hip
+  # src/io/comp/gpuinflate.hip
+  # src/io/comp/hipcomp_adapter.cpp
+  # src/io/comp/hipcomp_adapter.hip
+  # src/io/comp/snap.hip
+  # src/io/comp/statistics.hip
+  # src/io/comp/uncomp.cpp
+  # src/io/comp/unsnap.hip
+  # src/io/csv/csv_gpu.hip
+  # src/io/csv/durations.hip
+  # src/io/csv/reader_impl.hip
+  # src/io/csv/writer_impl.hip
+  # src/io/functions.cpp
+  # src/io/json/byte_range_info.hip
+  # src/io/json/json_column.hip
+  # src/io/json/json_tree.hip
+  # src/io/json/nested_json_gpu.hip
+  # src/io/json/read_json.hip
+  # src/io/json/legacy/json_gpu.hip
+  # src/io/json/legacy/reader_impl.hip
+  # src/io/json/write_json.hip
+  # src/io/orc/aggregate_orc_metadata.cpp
+  # src/io/orc/dict_enc.hip
+  # src/io/orc/orc.cpp
+  # src/io/orc/reader_impl.hip
+  # src/io/orc/stats_enc.hip
+  # src/io/orc/stripe_data.hip
+  # src/io/orc/stripe_enc.hip
+  # src/io/orc/stripe_init.hip
+  # src/datetime/timezone.cpp
+  # src/io/orc/writer_impl.hip
+  # src/io/parquet/compact_protocol_reader.cpp
+  # src/io/parquet/compact_protocol_writer.cpp
+  # src/io/parquet/decode_preprocess.hip
+  # src/io/parquet/page_data.hip
+  # src/io/parquet/chunk_dict.hip
+  # src/io/parquet/page_enc.hip
+  # src/io/parquet/page_hdr.hip
+  # src/io/parquet/page_delta_decode.hip
+  # src/io/parquet/page_string_decode.hip
+  # src/io/parquet/predicate_pushdown.cpp
+  # src/io/parquet/reader.cpp
+  # src/io/parquet/reader_impl.cpp
+  # src/io/parquet/reader_impl_helpers.cpp
+  # src/io/parquet/reader_impl_preprocess.hip
+  # src/io/parquet/writer_impl.hip
+  # src/io/statistics/orc_column_statistics.hip
+  # src/io/statistics/parquet_column_statistics.hip
+  # src/io/text/byte_range_info.cpp
+  # src/io/text/data_chunk_source_factories.cpp
+  # src/io/text/bgzip_data_chunk_source.hip
+  # src/io/text/bgzip_utils.cpp
+  # src/io/text/multibyte_split.hip
+  # src/io/utilities/arrow_io_source.cpp
+  # src/io/utilities/column_buffer.cpp
+  # src/io/utilities/config_utils.cpp
+  # src/io/utilities/data_sink.cpp
+  # src/io/utilities/datasource.cpp
+  # src/io/utilities/file_io_utilities.cpp
+  # src/io/utilities/parsing_utils.hip
+  # src/io/utilities/row_selection.cpp
+  # src/io/utilities/trie.hip
+  # src/jit/cache.cpp
+  # src/jit/parser.cpp
+  # src/jit/util.cpp
+  # src/join/conditional_join.hip
+  # src/join/cross_join.hip
+  # src/join/hash_join.hip
+  # src/join/join.hip
+  # src/join/join_utils.hip
+  # src/join/mixed_join.hip
+  # src/join/mixed_join_kernel.hip
+  # src/join/mixed_join_kernel_nulls.hip
+  # src/join/mixed_join_kernels_semi.hip
+  # src/join/mixed_join_semi.hip
+  # src/join/mixed_join_size_kernel.hip
+  # src/join/mixed_join_size_kernel_nulls.hip
+  # src/join/mixed_join_size_kernels_semi.hip
+  # src/join/semi_join.hip
+  # src/lists/contains.hip
+  # src/lists/combine/concatenate_list_elements.hip
+  # src/lists/combine/concatenate_rows.hip
+  # src/lists/copying/concatenate.hip
+  # src/lists/copying/copying.hip
+  # src/lists/copying/gather.hip
+  # src/lists/copying/segmented_gather.hip
+  # src/lists/copying/scatter_helper.hip
+  # src/lists/count_elements.hip
+  # src/lists/dremel.hip
+  # src/lists/explode.hip
+  # src/lists/extract.hip
+  # src/lists/interleave_columns.hip
+  # src/lists/lists_column_factories.hip
   src/lists/lists_column_view.hip
-  src/lists/reverse.hip
-  src/lists/segmented_sort.hip
-  src/lists/sequences.hip
-  src/lists/set_operations.hip
-  src/lists/stream_compaction/apply_boolean_mask.hip
-  src/lists/stream_compaction/distinct.hip
-  src/lists/utilities.hip
-  src/merge/merge.hip
-  src/partitioning/partitioning.hip
-  src/partitioning/round_robin.hip
-  src/quantiles/tdigest/tdigest.hip
-  src/quantiles/tdigest/tdigest_aggregation.hip
-  src/quantiles/tdigest/tdigest_column_view.cpp
-  src/quantiles/quantile.hip
-  src/quantiles/quantiles.hip
-  src/reductions/all.hip
-  src/reductions/any.hip
-  src/reductions/collect_ops.hip
-  src/reductions/max.hip
-  src/reductions/mean.hip
-  src/reductions/min.hip
-  src/reductions/minmax.hip
-  src/reductions/nth_element.hip
-  src/reductions/product.hip
-  src/reductions/reductions.cpp
-  src/reductions/scan/rank_scan.hip
-  src/reductions/scan/scan.cpp
-  src/reductions/scan/scan_exclusive.hip
-  src/reductions/scan/scan_inclusive.hip
-  src/reductions/segmented/all.hip
-  src/reductions/segmented/any.hip
-  src/reductions/segmented/counts.hip
-  src/reductions/segmented/max.hip
-  src/reductions/segmented/mean.hip
-  src/reductions/segmented/min.hip
-  src/reductions/segmented/nunique.hip
-  src/reductions/segmented/product.hip
-  src/reductions/segmented/reductions.cpp
-  src/reductions/segmented/std.hip
-  src/reductions/segmented/sum.hip
-  src/reductions/segmented/sum_of_squares.hip
-  src/reductions/segmented/update_validity.hip
-  src/reductions/segmented/var.hip
-  src/reductions/std.hip
-  src/reductions/sum.hip
-  src/reductions/sum_of_squares.hip
-  src/reductions/var.hip
-  src/replace/clamp.hip
-  src/replace/nans.hip
-  src/replace/nulls.hip
-  src/replace/replace.hip
-  src/reshape/byte_cast.hip
-  src/reshape/interleave_columns.hip
-  src/reshape/tile.hip
-  src/rolling/detail/optimized_unbounded_window.cpp
-  src/rolling/detail/rolling_collect_list.hip
-  src/rolling/detail/rolling_fixed_window.hip
-  src/rolling/detail/rolling_variable_window.hip
-  src/rolling/grouped_rolling.hip
-  src/rolling/range_window_bounds.cpp
-  src/rolling/rolling.hip
-  src/round/round.hip
+  # src/lists/reverse.hip
+  # src/lists/segmented_sort.hip
+  # src/lists/sequences.hip
+  # src/lists/set_operations.hip
+  # src/lists/stream_compaction/apply_boolean_mask.hip
+  # src/lists/stream_compaction/distinct.hip
+  # src/lists/utilities.hip
+  # src/merge/merge.hip
+  # src/partitioning/partitioning.hip
+  # src/partitioning/round_robin.hip
+  # src/quantiles/tdigest/tdigest.hip
+  # src/quantiles/tdigest/tdigest_aggregation.hip
+  # src/quantiles/tdigest/tdigest_column_view.cpp
+  # src/quantiles/quantile.hip
+  # src/quantiles/quantiles.hip
+  # src/reductions/all.hip
+  # src/reductions/any.hip
+  # src/reductions/collect_ops.hip
+  # src/reductions/max.hip
+  # src/reductions/mean.hip
+  # src/reductions/min.hip
+  # src/reductions/minmax.hip
+  # src/reductions/nth_element.hip
+  # src/reductions/product.hip
+  # src/reductions/reductions.cpp
+  # src/reductions/scan/rank_scan.hip
+  # src/reductions/scan/scan.cpp
+  # src/reductions/scan/scan_exclusive.hip
+  # src/reductions/scan/scan_inclusive.hip
+  # src/reductions/segmented/all.hip
+  # src/reductions/segmented/any.hip
+  # src/reductions/segmented/counts.hip
+  # src/reductions/segmented/max.hip
+  # src/reductions/segmented/mean.hip
+  # src/reductions/segmented/min.hip
+  # src/reductions/segmented/nunique.hip
+  # src/reductions/segmented/product.hip
+  # src/reductions/segmented/reductions.cpp
+  # src/reductions/segmented/std.hip
+  # src/reductions/segmented/sum.hip
+  # src/reductions/segmented/sum_of_squares.hip
+  # src/reductions/segmented/update_validity.hip
+  # src/reductions/segmented/var.hip
+  # src/reductions/std.hip
+  # src/reductions/sum.hip
+  # src/reductions/sum_of_squares.hip
+  # src/reductions/var.hip
+  # src/replace/clamp.hip
+  # src/replace/nans.hip
+  # src/replace/nulls.hip
+  # src/replace/replace.hip
+  # src/reshape/byte_cast.hip
+  # src/reshape/interleave_columns.hip
+  # src/reshape/tile.hip
+  # src/rolling/detail/optimized_unbounded_window.cpp
+  # src/rolling/detail/rolling_collect_list.hip
+  # src/rolling/detail/rolling_fixed_window.hip
+  # src/rolling/detail/rolling_variable_window.hip
+  # src/rolling/grouped_rolling.hip
+  # src/rolling/range_window_bounds.cpp
+  # src/rolling/rolling.hip
+  # src/round/round.hip
   src/scalar/scalar.cpp
   src/scalar/scalar_factories.cpp
-  src/search/contains_column.hip
-  src/search/contains_scalar.hip
-  src/search/contains_table.hip
-  src/search/search_ordered.hip
-  src/sort/is_sorted.hip
-  src/sort/rank.hip
-  src/sort/segmented_sort.hip
-  src/sort/sort_column.hip
-  src/sort/sort.hip
-  src/sort/stable_segmented_sort.hip
-  src/sort/stable_sort_column.hip
-  src/sort/stable_sort.hip
-  src/stream_compaction/apply_boolean_mask.hip
-  src/stream_compaction/distinct.hip
-  src/stream_compaction/distinct_count.hip
-  src/stream_compaction/distinct_reduce.hip
-  src/stream_compaction/drop_nans.hip
-  src/stream_compaction/drop_nulls.hip
-  src/stream_compaction/stable_distinct.hip
-  src/stream_compaction/unique.hip
-  src/stream_compaction/unique_count.hip
-  src/stream_compaction/unique_count_column.hip
+  # src/search/contains_column.hip
+  # src/search/contains_scalar.hip
+  # src/search/contains_table.hip
+  # src/search/search_ordered.hip
+  # src/sort/is_sorted.hip
+  # src/sort/rank.hip
+  # src/sort/segmented_sort.hip
+  # src/sort/sort_column.hip
+  # src/sort/sort.hip
+  # src/sort/stable_segmented_sort.hip
+  # src/sort/stable_sort_column.hip
+  # src/sort/stable_sort.hip
+  # src/stream_compaction/apply_boolean_mask.hip
+  # src/stream_compaction/distinct.hip
+  # src/stream_compaction/distinct_count.hip
+  # src/stream_compaction/distinct_reduce.hip
+  # src/stream_compaction/drop_nans.hip
+  # src/stream_compaction/drop_nulls.hip
+  # src/stream_compaction/stable_distinct.hip
+  # src/stream_compaction/unique.hip
+  # src/stream_compaction/unique_count.hip
+  # src/stream_compaction/unique_count_column.hip
   src/strings/attributes.hip
   src/strings/capitalize.hip
-  src/strings/case.hip
-  src/strings/char_types/char_cases.hip
-  src/strings/char_types/char_types.hip
-  src/strings/combine/concatenate.hip
-  src/strings/combine/join.hip
-  src/strings/combine/join_list_elements.hip
-  src/strings/contains.hip
-  src/strings/convert/convert_booleans.hip
+  # src/strings/case.hip
+  # src/strings/char_types/char_cases.hip
+  # src/strings/char_types/char_types.hip
+  # src/strings/combine/concatenate.hip
+  # src/strings/combine/join.hip
+  # src/strings/combine/join_list_elements.hip
+  # src/strings/contains.hip
+  # src/strings/convert/convert_booleans.hip
   src/strings/convert/convert_datetime.hip
   src/strings/convert/convert_durations.hip
-  src/strings/convert/convert_fixed_point.hip
-  src/strings/convert/convert_floats.hip
-  src/strings/convert/convert_hex.hip
-  src/strings/convert/convert_integers.hip
-  src/strings/convert/convert_ipv4.hip
-  src/strings/convert/convert_urls.hip
-  src/strings/convert/convert_lists.hip
-  src/strings/copying/concatenate.hip
-  src/strings/copying/copying.hip
-  src/strings/copying/shift.hip
-  src/strings/count_matches.hip
-  src/strings/extract/extract.hip
-  src/strings/extract/extract_all.hip
-  src/strings/filling/fill.hip
-  src/strings/filter_chars.hip
-  src/strings/like.hip
-  src/strings/padding.hip
-  src/strings/json/json_path.hip
-  src/strings/regex/regcomp.cpp
-  src/strings/regex/regexec.cpp
-  src/strings/regex/regex_program.cpp
-  src/strings/repeat_strings.hip
-  src/strings/replace/backref_re.hip
-  src/strings/replace/multi.hip
-  src/strings/replace/multi_re.hip
-  src/strings/replace/replace.hip
-  src/strings/replace/replace_re.hip
-  src/strings/reverse.hip
-  src/strings/search/findall.hip
-  src/strings/search/find.hip
-  src/strings/search/find_multiple.hip
-  src/strings/slice.hip
-  src/strings/split/partition.hip
-  src/strings/split/split.hip
-  src/strings/split/split_re.hip
-  src/strings/split/split_record.hip
+  #src/strings/convert/convert_fixed_point.hip
+  # src/strings/convert/convert_floats.hip
+  # src/strings/convert/convert_hex.hip
+  # src/strings/convert/convert_integers.hip
+  # src/strings/convert/convert_ipv4.hip
+  # src/strings/convert/convert_urls.hip
+  # src/strings/convert/convert_lists.hip
+  # src/strings/copying/concatenate.hip
+  # src/strings/copying/copying.hip
+  # src/strings/copying/shift.hip
+  # src/strings/count_matches.hip
+  # src/strings/extract/extract.hip
+  # src/strings/extract/extract_all.hip
+  # src/strings/filling/fill.hip
+  # src/strings/filter_chars.hip
+  # src/strings/like.hip
+  # src/strings/padding.hip
+  # src/strings/json/json_path.hip
+  # src/strings/regex/regcomp.cpp
+  # src/strings/regex/regexec.cpp
+  # src/strings/regex/regex_program.cpp
+  # src/strings/repeat_strings.hip
+  # src/strings/replace/backref_re.hip
+  # src/strings/replace/multi.hip
+  # src/strings/replace/multi_re.hip
+  # src/strings/replace/replace.hip
+  # src/strings/replace/replace_re.hip
+  # src/strings/reverse.hip
+  # src/strings/search/findall.hip
+  # src/strings/search/find.hip
+  # src/strings/search/find_multiple.hip
+  # src/strings/slice.hip
+  # src/strings/split/partition.hip
+  # src/strings/split/split.hip
+  # src/strings/split/split_re.hip
+  # src/strings/split/split_record.hip
   src/strings/strings_column_factories.hip
   src/strings/strings_column_view.cpp
   src/strings/strings_scalar_factories.cpp
-  src/strings/strip.hip
-  src/strings/translate.hip
-  src/strings/utilities.hip
-  src/strings/wrap.hip
+  # src/strings/strip.hip
+  # src/strings/translate.hip
+  # src/strings/utilities.hip
+  # src/strings/wrap.hip
   src/structs/copying/concatenate.hip
   src/structs/structs_column_factories.hip
   src/structs/structs_column_view.cpp
   src/structs/utilities.cpp
   src/table/row_operators.hip
-  src/table/table.cpp
+  # src/table/table.cpp
   src/table/table_device_view.hip
   src/table/table_view.cpp
-  src/text/detokenize.hip
-  src/text/edit_distance.hip
-  src/text/generate_ngrams.hip
-  src/text/jaccard.hip
-  src/text/minhash.hip
-  src/text/ngrams_tokenize.hip
-  src/text/normalize.hip
-  src/text/replace.hip
-  src/text/stemmer.hip
-  src/text/subword/bpe_tokenizer.hip
-  src/text/subword/data_normalizer.hip
-  src/text/subword/load_hash_file.hip
-  src/text/subword/load_merges_file.hip
-  src/text/subword/subword_tokenize.hip
-  src/text/subword/wordpiece_tokenizer.hip
-  src/text/tokenize.hip
-  src/transform/bools_to_mask.hip
-  src/transform/compute_column.hip
-  src/transform/encode.hip
-  src/transform/mask_to_bools.hip
-  src/transform/nans_to_nulls.hip
-  src/transform/one_hot_encode.hip
-  src/transform/row_bit_count.hip
-  src/transform/transform.cpp
-  src/transpose/transpose.hip
-  src/unary/cast_ops.hip
-  src/unary/math_ops.hip
-  src/unary/nan_ops.hip
-  src/unary/null_ops.hip
+  # src/text/detokenize.hip
+  # src/text/edit_distance.hip
+  # src/text/generate_ngrams.hip
+  # src/text/jaccard.hip
+  # src/text/minhash.hip
+  # src/text/ngrams_tokenize.hip
+  # src/text/normalize.hip
+  # src/text/replace.hip
+  # src/text/stemmer.hip
+  # src/text/subword/bpe_tokenizer.hip
+  # src/text/subword/data_normalizer.hip
+  # src/text/subword/load_hash_file.hip
+  # src/text/subword/load_merges_file.hip
+  # src/text/subword/subword_tokenize.hip
+  # src/text/subword/wordpiece_tokenizer.hip
+  # src/text/tokenize.hip
+  # src/transform/bools_to_mask.hip
+  # src/transform/compute_column.hip
+  # src/transform/encode.hip
+  # src/transform/mask_to_bools.hip
+  # src/transform/nans_to_nulls.hip
+  # src/transform/one_hot_encode.hip
+  # src/transform/row_bit_count.hip
+  # src/transform/transform.cpp
+  # src/transpose/transpose.hip
+  # src/unary/cast_ops.hip
+  # src/unary/math_ops.hip
+  # src/unary/nan_ops.hip
+  # src/unary/null_ops.hip
   src/utilities/default_stream.cpp
   src/utilities/linked_column.cpp
-  src/utilities/logger.cpp
+  # src/utilities/logger.cpp
   src/utilities/stacktrace.cpp
   src/utilities/traits.cpp
   src/utilities/type_checks.cpp
