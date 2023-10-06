@@ -296,7 +296,7 @@ std::unique_ptr<column> concatenate(host_span<column_view const> columns,
           bytes_offset;
 
         CUDF_CUDA_TRY(
-          cudaMemcpyAsync(d_new_chars, d_chars, bytes, cudaMemcpyDefault, stream.value()));
+          hipMemcpyAsync(d_new_chars, d_chars, bytes, hipMemcpyDefault, stream.value()));
 
         // get ready for the next column
         d_new_chars += bytes;

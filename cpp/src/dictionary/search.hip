@@ -157,7 +157,7 @@ std::unique_ptr<scalar> get_index(dictionary_column_view const& dictionary,
   if (dictionary.is_empty())
     return std::make_unique<numeric_scalar<uint32_t>>(0, false, stream, mr);
   return type_dispatcher<dispatch_storage_type>(
-    //dictionary.keys().type(), find_index_fn(), dictionary, key, stream, mr);
+    dictionary.keys().type(), find_index_fn(), dictionary, key, stream, mr);
 }
 
 std::unique_ptr<scalar> get_insert_index(dictionary_column_view const& dictionary,
@@ -168,7 +168,7 @@ std::unique_ptr<scalar> get_insert_index(dictionary_column_view const& dictionar
   if (dictionary.is_empty())
     return std::make_unique<numeric_scalar<uint32_t>>(0, false, stream, mr);
   return type_dispatcher<dispatch_storage_type>(
-    //dictionary.keys().type(), find_insert_index_fn(), dictionary, key, stream, mr);
+    dictionary.keys().type(), find_insert_index_fn(), dictionary, key, stream, mr);
 }
 
 }  // namespace detail

@@ -38,7 +38,7 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace cudf {
 namespace strings {
@@ -159,8 +159,8 @@ __global__ void finder_warp_parallel_fn(column_device_view const d_strings,
   }
 
   // find stores the minimum position while rfind stores the maximum position
-  // note that this was slightly faster than using cub::WarpReduce
-  cuda::atomic_ref<size_type, cuda::thread_scope_block> ref{*(d_results + str_idx)};
+  // note that this was slightly faster than using hipcub::WarpReduce
+  hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_results + str_idx)};
   forward ? ref.fetch_min(position, hip::std::memory_order_relaxed)
           : ref.fetch_max(position, hip::std::memory_order_relaxed);
   __syncwarp();
@@ -349,7 +349,7 @@ __global__ void contains_warp_parallel_fn(column_device_view const d_strings,
                                           bool* d_results)
 {
   size_type const idx = static_cast<size_type>(threadIdx.x + blockIdx.x * blockDim.x);
-  using warp_reduce   = cub::WarpReduce<bool>;
+  using warp_reduce   = hipcub::WarpReduce<bool>;
   __shared__ typename warp_reduce::TempStorage temp_storage;
 
   if (idx >= (d_strings.size() * cudf::detail::warp_size)) { return; }
@@ -367,7 +367,7 @@ __global__ void contains_warp_parallel_fn(column_device_view const d_strings,
     // check the target matches this part of the d_str data
     if (d_target.compare(d_str.data() + i, d_target.size_bytes()) == 0) { found = true; }
   }
-  auto const result = warp_reduce(temp_storage).Reduce(found, cub::Max());
+  auto const result = warp_reduce(temp_storage).Reduce(found, hipcub::Max());
   if (lane_idx == 0) { d_results[str_idx] = result; }
 }
 

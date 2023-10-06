@@ -54,7 +54,7 @@ struct IteratorTest : public cudf::test::BaseFixture {
 
     // Get temporary storage size
     size_t temp_storage_bytes = 0;
-    cub::DeviceReduce::Reduce(nullptr,
+    hipcub::DeviceReduce::Reduce(nullptr,
                               temp_storage_bytes,
                               d_in,
                               dev_result.begin(),
@@ -67,7 +67,7 @@ struct IteratorTest : public cudf::test::BaseFixture {
     rmm::device_buffer d_temp_storage(temp_storage_bytes, cudf::get_default_stream());
 
     // Run reduction
-    cub::DeviceReduce::Reduce(d_temp_storage.data(),
+    hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                               temp_storage_bytes,
                               d_in,
                               dev_result.begin(),

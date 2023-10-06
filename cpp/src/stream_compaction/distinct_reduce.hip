@@ -27,7 +27,7 @@ namespace {
  * @brief A functor to perform reduce-by-key with keys are rows that compared equal.
  *
  * TODO: We need to switch to use `static_reduction_map` when it is ready
- * (https://github.com/NVIDIA/cuCollections/pull/98).
+ * (https://github.com/NVIDIA/hipcollections/pull/98).
  */
 template <typename MapView, typename KeyHasher, typename KeyEqual>
 struct reduce_by_row_fn {

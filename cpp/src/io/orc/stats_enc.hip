@@ -72,7 +72,7 @@ __global__ void __launch_bounds__(block_size, 1)
                                  statistics_chunk const* chunks,
                                  uint32_t statistics_count)
 {
-  using block_scan = cub::BlockScan<uint32_t, block_size, cub::BLOCK_SCAN_WARP_SCANS>;
+  using block_scan = hipcub::BlockScan<uint32_t, block_size, hipcub::BLOCK_SCAN_WARP_SCANS>;
   __shared__ typename block_scan::TempStorage temp_storage;
   volatile uint32_t stats_size = 0;
   auto t                       = threadIdx.x;

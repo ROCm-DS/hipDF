@@ -270,7 +270,7 @@ __global__ void copy_block_partitions(InputIter input_iter,
     reinterpret_cast<size_type*>(block_output + OPTIMIZED_BLOCK_SIZE * OPTIMIZED_ROWS_PER_THREAD);
   auto partition_offset_global = partition_offset_shared + num_partitions + 1;
 
-  using BlockScan = cub::BlockScan<size_type, OPTIMIZED_BLOCK_SIZE>;
+  using BlockScan = hipcub::BlockScan<size_type, OPTIMIZED_BLOCK_SIZE>;
   __shared__ typename BlockScan::TempStorage temp_storage;
 
   // use ELEMENTS_PER_THREAD=2 to support up to 1024 partitions
@@ -667,7 +667,7 @@ struct dispatch_map_type {
     std::size_t const num_levels = num_partitions + 1;
     size_type const lower_level  = 0;
     size_type const upper_level  = num_partitions;
-    cub::DeviceHistogram::HistogramEven(nullptr,
+    hipcub::DeviceHistogram::HistogramEven(nullptr,
                                         temp_storage_bytes,
                                         partition_map.begin<MapType>(),
                                         histogram.data(),
@@ -679,7 +679,7 @@ struct dispatch_map_type {
 
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
 
-    cub::DeviceHistogram::HistogramEven(temp_storage.data(),
+    hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
                                         temp_storage_bytes,
                                         partition_map.begin<MapType>(),
                                         histogram.data(),

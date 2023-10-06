@@ -302,7 +302,7 @@ TYPED_TEST(StringsIntegerConvertTest, FromToInteger)
   CUDF_CUDA_TRY(cudaMemcpy(integers_view.data<TypeParam>(),
                            d_integers.data(),
                            d_integers.size() * sizeof(TypeParam),
-                           cudaMemcpyDefault));
+                           hipMemcpyDefault));
   integers_view.set_null_count(0);
 
   // convert to strings

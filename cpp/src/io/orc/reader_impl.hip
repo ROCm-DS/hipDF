@@ -1165,7 +1165,7 @@ table_with_metadata reader::impl::read(uint64_t skip_rows,
                 offset, len);
             CUDF_EXPECTS(buffer->size() == len, "Unexpected discrepancy in bytes read.");
             CUDF_CUDA_TRY(
-              cudaMemcpyAsync(d_dst, buffer->data(), len, cudaMemcpyDefault, _stream.value()));
+              hipMemcpyAsync(d_dst, buffer->data(), len, hipMemcpyDefault, _stream.value()));
             _stream.synchronize();
           }
         }

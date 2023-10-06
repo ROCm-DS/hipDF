@@ -39,7 +39,7 @@
 
 #include <limits>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace nvtext {
 namespace detail {
@@ -107,13 +107,13 @@ __global__ void minhash_kernel(cudf::column_device_view const d_strings,
       // hash substring and store the min value
       if constexpr (std::is_same_v<hash_value_type, uint32_t>) {
         auto const hvalue = hasher(hash_str);
-        cuda::atomic_ref<hash_value_type, cuda::thread_scope_block> ref{*(d_output + seed_idx)};
+        hip::atomic_ref<hash_value_type, hip::thread_scope_block> ref{*(d_output + seed_idx)};
         ref.fetch_min(hvalue, hip::std::memory_order_relaxed);
       } else {
         // This code path assumes the use of MurmurHash3_x64_128 which produces 2 uint64 values
         // but only uses the first uint64 value as requested by the LLM team.
         auto const hvalue = thrust::get<0>(hasher(hash_str));
-        cuda::atomic_ref<hash_value_type, cuda::thread_scope_block> ref{*(d_output + seed_idx)};
+        hip::atomic_ref<hash_value_type, hip::thread_scope_block> ref{*(d_output + seed_idx)};
         ref.fetch_min(hvalue, hip::std::memory_order_relaxed);
       }
     }

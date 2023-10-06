@@ -35,7 +35,7 @@
 
 #include <cub/device/device_radix_sort.cuh>
 
-#include <cuco/static_set.cuh>
+#include <hipco/static_set.cuh>
 
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
@@ -436,11 +436,11 @@ rmm::device_uvector<size_type> hash_node_type_with_field_name(device_span<Symbol
   using hasher_type                             = decltype(d_hasher);
   constexpr size_type empty_node_index_sentinel = -1;
   auto key_set =
-    cuco::experimental::static_set{cuco::experimental::extent{compute_hash_table_size(
+    hipco::experimental::static_set{hipco::experimental::extent{compute_hash_table_size(
                                      num_fields, 40)},  // 40% occupancy in hash map
-                                   cuco::empty_key{empty_node_index_sentinel},
+                                   hipco::empty_key{empty_node_index_sentinel},
                                    d_equal,
-                                   cuco::experimental::linear_probing<1, hasher_type>{d_hasher},
+                                   hipco::experimental::linear_probing<1, hasher_type>{d_hasher},
                                    hash_table_allocator_type{default_allocator<char>{}, stream},
                                    stream.value()};
   key_set.insert_if_async(iter,
@@ -450,7 +450,7 @@ rmm::device_uvector<size_type> hash_node_type_with_field_name(device_span<Symbol
                           stream.value());
 
   auto const get_hash_value =
-    [key_set = key_set.ref(cuco::experimental::op::find)] __device__(auto node_id) -> size_type {
+    [key_set = key_set.ref(hipco::experimental::op::find)] __device__(auto node_id) -> size_type {
     auto const it = key_set.find(node_id);
     return (it == key_set.end()) ? size_type{0} : *it;
   };
@@ -624,11 +624,11 @@ std::pair<rmm::device_uvector<size_type>, rmm::device_uvector<size_type>> hash_n
   using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
   using hasher_type               = decltype(d_hashed_cache);
 
-  auto key_set = cuco::experimental::static_set{
-    cuco::experimental::extent{compute_hash_table_size(num_nodes)},
-    cuco::empty_key<cudf::size_type>{empty_node_index_sentinel},
+  auto key_set = hipco::experimental::static_set{
+    hipco::experimental::extent{compute_hash_table_size(num_nodes)},
+    hipco::empty_key<cudf::size_type>{empty_node_index_sentinel},
     d_equal,
-    cuco::experimental::linear_probing<1, hasher_type>{d_hashed_cache},
+    hipco::experimental::linear_probing<1, hasher_type>{d_hashed_cache},
     hash_table_allocator_type{default_allocator<char>{}, stream},
     stream.value()};
 

@@ -74,8 +74,8 @@ class bgzip_data_chunk_reader : public data_chunk_reader {
     // Buffer needs to be padded.
     // Required by `inflate_kernel`.
     device.resize(cudf::util::round_up_safe(host.size(), BUFFER_PADDING_MULTIPLE), stream);
-    CUDF_CUDA_TRY(cudaMemcpyAsync(
-      device.data(), host.data(), host.size() * sizeof(T), cudaMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(hipMemcpyAsync(
+      device.data(), host.data(), host.size() * sizeof(T), hipMemcpyDefault, stream.value()));
   }
 
   struct decompression_blocks {
@@ -302,10 +302,10 @@ class bgzip_data_chunk_reader : public data_chunk_reader {
       _curr_blocks.decompress(stream);
       rmm::device_uvector<char> data(read_size, stream);
       CUDF_CUDA_TRY(
-        cudaMemcpyAsync(data.data(),
+        hipMemcpyAsync(data.data(),
                         _curr_blocks.d_decompressed_blocks.data() + _curr_blocks.read_pos,
                         read_size,
-                        cudaMemcpyDefault,
+                        hipMemcpyDefault,
                         stream.value()));
       // record the host-to-device copy, decompression and device copy
       CUDF_CUDA_TRY(cudaEventRecord(_curr_blocks.event, stream.value()));
@@ -317,15 +317,15 @@ class bgzip_data_chunk_reader : public data_chunk_reader {
     _curr_blocks.decompress(stream);
     read_size = std::min(read_size, _prev_blocks.remaining_size() + _curr_blocks.remaining_size());
     rmm::device_uvector<char> data(read_size, stream);
-    CUDF_CUDA_TRY(cudaMemcpyAsync(data.data(),
+    CUDF_CUDA_TRY(hipMemcpyAsync(data.data(),
                                   _prev_blocks.d_decompressed_blocks.data() + _prev_blocks.read_pos,
                                   _prev_blocks.remaining_size(),
-                                  cudaMemcpyDefault,
+                                  hipMemcpyDefault,
                                   stream.value()));
-    CUDF_CUDA_TRY(cudaMemcpyAsync(data.data() + _prev_blocks.remaining_size(),
+    CUDF_CUDA_TRY(hipMemcpyAsync(data.data() + _prev_blocks.remaining_size(),
                                   _curr_blocks.d_decompressed_blocks.data() + _curr_blocks.read_pos,
                                   read_size - _prev_blocks.remaining_size(),
-                                  cudaMemcpyDefault,
+                                  hipMemcpyDefault,
                                   stream.value()));
     // record the host-to-device copy, decompression and device copy
     CUDF_CUDA_TRY(cudaEventRecord(_curr_blocks.event, stream.value()));

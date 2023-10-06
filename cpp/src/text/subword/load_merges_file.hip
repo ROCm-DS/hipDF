@@ -89,18 +89,18 @@ std::unique_ptr<detail::merge_pairs_map_type> initialize_merge_pairs_map(
   cudf::column_device_view const& input, rmm::cuda_stream_view stream)
 {
   // Ensure capacity is at least (size/0.7) as documented here:
-  // https://github.com/NVIDIA/cuCollections/blob/6ec8b6dcdeceea07ab4456d32461a05c18864411/include/cuco/static_map.cuh#L179-L182
+  // https://github.com/NVIDIA/hipCollections/blob/6ec8b6dcdeceea07ab4456d32461a05c18864411/include/hipco/static_map.cuh#L179-L182
   auto merge_pairs_map = std::make_unique<merge_pairs_map_type>(
     static_cast<size_t>(input.size() * 2),  // capacity is 2x;
-    cuco::empty_key{-1},
-    cuco::empty_value{-1},                  // empty value is not used
+    hipco::empty_key{-1},
+    hipco::empty_value{-1},                  // empty value is not used
     bpe_equal{input},
     probe_scheme{bpe_hasher{input}},
     hash_table_allocator_type{default_allocator<char>{}, stream},
     stream.value());
 
   auto iter = cudf::detail::make_counting_transform_iterator(
-    0, [] __device__(cudf::size_type idx) { return cuco::make_pair(idx, idx); });
+    0, [] __device__(cudf::size_type idx) { return hipco::make_pair(idx, idx); });
 
   merge_pairs_map->insert_async(iter, iter + input.size(), stream.value());
 

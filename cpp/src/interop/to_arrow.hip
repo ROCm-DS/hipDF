@@ -55,10 +55,10 @@ std::shared_ptr<arrow::Buffer> fetch_data_buffer(column_view input_view,
 
   auto data_buffer = allocate_arrow_buffer(data_size_in_bytes, ar_mr);
 
-  CUDF_CUDA_TRY(cudaMemcpyAsync(data_buffer->mutable_data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(data_buffer->mutable_data(),
                                 input_view.data<T>(),
                                 data_size_in_bytes,
-                                cudaMemcpyDefault,
+                                hipMemcpyDefault,
                                 stream.value()));
 
   return std::move(data_buffer);
@@ -75,11 +75,11 @@ std::shared_ptr<arrow::Buffer> fetch_mask_buffer(column_view input_view,
 
   if (input_view.has_nulls()) {
     auto mask_buffer = allocate_arrow_bitmap(static_cast<int64_t>(input_view.size()), ar_mr);
-    CUDF_CUDA_TRY(cudaMemcpyAsync(
+    CUDF_CUDA_TRY(hipMemcpyAsync(
       mask_buffer->mutable_data(),
       (input_view.offset() > 0) ? cudf::copy_bitmask(input_view).data() : input_view.null_mask(),
       mask_size_in_bytes,
-      cudaMemcpyDefault,
+      hipMemcpyDefault,
       stream.value()));
 
     // Resets all padded bits to 0
@@ -166,8 +166,8 @@ std::shared_ptr<arrow::Array> dispatch_to_arrow::operator()<numeric::decimal64>(
   auto const buf_size_in_bytes = buf.size() * sizeof(DeviceType);
   auto data_buffer             = allocate_arrow_buffer(buf_size_in_bytes, ar_mr);
 
-  CUDF_CUDA_TRY(cudaMemcpyAsync(
-    data_buffer->mutable_data(), buf.data(), buf_size_in_bytes, cudaMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(hipMemcpyAsync(
+    data_buffer->mutable_data(), buf.data(), buf_size_in_bytes, hipMemcpyDefault, stream.value()));
 
   auto type    = arrow::decimal(18, -input.type().scale());
   auto mask    = fetch_mask_buffer(input, ar_mr, stream);
@@ -197,8 +197,8 @@ std::shared_ptr<arrow::Array> dispatch_to_arrow::operator()<numeric::decimal128>
   auto const buf_size_in_bytes = buf.size() * sizeof(DeviceType);
   auto data_buffer             = allocate_arrow_buffer(buf_size_in_bytes, ar_mr);
 
-  CUDF_CUDA_TRY(cudaMemcpyAsync(
-    data_buffer->mutable_data(), buf.data(), buf_size_in_bytes, cudaMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(hipMemcpyAsync(
+    data_buffer->mutable_data(), buf.data(), buf_size_in_bytes, hipMemcpyDefault, stream.value()));
 
   auto type    = arrow::decimal(18, -input.type().scale());
   auto mask    = fetch_mask_buffer(input, ar_mr, stream);
@@ -219,10 +219,10 @@ std::shared_ptr<arrow::Array> dispatch_to_arrow::operator()<bool>(column_view in
 
   auto data_buffer = allocate_arrow_buffer(static_cast<int64_t>(bitmask.first->size()), ar_mr);
 
-  CUDF_CUDA_TRY(cudaMemcpyAsync(data_buffer->mutable_data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(data_buffer->mutable_data(),
                                 bitmask.first->data(),
                                 bitmask.first->size(),
-                                cudaMemcpyDefault,
+                                hipMemcpyDefault,
                                 stream.value()));
   return to_arrow_array(id,
                         static_cast<int64_t>(input.size()),
@@ -397,7 +397,7 @@ std::shared_ptr<arrow::Table> to_arrow(table_view input,
   auto result = arrow::Table::Make(arrow::schema(fields), arrays);
 
   // synchronize the stream because after the return the data may be accessed from the host before
-  // the above `cudaMemcpyAsync` calls have completed their copies (especially if pinned host
+  // the above `hipMemcpyAsync` calls have completed their copies (especially if pinned host
   // memory is used).
   stream.synchronize();
 

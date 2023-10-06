@@ -44,7 +44,7 @@ void __global__ test_kernel(int* data) { data[threadIdx.x] = threadIdx.x; }
 
 // In a release build and without explicit synchronization, CUDF_CHECK_CUDA may
 // or may not fail on erroneous asynchronous CUDA calls. Invoke
-// cudaStreamSynchronize to guarantee failure on error. In a non-release build,
+// hipStreamSynchronize to guarantee failure on error. In a non-release build,
 // CUDF_CHECK_CUDA deterministically fails on erroneous asynchronous CUDA
 // calls.
 TEST(StreamCheck, FailedKernel)

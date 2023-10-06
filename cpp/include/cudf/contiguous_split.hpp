@@ -177,11 +177,11 @@ struct contiguous_split_state;
  *   // buffer will hold the contents of at most `user_buffer_size` bytes
  *   // of the contiguously packed input `table_view`. You are now free to copy
  *   // this memory somewhere else, for example, to host.
- *   cudaMemcpyAsync(
+ *   hipMemcpyAsync(
  *     host_buffer.data() + host_offset,
  *     user_buffer.data(),
  *     bytes_copied,
- *     cudaMemcpyDefault,
+ *     hipMemcpyDefault,
  *     stream);
  *
  *   host_offset += bytes_copied;

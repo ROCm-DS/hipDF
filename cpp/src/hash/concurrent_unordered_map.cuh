@@ -34,7 +34,7 @@
 #include <limits>
 #include <type_traits>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace {
 template <std::size_t N>
@@ -275,7 +275,7 @@ class concurrent_unordered_map {
     using packed_type = typename pair_packer<pair_type>::packed_type;
 
     auto* insert_ptr = reinterpret_cast<packed_type*>(insert_location);
-    cuda::atomic_ref<packed_type, cuda::thread_scope_device> ref{*insert_ptr};
+    hip::atomic_ref<packed_type, hip::thread_scope_device> ref{*insert_ptr};
     auto const success =
       ref.compare_exchange_strong(expected.packed, desired.packed, hip::std::memory_order_relaxed);
 
@@ -299,7 +299,7 @@ class concurrent_unordered_map {
     value_type* const __restrict__ insert_location, value_type const& insert_pair)
   {
     auto expected = m_unused_key;
-    cuda::atomic_ref<key_type, cuda::thread_scope_device> ref{insert_location->first};
+    hip::atomic_ref<key_type, hip::thread_scope_device> ref{insert_location->first};
     auto const key_success =
       ref.compare_exchange_strong(expected, insert_pair.first, hip::std::memory_order_relaxed);
 
@@ -442,10 +442,10 @@ class concurrent_unordered_map {
 
       m_hashtbl_values = m_allocator.allocate(m_capacity, stream);
     }
-    CUDF_CUDA_TRY(cudaMemcpyAsync(m_hashtbl_values,
+    CUDF_CUDA_TRY(hipMemcpyAsync(m_hashtbl_values,
                                   other.m_hashtbl_values,
                                   m_capacity * sizeof(value_type),
-                                  cudaMemcpyDefault,
+                                  hipMemcpyDefault,
                                   stream.value()));
   }
 

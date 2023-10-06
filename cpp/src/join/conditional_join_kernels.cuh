@@ -103,13 +103,13 @@ __global__ void compute_conditional_join_output_size(
     }
   }
 
-  using BlockReduce = cub::BlockReduce<cudf::size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<cudf::size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   std::size_t block_counter = BlockReduce(temp_storage).Sum(thread_counter);
 
   // Add block counter to global counter
   if (threadIdx.x == 0) {
-    cuda::atomic_ref<std::size_t, cuda::thread_scope_device> ref{*output_size};
+    hip::atomic_ref<std::size_t, hip::thread_scope_device> ref{*output_size};
     ref.fetch_add(block_counter, hip::std::memory_order_relaxed);
   }
 }

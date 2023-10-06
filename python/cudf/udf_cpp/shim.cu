@@ -23,7 +23,7 @@
 #include <cudf/strings/udf/strip.cuh>
 #include <cudf/strings/udf/udf_string.cuh>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 #include <cooperative_groups.h>
 
@@ -378,7 +378,7 @@ __device__ bool are_all_nans(cooperative_groups::thread_block const& block,
 
   for (int64_t idx = block.thread_rank(); idx < size; idx += block.size()) {
     if (not std::isnan(data[idx])) {
-      cuda::atomic_ref<int64_t, cuda::thread_scope_block> ref{count};
+      hip::atomic_ref<int64_t, hip::thread_scope_block> ref{count};
       ref.fetch_add(1, hip::std::memory_order_relaxed);
       break;
     }
@@ -403,7 +403,7 @@ __device__ AccumT device_sum(cooperative_groups::thread_block const& block,
     local_sum += static_cast<AccumT>(data[idx]);
   }
 
-  cuda::atomic_ref<AccumT, cuda::thread_scope_block> ref{block_sum};
+  hip::atomic_ref<AccumT, hip::thread_scope_block> ref{block_sum};
   ref.fetch_add(local_sum, hip::std::memory_order_relaxed);
 
   block.sync();
@@ -462,7 +462,7 @@ __device__ double BlockCoVar(T const* lhs, T const* rhs, int64_t size)
     local_covar += (static_cast<double>(lhs[idx]) - mu_l) * (static_cast<double>(rhs[idx]) - mu_r);
   }
 
-  cuda::atomic_ref<double, cuda::thread_scope_block> ref{block_covar};
+  hip::atomic_ref<double, hip::thread_scope_block> ref{block_covar};
   ref.fetch_add(local_covar, hip::std::memory_order_relaxed);
   block.sync();
 
@@ -503,7 +503,7 @@ __device__ T BlockMax(T const* data, int64_t size)
     local_max = max(local_max, data[idx]);
   }
 
-  cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_max};
+  hip::atomic_ref<T, hip::thread_scope_block> ref{block_max};
   ref.fetch_max(local_max, hip::std::memory_order_relaxed);
 
   block.sync();
@@ -530,7 +530,7 @@ __device__ T BlockMin(T const* data, int64_t size)
     local_min = min(local_min, data[idx]);
   }
 
-  cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_min};
+  hip::atomic_ref<T, hip::thread_scope_block> ref{block_min};
   ref.fetch_min(local_min, hip::std::memory_order_relaxed);
 
   block.sync();
@@ -566,13 +566,13 @@ __device__ int64_t BlockIdxMax(T const* data, int64_t* index, int64_t size)
     }
   }
 
-  cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_max};
+  hip::atomic_ref<T, hip::thread_scope_block> ref{block_max};
   ref.fetch_max(local_max, hip::std::memory_order_relaxed);
   block.sync();
 
   if (found_max) {
     if (local_max == block_max) {
-      cuda::atomic_ref<int64_t, cuda::thread_scope_block> ref_idx{block_idx_max};
+      hip::atomic_ref<int64_t, hip::thread_scope_block> ref_idx{block_idx_max};
       ref_idx.fetch_min(local_idx_max, hip::std::memory_order_relaxed);
     }
   } else {
@@ -611,13 +611,13 @@ __device__ int64_t BlockIdxMin(T const* data, int64_t* index, int64_t size)
     }
   }
 
-  cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_min};
+  hip::atomic_ref<T, hip::thread_scope_block> ref{block_min};
   ref.fetch_min(local_min, hip::std::memory_order_relaxed);
   block.sync();
 
   if (found_min) {
     if (local_min == block_min) {
-      cuda::atomic_ref<int64_t, cuda::thread_scope_block> ref_idx{block_idx_min};
+      hip::atomic_ref<int64_t, hip::thread_scope_block> ref_idx{block_idx_min};
       ref_idx.fetch_min(local_idx_min, hip::std::memory_order_relaxed);
     }
   } else {

@@ -83,12 +83,12 @@ rmm::device_scalar<OutputType> reduce_device(InputIterator d_in,
 
   // Allocate temporary storage
   size_t storage_bytes = 0;
-  cub::DeviceReduce::Reduce(
+  hipcub::DeviceReduce::Reduce(
     nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value());
   auto temp_storage = rmm::device_buffer{storage_bytes, stream};
 
   // Run reduction
-  cub::DeviceReduce::Reduce(temp_storage.data(),
+  hipcub::DeviceReduce::Reduce(temp_storage.data(),
                             storage_bytes,
                             d_in,
                             result.data(),
@@ -217,8 +217,8 @@ struct minmax_functor {
     // copy the minmax_pair to the host; does not copy the strings
     using OutputType = minmax_pair<cudf::string_view>;
     OutputType host_result;
-    CUDF_CUDA_TRY(cudaMemcpyAsync(
-      &host_result, dev_result.data(), sizeof(OutputType), cudaMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(hipMemcpyAsync(
+      &host_result, dev_result.data(), sizeof(OutputType), hipMemcpyDefault, stream.value()));
     // strings are copied to create the scalars here
     return {std::make_unique<string_scalar>(host_result.min_val, true, stream, mr),
             std::make_unique<string_scalar>(host_result.max_val, true, stream, mr)};
@@ -236,8 +236,8 @@ struct minmax_functor {
     // copy the minmax_pair to the host to call get_element
     using OutputType = minmax_pair<T>;
     OutputType host_result;
-    CUDF_CUDA_TRY(cudaMemcpyAsync(
-      &host_result, dev_result.data(), sizeof(OutputType), cudaMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(hipMemcpyAsync(
+      &host_result, dev_result.data(), sizeof(OutputType), hipMemcpyDefault, stream.value()));
     // get the keys for those indexes
     auto const keys = dictionary_column_view(col).keys();
     return {detail::get_element(keys, static_cast<size_type>(host_result.min_val), stream, mr),

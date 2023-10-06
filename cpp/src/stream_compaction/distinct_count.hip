@@ -34,7 +34,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cuco/static_set.cuh>
+#include <hipco/static_set.cuh>
 
 #include <thrust/count.h>
 #include <thrust/execution_policy.h>
@@ -141,11 +141,11 @@ cudf::size_type distinct_count(table_view const& keys,
 
   auto const comparator_helper = [&](auto const row_equal) {
     using hasher_type = decltype(hash_key);
-    auto key_set      = cuco::experimental::static_set{
-      cuco::experimental::extent{compute_hash_table_size(num_rows)},
-      cuco::empty_key<cudf::size_type>{COMPACTION_EMPTY_KEY_SENTINEL},
+    auto key_set      = hipco::experimental::static_set{
+      hipco::experimental::extent{compute_hash_table_size(num_rows)},
+      hipco::empty_key<cudf::size_type>{COMPACTION_EMPTY_KEY_SENTINEL},
       row_equal,
-      cuco::experimental::linear_probing<1, hasher_type>{hash_key},
+      hipco::experimental::linear_probing<1, hasher_type>{hash_key},
       detail::hash_table_allocator_type{default_allocator<char>{}, stream},
       stream.value()};
 

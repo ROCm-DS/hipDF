@@ -38,7 +38,7 @@ cuda_event_timer::cuda_event_timer(benchmark::State& state,
       int const memset_value = 0;
       rmm::device_buffer l2_cache_buffer(l2_cache_bytes, stream);
       CUDF_CUDA_TRY(
-        cudaMemsetAsync(l2_cache_buffer.data(), memset_value, l2_cache_bytes, stream.value()));
+        hipMemsetAsync(l2_cache_buffer.data(), memset_value, l2_cache_bytes, stream.value()));
     }
   }
 

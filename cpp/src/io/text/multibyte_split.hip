@@ -90,7 +90,7 @@ constexpr multistate transition(char c, multistate state, cudf::device_span<char
 }
 
 struct PatternScan {
-  using BlockScan         = cub::BlockScan<multistate, THREADS_PER_TILE>;
+  using BlockScan         = hipcub::BlockScan<multistate, THREADS_PER_TILE>;
   using BlockScanCallback = cudf::io::text::detail::scan_tile_state_callback<multistate>;
 
   struct _TempStorage {
@@ -99,7 +99,7 @@ struct PatternScan {
 
   _TempStorage& _temp_storage;
 
-  using TempStorage = cub::Uninitialized<_TempStorage>;
+  using TempStorage = hipcub::Uninitialized<_TempStorage>;
 
   __device__ inline PatternScan(TempStorage& temp_storage) : _temp_storage(temp_storage.Alias()) {}
 
@@ -163,8 +163,8 @@ __global__ __launch_bounds__(THREADS_PER_TILE) void multibyte_split_kernel(
   cudf::split_device_span<byte_offset> row_offsets)
 {
   using InputLoad =
-    cub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, cub::BLOCK_LOAD_WARP_TRANSPOSE>;
-  using OffsetScan         = cub::BlockScan<output_offset, THREADS_PER_TILE>;
+    hipcub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, hipcub::BLOCK_LOAD_WARP_TRANSPOSE>;
+  using OffsetScan         = hipcub::BlockScan<output_offset, THREADS_PER_TILE>;
   using OffsetScanCallback = cudf::io::text::detail::scan_tile_state_callback<output_offset>;
 
   __shared__ union {
@@ -239,8 +239,8 @@ __global__ __launch_bounds__(THREADS_PER_TILE) void byte_split_kernel(
   cudf::split_device_span<byte_offset> row_offsets)
 {
   using InputLoad =
-    cub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, cub::BLOCK_LOAD_WARP_TRANSPOSE>;
-  using OffsetScan         = cub::BlockScan<output_offset, THREADS_PER_TILE>;
+    hipcub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, hipcub::BLOCK_LOAD_WARP_TRANSPOSE>;
+  using OffsetScan         = hipcub::BlockScan<output_offset, THREADS_PER_TILE>;
   using OffsetScanCallback = cudf::io::text::detail::scan_tile_state_callback<output_offset>;
 
   __shared__ union {

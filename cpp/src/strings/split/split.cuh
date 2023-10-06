@@ -36,7 +36,7 @@
 #include <thrust/scan.h>
 #include <thrust/transform.h>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace cudf::strings::detail {
 
@@ -347,7 +347,7 @@ std::pair<std::unique_ptr<column>, rmm::device_uvector<string_index_pair>> split
     auto d_delimiter_offsets = delimiter_offsets.data();
 
     // memset to zero-out the delimiter counts for any null-entries or strings with no delimiters
-    CUDF_CUDA_TRY(cudaMemsetAsync(
+    CUDF_CUDA_TRY(hipMemsetAsync(
       d_delimiter_offsets, 0, delimiter_offsets.size() * sizeof(size_type), stream.value()));
 
     // next, count the number of delimiters per string
@@ -357,7 +357,7 @@ std::pair<std::unique_ptr<column>, rmm::device_uvector<string_index_pair>> split
                        delimiter_count,
                        [d_string_indices, d_delimiter_offsets] __device__(size_type idx) {
                          auto const str_idx = d_string_indices[idx] - 1;
-                         cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{
+                         hip::atomic_ref<size_type, hip::thread_scope_device> ref{
                            *(d_delimiter_offsets + str_idx)};
                          ref.fetch_add(1, hip::std::memory_order_relaxed);
                        });

@@ -52,14 +52,14 @@ inline auto reduce_by_cub(OutputIterator result, InputIterator d_in, int num_ite
 {
   size_t temp_storage_bytes = 0;
 
-  cub::DeviceReduce::Reduce(
+  hipcub::DeviceReduce::Reduce(
     nullptr, temp_storage_bytes, d_in, result, num_items, cudf::DeviceSum{}, init);
 
   // Allocate temporary storage
   rmm::device_buffer d_temp_storage(temp_storage_bytes, cudf::get_default_stream());
 
   // Run reduction
-  cub::DeviceReduce::Reduce(
+  hipcub::DeviceReduce::Reduce(
     d_temp_storage.data(), temp_storage_bytes, d_in, result, num_items, cudf::DeviceSum{}, init);
 
   return temp_storage_bytes;

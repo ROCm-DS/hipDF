@@ -21,14 +21,14 @@
 #include <cudf/lists/lists_column_device_view.cuh>
 #include <cudf/types.hpp>
 
-#include <cuco/static_map.cuh>
+#include <hipco/static_map.cuh>
 
 namespace cudf::io::parquet::gpu {
 
 auto constexpr KEY_SENTINEL   = size_type{-1};
 auto constexpr VALUE_SENTINEL = size_type{-1};
 
-using map_type = cuco::static_map<size_type, size_type>;
+using map_type = hipco::static_map<size_type, size_type>;
 
 /**
  * @brief The alias of `map_type::pair_atomic_type` class.

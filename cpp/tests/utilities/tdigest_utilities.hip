@@ -116,7 +116,7 @@ std::unique_ptr<column> make_expected_tdigest_column(std::vector<expected_tdiges
     CUDF_CUDA_TRY(cudaMemcpy(offsets->mutable_view().begin<size_type>(),
                              h_offsets.data(),
                              sizeof(size_type) * 2,
-                             cudaMemcpyDefault));
+                             hipMemcpyDefault));
 
     auto list = cudf::make_lists_column(1, std::move(offsets), std::move(tdigests), 0, {});
 

@@ -55,7 +55,7 @@ std::unique_ptr<column> search_ordered(table_view const& haystack,
   // Handle empty inputs
   if (haystack.num_rows() == 0) {
     CUDF_CUDA_TRY(
-      cudaMemsetAsync(out_it, 0, needles.num_rows() * sizeof(size_type), stream.value()));
+      hipMemsetAsync(out_it, 0, needles.num_rows() * sizeof(size_type), stream.value()));
     return result;
   }
 

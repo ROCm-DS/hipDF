@@ -201,7 +201,7 @@ __global__ void url_decode_char_counter(column_device_view const in_strings,
 {
   constexpr int halo_size = 2;
   __shared__ char temporary_buffer[num_warps_per_threadblock][char_block_size + halo_size];
-  __shared__ typename cub::WarpReduce<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
+  __shared__ typename hipcub::WarpReduce<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
 
   auto const global_thread_id = cudf::detail::grid_1d::global_thread_id();
   auto const global_warp_id   = static_cast<size_type>(global_thread_id / cudf::detail::warp_size);
@@ -252,7 +252,7 @@ __global__ void url_decode_char_counter(column_device_view const in_strings,
         // All threads in the warp participate in the reduction, even if `char_idx` is beyond
         // `string_length_block`.
         int8_t const total_escape_char =
-          cub::WarpReduce<int8_t>(cub_storage[local_warp_id]).Sum(is_ichar_escape_char);
+          hipcub::WarpReduce<int8_t>(cub_storage[local_warp_id]).Sum(is_ichar_escape_char);
 
         if (warp_lane == 0) { escape_char_count += total_escape_char; }
 
@@ -284,7 +284,7 @@ __global__ void url_decode_char_replacer(column_device_view const in_strings,
 {
   constexpr int halo_size = 2;
   __shared__ char temporary_buffer[num_warps_per_threadblock][char_block_size + halo_size * 2];
-  __shared__ typename cub::WarpScan<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
+  __shared__ typename hipcub::WarpScan<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
   __shared__ size_type out_idx[num_warps_per_threadblock];
 
   auto const global_thread_id = cudf::detail::grid_1d::global_thread_id();
@@ -340,7 +340,7 @@ __global__ void url_decode_char_replacer(column_device_view const in_strings,
         // All threads in the warp participate in the prefix sum, even if `char_idx` is beyond
         // `string_length_block`.
         int8_t out_offset;
-        cub::WarpScan<int8_t>(cub_storage[local_warp_id]).ExclusiveSum(out_size, out_offset);
+        hipcub::WarpScan<int8_t>(cub_storage[local_warp_id]).ExclusiveSum(out_size, out_offset);
 
         if (out_size == 1) {
           char const* const ch_ptr = in_chars_shared + char_idx + halo_size;

@@ -24,7 +24,7 @@
 #include <cudf/table/table_device_view.cuh>
 #include <cudf/utilities/type_dispatcher.hpp>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 #include <cmath>
 
@@ -87,7 +87,7 @@ struct var_hash_functor {
     auto x        = static_cast<Target>(source.element<Source>(source_index));
     auto mean     = static_cast<Target>(sum.element<SumType>(target_index)) / group_size;
     Target result = (x - mean) * (x - mean) / (group_size - ddof);
-    cuda::atomic_ref<Target, cuda::thread_scope_device> ref{target.element<Target>(target_index)};
+    hip::atomic_ref<Target, hip::thread_scope_device> ref{target.element<Target>(target_index)};
     ref.fetch_add(result, hip::std::memory_order_relaxed);
     // STD sqrt is applied in finalize()
 

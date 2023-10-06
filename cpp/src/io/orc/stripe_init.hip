@@ -517,7 +517,7 @@ __global__ void __launch_bounds__(block_size)
                             device_2dspan<rowgroup_rows const> rowgroup_bounds,
                             device_2dspan<size_type> set_counts)
 {
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
 
   auto const column_id   = blockIdx.x;

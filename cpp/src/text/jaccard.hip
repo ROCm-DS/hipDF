@@ -72,7 +72,7 @@ struct sorted_unique_fn {
   // warp per row
   __device__ void operator()(cudf::size_type idx) const
   {
-    using warp_reduce = cub::WarpReduce<cudf::size_type>;
+    using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
     __shared__ typename warp_reduce::TempStorage temp_storage;
 
     auto const row_idx  = idx / cudf::detail::warp_size;
@@ -115,7 +115,7 @@ struct sorted_interset_fn {
   // warp per row
   __device__ float operator()(cudf::size_type idx) const
   {
-    using warp_reduce = cub::WarpReduce<cudf::size_type>;
+    using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
     __shared__ typename warp_reduce::TempStorage temp_storage;
 
     auto const row_idx  = idx / cudf::detail::warp_size;
@@ -127,7 +127,7 @@ struct sorted_interset_fn {
     auto begin     = haystack.begin();
     auto const end = haystack.end();
 
-    // TODO: investigate cuCollections device-side static-map to match row values
+    // TODO: investigate hipcollections device-side static-map to match row values
 
     cudf::size_type count = 0;
     for (auto itr = needles.begin() + lane_idx; itr < needles.end() && begin < end;
@@ -210,7 +210,7 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
   // this is wicked fast and much faster than using cudf::lists::detail::sort_list
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
-  cub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
+  hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,
                                      sorted.data(),
@@ -220,7 +220,7 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
                                      offsets + 1,
                                      stream.value());
   d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-  cub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
+  hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,
                                      sorted.data(),

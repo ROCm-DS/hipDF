@@ -241,7 +241,7 @@ probe_join_hash_table(
  * @brief Probes the `hash_table` built from `build_table` for tuples in `probe_table` twice,
  * and returns the output size of a full join operation between `build_table` and `probe_table`.
  * TODO: this is a temporary solution as part of `full_join_size`. To be refactored during
- * cuco integration.
+ * hipco integration.
  *
  * @param build_table Table of build side columns to join
  * @param probe_table Table of probe side columns to join
@@ -365,8 +365,8 @@ hash_join<Hasher>::hash_join(cudf::table_view const& build,
     _is_empty{build.num_rows() == 0},
     _nulls_equal{compare_nulls},
     _hash_table{compute_hash_table_size(build.num_rows()),
-                cuco::empty_key{std::numeric_limits<hash_value_type>::max()},
-                cuco::empty_value{cudf::detail::JoinNoneValue},
+                hipco::empty_key{std::numeric_limits<hash_value_type>::max()},
+                hipco::empty_value{cudf::detail::JoinNoneValue},
                 stream.value(),
                 detail::hash_table_allocator_type{default_allocator<char>{}, stream}},
     _build{build},

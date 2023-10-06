@@ -26,7 +26,7 @@
 
 #include <thrust/iterator/counting_iterator.h>
 
-#include <cuco/static_map.cuh>
+#include <hipco/static_map.cuh>
 
 #include <type_traits>
 
@@ -37,9 +37,9 @@ namespace {
 using cudf::experimental::row::lhs_index_type;
 using cudf::experimental::row::rhs_index_type;
 
-using static_map = cuco::static_map<lhs_index_type,
+using static_map = hipco::static_map<lhs_index_type,
                                     size_type,
-                                    cuda::thread_scope_device,
+                                    hip::thread_scope_device,
                                     rmm::mr::stream_allocator_adaptor<default_allocator<char>>>;
 
 /**
@@ -174,8 +174,8 @@ rmm::device_uvector<bool> contains(table_view const& haystack,
                                    rmm::mr::device_memory_resource* mr)
 {
   auto map = static_map(compute_hash_table_size(haystack.num_rows()),
-                        cuco::empty_key{lhs_index_type{std::numeric_limits<size_type>::max()}},
-                        cuco::empty_value{detail::JoinNoneValue},
+                        hipco::empty_key{lhs_index_type{std::numeric_limits<size_type>::max()}},
+                        hipco::empty_value{detail::JoinNoneValue},
                         detail::hash_table_allocator_type{default_allocator<char>{}, stream},
                         stream.value());
 
@@ -189,7 +189,7 @@ rmm::device_uvector<bool> contains(table_view const& haystack,
   {
     auto const haystack_it = cudf::detail::make_counting_transform_iterator(
       size_type{0},
-      [] __device__(auto const idx) { return cuco::make_pair(lhs_index_type{idx}, 0); });
+      [] __device__(auto const idx) { return hipco::make_pair(lhs_index_type{idx}, 0); });
 
     auto const hasher = cudf::experimental::row::hash::row_hasher(preprocessed_haystack);
     auto const d_hasher =

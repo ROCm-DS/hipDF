@@ -23,7 +23,7 @@
 
 #include <rmm/exec_policy.hpp>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace cudf {
 namespace io {
@@ -128,8 +128,8 @@ __global__ void __launch_bounds__(block_size)
   // Make a view of the hash map
   auto hash_map_mutable = map_type::device_mutable_view(chunk->dict_map_slots,
                                                         chunk->dict_map_size,
-                                                        cuco::empty_key{KEY_SENTINEL},
-                                                        cuco::empty_value{VALUE_SENTINEL});
+                                                        hipco::empty_key{KEY_SENTINEL},
+                                                        hipco::empty_value{VALUE_SENTINEL});
 
   __shared__ size_type total_num_dict_entries;
   thread_index_type val_idx = s_start_value_idx + t;
@@ -201,12 +201,12 @@ __global__ void __launch_bounds__(block_size)
   auto t   = threadIdx.x;
   auto map = map_type::device_view(chunk.dict_map_slots,
                                    chunk.dict_map_size,
-                                   cuco::empty_key{KEY_SENTINEL},
-                                   cuco::empty_value{VALUE_SENTINEL});
+                                   hipco::empty_key{KEY_SENTINEL},
+                                   hipco::empty_value{VALUE_SENTINEL});
 
-  __shared__ cuda::atomic<size_type, cuda::thread_scope_block> counter;
+  __shared__ hip::atomic<size_type, hip::thread_scope_block> counter;
   using hip::std::memory_order_relaxed;
-  if (t == 0) { new (&counter) cuda::atomic<size_type, cuda::thread_scope_block>{0}; }
+  if (t == 0) { new (&counter) hip::atomic<size_type, hip::thread_scope_block>{0}; }
   __syncthreads();
   for (size_type i = 0; i < chunk.dict_map_size; i += block_size) {
     if (t + i < chunk.dict_map_size) {
@@ -250,8 +250,8 @@ __global__ void __launch_bounds__(block_size)
 
   auto map = map_type::device_view(chunk->dict_map_slots,
                                    chunk->dict_map_size,
-                                   cuco::empty_key{KEY_SENTINEL},
-                                   cuco::empty_value{VALUE_SENTINEL});
+                                   hipco::empty_key{KEY_SENTINEL},
+                                   hipco::empty_value{VALUE_SENTINEL});
 
   thread_index_type val_idx = s_start_value_idx + t;
   while (val_idx < end_value_idx) {

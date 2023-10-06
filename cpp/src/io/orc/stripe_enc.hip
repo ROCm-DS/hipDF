@@ -363,7 +363,7 @@ template <StreamIndexType cid,
 static __device__ uint32_t IntegerRLE(
   orcenc_state_s* s, T const* inbuf, uint32_t inpos, uint32_t numvals, int t, Storage& temp_storage)
 {
-  using block_reduce = cub::BlockReduce<T, block_size>;
+  using block_reduce = hipcub::BlockReduce<T, block_size>;
   uint8_t* dst       = s->stream.data_ptrs[cid] + s->strm_pos[cid];
   uint32_t out_cnt   = 0;
   __shared__ volatile uint64_t block_vmin;
@@ -411,9 +411,9 @@ static __device__ uint32_t IntegerRLE(
       T vmin = (t < literal_run) ? v0 : std::numeric_limits<T>::max();
       T vmax = (t < literal_run) ? v0 : std::numeric_limits<T>::min();
       uint32_t literal_mode, literal_w;
-      vmin = block_reduce(temp_storage).Reduce(vmin, cub::Min());
+      vmin = block_reduce(temp_storage).Reduce(vmin, hipcub::Min());
       __syncthreads();
-      vmax = block_reduce(temp_storage).Reduce(vmax, cub::Max());
+      vmax = block_reduce(temp_storage).Reduce(vmax, hipcub::Max());
       if (t == 0) {
         uint32_t mode1_w, mode2_w;
         typename std::make_unsigned<T>::type vrange_mode1, vrange_mode2;
@@ -660,7 +660,7 @@ static __device__ void encode_null_mask(orcenc_state_s* s,
       pd_byte    = get_mask_byte(pushdown_mask, 0) & ((1 << t_nrows) - 1);
       pd_set_cnt = __popc(pd_byte);
       // Scan the number of valid bits to get dst offset for each thread
-      cub::BlockScan<uint32_t, block_size>(scan_storage).ExclusiveSum(pd_set_cnt, offset);
+      hipcub::BlockScan<uint32_t, block_size>(scan_storage).ExclusiveSum(pd_set_cnt, offset);
     }
 
     auto const mask_byte = get_mask_byte(column.null_mask(), column.offset());
@@ -728,10 +728,10 @@ __global__ void __launch_bounds__(block_size)
 {
   __shared__ __align__(16) orcenc_state_s state_g;
   __shared__ union {
-    typename cub::BlockScan<uint32_t, block_size>::TempStorage scan_u32;
-    typename cub::BlockReduce<int32_t, block_size>::TempStorage i32;
-    typename cub::BlockReduce<int64_t, block_size>::TempStorage i64;
-    typename cub::BlockReduce<uint32_t, block_size>::TempStorage u32;
+    typename hipcub::BlockScan<uint32_t, block_size>::TempStorage scan_u32;
+    typename hipcub::BlockReduce<int32_t, block_size>::TempStorage i32;
+    typename hipcub::BlockReduce<int64_t, block_size>::TempStorage i64;
+    typename hipcub::BlockReduce<uint32_t, block_size>::TempStorage u32;
     typename cub::BlockReduce<uint64_t, block_size>::TempStorage u64;
   } temp_storage;
 
@@ -1010,7 +1010,7 @@ __global__ void __launch_bounds__(block_size)
                               device_2dspan<encoder_chunk_streams> streams)
 {
   __shared__ __align__(16) orcenc_state_s state_g;
-  __shared__ typename cub::BlockReduce<uint32_t, block_size>::TempStorage temp_storage;
+  __shared__ typename hipcub::BlockReduce<uint32_t, block_size>::TempStorage temp_storage;
 
   orcenc_state_s* const s = &state_g;
   uint32_t stripe_id      = blockIdx.x;

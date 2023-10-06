@@ -119,8 +119,8 @@ __global__ void __launch_bounds__(block_size)
   // Make a view of the hash map
   auto hash_map_mutable  = map_type::device_mutable_view(dict.map_slots.data(),
                                                         dict.map_slots.size(),
-                                                        cuco::empty_key{KEY_SENTINEL},
-                                                        cuco::empty_value{VALUE_SENTINEL});
+                                                        hipco::empty_key{KEY_SENTINEL},
+                                                        hipco::empty_value{VALUE_SENTINEL});
   auto const hash_fn     = hash_functor{col};
   auto const equality_fn = equality_functor{col};
 
@@ -147,7 +147,7 @@ __global__ void __launch_bounds__(block_size)
     __syncthreads();
   }
 
-  using block_reduce = cub::BlockReduce<size_type, block_size>;
+  using block_reduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename block_reduce::TempStorage reduce_storage;
 
   auto const block_entry_count = block_reduce(reduce_storage).Sum(entry_count);
@@ -173,13 +173,13 @@ __global__ void __launch_bounds__(block_size)
   auto const t = threadIdx.x;
   auto map     = map_type::device_view(dict.map_slots.data(),
                                    dict.map_slots.size(),
-                                   cuco::empty_key{KEY_SENTINEL},
-                                   cuco::empty_value{VALUE_SENTINEL});
+                                   hipco::empty_key{KEY_SENTINEL},
+                                   hipco::empty_value{VALUE_SENTINEL});
 
-  __shared__ cuda::atomic<size_type, cuda::thread_scope_block> counter;
+  __shared__ hip::atomic<size_type, hip::thread_scope_block> counter;
 
   using hip::std::memory_order_relaxed;
-  if (t == 0) { new (&counter) cuda::atomic<size_type, cuda::thread_scope_block>{0}; }
+  if (t == 0) { new (&counter) hip::atomic<size_type, hip::thread_scope_block>{0}; }
   __syncthreads();
   for (size_type i = 0; i < dict.map_slots.size(); i += block_size) {
     if (t + i < dict.map_slots.size()) {
@@ -212,8 +212,8 @@ __global__ void __launch_bounds__(block_size)
 
   auto const map = map_type::device_view(dict.map_slots.data(),
                                          dict.map_slots.size(),
-                                         cuco::empty_key{KEY_SENTINEL},
-                                         cuco::empty_value{VALUE_SENTINEL});
+                                         hipco::empty_key{KEY_SENTINEL},
+                                         hipco::empty_value{VALUE_SENTINEL});
 
   thread_index_type cur_row = start_row + t;
   while (cur_row < end_row) {

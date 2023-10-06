@@ -55,7 +55,7 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
 
   auto result = cudf::strings::concatenate(last_initial_first, std::string(" "));
 
-  cudaStreamSynchronize(0);
+  hipStreamSynchronize(0);
 
   nvtxRangePop();
   return result;

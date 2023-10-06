@@ -28,9 +28,9 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_scalar.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <memory>
 

@@ -168,7 +168,7 @@ struct count_bytes_fn {
       to_char_utf8(str_ptr + i, u8);
       size += converter.process_character(u8);
     }
-    // this is every so slightly faster than using the cub::warp_reduce
+    // this is every so slightly faster than using the hipcub::warp_reduce
     if (size > 0) {
       hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_offsets + str_idx)};
       ref.fetch_add(size, hip::std::memory_order_relaxed);

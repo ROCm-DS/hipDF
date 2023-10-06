@@ -53,7 +53,7 @@ struct make_pair_function_semi {
   {
     // The value is irrelevant since we only ever use the hash map to check for
     // membership of a particular row index.
-    return cuco::make_pair(static_cast<hash_value_type>(i), 0);
+    return hipco::make_pair(static_cast<hash_value_type>(i), 0);
   }
 };
 
@@ -170,8 +170,8 @@ std::unique_ptr<rmm::device_uvector<size_type>> mixed_join_semi(
   auto const equality_probe = row_comparator.equal_to<false>(has_nulls, compare_nulls);
 
   semi_map_type hash_table{compute_hash_table_size(build.num_rows()),
-                           cuco::empty_key{std::numeric_limits<hash_value_type>::max()},
-                           cuco::empty_value{cudf::detail::JoinNoneValue},
+                           hipco::empty_key{std::numeric_limits<hash_value_type>::max()},
+                           hipco::empty_value{cudf::detail::JoinNoneValue},
                            detail::hash_table_allocator_type{default_allocator<char>{}, stream},
                            stream.value()};
 
@@ -431,8 +431,8 @@ compute_mixed_join_output_size_semi(table_view const& left_equality,
   auto const equality_probe = row_comparator.equal_to<false>(has_nulls, compare_nulls);
 
   semi_map_type hash_table{compute_hash_table_size(build.num_rows()),
-                           cuco::empty_key{std::numeric_limits<hash_value_type>::max()},
-                           cuco::empty_value{cudf::detail::JoinNoneValue},
+                           hipco::empty_key{std::numeric_limits<hash_value_type>::max()},
+                           hipco::empty_value{cudf::detail::JoinNoneValue},
                            detail::hash_table_allocator_type{default_allocator<char>{}, stream},
                            stream.value()};
 
