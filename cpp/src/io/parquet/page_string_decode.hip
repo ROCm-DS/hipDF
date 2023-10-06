@@ -682,7 +682,7 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodeStringPageData(
 
           auto [ptr, len] = src_pos + i < target_pos && dst_pos >= 0
                               ? gpuGetStringData(s, sb, src_pos + skipped_leaf_values + i)
-                              : cuda::std::pair<char const*, size_t>{nullptr, 0};
+                              : hip::std::pair<char const*, size_t>{nullptr, 0};
 
           __shared__ hipcub::WarpScan<size_type>::TempStorage temp_storage;
           size_type offset;

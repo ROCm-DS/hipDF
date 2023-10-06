@@ -64,13 +64,13 @@ __inline__ __device__ T to_non_negative_integer(char const* begin, char const* e
  * @param begin Pointer to the first element of the string
  * @param end Pointer to the first element after the string
  * @param dayfirst Flag indicating that first field is the day
- * @return Extracted year, month and day in `cuda::std::chrono::year_month_day` format
+ * @return Extracted year, month and day in `hip::std::chrono::year_month_day` format
  */
-__inline__ __device__ cuda::std::chrono::year_month_day extract_date(char const* begin,
+__inline__ __device__ hip::std::chrono::year_month_day extract_date(char const* begin,
                                                                      char const* end,
                                                                      bool dayfirst)
 {
-  using namespace cuda::std::chrono;
+  using namespace hip::std::chrono;
 
   char sep = '/';
 
@@ -149,7 +149,7 @@ __inline__ __device__ cuda::std::chrono::year_month_day extract_date(char const*
  * @return Extracted hours, minutes, seconds and milliseconds of `chrono::hh_mm_ss` type with a
  * precision of milliseconds
  */
-__inline__ __device__ cuda::std::chrono::hh_mm_ss<duration_ms> extract_time_of_day(
+__inline__ __device__ hip::std::chrono::hh_mm_ss<duration_ms> extract_time_of_day(
   char const* begin, char const* end)
 {
   constexpr char sep = ':';
@@ -191,7 +191,7 @@ __inline__ __device__ cuda::std::chrono::hh_mm_ss<duration_ms> extract_time_of_d
       d_ms = duration_ms{to_non_negative_integer<int64_t>(sms_sep + 1, end)};
     }
   }
-  return cuda::std::chrono::hh_mm_ss<duration_ms>{d_h + d_m + d_s + d_ms};
+  return hip::std::chrono::hh_mm_ss<duration_ms>{d_h + d_m + d_s + d_ms};
 }
 
 /**
@@ -245,12 +245,12 @@ __inline__ __device__ timestamp_type to_timestamp(char const* begin, char const*
   }
 
   auto ymd = extract_date(begin, sep_pos, dayfirst);
-  timestamp_type answer{cuda::std::chrono::sys_days{ymd}};
+  timestamp_type answer{hip::std::chrono::sys_days{ymd}};
 
   // Extract time only if separator is present
   if (sep_pos != end) {
     auto t = extract_time_of_day(sep_pos + 1, end);
-    answer += cuda::std::chrono::duration_cast<duration_type>(t.to_duration());
+    answer += hip::std::chrono::duration_cast<duration_type>(t.to_duration());
   }
 
   return answer;
@@ -351,7 +351,7 @@ __inline__ __device__ auto skip_if_starts_with(char const* begin,
 template <typename duration_type>
 __inline__ __device__ duration_type to_duration(char const* begin, char const* end)
 {
-  using cuda::std::chrono::duration_cast;
+  using hip::std::chrono::duration_cast;
 
   // %d days [+]%H:%M:%S.n => %d days, %d days [+]%H:%M:%S,  %H:%M:%S.n, %H:%M:%S, %value.
   constexpr char sep = ':';

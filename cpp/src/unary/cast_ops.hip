@@ -55,7 +55,7 @@ struct unary_cast {
     // Convert source tick counts into target tick counts without blindly truncating them
     // by dividing the respective duration time periods (which may not work for time before
     // UNIX epoch)
-    return TargetT{cuda::std::chrono::floor<TargetT::duration>(element.time_since_epoch())};
+    return TargetT{hip::std::chrono::floor<TargetT::duration>(element.time_since_epoch())};
   }
 
   template <
@@ -64,7 +64,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_duration<SourceT>() && cudf::is_duration<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{cuda::std::chrono::floor<TargetT>(element)};
+    return TargetT{hip::std::chrono::floor<TargetT>(element)};
   }
 
   template <
@@ -82,7 +82,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_timestamp<SourceT>() && cudf::is_duration<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{cuda::std::chrono::floor<TargetT>(element.time_since_epoch())};
+    return TargetT{hip::std::chrono::floor<TargetT>(element.time_since_epoch())};
   }
 
   template <
@@ -100,7 +100,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_duration<SourceT>() && cudf::is_timestamp<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{cuda::std::chrono::floor<TargetT::duration>(element)};
+    return TargetT{hip::std::chrono::floor<TargetT::duration>(element)};
   }
 };
 
@@ -190,7 +190,7 @@ std::unique_ptr<column> rescale(column_view input,
     // The value of fixed point scalar will overflow if the scale difference is larger than the
     // max digits of underlying integral type. Under this condition, the output values can be
     // nothing other than zero value. Therefore, we simply return a zero column.
-    if (-diff > cuda::std::numeric_limits<RepType>::digits10) {
+    if (-diff > hip::std::numeric_limits<RepType>::digits10) {
       auto const scalar  = make_fixed_point_scalar<T>(0, scale_type{scale}, stream);
       auto output_column = make_column_from_scalar(*scalar, input.size(), stream, mr);
       if (input.nullable()) {

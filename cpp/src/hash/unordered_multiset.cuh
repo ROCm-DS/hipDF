@@ -106,7 +106,7 @@ class unordered_multiset {
           Element e     = d_col.element<Element>(idx);
           size_type tmp = hasher(e) % (2 * d_col.size());
           cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{*(d_hash_bins_start + tmp)};
-          ref.fetch_add(1, cuda::std::memory_order_relaxed);
+          ref.fetch_add(1, hip::std::memory_order_relaxed);
         }
       });
 
@@ -129,7 +129,7 @@ class unordered_multiset {
           Element e     = d_col.element<Element>(idx);
           size_type tmp = hasher(e) % (2 * d_col.size());
           cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{*(d_hash_bins_end + tmp)};
-          size_type offset    = ref.fetch_add(1, cuda::std::memory_order_relaxed);
+          size_type offset    = ref.fetch_add(1, hip::std::memory_order_relaxed);
           d_hash_data[offset] = e;
         }
       });

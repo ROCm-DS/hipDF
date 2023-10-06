@@ -382,7 +382,7 @@ struct output_indexalator : base_indexalator<output_indexalator> {
   {
     void* tp = p_;
     //TODO FIXME
-    // type_dispatcher(dtype_, size_type_to_index{}, tp, value);
+    type_dispatcher(dtype_, size_type_to_index{}, tp, value);
     return *this;
   }
 

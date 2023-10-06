@@ -379,7 +379,7 @@ __device__ bool are_all_nans(cooperative_groups::thread_block const& block,
   for (int64_t idx = block.thread_rank(); idx < size; idx += block.size()) {
     if (not std::isnan(data[idx])) {
       cuda::atomic_ref<int64_t, cuda::thread_scope_block> ref{count};
-      ref.fetch_add(1, cuda::std::memory_order_relaxed);
+      ref.fetch_add(1, hip::std::memory_order_relaxed);
       break;
     }
   }
@@ -404,7 +404,7 @@ __device__ AccumT device_sum(cooperative_groups::thread_block const& block,
   }
 
   cuda::atomic_ref<AccumT, cuda::thread_scope_block> ref{block_sum};
-  ref.fetch_add(local_sum, cuda::std::memory_order_relaxed);
+  ref.fetch_add(local_sum, hip::std::memory_order_relaxed);
 
   block.sync();
   return block_sum;
@@ -463,7 +463,7 @@ __device__ double BlockCoVar(T const* lhs, T const* rhs, int64_t size)
   }
 
   cuda::atomic_ref<double, cuda::thread_scope_block> ref{block_covar};
-  ref.fetch_add(local_covar, cuda::std::memory_order_relaxed);
+  ref.fetch_add(local_covar, hip::std::memory_order_relaxed);
   block.sync();
 
   if (block.thread_rank() == 0) { block_covar /= static_cast<double>(size - 1); }
@@ -504,7 +504,7 @@ __device__ T BlockMax(T const* data, int64_t size)
   }
 
   cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_max};
-  ref.fetch_max(local_max, cuda::std::memory_order_relaxed);
+  ref.fetch_max(local_max, hip::std::memory_order_relaxed);
 
   block.sync();
 
@@ -531,7 +531,7 @@ __device__ T BlockMin(T const* data, int64_t size)
   }
 
   cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_min};
-  ref.fetch_min(local_min, cuda::std::memory_order_relaxed);
+  ref.fetch_min(local_min, hip::std::memory_order_relaxed);
 
   block.sync();
 
@@ -567,13 +567,13 @@ __device__ int64_t BlockIdxMax(T const* data, int64_t* index, int64_t size)
   }
 
   cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_max};
-  ref.fetch_max(local_max, cuda::std::memory_order_relaxed);
+  ref.fetch_max(local_max, hip::std::memory_order_relaxed);
   block.sync();
 
   if (found_max) {
     if (local_max == block_max) {
       cuda::atomic_ref<int64_t, cuda::thread_scope_block> ref_idx{block_idx_max};
-      ref_idx.fetch_min(local_idx_max, cuda::std::memory_order_relaxed);
+      ref_idx.fetch_min(local_idx_max, hip::std::memory_order_relaxed);
     }
   } else {
     if (block.thread_rank() == 0) { block_idx_max = index[0]; }
@@ -612,13 +612,13 @@ __device__ int64_t BlockIdxMin(T const* data, int64_t* index, int64_t size)
   }
 
   cuda::atomic_ref<T, cuda::thread_scope_block> ref{block_min};
-  ref.fetch_min(local_min, cuda::std::memory_order_relaxed);
+  ref.fetch_min(local_min, hip::std::memory_order_relaxed);
   block.sync();
 
   if (found_min) {
     if (local_min == block_min) {
       cuda::atomic_ref<int64_t, cuda::thread_scope_block> ref_idx{block_idx_min};
-      ref_idx.fetch_min(local_idx_min, cuda::std::memory_order_relaxed);
+      ref_idx.fetch_min(local_idx_min, hip::std::memory_order_relaxed);
     }
   } else {
     if (block.thread_rank() == 0) { block_idx_min = index[0]; }

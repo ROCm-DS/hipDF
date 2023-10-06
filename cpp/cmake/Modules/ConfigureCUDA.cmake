@@ -54,7 +54,7 @@ macro(set_hipdf_target_properties)
                # set target compile options
                CXX_STANDARD 17
                CXX_STANDARD_REQUIRED ON
-               # For std:: support of __int128_t. Can be removed once using cuda::std
+               # For std:: support of __int128_t. Can be removed once using hip::std
                CXX_EXTENSIONS ON
                CUDA_STANDARD 17
                CUDA_STANDARD_REQUIRED ON

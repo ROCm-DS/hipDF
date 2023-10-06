@@ -88,7 +88,7 @@ struct var_hash_functor {
     auto mean     = static_cast<Target>(sum.element<SumType>(target_index)) / group_size;
     Target result = (x - mean) * (x - mean) / (group_size - ddof);
     cuda::atomic_ref<Target, cuda::thread_scope_device> ref{target.element<Target>(target_index)};
-    ref.fetch_add(result, cuda::std::memory_order_relaxed);
+    ref.fetch_add(result, hip::std::memory_order_relaxed);
     // STD sqrt is applied in finalize()
 
     if (target_has_nulls and target.is_null(target_index)) { target.set_valid(target_index); }

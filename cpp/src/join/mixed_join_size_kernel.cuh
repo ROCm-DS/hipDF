@@ -97,7 +97,7 @@ __launch_bounds__(block_size) __global__ void compute_mixed_join_output_size(
   // Add block counter to global counter
   if (threadIdx.x == 0) {
     cuda::atomic_ref<std::size_t, cuda::thread_scope_device> ref{*output_size};
-    ref.fetch_add(block_counter, cuda::std::memory_order_relaxed);
+    ref.fetch_add(block_counter, hip::std::memory_order_relaxed);
   }
 }
 

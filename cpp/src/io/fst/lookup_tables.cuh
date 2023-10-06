@@ -23,7 +23,7 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <cuda/std/iterator>
+#include <hip/std/iterator>
 
 #include <algorithm>
 #include <cstdint>

@@ -603,7 +603,7 @@ struct expression_evaluator {
     {
       // The output data type is the same whether or not nulls are present, so
       // pull from the non-nullable operator.
-      using Out = cuda::std::invoke_result_t<detail::operator_functor<op, false>, Input>;
+      using Out = hip::std::invoke_result_t<detail::operator_functor<op, false>, Input>;
       this->template resolve_output<Out>(output_object,
                                          output,
                                          output_row_index,
@@ -669,7 +669,7 @@ struct expression_evaluator {
     {
       // The output data type is the same whether or not nulls are present, so
       // pull from the non-nullable operator.
-      using Out = cuda::std::invoke_result_t<detail::operator_functor<op, false>, LHS, RHS>;
+      using Out = hip::std::invoke_result_t<detail::operator_functor<op, false>, LHS, RHS>;
       this->template resolve_output<Out>(output_object,
                                          output,
                                          output_row_index,

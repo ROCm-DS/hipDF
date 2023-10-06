@@ -175,7 +175,7 @@ constexpr CUDF_HOST_DEVICE inline bitmask_type set_most_significant_bits(size_ty
   return ~((bitmask_type{1} << (word_size - n)) - 1);
 }
 
-#ifdef __CUDACC__
+#ifdef __HIPCC__ 
 
 /**
  * @brief Sets the specified bit to `1`

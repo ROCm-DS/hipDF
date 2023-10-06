@@ -277,7 +277,7 @@ class concurrent_unordered_map {
     auto* insert_ptr = reinterpret_cast<packed_type*>(insert_location);
     cuda::atomic_ref<packed_type, cuda::thread_scope_device> ref{*insert_ptr};
     auto const success =
-      ref.compare_exchange_strong(expected.packed, desired.packed, cuda::std::memory_order_relaxed);
+      ref.compare_exchange_strong(expected.packed, desired.packed, hip::std::memory_order_relaxed);
 
     if (success) {
       return insert_result::SUCCESS;
@@ -301,7 +301,7 @@ class concurrent_unordered_map {
     auto expected = m_unused_key;
     cuda::atomic_ref<key_type, cuda::thread_scope_device> ref{insert_location->first};
     auto const key_success =
-      ref.compare_exchange_strong(expected, insert_pair.first, cuda::std::memory_order_relaxed);
+      ref.compare_exchange_strong(expected, insert_pair.first, hip::std::memory_order_relaxed);
 
     // Hash bucket empty
     if (key_success) {

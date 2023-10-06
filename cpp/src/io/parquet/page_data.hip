@@ -152,7 +152,7 @@ inline __device__ void gpuOutputInt96Timestamp(volatile page_state_s* s,
                                                int src_pos,
                                                int64_t* dst)
 {
-  using cuda::std::chrono::duration_cast;
+  using hip::std::chrono::duration_cast;
 
   uint8_t const* src8;
   uint32_t dict_pos, dict_size = s->dict_size, ofs;

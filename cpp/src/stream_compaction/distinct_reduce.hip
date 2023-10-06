@@ -70,7 +70,7 @@ struct reduce_by_row_fn {
     if (iter != d_map.end()) {
       // Only one index value of the duplicate rows could be inserted into the map.
       // As such, looking up for all indices of duplicate rows always returns the same value.
-      auto const inserted_idx = iter->second.load(cuda::std::memory_order_relaxed);
+      auto const inserted_idx = iter->second.load(hip::std::memory_order_relaxed);
 
       // All duplicate rows will have concurrent access to this same output slot.
       return &d_output[inserted_idx];

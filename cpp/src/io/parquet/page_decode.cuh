@@ -22,7 +22,7 @@
 
 #include <io/utilities/block_utils.cuh>
 
-#include <cuda/std/tuple>
+#include <hip/std/tuple>
 
 namespace cudf::io::parquet::gpu {
 
@@ -172,7 +172,7 @@ inline __device__ bool is_page_contained(page_state_s* const s, size_t start_row
  * @return A pair containing a pointer to the string and its length
  */
 template <typename state_buf>
-inline __device__ cuda::std::pair<char const*, size_t> gpuGetStringData(page_state_s volatile* s,
+inline __device__ hip::std::pair<char const*, size_t> gpuGetStringData(page_state_s volatile* s,
                                                                         state_buf volatile* sb,
                                                                         int src_pos)
 {
@@ -219,7 +219,7 @@ inline __device__ cuda::std::pair<char const*, size_t> gpuGetStringData(page_sta
  * additional values.
  */
 template <bool sizes_only, typename state_buf>
-__device__ cuda::std::pair<int, int> gpuDecodeDictionaryIndices(
+__device__ hip::std::pair<int, int> gpuDecodeDictionaryIndices(
   page_state_s volatile* s, [[maybe_unused]] state_buf volatile* sb, int target_pos, int t)
 {
   uint8_t const* end = s->data_end;

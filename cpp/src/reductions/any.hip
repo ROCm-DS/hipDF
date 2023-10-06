@@ -46,7 +46,7 @@ struct any_fn {
     {
       if (!*d_result && (iter[idx] != *d_result)) {
         cuda::atomic_ref<int32_t, cuda::thread_scope_device> ref{*d_result};
-        ref.fetch_or(1, cuda::std::memory_order_relaxed);
+        ref.fetch_or(1, hip::std::memory_order_relaxed);
       }
     }
     Iterator iter;
