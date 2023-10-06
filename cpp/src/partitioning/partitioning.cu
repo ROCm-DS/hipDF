@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_factories.hpp>
 #include <cudf/copying.hpp>
 #include <cudf/detail/gather.cuh>
@@ -270,7 +292,7 @@ CUDF_KERNEL void copy_block_partitions(InputIter input_iter,
     reinterpret_cast<size_type*>(block_output + OPTIMIZED_BLOCK_SIZE * OPTIMIZED_ROWS_PER_THREAD);
   auto partition_offset_global = partition_offset_shared + num_partitions + 1;
 
-  using BlockScan = cub::BlockScan<size_type, OPTIMIZED_BLOCK_SIZE>;
+  using BlockScan = hipcub::BlockScan<size_type, OPTIMIZED_BLOCK_SIZE>;
   __shared__ typename BlockScan::TempStorage temp_storage;
 
   // use ELEMENTS_PER_THREAD=2 to support up to 1024 partitions
@@ -668,7 +690,7 @@ struct dispatch_map_type {
     std::size_t const num_levels = num_partitions + 1;
     size_type const lower_level  = 0;
     size_type const upper_level  = num_partitions;
-    cub::DeviceHistogram::HistogramEven(nullptr,
+    hipcub::DeviceHistogram::HistogramEven(nullptr,
                                         temp_storage_bytes,
                                         partition_map.begin<MapType>(),
                                         histogram.data(),
@@ -680,7 +702,7 @@ struct dispatch_map_type {
 
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
 
-    cub::DeviceHistogram::HistogramEven(temp_storage.data(),
+    hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
                                         temp_storage_bytes,
                                         partition_map.begin<MapType>(),
                                         histogram.data(),

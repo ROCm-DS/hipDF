@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include "join/join_common_utils.hpp"
@@ -39,7 +62,7 @@ using row_equality = cudf::experimental::row::equality::strong_index_comparator_
   cudf::experimental::row::equality::device_row_comparator<false, cudf::nullate::DYNAMIC>>;
 
 /**
- * @brief Equality comparator for use with cuco map methods that require expression evaluation.
+ * @brief Equality comparator for use with hipco map methods that require expression evaluation.
  *
  * This class just defines the construction of the class and the necessary
  * attributes, specifically the equality operator for the non-conditional parts
@@ -66,9 +89,9 @@ struct expression_equality {
 };
 
 /**
- * @brief Equality comparator for cuco::static_map queries.
+ * @brief Equality comparator for hipco::static_map queries.
  *
- * This equality comparator is designed for use with cuco::static_map's APIs. A
+ * This equality comparator is designed for use with hipco::static_map's APIs. A
  * probe hit indicates that the hashes of the keys are equal, at which point
  * this comparator checks whether the keys themselves are equal (using the
  * provided equality_probe) and then evaluates the conditional expression
@@ -78,7 +101,7 @@ struct single_expression_equality : expression_equality<has_nulls> {
   using expression_equality<has_nulls>::expression_equality;
 
   // The parameters are build/probe rather than left/right because the operator
-  // is called by cuco's kernels with parameters in this order (note that this
+  // is called by hipco's kernels with parameters in this order (note that this
   // is an implementation detail that we should eventually stop relying on by
   // defining operators with suitable heterogeneous typing). Rather than
   // converting to left/right semantics, we can operate directly on build/probe
@@ -112,9 +135,9 @@ struct single_expression_equality : expression_equality<has_nulls> {
 };
 
 /**
- * @brief Equality comparator for cuco::static_multimap queries.
+ * @brief Equality comparator for hipco::static_multimap queries.
  *
- * This equality comparator is designed for use with cuco::static_multimap's
+ * This equality comparator is designed for use with hipco::static_multimap's
  * pair* APIs, which will compare equality based on comparing (key, value)
  * pairs. In the context of joins, these pairs are of the form
  * (row_hash, row_id). A hash probe hit indicates that hash of a probe row's hash is
@@ -130,7 +153,7 @@ struct pair_expression_equality : public expression_equality<has_nulls> {
   using expression_equality<has_nulls>::expression_equality;
 
   // The parameters are build/probe rather than left/right because the operator
-  // is called by cuco's kernels with parameters in this order (note that this
+  // is called by hipco's kernels with parameters in this order (note that this
   // is an implementation detail that we should eventually stop relying on by
   // defining operators with suitable heterogeneous typing). Rather than
   // converting to left/right semantics, we can operate directly on build/probe

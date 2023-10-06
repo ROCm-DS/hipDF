@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_view.hpp>
 #include <cudf/contiguous_split.hpp>
@@ -248,7 +270,7 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
     if (num_bytes == 0) {
       if (!t) { *valid_count = 0; }
     } else {
-      using BlockReduce = cub::BlockReduce<size_type, block_size>;
+      using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
       __shared__ typename BlockReduce::TempStorage temp_storage;
       size_type block_valid_count{BlockReduce(temp_storage).Sum(thread_valid_count)};
       if (!t) {
@@ -845,7 +867,7 @@ BufInfo populate_metadata(InputIter begin,
  */
 struct buf_size_functor {
   dst_buf_info const* ci;
-  std::size_t operator() __device__(int index) { return ci[index].buf_size; }
+  std::size_t __device__ operator()(int index) { return ci[index].buf_size; }
 };
 
 /**
@@ -856,7 +878,7 @@ struct buf_size_functor {
  */
 struct split_key_functor {
   int const num_src_bufs;
-  int operator() __device__(int buf_index) const { return buf_index / num_src_bufs; }
+  __device__ int operator()(int buf_index) const { return buf_index / num_src_bufs; }
 };
 
 /**
@@ -871,7 +893,7 @@ struct dst_offset_output_iterator {
   using reference         = std::size_t&;
   using iterator_category = thrust::output_device_iterator_tag;
 
-  dst_offset_output_iterator operator+ __host__ __device__(int i) { return {c + i}; }
+  __host__ __device__ dst_offset_output_iterator operator+(int i) { return {c + i}; }
 
   dst_offset_output_iterator& operator++ __host__ __device__()
   {
@@ -879,8 +901,8 @@ struct dst_offset_output_iterator {
     return *this;
   }
 
-  reference operator[] __device__(int i) { return dereference(c + i); }
-  reference operator* __device__() { return dereference(c); }
+  reference __device__ operator[] (int i) { return dereference(c + i); }
+  reference __device__ operator* () { return dereference(c); }
 
  private:
   reference __device__ dereference(dst_buf_info* c) { return c->dst_offset; }
@@ -906,8 +928,8 @@ struct dst_valid_count_output_iterator {
     return *this;
   }
 
-  reference operator[] __device__(int i) { return dereference(c + i); }
-  reference operator* __device__() { return dereference(c); }
+  reference __device__ operator[] (int i) { return dereference(c + i); }
+  reference __device__ operator* () { return dereference(c); }
 
  private:
   reference __device__ dereference(dst_buf_info* c) { return c->valid_count; }

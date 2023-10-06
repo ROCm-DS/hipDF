@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/utilities/block_utils.cuh"
 #include "orc_gpu.hpp"
 
@@ -1280,8 +1302,8 @@ CUDF_KERNEL void __launch_bounds__(block_size)
                                       int64_t first_row)
 {
   __shared__ __align__(16) orcdec_state_s state_g;
-  using warp_reduce  = cub::WarpReduce<uint32_t>;
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
+  using warp_reduce  = hipcub::WarpReduce<uint32_t>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ union {
     typename warp_reduce::TempStorage wr_storage[block_size / 32];
     typename block_reduce::TempStorage bk_storage;
@@ -1471,7 +1493,7 @@ static __device__ void DecodeRowPositions(orcdec_state_s* s,
                                           int t,
                                           Storage& temp_storage)
 {
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
 
   if (t == 0) {
     if (s->chunk.skip_count != 0) {
@@ -1516,7 +1538,7 @@ static __device__ void DecodeRowPositions(orcdec_state_s* s,
       // TBD: Brute-forcing this, there might be a more efficient way to find the thread with the
       // last row
       last_row = (nz_count == s->u.rowdec.nz_count) ? row_plus1 : 0;
-      last_row = block_reduce(temp_storage).Reduce(last_row, cub::Max());
+      last_row = block_reduce(temp_storage).Reduce(last_row, hipcub::Max());
       nz_pos   = (valid) ? nz_count : 0;
       if (t == 0) { s->top.data.nrows = last_row; }
       if (valid && nz_pos - 1 < s->u.rowdec.nz_count) { s->u.rowdec.row[nz_pos - 1] = row_plus1; }
@@ -1565,10 +1587,10 @@ CUDF_KERNEL void __launch_bounds__(block_size)
                          size_type* error_count)
 {
   __shared__ __align__(16) orcdec_state_s state_g;
-  using block_reduce = cub::BlockReduce<uint64_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint64_t, block_size>;
   __shared__ union {
-    typename cub::BlockReduce<uint32_t, block_size>::TempStorage blk_uint32;
-    typename cub::BlockReduce<uint64_t, block_size>::TempStorage blk_uint64;
+    typename hipcub::BlockReduce<uint32_t, block_size>::TempStorage blk_uint32;
+    typename hipcub::BlockReduce<uint64_t, block_size>::TempStorage blk_uint64;
   } temp_storage;
 
   orcdec_state_s* const s = &state_g;

@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/null_mask.hpp>
@@ -200,7 +222,7 @@ CUDF_KERNEL void url_decode_char_counter(column_device_view const in_strings,
 {
   constexpr int halo_size = 2;
   __shared__ char temporary_buffer[num_warps_per_threadblock][char_block_size + halo_size];
-  __shared__ typename cub::WarpReduce<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
+  __shared__ typename hipcub::WarpReduce<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
 
   auto const global_thread_id =
     cudf::detail::grid_1d::global_thread_id<num_warps_per_threadblock * cudf::detail::warp_size>();
@@ -254,7 +276,7 @@ CUDF_KERNEL void url_decode_char_counter(column_device_view const in_strings,
         // All threads in the warp participate in the reduction, even if `char_idx` is beyond
         // `string_length_block`.
         int8_t const total_escape_char =
-          cub::WarpReduce<int8_t>(cub_storage[local_warp_id]).Sum(is_ichar_escape_char);
+          hipcub::WarpReduce<int8_t>(cub_storage[local_warp_id]).Sum(is_ichar_escape_char);
 
         if (warp_lane == 0) { escape_char_count += total_escape_char; }
 
@@ -286,7 +308,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
 {
   constexpr int halo_size = 2;
   __shared__ char temporary_buffer[num_warps_per_threadblock][char_block_size + halo_size * 2];
-  __shared__ typename cub::WarpScan<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
+  __shared__ typename hipcub::WarpScan<int8_t>::TempStorage cub_storage[num_warps_per_threadblock];
   __shared__ size_type out_idx[num_warps_per_threadblock];
 
   auto const global_thread_id =
@@ -345,7 +367,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
         // All threads in the warp participate in the prefix sum, even if `char_idx` is beyond
         // `string_length_block`.
         int8_t out_offset;
-        cub::WarpScan<int8_t>(cub_storage[local_warp_id]).ExclusiveSum(out_size, out_offset);
+        hipcub::WarpScan<int8_t>(cub_storage[local_warp_id]).ExclusiveSum(out_size, out_offset);
 
         if (out_size == 1) {
           char const* const ch_ptr = in_chars_shared + char_idx + halo_size;

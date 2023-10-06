@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/utilities/output_builder.cuh"
 
 #include <cudf/column/column.hpp>
@@ -96,7 +118,7 @@ __device__ constexpr multistate transition(char c,
 }
 
 struct PatternScan {
-  using BlockScan         = cub::BlockScan<multistate, THREADS_PER_TILE>;
+  using BlockScan         = hipcub::BlockScan<multistate, THREADS_PER_TILE>;
   using BlockScanCallback = cudf::io::text::detail::scan_tile_state_callback<multistate>;
 
   struct _TempStorage {
@@ -105,7 +127,7 @@ struct PatternScan {
 
   _TempStorage& _temp_storage;
 
-  using TempStorage = cub::Uninitialized<_TempStorage>;
+  using TempStorage = hipcub::Uninitialized<_TempStorage>;
 
   __device__ inline PatternScan(TempStorage& temp_storage) : _temp_storage(temp_storage.Alias()) {}
 
@@ -169,8 +191,8 @@ CUDF_KERNEL __launch_bounds__(THREADS_PER_TILE) void multibyte_split_kernel(
   cudf::split_device_span<byte_offset> row_offsets)
 {
   using InputLoad =
-    cub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, cub::BLOCK_LOAD_WARP_TRANSPOSE>;
-  using OffsetScan         = cub::BlockScan<output_offset, THREADS_PER_TILE>;
+    hipcub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, hipcub::BLOCK_LOAD_WARP_TRANSPOSE>;
+  using OffsetScan         = hipcub::BlockScan<output_offset, THREADS_PER_TILE>;
   using OffsetScanCallback = cudf::io::text::detail::scan_tile_state_callback<output_offset>;
 
   __shared__ union {
@@ -245,8 +267,8 @@ CUDF_KERNEL __launch_bounds__(THREADS_PER_TILE) void byte_split_kernel(
   cudf::split_device_span<byte_offset> row_offsets)
 {
   using InputLoad =
-    cub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, cub::BLOCK_LOAD_WARP_TRANSPOSE>;
-  using OffsetScan         = cub::BlockScan<output_offset, THREADS_PER_TILE>;
+    hipcub::BlockLoad<char, THREADS_PER_TILE, ITEMS_PER_THREAD, hipcub::BLOCK_LOAD_WARP_TRANSPOSE>;
+  using OffsetScan         = hipcub::BlockScan<output_offset, THREADS_PER_TILE>;
   using OffsetScanCallback = cudf::io::text::detail::scan_tile_state_callback<output_offset>;
 
   __shared__ union {

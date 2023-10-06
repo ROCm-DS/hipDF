@@ -67,20 +67,20 @@ struct scan_tile_state_view {
   __device__ inline void set_status(cudf::size_type tile_idx, scan_tile_status status)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
-    tile_status[offset].store(status, cuda::memory_order_relaxed);
+    tile_status[offset].store(status, hip::memory_order_relaxed);
   }
 
   __device__ inline void set_partial_prefix(cudf::size_type tile_idx, T value)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
-    cub::ThreadStore<cub::STORE_CG>(tile_partial + offset, value);
+    hipcub::ThreadStore<hipcub::STORE_CG>(tile_partial + offset, value);
     tile_status[offset].store(scan_tile_status::partial);
   }
 
   __device__ inline void set_inclusive_prefix(cudf::size_type tile_idx, T value)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
-    cub::ThreadStore<cub::STORE_CG>(tile_inclusive + offset, value);
+    hipcub::ThreadStore<hipcub::STORE_CG>(tile_inclusive + offset, value);
     tile_status[offset].store(scan_tile_status::inclusive);
   }
 
@@ -88,13 +88,13 @@ struct scan_tile_state_view {
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
 
-    while ((status = tile_status[offset].load(cuda::memory_order_relaxed)) ==
+    while ((status = tile_status[offset].load(hip::memory_order_relaxed)) ==
            scan_tile_status::invalid) {}
 
     if (status == scan_tile_status::partial) {
-      return cub::ThreadLoad<cub::LOAD_CG>(tile_partial + offset);
+      return hipcub::ThreadLoad<hipcub::LOAD_CG>(tile_partial + offset);
     } else {
-      return cub::ThreadLoad<cub::LOAD_CG>(tile_inclusive + offset);
+      return hipcub::ThreadLoad<hipcub::LOAD_CG>(tile_inclusive + offset);
     }
   }
 };

@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 /**
  * @file typed_statistics_chunk.cuh
  * @brief Templated wrapper to generalize statistics chunk reduction and aggregation
@@ -200,13 +222,13 @@ __inline__ __device__ typed_statistics_chunk<T, include_aggregate> block_reduce(
   typed_statistics_chunk<T, include_aggregate> output_chunk = chunk;
 
   using E              = typename detail::extrema_type<T>::type;
-  using extrema_reduce = cub::BlockReduce<E, block_size>;
-  using count_reduce   = cub::BlockReduce<uint32_t, block_size>;
+  using extrema_reduce = hipcub::BlockReduce<E, block_size>;
+  using count_reduce   = hipcub::BlockReduce<uint32_t, block_size>;
   output_chunk.minimum_value =
-    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.minimum_value, cub::Min());
+    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.minimum_value, hipcub::Min());
   __syncthreads();
   output_chunk.maximum_value =
-    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.maximum_value, cub::Max());
+    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.maximum_value, hipcub::Max());
   __syncthreads();
   output_chunk.non_nulls =
     count_reduce(storage.template get<uint32_t>()).Sum(output_chunk.non_nulls);
@@ -220,7 +242,7 @@ __inline__ __device__ typed_statistics_chunk<T, include_aggregate> block_reduce(
   if constexpr (include_aggregate) {
     if (output_chunk.has_minmax) {
       using A                = typename detail::aggregation_type<T>::type;
-      using aggregate_reduce = cub::BlockReduce<A, block_size>;
+      using aggregate_reduce = hipcub::BlockReduce<A, block_size>;
       output_chunk.aggregate =
         aggregate_reduce(storage.template get<A>()).Sum(output_chunk.aggregate);
     }
