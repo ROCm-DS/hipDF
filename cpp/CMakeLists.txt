@@ -285,7 +285,7 @@ add_library(
   src/aggregation/result_cache.cpp
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
-  # src/binaryop/binaryop.cpp
+  # src/binaryop/binaryop.cpp  //TODO(HIP): fix jitify issues
   # src/binaryop/compiled/ATan2.hip
   # src/binaryop/compiled/Add.hip
   # src/binaryop/compiled/BitwiseAnd.hip
@@ -319,37 +319,37 @@ add_library(
   # src/binaryop/compiled/binary_ops.hip
   # src/binaryop/compiled/equality_ops.hip
   # src/binaryop/compiled/util.cpp
-  # src/labeling/label_bins.hip
+  src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
   src/bitmask/is_element_valid.cpp
   src/copying/concatenate.hip
   src/copying/contiguous_split.hip
   src/copying/copy.cpp
-  # src/copying/copy.hip
+  src/copying/copy.hip
   # src/copying/copy_range.hip
   src/copying/gather.hip
-  # src/copying/get_element.hip
-  # src/copying/pack.cpp
+  src/copying/get_element.hip
+  src/copying/pack.cpp
   src/copying/purge_nonempty_nulls.hip
-  #  src/copying/reverse.hip
-  # src/copying/sample.hip
-  # src/copying/scatter.hip
-  # src/copying/shift.hip
+  src/copying/reverse.hip
+  src/copying/sample.hip
+  src/copying/scatter.hip
+  src/copying/shift.hip
   src/copying/slice.hip
-  # src/copying/split.cpp
-  # src/copying/segmented_shift.hip
-  # src/datetime/datetime_ops.hip
-  # src/dictionary/add_keys.hip
-  # src/dictionary/decode.hip
+  src/copying/split.cpp
+  src/copying/segmented_shift.hip
+  src/datetime/datetime_ops.hip
+  src/dictionary/add_keys.hip
+  src/dictionary/decode.hip
   src/dictionary/detail/concatenate.hip
-  # src/dictionary/detail/merge.hip
+  src/dictionary/detail/merge.hip
   src/dictionary/dictionary_column_view.cpp
-  # src/dictionary/dictionary_factories.hip
-  # src/dictionary/encode.hip
-  # src/dictionary/remove_keys.hip
-  # src/dictionary/replace.hip
-  # src/dictionary/search.hip
-  # src/dictionary/set_keys.hip
+  src/dictionary/dictionary_factories.hip
+  src/dictionary/encode.hip
+  src/dictionary/remove_keys.hip
+  src/dictionary/replace.hip
+  src/dictionary/search.hip
+  src/dictionary/set_keys.hip
   # src/filling/calendrical_month_sequence.hip
   # src/filling/fill.hip
   # src/filling/repeat.hip

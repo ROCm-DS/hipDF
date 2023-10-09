@@ -380,7 +380,6 @@ struct output_indexalator : base_indexalator<output_indexalator> {
   __device__ inline output_indexalator const& operator=(size_type const value) const
   {
     void* tp = p_;
-    //TODO FIXME
     type_dispatcher(dtype_, size_type_to_index{}, tp, value);
     return *this;
   }
@@ -468,9 +467,7 @@ struct indexalator_factory {
    */
   static input_indexalator make_input_iterator(column_view const& indices)
   {
-    //Todo(HIP)
-    return input_indexalator();
-    // return type_dispatcher(indices.type(), input_indexalator_fn{}, indices);
+    return type_dispatcher(indices.type(), input_indexalator_fn{}, indices);
   }
 
   /**
@@ -478,9 +475,7 @@ struct indexalator_factory {
    */
   static input_indexalator make_input_iterator(cudf::scalar const& index)
   {
-    //Todo(HIP)
-    return input_indexalator();
-    // return type_dispatcher(index.type(), input_indexalator_scalar_fn{}, index);
+    return type_dispatcher(index.type(), input_indexalator_scalar_fn{}, index);
   }
 
   /**
@@ -488,9 +483,7 @@ struct indexalator_factory {
    */
   static output_indexalator make_output_iterator(mutable_column_view const& indices)
   {
-    //Todo(HIP)
-    return output_indexalator();
-    // return type_dispatcher(indices.type(), output_indexalator_fn{}, indices);
+    return type_dispatcher(indices.type(), output_indexalator_fn{}, indices);
   }
 
   /**
@@ -548,9 +541,7 @@ struct indexalator_factory {
    */
   static auto make_input_pair_iterator(column_view const& col)
   {
-    // Todo(HIP)
-    return 0;
-    // return make_counting_transform_iterator(0, nullable_index_accessor{col, col.has_nulls()});
+    return make_counting_transform_iterator(0, nullable_index_accessor{col, col.has_nulls()});
   }
 
   /**
@@ -558,10 +549,8 @@ struct indexalator_factory {
    */
   static auto make_input_pair_iterator(scalar const& input)
   {
-    // Todo(HIP)
-    return 0;
-    // return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
-    //                                        scalar_nullable_index_accessor{input});
+    return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
+                                            scalar_nullable_index_accessor{input});
   }
 
   /**
@@ -620,9 +609,7 @@ struct indexalator_factory {
    */
   static auto make_input_optional_iterator(column_view const& col)
   {
-    // Todo(HIP)
-    return 0;
-    // return make_counting_transform_iterator(0, optional_index_accessor{col, col.has_nulls()});
+    return make_counting_transform_iterator(0, optional_index_accessor{col, col.has_nulls()});
   }
 
   /**
@@ -630,10 +617,8 @@ struct indexalator_factory {
    */
   static auto make_input_optional_iterator(scalar const& input)
   {
-    //Todo(HIP)
-    return 0;
-    // return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
-    //                                        scalar_optional_index_accessor{input});
+    return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
+                                            scalar_optional_index_accessor{input});
   }
 };
 
