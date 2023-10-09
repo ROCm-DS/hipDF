@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-// MIT License
-//
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 #pragma once
 
 #include <cudf/column/column_view.hpp>
@@ -291,9 +269,7 @@ struct indexalator_factory {
    */
   static input_indexalator make_input_iterator(column_view const& indices)
   {
-    //Todo(HIP)
-    return input_indexalator();
-    // return type_dispatcher(indices.type(), input_indexalator_fn{}, indices);
+    return type_dispatcher(indices.type(), input_indexalator_fn{}, indices);
   }
 
   /**
@@ -301,9 +277,7 @@ struct indexalator_factory {
    */
   static input_indexalator make_input_iterator(cudf::scalar const& index)
   {
-    //Todo(HIP)
-    return input_indexalator();
-    // return type_dispatcher(index.type(), input_indexalator_scalar_fn{}, index);
+    return type_dispatcher(index.type(), input_indexalator_scalar_fn{}, index);
   }
 
   /**
@@ -311,9 +285,7 @@ struct indexalator_factory {
    */
   static output_indexalator make_output_iterator(mutable_column_view const& indices)
   {
-    //Todo(HIP)
-    return output_indexalator();
-    // return type_dispatcher(indices.type(), output_indexalator_fn{}, indices);
+    return type_dispatcher(indices.type(), output_indexalator_fn{}, indices);
   }
 
   /**
@@ -371,9 +343,7 @@ struct indexalator_factory {
    */
   static auto make_input_pair_iterator(column_view const& col)
   {
-    // Todo(HIP)
-    return 0;
-    // return make_counting_transform_iterator(0, nullable_index_accessor{col, col.has_nulls()});
+    return make_counting_transform_iterator(0, nullable_index_accessor{col, col.has_nulls()});
   }
 
   /**
@@ -381,10 +351,8 @@ struct indexalator_factory {
    */
   static auto make_input_pair_iterator(scalar const& input)
   {
-    // Todo(HIP)
-    return 0;
-    // return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
-    //                                        scalar_nullable_index_accessor{input});
+    return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
+                                           scalar_nullable_index_accessor{input});
   }
 
   /**
@@ -443,9 +411,7 @@ struct indexalator_factory {
    */
   static auto make_input_optional_iterator(column_view const& col)
   {
-    // Todo(HIP)
-    return 0;
-    // return make_counting_transform_iterator(0, optional_index_accessor{col, col.has_nulls()});
+    return make_counting_transform_iterator(0, optional_index_accessor{col, col.has_nulls()});
   }
 
   /**
@@ -453,10 +419,8 @@ struct indexalator_factory {
    */
   static auto make_input_optional_iterator(scalar const& input)
   {
-    //Todo(HIP)
-    return 0;
-    // return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
-    //                                        scalar_optional_index_accessor{input});
+    return thrust::make_transform_iterator(thrust::make_constant_iterator<size_type>(0),
+                                           scalar_optional_index_accessor{input});
   }
 };
 
