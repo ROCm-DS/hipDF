@@ -280,9 +280,9 @@ add_library(
   src/column/column_factories.cpp
   src/column/column_factories.hip
   src/column/column_view.cpp
-  # src/aggregation/aggregation.cpp
-  # src/aggregation/aggregation.hip
-  # src/aggregation/result_cache.cpp
+  src/aggregation/aggregation.cpp
+  src/aggregation/aggregation.hip
+  src/aggregation/result_cache.cpp
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
   # src/binaryop/binaryop.cpp
@@ -323,7 +323,7 @@ add_library(
   src/bitmask/null_mask.hip
   src/bitmask/is_element_valid.cpp
   src/copying/concatenate.hip
-  # src/copying/contiguous_split.hip
+  src/copying/contiguous_split.hip
   src/copying/copy.cpp
   # src/copying/copy.hip
   # src/copying/copy_range.hip

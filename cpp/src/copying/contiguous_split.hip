@@ -878,6 +878,12 @@ struct dst_valid_count_output_iterator {
     return dst_valid_count_output_iterator{c + i};
   }
 
+  //TODO(HIP): this is a WAR for rocthrust/rocprim expecting an implementation of the - operator
+  dst_valid_count_output_iterator __host__ __device__ operator- (int i)
+  {
+    return dst_valid_count_output_iterator{c - i};
+  }
+
   void __host__ __device__ operator++ () { c++; }
 
   reference __device__ operator[] (int i) { return dereference(c + i); }
@@ -1786,12 +1792,12 @@ struct contiguous_split_state {
       chunk_iter_state->d_batched_dst_buf_info.begin(),
       [] __device__(dst_buf_info const& info) { return info.valid_count; });
 
-    thrust::reduce_by_key(rmm::exec_policy(stream, temp_mr),
-                          keys,
+     thrust::reduce_by_key(rmm::exec_policy(stream, temp_mr),
+                           keys,
                           keys + num_batches_total,
-                          values,
-                          thrust::make_discard_iterator(),
-                          dst_valid_count_output_iterator{d_orig_dst_buf_info});
+                           values,
+                           thrust::make_discard_iterator(),
+                           dst_valid_count_output_iterator{d_orig_dst_buf_info});
 
     CUDF_CUDA_TRY(hipMemcpyAsync(h_orig_dst_buf_info,
                                   d_orig_dst_buf_info,
