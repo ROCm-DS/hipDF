@@ -11,6 +11,28 @@
 // <http://creativecommons.org/publicdomain/zero/1.0/>.
 ///
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <thrust/detail/config.h>
@@ -255,22 +277,6 @@ constexpr auto invoke(Fn &&f, Args &&... args)
 {
   return std::forward<Fn>(f)(std::forward<Args>(args)...);
 }
-
-// std::invoke_result from C++17
-template <class F, class, class... Us> struct invoke_result_impl;
-
-template <class F, class... Us>
-struct invoke_result_impl<
-    F, decltype(detail::invoke(std::declval<F>(), std::declval<Us>()...), void()),
-    Us...> {
-  using type = decltype(detail::invoke(std::declval<F>(), std::declval<Us>()...));
-};
-
-template <class F, class... Us>
-using invoke_result = invoke_result_impl<F, void, Us...>;
-
-template <class F, class... Us>
-using invoke_result_t = typename invoke_result<F, Us...>::type;
 #endif
 
 // std::void_t from C++17
@@ -1700,7 +1706,7 @@ public:
   /// [bad_optional_access]
   /// \group value
   /// \synopsis constexpr T &value();
-  __host__ 
+  __host__
   THRUST_OPTIONAL_CPP11_CONSTEXPR T &value() & {
     if (has_value())
       return this->m_value;
@@ -1708,7 +1714,7 @@ public:
   }
   /// \group value
   /// \synopsis constexpr const T &value() const;
-  __host__ 
+  __host__
   THRUST_OPTIONAL_CPP11_CONSTEXPR const T &value() const & {
     if (has_value())
       return this->m_value;
@@ -1722,7 +1728,7 @@ public:
     throw bad_optional_access();
   }
 
-  //TODO(HIP): This is a quick n dirty patch of thrust needed for hipdf
+    //TODO(HIP): This is a quick n dirty patch of thrust needed for hipdf
   /// \return the contained value if there is one, otherwise throws
   /// [bad_optional_access]
   /// \group value
@@ -1751,13 +1757,14 @@ public:
       return std::move(this->m_value);
     assert(false);
   }
+
 #ifndef THRUST_OPTIONAL_NO_CONSTRR
   /// \exclude
   __host__
   THRUST_OPTIONAL_CPP11_CONSTEXPR const T &&value() const && {
     if (has_value())
       return std::move(this->m_value);
-    assert(false);
+    throw bad_optional_access();
   }
 #endif
 
