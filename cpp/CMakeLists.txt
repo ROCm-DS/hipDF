@@ -321,7 +321,7 @@ add_library(
   # src/binaryop/compiled/util.cpp
   # src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
-  # src/bitmask/is_element_valid.cpp
+  src/bitmask/is_element_valid.cpp
   src/copying/concatenate.hip
   # src/copying/contiguous_split.hip
   src/copying/copy.cpp
@@ -743,7 +743,7 @@ target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBH
 # Compile stringified JIT sources first
 # TODO(HIP): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
 # header conflicts during jitify preprocessing
-#add_dependencies(hipdf jitify_preprocess_run)
+# add_dependencies(hipdf jitify_preprocess_run)
 
 # todo(hip): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
