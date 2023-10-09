@@ -174,7 +174,6 @@ struct dispatch_compute_indices {
 
     auto indices_itr = cudf::detail::indexalator_factory::make_input_iterator(all_indices);
     // map the concatenated indices to the concatenated keys
-    // TODO(HIP): why is __host__ necessary in lambda to avoid a thrust-related compiler error?
     auto all_itr = thrust::make_permutation_iterator(
       keys_view->begin<Element>(),
       thrust::make_transform_iterator(
