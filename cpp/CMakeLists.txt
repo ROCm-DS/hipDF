@@ -283,8 +283,8 @@ add_library(
   # src/aggregation/aggregation.cpp
   # src/aggregation/aggregation.hip
   # src/aggregation/result_cache.cpp
-  # src/ast/expression_parser.cpp
-  # src/ast/expressions.cpp
+  src/ast/expression_parser.cpp
+  src/ast/expressions.cpp
   # src/binaryop/binaryop.cpp
   # src/binaryop/compiled/ATan2.hip
   # src/binaryop/compiled/Add.hip
