@@ -45,7 +45,7 @@
 #include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/utilities/error.hpp>
 
-#include <cub/block/block_reduce.cuh>
+#include <hipcub/block/block_reduce.hpp>
 
 #include <cstddef>
 

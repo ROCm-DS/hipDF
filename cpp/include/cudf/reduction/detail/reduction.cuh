@@ -50,7 +50,8 @@
 #include <rmm/device_scalar.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/device/device_reduce.cuh>
+#include <hipcub/device/device_reduce.hpp>
+
 #include <thrust/for_each.h>
 #include <thrust/iterator/iterator_traits.h>
 
