@@ -82,7 +82,7 @@ __global__ void materialize_merged_bitmask_kernel(
 
   auto tid = detail::grid_1d::global_thread_id();
 
-  auto active_threads = __ballot_sync(0xffff'ffffu, tid < num_destination_rows);
+  auto active_threads = hip_extensions::__ballot_sync(0xffff'ffffu, tid < num_destination_rows);
 
   while (tid < num_destination_rows) {
     auto const destination_row     = static_cast<size_type>(tid);

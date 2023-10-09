@@ -20,6 +20,7 @@
 #include "in_reg_array.cuh"
 
 #include <hipcub/hipcub.hpp>
+#include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
 
 #include <cstdint>
 
@@ -47,7 +48,7 @@ struct DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // Architecture-specific tuning policies
   //------------------------------------------------------------------------------
-  struct Policy900 : hipcub::ChainedPolicy<900, Policy900, Policy900> {
+  struct Policy900 : hipcub_extensions::ChainedPolicy<900, Policy900, Policy900> {
     enum {
       BLOCK_THREADS    = 128,
       ITEMS_PER_THREAD = 32,

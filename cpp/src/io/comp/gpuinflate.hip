@@ -959,7 +959,7 @@ __device__ void prefetch_warp(volatile inflate_state_s* s, int t)
       *prefetch_addr32(s->pref, p) = (p < end) ? *reinterpret_cast<uint32_t const*>(p) : 0;
       cur_p += 4 * 32;
       __threadfence_block();
-      __syncwarp();
+      hip_extensions::__syncwarp();
       if (!t) {
         s->pref.cur_p = cur_p;
         __threadfence_block();

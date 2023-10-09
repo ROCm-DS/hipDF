@@ -1890,7 +1890,7 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
   }
 
   // Ensure all other threads have observed prior state of p1 & p2 before overwriting
-  __syncwarp();
+  hip_extensions::__syncwarp();
 
   if (!t) {
     s->p1          = (uint8_t)p1;

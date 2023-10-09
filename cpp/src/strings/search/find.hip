@@ -132,7 +132,7 @@ __global__ void finder_warp_parallel_fn(column_device_view const d_strings,
 
   // initialize the output for the atomicMin/Max
   if (lane_idx == 0) { d_results[str_idx] = forward ? std::numeric_limits<size_type>::max() : -1; }
-  __syncwarp();
+  hip_extensions::__syncwarp();
 
   auto const d_str    = d_strings.element<string_view>(str_idx);
   auto const d_target = d_targets[str_idx];
@@ -163,7 +163,7 @@ __global__ void finder_warp_parallel_fn(column_device_view const d_strings,
   hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_results + str_idx)};
   forward ? ref.fetch_min(position, hip::std::memory_order_relaxed)
           : ref.fetch_max(position, hip::std::memory_order_relaxed);
-  __syncwarp();
+  hip_extensions::__syncwarp();
 
   if (lane_idx == 0) {
     // the final result needs to be fixed up convert max() to -1

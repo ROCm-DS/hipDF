@@ -98,7 +98,7 @@ __device__ void snappy_prefetch_bytestream(unsnap_state_s* s, int t)
   if (t < pos) { s->q.buf[t] = base[t]; }
   blen = 0;
   do {
-    __syncwarp();
+    hip_extensions::__syncwarp();
     if (!t) {
       uint32_t minrdpos;
       s->q.prefetch_wrpos = pos;
@@ -609,7 +609,7 @@ __device__ void snappy_process_symbols(unsnap_state_s* s, int t, Storage& temp_s
       }
       out += blen;
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
     if (t == 0) { s->q.batch_len[batch] = 0; }
     batch = (batch + 1) & (batch_count - 1);
   } while (true);

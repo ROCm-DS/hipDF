@@ -86,7 +86,7 @@ __global__ void minhash_kernel(cudf::column_device_view const d_strings,
     auto const init = d_str.empty() ? 0 : std::numeric_limits<hash_value_type>::max();
     thrust::fill(thrust::seq, d_output, d_output + seeds.size(), init);
   }
-  __syncwarp();
+  hip_extensions::__syncwarp();
 
   auto const begin = d_str.data() + lane_idx;
   auto const end   = d_str.data() + d_str.size_bytes();

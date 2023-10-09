@@ -314,7 +314,7 @@ __global__ void __launch_bounds__(128)
         if (t == 0) { dst = StoreCopy(dst, end, copy_len, distance); }
         pos += copy_len;
       }
-      __syncwarp();
+      hip_extensions::__syncwarp();
       if (t == 0) { s->dst = dst; }
     } else {
       pos += literal_len + copy_len;

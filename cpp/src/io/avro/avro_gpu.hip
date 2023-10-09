@@ -394,7 +394,7 @@ __global__ void __launch_bounds__(num_warps * 32, 2)
                             &skipped_row);
       if (!skipped_row) { rows_remaining -= nrows; }
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
 
     cur_row += nrows;
     if (nrows == 1) {
