@@ -255,22 +255,6 @@ constexpr auto invoke(Fn &&f, Args &&... args)
 {
   return std::forward<Fn>(f)(std::forward<Args>(args)...);
 }
-
-// std::invoke_result from C++17
-template <class F, class, class... Us> struct invoke_result_impl;
-
-template <class F, class... Us>
-struct invoke_result_impl<
-    F, decltype(detail::invoke(std::declval<F>(), std::declval<Us>()...), void()),
-    Us...> {
-  using type = decltype(detail::invoke(std::declval<F>(), std::declval<Us>()...));
-};
-
-template <class F, class... Us>
-using invoke_result = invoke_result_impl<F, void, Us...>;
-
-template <class F, class... Us>
-using invoke_result_t = typename invoke_result<F, Us...>::type;
 #endif
 
 // std::void_t from C++17
@@ -1700,7 +1684,7 @@ public:
   /// [bad_optional_access]
   /// \group value
   /// \synopsis constexpr T &value();
-  __host__ 
+  __host__
   THRUST_OPTIONAL_CPP11_CONSTEXPR T &value() & {
     if (has_value())
       return this->m_value;
@@ -1708,7 +1692,7 @@ public:
   }
   /// \group value
   /// \synopsis constexpr const T &value() const;
-  __host__ 
+  __host__
   THRUST_OPTIONAL_CPP11_CONSTEXPR const T &value() const & {
     if (has_value())
       return this->m_value;
@@ -1722,7 +1706,7 @@ public:
     throw bad_optional_access();
   }
 
-  //TODO(HIP): This is a quick n dirty patch of thrust needed for hipdf
+    //TODO(HIP): This is a quick n dirty patch of thrust needed for hipdf
   /// \return the contained value if there is one, otherwise throws
   /// [bad_optional_access]
   /// \group value
@@ -1751,13 +1735,14 @@ public:
       return std::move(this->m_value);
     assert(false);
   }
+
 #ifndef THRUST_OPTIONAL_NO_CONSTRR
   /// \exclude
   __host__
   THRUST_OPTIONAL_CPP11_CONSTEXPR const T &&value() const && {
     if (has_value())
       return std::move(this->m_value);
-    assert(false);
+    throw bad_optional_access();
   }
 #endif
 
