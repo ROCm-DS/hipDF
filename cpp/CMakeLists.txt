@@ -326,7 +326,7 @@ add_library(
   src/copying/contiguous_split.hip
   src/copying/copy.cpp
   src/copying/copy.hip
-  # src/copying/copy_range.hip
+  src/copying/copy_range.hip
   src/copying/gather.hip
   src/copying/get_element.hip
   src/copying/pack.cpp
@@ -350,12 +350,12 @@ add_library(
   src/dictionary/replace.hip
   src/dictionary/search.hip
   src/dictionary/set_keys.hip
-  # src/filling/calendrical_month_sequence.hip
-  # src/filling/fill.hip
-  # src/filling/repeat.hip
-  # src/filling/sequence.hip
-  # src/groupby/groupby.hip
-  # src/groupby/hash/groupby.hip
+  src/filling/calendrical_month_sequence.hip
+  src/filling/fill.hip
+  src/filling/repeat.hip
+  src/filling/sequence.hip
+  src/groupby/groupby.hip
+  src/groupby/hash/groupby.hip
   # src/groupby/sort/aggregate.cpp
   # src/groupby/sort/group_argmax.hip
   # src/groupby/sort/group_argmin.hip
