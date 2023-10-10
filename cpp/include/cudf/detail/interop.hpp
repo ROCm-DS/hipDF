@@ -19,12 +19,12 @@
 // We disable warning 611 because the `arrow::TableBatchReader` only partially
 // override the `ReadNext` method of `arrow::RecordBatchReader::ReadNext`
 // triggering warning 611-D from nvcc.
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_diag_suppress 611
 #pragma nv_diag_suppress 2810
 #endif
 #include <arrow/api.h>
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_diag_default 611
 #pragma nv_diag_default 2810
 #endif
