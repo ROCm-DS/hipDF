@@ -80,8 +80,10 @@ data_type arrow_to_cudf_type(arrow::DataType const& arrow_type)
     case arrow::Type::DICTIONARY: return data_type(type_id::DICTIONARY32);
     case arrow::Type::LIST: return data_type(type_id::LIST);
     case arrow::Type::DECIMAL: {
-      auto const type = static_cast<arrow::Decimal128Type const*>(&arrow_type);
-      return data_type{type_id::DECIMAL128, -type->scale()};
+      // auto const type = static_cast<arrow::Decimal128Type const*>(&arrow_type);
+      // return data_type{type_id::DECIMAL128, -type->scale()};
+      auto const type = static_cast<arrow::DecimalType const*>(&arrow_type);
+      return data_type{type_id::DECIMAL64, -type->scale()};
     }
     case arrow::Type::STRUCT: return data_type(type_id::STRUCT);
     default: CUDF_FAIL("Unsupported type_id conversion to cudf");
@@ -368,7 +370,7 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<cudf::struct_view>(
   }
 
   return make_structs_column(
-    array.length(), move(child_columns), array.null_count(), std::move(out_mask), stream, mr);
+    array.length(), std::move(child_columns), array.null_count(), std::move(out_mask), stream, mr); //TODO(HIP): is std::move correct for child_columns?
 }
 
 template <>

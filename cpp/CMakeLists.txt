@@ -388,9 +388,9 @@ add_library(
   src/hash/spark_murmurhash3_x86_32.hip
   src/hash/xxhash_64.hip
   src/interop/dlpack.cpp
-  # src/interop/from_arrow.hip
-  # src/interop/to_arrow.hip
-  # src/interop/detail/arrow_allocator.cpp
+  src/interop/from_arrow.hip
+  src/interop/to_arrow.hip
+  src/interop/detail/arrow_allocator.cpp
   # src/io/avro/avro.cpp
   # src/io/avro/avro_gpu.hip
   # src/io/avro/reader_impl.hip
