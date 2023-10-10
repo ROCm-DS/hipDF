@@ -111,9 +111,6 @@ __device__ inline lane_mask __ballot_sync(lane_mask mask, int predicate)
   return __ballot(predicate) & mask;
 }
 
-int   __shfl      (int var,   int srcLane, int width=warpSize);
-int   __shfl_xor  (int var,   int laneMask, int width=warpSize)
-
 template <class T>
 __device__ inline T __shfl_sync(lane_mask mask, T var, int src, int width = WAVEFRONT_SIZE)
 {
