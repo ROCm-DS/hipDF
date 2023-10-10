@@ -277,6 +277,15 @@ avro_decode_row(schemadesc_s const* schema,
         CUDF_UNREACHABLE("avro type 'duration' not yet implemented");
       } break;
 
+      // TODO(HIP): Note: it appears that these types are handled elsewhere, but we need this to 
+      // avoid errors with HIP clang
+      case type_not_set: [[fallthrough]];
+      case type_record: [[fallthrough]];
+      case type_union: [[fallthrough]];
+      case type_fixed: [[fallthrough]];
+      case type_decimal: [[fallthrough]];
+      case type_uuid: [[fallthrough]];
+
       // N.B. These aren't handled yet, see the discussion on
       //      https://github.com/rapidsai/cudf/pull/12788.  The decoding logic
       //      is correct, though, so there's no harm in having them here.
