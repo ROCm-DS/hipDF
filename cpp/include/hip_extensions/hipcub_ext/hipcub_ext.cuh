@@ -74,6 +74,25 @@ enum ScanTileStatus
 };
 
 /**
+     * Kernel kernel dispatch configuration
+     */
+    struct KernelConfig
+    {
+        int                             block_threads;
+        int                             pixels_per_thread;
+
+        template <typename BlockPolicy>
+        HIPCUB_RUNTIME_FUNCTION __forceinline__
+        cudaError_t Init()
+        {
+            block_threads               = BlockPolicy::BLOCK_THREADS;
+            pixels_per_thread           = BlockPolicy::PIXELS_PER_THREAD;
+
+            return cudaSuccess;
+        }
+    };
+
+/**
  * \brief Returns the current device or -1 if an error occurred.
  */
 HIPCUB_RUNTIME_FUNCTION inline int CurrentDevice()
@@ -106,13 +125,15 @@ public:
       : old_device(CurrentDevice()), needs_reset(old_device != new_device)
     {
         if (needs_reset)
-            HipcubDebug(cudaSetDevice(new_device));
+            auto dummy = cudaSetDevice(new_device);
+            // HipcubDebug();
     }
 
     __host__ inline ~SwitchDevice()
     {
         if (needs_reset)
-            HipcubDebug(cudaSetDevice(old_device));
+            auto dummy1 = cudaSetDevice(old_device);
+            // HipcubDebug();
     }
 };
 
@@ -168,6 +189,46 @@ __host__ inline cudaError_t PtxVersionUncached(int& ptx_version, int device)
     SwitchDevice sd(device);
     (void)sd;
     return PtxVersionUncached(ptx_version);
+}
+
+/**
+ * \brief Retrieves the PTX version that will be used on the current device (major * 100 + minor * 10).
+ *
+ * \note This function may cache the result internally.
+ *
+ * \note This function is thread safe.
+ */
+HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersion(int& ptx_version)
+{
+    cudaError_t result = cudaErrorUnknown;
+    if (HIPCUB_IS_HOST_CODE) {
+        #if HIPCUB_INCLUDE_HOST_CODE
+            #if HIPCUB_CPP_DIALECT >= 2011
+                // Host code and C++11.
+                auto const device = CurrentDevice();
+
+                auto const payload = GetPerDeviceAttributeCache<PtxVersionCacheTag>()(
+                  // If this call fails, then we get the error code back in the payload,
+                  // which we check with `CubDebug` below.
+                  [=] (int& pv) { return PtxVersionUncached(pv, device); },
+                  device);
+
+                if (!HIPcubDebug(payload.error))
+                    ptx_version = payload.attribute;
+
+                result = payload.error;
+            #else
+                // Host code and C++98.
+                result = PtxVersionUncached(ptx_version);
+            #endif
+        #endif
+    } else {
+        #if HIPCUB_INCLUDE_DEVICE_CODE
+            // Device code.
+            result = PtxVersionUncached(ptx_version);
+        #endif
+    }
+    return result;
 }
 
 /**
@@ -290,7 +351,7 @@ struct TilePrefixCallbackOp
         exclusive_prefix = window_aggregate;
 
         // Keep sliding the window back until we come across a tile whose inclusive prefix is known
-        while (WARP_ALL((predecessor_status != StatusWord(SCAN_TILE_INCLUSIVE)), 0xffffffff))
+        while (hipcub::WARP_ALL((predecessor_status != StatusWord(SCAN_TILE_INCLUSIVE)), 0xffffffff))
         {
             predecessor_idx -= HIPCUB_WARP_THREADS;
 
@@ -361,5 +422,382 @@ struct TilePrefixCallbackOp
         return op.template Invoke<PolicyT>();
     }
     };
+
+/**
+ * \brief Alias temporaries to externally-allocated device storage (or simply return the amount of storage needed).
+ */
+template <int ALLOCATIONS>
+__host__ __device__ __forceinline__
+cudaError_t AliasTemporaries(
+    void    *d_temp_storage,                    ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+    size_t& temp_storage_bytes,                 ///< [in,out] Size in bytes of \t d_temp_storage allocation
+    void*   (&allocations)[ALLOCATIONS],        ///< [in,out] Pointers to device allocations needed
+    size_t  (&allocation_sizes)[ALLOCATIONS])   ///< [in] Sizes in bytes of device allocations needed
+{
+    const int ALIGN_BYTES   = 256;
+    const int ALIGN_MASK    = ~(ALIGN_BYTES - 1);
+
+    // Compute exclusive prefix sum over allocation requests
+    size_t allocation_offsets[ALLOCATIONS];
+    size_t bytes_needed = 0;
+    for (int i = 0; i < ALLOCATIONS; ++i)
+    {
+        size_t allocation_bytes = (allocation_sizes[i] + ALIGN_BYTES - 1) & ALIGN_MASK;
+        allocation_offsets[i] = bytes_needed;
+        bytes_needed += allocation_bytes;
+    }
+    bytes_needed += ALIGN_BYTES - 1;
+
+    // Check if the caller is simply requesting the size of the storage allocation
+    if (!d_temp_storage)
+    {
+        temp_storage_bytes = bytes_needed;
+        return cudaSuccess;
+    }
+
+    // Check if enough storage provided
+    if (temp_storage_bytes < bytes_needed)
+    {
+        return HipcubDebug(cudaErrorInvalidValue);
+    }
+
+    // Alias
+    d_temp_storage = (void *) ((size_t(d_temp_storage) + ALIGN_BYTES - 1) & ALIGN_MASK);
+    for (int i = 0; i < ALLOCATIONS; ++i)
+    {
+        allocations[i] = static_cast<char*>(d_temp_storage) + allocation_offsets[i];
+    }
+
+    return cudaSuccess;
+}
+
+/******************************************************************************
+ * Generic tile status interface types for block-cooperative scans
+ ******************************************************************************/
+
+
+/**
+ * Tile status interface.
+ */
+template <
+    typename    T,
+    bool        SINGLE_WORD = hipcub::Traits<T>::PRIMITIVE>
+struct ScanTileState;
+
+
+/**
+ * Tile status interface specialized for scan status and value types
+ * that can be combined into one machine word that can be
+ * read/written coherently in a single access.
+ */
+template <typename T>
+struct ScanTileState<T, true>
+{
+    // Status word type
+    using StatusWord = conditional_t<
+      sizeof(T) == 8,
+      long long,
+      conditional_t<
+        sizeof(T) == 4,
+        int,
+        conditional_t<sizeof(T) == 2, short, char>>>;
+
+    // Unit word type
+    using TxnWord = conditional_t<
+      sizeof(T) == 8,
+      longlong2,
+      conditional_t<
+        sizeof(T) == 4,
+        int2,
+        conditional_t<sizeof(T) == 2, int, uchar2>>>;
+
+    // Device word type
+    struct TileDescriptor
+    {
+        StatusWord  status;
+        T           value;
+    };
+
+
+    // Constants
+    enum
+    {
+        TILE_STATUS_PADDING = HIPCUB_WARP_THREADS,
+    };
+
+
+    // Device storage
+    TxnWord *d_tile_descriptors;
+
+    /// Constructor
+    __host__ __device__ __forceinline__
+    ScanTileState()
+    :
+        d_tile_descriptors(NULL)
+    {}
+
+
+    /// Initializer
+    __host__ __device__ __forceinline__
+    cudaError_t Init(
+        int     /*num_tiles*/,                      ///< [in] Number of tiles
+        void    *d_temp_storage,                    ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t  /*temp_storage_bytes*/)             ///< [in] Size in bytes of \t d_temp_storage allocation
+    {
+        d_tile_descriptors = reinterpret_cast<TxnWord*>(d_temp_storage);
+        return cudaSuccess;
+    }
+
+
+    /**
+     * Compute device memory needed for tile status
+     */
+    __host__ __device__ __forceinline__
+    static cudaError_t AllocationSize(
+        int     num_tiles,                          ///< [in] Number of tiles
+        size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
+    {
+        temp_storage_bytes = (num_tiles + TILE_STATUS_PADDING) * sizeof(TileDescriptor);       // bytes needed for tile status descriptors
+        return cudaSuccess;
+    }
+
+
+    /**
+     * Initialize (from device)
+     */
+    __device__ __forceinline__ void InitializeStatus(int num_tiles)
+    {
+        int tile_idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+
+        TxnWord val = TxnWord();
+        TileDescriptor *descriptor = reinterpret_cast<TileDescriptor*>(&val);
+
+        if (tile_idx < num_tiles)
+        {
+            // Not-yet-set
+            descriptor->status = StatusWord(SCAN_TILE_INVALID);
+            d_tile_descriptors[TILE_STATUS_PADDING + tile_idx] = val;
+        }
+
+        if ((blockIdx.x == 0) && (threadIdx.x < TILE_STATUS_PADDING))
+        {
+            // Padding
+            descriptor->status = StatusWord(SCAN_TILE_OOB);
+            d_tile_descriptors[threadIdx.x] = val;
+        }
+    }
+
+
+    /**
+     * Update the specified tile's inclusive value and corresponding status
+     */
+    __device__ __forceinline__ void SetInclusive(int tile_idx, T tile_inclusive)
+    {
+        TileDescriptor tile_descriptor;
+        tile_descriptor.status = SCAN_TILE_INCLUSIVE;
+        tile_descriptor.value = tile_inclusive;
+
+        TxnWord alias;
+        *reinterpret_cast<TileDescriptor*>(&alias) = tile_descriptor;
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx, alias);
+    }
+
+
+    /**
+     * Update the specified tile's partial value and corresponding status
+     */
+    __device__ __forceinline__ void SetPartial(int tile_idx, T tile_partial)
+    {
+        TileDescriptor tile_descriptor;
+        tile_descriptor.status = SCAN_TILE_PARTIAL;
+        tile_descriptor.value = tile_partial;
+
+        TxnWord alias;
+        *reinterpret_cast<TileDescriptor*>(&alias) = tile_descriptor;
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx, alias);
+    }
+
+    /**
+     * Wait for the corresponding tile to become non-invalid
+     */
+    __device__ __forceinline__ void WaitForValid(
+        int             tile_idx,
+        StatusWord      &status,
+        T               &value)
+    {
+        TileDescriptor tile_descriptor;
+        do
+        {
+            __threadfence_block(); // prevent hoisting loads from loop
+            TxnWord alias = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
+            tile_descriptor = reinterpret_cast<TileDescriptor&>(alias);
+
+        } while (hipcub::WARP_ANY((tile_descriptor.status == SCAN_TILE_INVALID), 0xffffffff));
+
+        status = tile_descriptor.status;
+        value = tile_descriptor.value;
+    }
+
+};
+
+
+
+/**
+ * Tile status interface specialized for scan status and value types that
+ * cannot be combined into one machine word.
+ */
+template <typename T>
+struct ScanTileState<T, false>
+{
+    // Status word type
+    typedef char StatusWord;
+
+    // Constants
+    enum
+    {
+        TILE_STATUS_PADDING = HIPCUB_WARP_THREADS,
+    };
+
+    // Device storage
+    StatusWord  *d_tile_status;
+    T           *d_tile_partial;
+    T           *d_tile_inclusive;
+
+    /// Constructor
+    __host__ __device__ __forceinline__
+    ScanTileState()
+    :
+        d_tile_status(NULL),
+        d_tile_partial(NULL),
+        d_tile_inclusive(NULL)
+    {}
+
+
+    /// Initializer
+    __host__ __device__ __forceinline__
+    cudaError_t Init(
+        int     num_tiles,                          ///< [in] Number of tiles
+        void    *d_temp_storage,                    ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t  temp_storage_bytes)                 ///< [in] Size in bytes of \t d_temp_storage allocation
+    {
+        cudaError_t error = cudaSuccess;
+        do
+        {
+            void*   allocations[3] = {};
+            size_t  allocation_sizes[3];
+
+            allocation_sizes[0] = (num_tiles + TILE_STATUS_PADDING) * sizeof(StatusWord);           // bytes needed for tile status descriptors
+            allocation_sizes[1] = (num_tiles + TILE_STATUS_PADDING) * sizeof(hipcub::Uninitialized<T>);     // bytes needed for partials
+            allocation_sizes[2] = (num_tiles + TILE_STATUS_PADDING) * sizeof(hipcub::Uninitialized<T>);     // bytes needed for inclusives
+
+            // Compute allocation pointers into the single storage blob
+            if (HipcubDebug(error = AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes))) break;
+
+            // Alias the offsets
+            d_tile_status       = reinterpret_cast<StatusWord*>(allocations[0]);
+            d_tile_partial      = reinterpret_cast<T*>(allocations[1]);
+            d_tile_inclusive    = reinterpret_cast<T*>(allocations[2]);
+        }
+        while (0);
+
+        return error;
+    }
+
+
+    /**
+     * Compute device memory needed for tile status
+     */
+    __host__ __device__ __forceinline__
+    static cudaError_t AllocationSize(
+        int     num_tiles,                          ///< [in] Number of tiles
+        size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
+    {
+        // Specify storage allocation requirements
+        size_t  allocation_sizes[3];
+        allocation_sizes[0] = (num_tiles + TILE_STATUS_PADDING) * sizeof(StatusWord);         // bytes needed for tile status descriptors
+        allocation_sizes[1] = (num_tiles + TILE_STATUS_PADDING) * sizeof(hipcub::Uninitialized<T>);   // bytes needed for partials
+        allocation_sizes[2] = (num_tiles + TILE_STATUS_PADDING) * sizeof(hipcub::Uninitialized<T>);   // bytes needed for inclusives
+
+        // Set the necessary size of the blob
+        void* allocations[3] = {};
+        return HipcubDebug(AliasTemporaries(NULL, temp_storage_bytes, allocations, allocation_sizes));
+    }
+
+
+    /**
+     * Initialize (from device)
+     */
+    __device__ __forceinline__ void InitializeStatus(int num_tiles)
+    {
+        int tile_idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+        if (tile_idx < num_tiles)
+        {
+            // Not-yet-set
+            d_tile_status[TILE_STATUS_PADDING + tile_idx] = StatusWord(SCAN_TILE_INVALID);
+        }
+
+        if ((blockIdx.x == 0) && (threadIdx.x < TILE_STATUS_PADDING))
+        {
+            // Padding
+            d_tile_status[threadIdx.x] = StatusWord(SCAN_TILE_OOB);
+        }
+    }
+
+
+    /**
+     * Update the specified tile's inclusive value and corresponding status
+     */
+    __device__ __forceinline__ void SetInclusive(int tile_idx, T tile_inclusive)
+    {
+        // Update tile inclusive value
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_inclusive + TILE_STATUS_PADDING + tile_idx, tile_inclusive);
+
+        // Fence
+        __threadfence();
+
+        // Update tile status
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_status + TILE_STATUS_PADDING + tile_idx, StatusWord(SCAN_TILE_INCLUSIVE));
+    }
+
+
+    /**
+     * Update the specified tile's partial value and corresponding status
+     */
+    __device__ __forceinline__ void SetPartial(int tile_idx, T tile_partial)
+    {
+        // Update tile partial value
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_partial + TILE_STATUS_PADDING + tile_idx, tile_partial);
+
+        // Fence
+        __threadfence();
+
+        // Update tile status
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_status + TILE_STATUS_PADDING + tile_idx, StatusWord(SCAN_TILE_PARTIAL));
+    }
+
+    /**
+     * Wait for the corresponding tile to become non-invalid
+     */
+    __device__ __forceinline__ void WaitForValid(
+        int             tile_idx,
+        StatusWord      &status,
+        T               &value)
+    {
+        do {
+            status = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_status + TILE_STATUS_PADDING + tile_idx);
+
+            __threadfence();    // prevent hoisting loads from loop or loads below above this one
+
+        } while (status == SCAN_TILE_INVALID);
+
+        if (status == StatusWord(SCAN_TILE_PARTIAL)) 
+            value = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_partial + TILE_STATUS_PADDING + tile_idx);
+        else
+            value = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_inclusive + TILE_STATUS_PADDING + tile_idx);
+    }
+};
+
+typedef ScanTileState<OffsetT> ScanTileStateT;
+
 }
 #endif 

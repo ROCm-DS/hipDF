@@ -235,7 +235,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
   {
     cudaError_t error = cudaSuccess;
-    hipcub::KernelConfig dfa_simulation_config;
+    hipcub_extensions::KernelConfig dfa_simulation_config;
 
     using PolicyT = typename ActivePolicyT::AgentDFAPolicy;
     if (HipcubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
@@ -357,10 +357,10 @@ struct DispatchFSM : DeviceFSMPolicy {
     using StateVectorT = MultiFragmentInRegArray<MAX_NUM_STATES, MAX_NUM_STATES - 1>;
 
     // Scan tile state used for propagating composed state transition vectors
-    using ScanTileStateT = typename hipcub::ScanTileState<StateVectorT>;
+    using ScanTileStateT = typename hipcub_extensions::ScanTileState<StateVectorT>;
 
     // Scan tile state used for propagating transduced output offsets
-    using FstScanTileStateT = typename hipcub::ScanTileState<OffsetT>;
+    using FstScanTileStateT = typename hipcub_extensions::ScanTileState<OffsetT>;
 
     // STATE-TRANSITION IDENTITY VECTOR
     StateVectorT state_identity_vector;
@@ -421,7 +421,7 @@ struct DispatchFSM : DeviceFSMPolicy {
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
     error =
-      hipcub::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
+      hipcub_extensions::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
     if (error != cudaSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation
@@ -463,11 +463,13 @@ struct DispatchFSM : DeviceFSMPolicy {
       // Compute state-transition vectors
       // TODO tag dispatch or constexpr if depending on single-pass config to avoid superfluous
       // template instantiations
-      ComputeStateTransitionVector<ActivePolicyT>(
+      // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+      auto dummy = ComputeStateTransitionVector<ActivePolicyT>(
         sm_count, stv_tile_state, fst_offset_tile_state, d_thread_state_transition);
 
       // State-transition vector scan computing using the composition operator
-      hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
+      // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+      dummy = hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
                                      allocation_sizes[MEM_SCAN],
                                      d_thread_state_transition,
                                      d_thread_state_transition,
