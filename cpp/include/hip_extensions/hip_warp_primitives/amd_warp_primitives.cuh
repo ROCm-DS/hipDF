@@ -111,6 +111,9 @@ __device__ inline lane_mask __ballot_sync(lane_mask mask, int predicate)
   return __ballot(predicate) & mask;
 }
 
+int   __shfl      (int var,   int srcLane, int width=warpSize);
+int   __shfl_xor  (int var,   int laneMask, int width=warpSize)
+
 template <class T>
 __device__ inline T __shfl_sync(lane_mask mask, T var, int src, int width = WAVEFRONT_SIZE)
 {
@@ -120,6 +123,17 @@ __device__ inline T __shfl_sync(lane_mask mask, T var, int src, int width = WAVE
 #endif
 
   return __shfl(var, src, width);
+}
+
+template <class T>
+__device__ inline T __shfl_xor_sync(lane_mask mask, T var, int src, int width = WAVEFRONT_SIZE)
+{
+  /* calling thread must be set in the mask */
+#ifndef WARP_NO_ASSERT
+  assert(__is_thread_in_mask(mask));
+#endif
+
+  return __shfl_xor(var, src, width);
 }
 
 template <class T>

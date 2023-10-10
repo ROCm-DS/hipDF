@@ -31,7 +31,7 @@ inline __device__ T shuffle(T var, int lane = 0)
 template <typename T>
 inline __device__ T shuffle_xor(T var, uint32_t delta)
 {
-  return __shfl_xor_sync(~0, var, delta);
+  return hip_extensions::__shfl_xor_sync(~0, var, delta);
 }
 
 inline __device__ void syncwarp() { hip_extensions::__syncwarp(); }
