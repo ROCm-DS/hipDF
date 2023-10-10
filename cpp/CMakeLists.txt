@@ -356,31 +356,31 @@ add_library(
   src/filling/sequence.hip
   src/groupby/groupby.hip
   src/groupby/hash/groupby.hip
-  # src/groupby/sort/aggregate.cpp
-  # src/groupby/sort/group_argmax.hip
-  # src/groupby/sort/group_argmin.hip
-  # src/groupby/sort/group_collect.hip
-  # src/groupby/sort/group_correlation.hip
-  # src/groupby/sort/group_count.hip
-  # src/groupby/sort/group_m2.hip
-  # src/groupby/sort/group_max.hip
-  # src/groupby/sort/group_min.hip
-  # src/groupby/sort/group_merge_lists.hip
-  # src/groupby/sort/group_merge_m2.hip
-  # src/groupby/sort/group_nth_element.hip
-  # src/groupby/sort/group_nunique.hip
-  # src/groupby/sort/group_product.hip
-  # src/groupby/sort/group_quantiles.hip
-  # src/groupby/sort/group_std.hip
-  # src/groupby/sort/group_sum.hip
-  # src/groupby/sort/scan.cpp
-  # src/groupby/sort/group_count_scan.hip
-  # src/groupby/sort/group_max_scan.hip
-  # src/groupby/sort/group_min_scan.hip
-  # src/groupby/sort/group_rank_scan.hip
-  # src/groupby/sort/group_replace_nulls.hip
-  # src/groupby/sort/group_sum_scan.hip
-  # src/groupby/sort/sort_helper.hip
+  src/groupby/sort/aggregate.cpp
+  src/groupby/sort/group_argmax.hip
+  src/groupby/sort/group_argmin.hip
+  src/groupby/sort/group_collect.hip
+  src/groupby/sort/group_correlation.hip
+  src/groupby/sort/group_count.hip
+  src/groupby/sort/group_m2.hip
+  src/groupby/sort/group_max.hip
+  src/groupby/sort/group_min.hip
+  src/groupby/sort/group_merge_lists.hip
+  src/groupby/sort/group_merge_m2.hip
+  src/groupby/sort/group_nth_element.hip
+  src/groupby/sort/group_nunique.hip
+  src/groupby/sort/group_product.hip
+  src/groupby/sort/group_quantiles.hip
+  src/groupby/sort/group_std.hip
+  src/groupby/sort/group_sum.hip
+  src/groupby/sort/scan.cpp
+  src/groupby/sort/group_count_scan.hip
+  src/groupby/sort/group_max_scan.hip
+  src/groupby/sort/group_min_scan.hip
+  src/groupby/sort/group_rank_scan.hip
+  src/groupby/sort/group_replace_nulls.hip
+  src/groupby/sort/group_sum_scan.hip
+  src/groupby/sort/sort_helper.hip
   # src/hash/hashing.hip
   # src/hash/md5_hash.hip
   # src/hash/murmurhash3_x86_32.hip

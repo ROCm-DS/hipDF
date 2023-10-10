@@ -97,7 +97,7 @@ __forceinline__ __device__ void store_pair_vectorized(pair_type* __restrict__ co
       uint4 vec_val;
       pair_type pair_val;
 
-      // todo(HIP): WAR for non-working: pair_type2vec_type converter = {0, 0, 0, 0} 
+      // TODO(HIP): WAR for non-working: pair_type2vec_type converter = {0, 0, 0, 0} 
       __host__ __device__ pair_type2vec_type(uint4 vec_val) : vec_val(vec_val) {}
     };
     pair_type2vec_type converter(make_uint4(0,0,0,0));
@@ -108,7 +108,7 @@ __forceinline__ __device__ void store_pair_vectorized(pair_type* __restrict__ co
       uint2 vec_val;
       pair_type pair_val;
 
-      // todo(HIP): WAR for non-working: pair_type2vec_type converter = {0, 0}       
+      // TODO(HIP): WAR for non-working: pair_type2vec_type converter = {0, 0}       
       __host__ __device__ pair_type2vec_type(uint2 vec_val) : vec_val(vec_val) {}
     };
     pair_type2vec_type converter(make_uint2(0, 0));

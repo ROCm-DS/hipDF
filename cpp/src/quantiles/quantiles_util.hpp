@@ -179,7 +179,7 @@ CUDF_HOST_DEVICE inline Result select_quantile_data(Iterator begin,
     case interpolation::MIDPOINT:
       return interpolate::midpoint<Result>(*(begin + idx.lower), *(begin + idx.higher));
     default: {
-#ifndef __CUDA_ARCH__
+#if !__HIP_DEVICE_COMPILE__
       CUDF_FAIL("Invalid interpolation operation for quantiles.");
 #else
       CUDF_UNREACHABLE("Invalid interpolation operation for quantiles");

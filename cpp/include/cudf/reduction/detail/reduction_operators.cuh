@@ -92,7 +92,7 @@ struct simple_op {
   template <typename ResultType>
   auto get_element_transformer()
   {
-    using element_transformer = typename Derived::transformer<ResultType>;
+    using element_transformer = typename Derived::template transformer<ResultType>;
     return element_transformer{};
   }
 
@@ -107,7 +107,7 @@ struct simple_op {
   template <typename ResultType>
   auto get_null_replacing_element_transformer()
   {
-    using element_transformer = typename Derived::transformer<ResultType>;
+    using element_transformer = typename Derived::template transformer<ResultType>;
     return null_replacing_transformer<ResultType, element_transformer>{get_identity<ResultType>(),
                                                                        element_transformer{}};
   }
@@ -185,8 +185,8 @@ struct compound_op : public simple_op<Derived> {
   template <typename ResultType>
   auto get_null_replacing_element_transformer()
   {
-    using element_transformer = typename Derived::transformer<ResultType>;
-    using OutputType          = typename Derived::intermediate<ResultType>::IntermediateType;
+    using element_transformer = typename Derived::template transformer<ResultType>;
+    using OutputType          = typename Derived::template intermediate<ResultType>::IntermediateType;
     return null_replacing_transformer<OutputType, element_transformer>{
       simple_op<Derived>::template get_identity<OutputType>(), element_transformer{}};
   }
