@@ -197,7 +197,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Get PTX version
     int ptx_version;
-    error = hipcub::PtxVersion(ptx_version);
+    error = hipcub_extensions::PtxVersion(ptx_version);
     if (error != cudaSuccess) return error;
 
     // Create dispatch functor
@@ -242,7 +242,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Kernel invocation
     uint32_t grid_size = std::max(
-      1u, CUB_QUOTIENT_CEILING(num_chars, PolicyT::BLOCK_THREADS * PolicyT::ITEMS_PER_THREAD));
+      1u, HIPCUB_QUOTIENT_CEILING(num_chars, PolicyT::BLOCK_THREADS * PolicyT::ITEMS_PER_THREAD));
     uint32_t block_threads = dfa_simulation_config.block_threads;
 
     dfa_kernel<<<grid_size, block_threads, 0, stream>>>(dfa,
@@ -378,7 +378,7 @@ struct DispatchFSM : DeviceFSMPolicy {
       NUM_SYMBOLS_PER_BLOCK = BLOCK_THREADS * SYMBOLS_PER_THREAD
     };
 
-    BlockOffsetT num_blocks = std::max(1u, CUB_QUOTIENT_CEILING(num_chars, NUM_SYMBOLS_PER_BLOCK));
+    BlockOffsetT num_blocks = std::max(1u, HIPCUB_QUOTIENT_CEILING(num_chars, NUM_SYMBOLS_PER_BLOCK));
     size_t num_threads      = num_blocks * BLOCK_THREADS;
 
     //------------------------------------------------------------------------------
@@ -392,7 +392,8 @@ struct DispatchFSM : DeviceFSMPolicy {
     size_t vector_scan_storage_bytes = 0;
 
     // [MEMORY REQUIREMENTS] STATE-TRANSITION SCAN
-    hipcub::DeviceScan::ExclusiveScan(nullptr,
+    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+    auto dummy = hipcub::DeviceScan::ExclusiveScan(nullptr,
                                    vector_scan_storage_bytes,
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
@@ -406,7 +407,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Bytes needed for tile status descriptors (fusing state-transition vector + DFA simulation)
     if constexpr (SINGLE_PASS_STV) {
-      error = ScanTileStateT::AllocationSize(num_blocks, allocation_sizes[MEM_SINGLE_PASS_STV]);
+      error = hipcub_extensions::ScanTileStateT::AllocationSize(num_blocks, allocation_sizes[MEM_SINGLE_PASS_STV]);
       if (error != cudaSuccess) return error;
     }
 
@@ -440,7 +441,7 @@ struct DispatchFSM : DeviceFSMPolicy {
         num_blocks, allocations[MEM_FST_OFFSET], allocation_sizes[MEM_FST_OFFSET]);
       if (error != cudaSuccess) return error;
       constexpr uint32_t FST_INIT_TPB = 256;
-      uint32_t num_fst_init_blocks    = CUB_QUOTIENT_CEILING(num_blocks, FST_INIT_TPB);
+      uint32_t num_fst_init_blocks    = HIPCUB_QUOTIENT_CEILING(num_blocks, FST_INIT_TPB);
       initialization_pass_kernel<<<num_fst_init_blocks, FST_INIT_TPB, 0, stream>>>(
         fst_offset_tile_state, num_blocks);
     }
@@ -455,7 +456,7 @@ struct DispatchFSM : DeviceFSMPolicy {
         num_blocks, allocations[MEM_SINGLE_PASS_STV], allocation_sizes[MEM_SINGLE_PASS_STV]);
       if (error != cudaSuccess) return error;
       constexpr uint32_t STV_INIT_TPB = 256;
-      uint32_t num_stv_init_blocks    = CUB_QUOTIENT_CEILING(num_blocks, STV_INIT_TPB);
+      uint32_t num_stv_init_blocks    = HIPCUB_QUOTIENT_CEILING(num_blocks, STV_INIT_TPB);
       initialization_pass_kernel<<<num_stv_init_blocks, STV_INIT_TPB, 0, stream>>>(stv_tile_state,
                                                                                    num_blocks);
     } else {

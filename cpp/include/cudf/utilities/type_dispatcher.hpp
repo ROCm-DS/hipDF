@@ -583,7 +583,7 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
 namespace detail {
 template <typename T1>
 struct double_type_dispatcher_second_type {
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
   template <typename T2, typename F, typename... Ts>
@@ -595,7 +595,7 @@ struct double_type_dispatcher_second_type {
 
 template <template <cudf::type_id> typename IdTypeMap>
 struct double_type_dispatcher_first_type {
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
   template <typename T1, typename F, typename... Ts>
@@ -629,7 +629,7 @@ struct double_type_dispatcher_first_type {
  *
  * @return The result of invoking `f.template operator<T1, T2>(args)`
  */
-#ifdef __CUDACC__
+#ifdef __HIPCC__
 #pragma nv_exec_check_disable
 #endif
 template <template <cudf::type_id> typename IdTypeMap = id_to_type_impl, typename F, typename... Ts>

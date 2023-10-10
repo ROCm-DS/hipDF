@@ -25,10 +25,316 @@
 #include "hip/hip_runtime.h"
 #include <hipcub/hipcub.hpp>
 
+#ifndef HIPCUB_QUOTIENT_CEILING
+    /// Quotient of x/y rounded up to nearest integer
+    #define HIPCUB_QUOTIENT_CEILING(x, y) (((x) + (y) - 1) / (y))
+#endif
+
+#ifndef HipcubDebug
+    #define HipcubDebug(e) hipcub::Debug((cudaError_t) (e), __FILE__, __LINE__)
+#endif
+
+#ifndef HIPCUB_NS_QUALIFIER
+#define HIPCUB_NS_QUALIFIER ::hipcub
+#endif
+
+#ifndef HIPCUB_IS_DEVICE_CODE
+    #if defined(_NVHPC_CUDA)
+        #define HIPCUB_IS_DEVICE_CODE __builtin_is_device_code()
+        #define HIPCUB_IS_HOST_CODE (!__builtin_is_device_code())
+        #define HIPCUB_INCLUDE_DEVICE_CODE 1
+        #define HIPCUB_INCLUDE_HOST_CODE 1
+    #elif HIPCUB_ARCH > 0
+        #define HIPCUB_IS_DEVICE_CODE 1
+        #define HIPCUB_IS_HOST_CODE 0
+        #define HIPCUB_INCLUDE_DEVICE_CODE 1
+        #define HIPCUB_INCLUDE_HOST_CODE 0
+    #else
+        #define HIPCUB_IS_DEVICE_CODE 0
+        #define HIPCUB_IS_HOST_CODE 1
+        #define HIPCUB_INCLUDE_DEVICE_CODE 0
+        #define HIPCUB_INCLUDE_HOST_CODE 1
+    #endif
+#endif
+
 namespace hipcub_extensions {
 
     template <bool Test, class T1, class T2>
     using conditional_t = typename std::conditional<Test, T1, T2>::type;
+
+/**
+ * Enumerations of tile status
+ */
+enum ScanTileStatus
+{
+    SCAN_TILE_OOB,          // Out-of-bounds (e.g., padding)
+    SCAN_TILE_INVALID = 99, // Not yet processed
+    SCAN_TILE_PARTIAL,      // Tile aggregate is available
+    SCAN_TILE_INCLUSIVE,    // Inclusive tile prefix is available
+};
+
+/**
+ * \brief Returns the current device or -1 if an error occurred.
+ */
+HIPCUB_RUNTIME_FUNCTION inline int CurrentDevice()
+{
+#if defined(HIPCUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
+
+    int device = -1;
+    if (hipcubDebug(cudaGetDevice(&device))) return -1;
+    return device;
+
+#else // Device code without the CUDA runtime.
+
+    return -1;
+
+#endif
+}
+
+/**
+ * \brief RAII helper which saves the current device and switches to the
+ *        specified device on construction and switches to the saved device on
+ *        destruction.
+ */
+struct SwitchDevice
+{
+private:
+    int const old_device;
+    bool const needs_reset;
+public:
+    __host__ inline SwitchDevice(int new_device)
+      : old_device(CurrentDevice()), needs_reset(old_device != new_device)
+    {
+        if (needs_reset)
+            HipcubDebug(cudaSetDevice(new_device));
+    }
+
+    __host__ inline ~SwitchDevice()
+    {
+        if (needs_reset)
+            HipcubDebug(cudaSetDevice(old_device));
+    }
+};
+
+/**
+ * \brief Empty kernel for querying PTX manifest metadata (e.g., version) for the current device
+ */
+template <typename T>
+__global__ void EmptyKernel(void) { }
+
+/**
+ * \brief Retrieves the PTX version that will be used on the current device (major * 100 + minor * 10).
+ */
+HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
+{
+    // Instantiate `EmptyKernel<void>` in both host and device code to ensure
+    // it can be called.
+    typedef void (*EmptyKernelPtr)();
+    EmptyKernelPtr empty_kernel = EmptyKernel<void>;
+
+    // This is necessary for unused variable warnings in host compilers. The
+    // usual syntax of (void)empty_kernel; was not sufficient on MSVC2015.
+    (void)reinterpret_cast<void*>(empty_kernel);
+
+    cudaError_t result = cudaSuccess;
+    if (HIPCUB_IS_HOST_CODE) {
+       #if HIPCUB_INCLUDE_HOST_CODE
+            hipFuncAttributes empty_kernel_attrs;
+
+            result = hipFuncGetAttributes(&empty_kernel_attrs,
+                                           reinterpret_cast<void*>(empty_kernel));
+            HipcubDebug(result);
+
+            ptx_version = empty_kernel_attrs.ptxVersion * 10;
+        #endif
+    } else {
+        #if HIPCUB_INCLUDE_DEVICE_CODE
+            // This is necessary to ensure instantiation of EmptyKernel in device code.
+            // The `reinterpret_cast` is necessary to suppress a set-but-unused warnings.
+            // This is a meme now: https://twitter.com/blelbach/status/1222391615576100864
+            (void)reinterpret_cast<EmptyKernelPtr>(empty_kernel);
+
+            ptx_version = HIPCUB_ARCH;
+        #endif
+    }
+    return result;
+}
+
+/**
+ * \brief Retrieves the PTX version that will be used on \p device (major * 100 + minor * 10).
+ */
+__host__ inline cudaError_t PtxVersionUncached(int& ptx_version, int device)
+{
+    SwitchDevice sd(device);
+    (void)sd;
+    return PtxVersionUncached(ptx_version);
+}
+
+/**
+ * \brief Retrieves the PTX version that will be used on \p device (major * 100 + minor * 10).
+ *
+ * \note This function may cache the result internally.
+ *
+ * \note This function is thread safe.
+ */
+__host__ inline cudaError_t PtxVersion(int& ptx_version, int device)
+{
+#if HIPCUB_CPP_DIALECT >= 2011 // C++11 and later.
+
+    auto const payload = GetPerDeviceAttributeCache<PtxVersionCacheTag>()(
+      // If this call fails, then we get the error code back in the payload,
+      // which we check with `CubDebug` below.
+      [=] (int& pv) { return PtxVersionUncached(pv, device); },
+      device);
+
+    if (!HipcubDebug(payload.error))
+        ptx_version = payload.attribute;
+
+    return payload.error;
+
+#else // Pre C++11.
+
+    return PtxVersionUncached(ptx_version, device);
+
+#endif
+}
+
+    template <
+    typename    T,
+    typename    ScanOpT,
+    typename    ScanTileStateT,
+    int         PTX_ARCH = HIPCUB_ARCH>
+struct TilePrefixCallbackOp
+{
+    // Parameterized warp reduce
+    typedef hipcub::WarpReduce<T, HIPCUB_WARP_THREADS, PTX_ARCH> WarpReduceT;
+
+    // Temporary storage type
+    struct _TempStorage
+    {
+        typename WarpReduceT::TempStorage   warp_reduce;
+        T                                   exclusive_prefix;
+        T                                   inclusive_prefix;
+        T                                   block_aggregate;
+    };
+
+    // Alias wrapper allowing temporary storage to be unioned
+    struct TempStorage : hipcub::Uninitialized<_TempStorage> {};
+
+    // Type of status word
+    typedef typename ScanTileStateT::StatusWord StatusWord;
+
+    // Fields
+    _TempStorage&               temp_storage;       ///< Reference to a warp-reduction instance
+    ScanTileStateT&             tile_status;        ///< Interface to tile status
+    ScanOpT                     scan_op;            ///< Binary scan operator
+    int                         tile_idx;           ///< The current tile index
+    T                           exclusive_prefix;   ///< Exclusive prefix for the tile
+    T                           inclusive_prefix;   ///< Inclusive prefix for the tile
+
+    // Constructor
+    __device__ __forceinline__
+    TilePrefixCallbackOp(
+        ScanTileStateT       &tile_status,
+        TempStorage         &temp_storage,
+        ScanOpT              scan_op,
+        int                 tile_idx)
+    :
+        temp_storage(temp_storage.Alias()),
+        tile_status(tile_status),
+        scan_op(scan_op),
+        tile_idx(tile_idx) {}
+
+
+    // Block until all predecessors within the warp-wide window have non-invalid status
+    __device__ __forceinline__
+    void ProcessWindow(
+        int         predecessor_idx,        ///< Preceding tile index to inspect
+        StatusWord  &predecessor_status,    ///< [out] Preceding tile status
+        T           &window_aggregate)      ///< [out] Relevant partial reduction from this window of preceding tiles
+    {
+        T value;
+        tile_status.WaitForValid(predecessor_idx, predecessor_status, value);
+
+        // Perform a segmented reduction to get the prefix for the current window.
+        // Use the swizzled scan operator because we are now scanning *down* towards thread0.
+
+        int tail_flag = (predecessor_status == StatusWord(SCAN_TILE_INCLUSIVE));
+        window_aggregate = WarpReduceT(temp_storage.warp_reduce).TailSegmentedReduce(
+            value,
+            tail_flag,
+            hipcub::SwizzleScanOp<ScanOpT>(scan_op));
+    }
+
+
+    // BlockScan prefix callback functor (called by the first warp)
+    __device__ __forceinline__
+    T operator()(T block_aggregate)
+    {
+
+        // Update our status with our tile-aggregate
+        if (threadIdx.x == 0)
+        {
+            temp_storage.block_aggregate = block_aggregate;
+            tile_status.SetPartial(tile_idx, block_aggregate);
+        }
+
+        int         predecessor_idx = tile_idx - threadIdx.x - 1;
+        StatusWord  predecessor_status;
+        T           window_aggregate;
+
+        // Wait for the warp-wide window of predecessor tiles to become valid
+        ProcessWindow(predecessor_idx, predecessor_status, window_aggregate);
+
+        // The exclusive tile prefix starts out as the current window aggregate
+        exclusive_prefix = window_aggregate;
+
+        // Keep sliding the window back until we come across a tile whose inclusive prefix is known
+        while (WARP_ALL((predecessor_status != StatusWord(SCAN_TILE_INCLUSIVE)), 0xffffffff))
+        {
+            predecessor_idx -= HIPCUB_WARP_THREADS;
+
+            // Update exclusive tile prefix with the window prefix
+            ProcessWindow(predecessor_idx, predecessor_status, window_aggregate);
+            exclusive_prefix = scan_op(window_aggregate, exclusive_prefix);
+        }
+
+        // Compute the inclusive tile prefix and update the status for this tile
+        if (threadIdx.x == 0)
+        {
+            inclusive_prefix = scan_op(exclusive_prefix, block_aggregate);
+            tile_status.SetInclusive(tile_idx, inclusive_prefix);
+
+            temp_storage.exclusive_prefix = exclusive_prefix;
+            temp_storage.inclusive_prefix = inclusive_prefix;
+        }
+
+        // Return exclusive_prefix
+        return exclusive_prefix;
+    }
+
+    // Get the exclusive prefix stored in temporary storage
+    __device__ __forceinline__
+    T GetExclusivePrefix()
+    {
+        return temp_storage.exclusive_prefix;
+    }
+
+    // Get the inclusive prefix stored in temporary storage
+    __device__ __forceinline__
+    T GetInclusivePrefix()
+    {
+        return temp_storage.inclusive_prefix;
+    }
+
+    // Get the block aggregate stored in temporary storage
+    __device__ __forceinline__
+    T GetBlockAggregate()
+    {
+        return temp_storage.block_aggregate;
+    }
+
+};
 
     /// Helper for dispatching into a policy chain
     template <int PTX_VERSION, typename PolicyT, typename PrevPolicyT>
