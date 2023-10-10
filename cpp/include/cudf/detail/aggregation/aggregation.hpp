@@ -1645,7 +1645,7 @@ CUDF_HOST_DEVICE inline decltype(auto) aggregation_dispatcher(aggregation::Kind 
     case aggregation::HOST_UDF:
       return f.template operator()<aggregation::HOST_UDF>(std::forward<Ts>(args)...);
     default: {
-#ifndef __CUDA_ARCH__
+#if !__HIP_DEVICE_COMPILE__
       CUDF_FAIL("Unsupported aggregation.");
 #else
       CUDF_UNREACHABLE("Unsupported aggregation.");
