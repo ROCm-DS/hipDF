@@ -407,7 +407,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Bytes needed for tile status descriptors (fusing state-transition vector + DFA simulation)
     if constexpr (SINGLE_PASS_STV) {
-      error = hipcub_extensions::ScanTileStateT::AllocationSize(num_blocks, allocation_sizes[MEM_SINGLE_PASS_STV]);
+      error = ScanTileStateT::AllocationSize(num_blocks, allocation_sizes[MEM_SINGLE_PASS_STV]);
       if (error != cudaSuccess) return error;
     }
 

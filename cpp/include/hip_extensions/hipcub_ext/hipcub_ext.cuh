@@ -797,7 +797,5 @@ struct ScanTileState<T, false>
     }
 };
 
-typedef ScanTileState<OffsetT> ScanTileStateT;
-
 }
 #endif 
