@@ -458,9 +458,9 @@ add_library(
   # src/io/utilities/parsing_utils.hip
   # src/io/utilities/row_selection.cpp
   # src/io/utilities/trie.hip
-  # src/jit/cache.cpp
-  # src/jit/parser.cpp
-  # src/jit/util.cpp
+  src/jit/cache.cpp
+  src/jit/parser.cpp
+  src/jit/util.cpp
   # src/join/conditional_join.hip
   # src/join/cross_join.hip
   # src/join/hash_join.hip
@@ -670,7 +670,7 @@ add_library(
   # src/unary/null_ops.hip
   src/utilities/default_stream.cpp
   src/utilities/linked_column.cpp
-  # src/utilities/logger.cpp
+  src/utilities/logger.cpp
   src/utilities/stacktrace.cpp
   src/utilities/traits.cpp
   src/utilities/type_checks.cpp
