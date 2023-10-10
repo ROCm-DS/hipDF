@@ -35,7 +35,8 @@ namespace {
 
 using spark_hash_value_type = int32_t;
 
-template <typename Key, CUDF_ENABLE_IF(not cudf::is_nested<Key>())>
+template <typename Key> //TODO(HIP): re-enable: CUDF_ENABLE_IF(not cudf::is_nested<Key>())>
+                        //TODO(HIP): template instantiation of  "DeviceRowHasher<hash_function, Nullate> device_hasher()" appears to fail for hash function Spark_MurmurHash3_x86_32 if it uses the CUDF_ENABLE_IF
 struct Spark_MurmurHash3_x86_32 {
   using result_type = spark_hash_value_type;
 

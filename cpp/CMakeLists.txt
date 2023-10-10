@@ -381,12 +381,12 @@ add_library(
   src/groupby/sort/group_replace_nulls.hip
   src/groupby/sort/group_sum_scan.hip
   src/groupby/sort/sort_helper.hip
-  # src/hash/hashing.hip
-  # src/hash/md5_hash.hip
-  # src/hash/murmurhash3_x86_32.hip
-  # src/hash/murmurhash3_x64_128.hip
-  # src/hash/spark_murmurhash3_x86_32.hip
-  # src/hash/xxhash_64.hip
+  src/hash/hashing.hip
+  src/hash/md5_hash.hip
+  src/hash/murmurhash3_x86_32.hip
+  src/hash/murmurhash3_x64_128.hip
+  src/hash/spark_murmurhash3_x86_32.hip
+  src/hash/xxhash_64.hip
   src/interop/dlpack.cpp
   # src/interop/from_arrow.hip
   # src/interop/to_arrow.hip
