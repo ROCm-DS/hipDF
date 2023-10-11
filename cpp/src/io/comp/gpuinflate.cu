@@ -181,7 +181,7 @@ inline __device__ unsigned int bfe(unsigned int source,
                                    unsigned int bit_start,
                                    unsigned int num_bits)
 {
-  // TODO(HIP): check if we have an equivalent ISA instruction/intrinic that can be used here
+  // TODO(HIP): check if we have an equivalent ISA instruction/intrinsic that can be used here
   //unsigned int bits;
   //asm("bfe.u32 %0, %1, %2, %3;" : "=r"(bits) : "r"(source), "r"(bit_start), "r"(num_bits));
   return hipcub::BFE(source, bit_start, num_bits);
