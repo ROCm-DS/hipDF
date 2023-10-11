@@ -177,7 +177,7 @@ if(CUDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 #
 set(CUDF_CXX_FLAGS "")
-set(CUDF_GPU_FLAGS "")
+set(CUDF_GPU_FLAGS "-Wno-pass-failed") #FIXME(HIP): WAR for some transformation passes failing in hipcub, might degrade performance
 set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_GPU_DEFINITIONS "")
 
