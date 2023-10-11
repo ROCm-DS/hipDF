@@ -299,7 +299,7 @@ TYPED_TEST(StringsIntegerConvertTest, FromToInteger)
   auto integers      = cudf::make_numeric_column(cudf::data_type{cudf::type_to_id<TypeParam>()},
                                             (cudf::size_type)d_integers.size());
   auto integers_view = integers->mutable_view();
-  CUDF_CUDA_TRY(cudaMemcpy(integers_view.data<TypeParam>(),
+  CUDF_CUDA_TRY(hipMemcpy(integers_view.data<TypeParam>(),
                            d_integers.data(),
                            d_integers.size() * sizeof(TypeParam),
                            hipMemcpyDefault));

@@ -475,28 +475,28 @@ add_library(
   # src/join/mixed_join_size_kernel_nulls.hip
   # src/join/mixed_join_size_kernels_semi.hip
   # src/join/semi_join.hip
-  # src/lists/contains.hip
-  # src/lists/combine/concatenate_list_elements.hip
-  # src/lists/combine/concatenate_rows.hip
-  # src/lists/copying/concatenate.hip
-  # src/lists/copying/copying.hip
-  # src/lists/copying/gather.hip
-  # src/lists/copying/segmented_gather.hip
-  # src/lists/copying/scatter_helper.hip
-  # src/lists/count_elements.hip
-  # src/lists/dremel.hip
-  # src/lists/explode.hip
-  # src/lists/extract.hip
-  # src/lists/interleave_columns.hip
-  # src/lists/lists_column_factories.hip
+  src/lists/contains.hip
+  src/lists/combine/concatenate_list_elements.hip
+  src/lists/combine/concatenate_rows.hip
+  src/lists/copying/concatenate.hip
+  src/lists/copying/copying.hip
+  src/lists/copying/gather.hip
+  src/lists/copying/segmented_gather.hip
+  src/lists/copying/scatter_helper.hip
+  src/lists/count_elements.hip
+  src/lists/dremel.hip
+  src/lists/explode.hip
+  src/lists/extract.hip
+  src/lists/interleave_columns.hip
+  src/lists/lists_column_factories.hip
   src/lists/lists_column_view.hip
-  # src/lists/reverse.hip
-  # src/lists/segmented_sort.hip
-  # src/lists/sequences.hip
-  # src/lists/set_operations.hip
-  # src/lists/stream_compaction/apply_boolean_mask.hip
-  # src/lists/stream_compaction/distinct.hip
-  # src/lists/utilities.hip
+  src/lists/reverse.hip
+  src/lists/segmented_sort.hip
+  src/lists/sequences.hip
+  src/lists/set_operations.hip
+  src/lists/stream_compaction/apply_boolean_mask.hip
+  src/lists/stream_compaction/distinct.hip
+  src/lists/utilities.hip
   # src/merge/merge.hip
   # src/partitioning/partitioning.hip
   # src/partitioning/round_robin.hip
@@ -636,7 +636,7 @@ add_library(
   src/structs/structs_column_view.cpp
   src/structs/utilities.cpp
   src/table/row_operators.hip
-  # src/table/table.cpp
+  src/table/table.cpp
   src/table/table_device_view.hip
   src/table/table_view.cpp
   # src/text/detokenize.hip
