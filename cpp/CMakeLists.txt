@@ -145,7 +145,7 @@ if(HIPDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 #
 set(HIPDF_CXX_FLAGS "")
-set(HIPDF_GPU_FLAGS "-Wno-pass-failed") #FIXME(HIP): WAR for some transformation passes failing in hipcub, might degrade performance
+set(HIPDF_GPU_FLAGS "") 
 set(HIPDF_CXX_DEFINITIONS "")
 set(HIPDF_GPU_DEFINITIONS "")
 
@@ -664,10 +664,10 @@ add_library(
   # src/transform/row_bit_count.hip
   # src/transform/transform.cpp
   # src/transpose/transpose.hip
-  # src/unary/cast_ops.hip
-  # src/unary/math_ops.hip
-  # src/unary/nan_ops.hip
-  # src/unary/null_ops.hip
+  src/unary/cast_ops.hip
+  src/unary/math_ops.hip
+  src/unary/nan_ops.hip
+  src/unary/null_ops.hip
   src/utilities/default_stream.cpp
   src/utilities/linked_column.cpp
   src/utilities/logger.cpp

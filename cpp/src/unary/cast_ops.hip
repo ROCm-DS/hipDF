@@ -55,7 +55,7 @@ struct unary_cast {
     // Convert source tick counts into target tick counts without blindly truncating them
     // by dividing the respective duration time periods (which may not work for time before
     // UNIX epoch)
-    return TargetT{hip::std::chrono::floor<TargetT::duration>(element.time_since_epoch())};
+    return TargetT{hip::std::chrono::floor<typename TargetT::duration>(element.time_since_epoch())};
   }
 
   template <
@@ -100,7 +100,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_duration<SourceT>() && cudf::is_timestamp<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{hip::std::chrono::floor<TargetT::duration>(element)};
+    return TargetT{hip::std::chrono::floor<typename TargetT::duration>(element)};
   }
 };
 
