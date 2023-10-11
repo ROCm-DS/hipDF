@@ -145,7 +145,7 @@ if(HIPDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
 endif()
 #
 set(HIPDF_CXX_FLAGS "")
-set(HIPDF_GPU_FLAGS "")
+set(HIPDF_GPU_FLAGS "-Wno-pass-failed") #FIXME(HIP): WAR for some transformation passes failing in hipcub, might degrade performance
 set(HIPDF_CXX_DEFINITIONS "")
 set(HIPDF_GPU_DEFINITIONS "")
 
@@ -558,14 +558,14 @@ add_library(
   # src/search/contains_scalar.hip
   # src/search/contains_table.hip
   # src/search/search_ordered.hip
-  # src/sort/is_sorted.hip
-  # src/sort/rank.hip
-  # src/sort/segmented_sort.hip
-  # src/sort/sort_column.hip
-  # src/sort/sort.hip
-  # src/sort/stable_segmented_sort.hip
-  # src/sort/stable_sort_column.hip
-  # src/sort/stable_sort.hip
+  src/sort/is_sorted.hip
+  src/sort/rank.hip
+  src/sort/segmented_sort.hip
+  src/sort/sort_column.hip
+  src/sort/sort.hip
+  src/sort/stable_segmented_sort.hip
+  src/sort/stable_sort_column.hip
+  src/sort/stable_sort.hip
   # src/stream_compaction/apply_boolean_mask.hip
   # src/stream_compaction/distinct.hip
   # src/stream_compaction/distinct_count.hip
