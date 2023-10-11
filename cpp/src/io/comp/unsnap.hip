@@ -292,7 +292,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
     // Wait for prefetcher
     if (t == 0) {
       s->q.prefetch_rdpos = cur;
-#pragma unroll(1)  // We don't want unrolling here
+#pragma unroll 1  // We don't want unrolling here
       while (s->q.prefetch_wrpos < min(cur + 5 * batch_size, end)) {
         busy_wait(10);
       }
@@ -453,7 +453,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
           cur += blen;
           // Wait for prefetcher
           s->q.prefetch_rdpos = cur;
-#pragma unroll(1)  // We don't want unrolling here
+#pragma unroll 1  // We don't want unrolling here
           while (s->q.prefetch_wrpos < min(cur + 5 * batch_size, end)) {
             busy_wait(10);
           }
@@ -624,8 +624,10 @@ __device__ void snappy_process_symbols(unsnap_state_s* s, int t, Storage& temp_s
  * @param[in] inputs Source & destination information per block
  * @param[out] outputs Decompression status per block
  */
-template <int block_size>
-__global__ void __launch_bounds__(block_size)
+  //FIXME(HIP): with the template kernel, we would run into the error "reproducer_struct.hip:16:30: error: initialization is not supported for __shared__ variables.
+  // __shared__ unsnap_state_s state_g;" with hipcc and std=c++17
+//template <int block_size>
+__global__ void //__launch_bounds__(block_size)
   unsnap_kernel(device_span<device_span<uint8_t const> const> inputs,
                 device_span<device_span<uint8_t> const> outputs,
                 device_span<compression_result> results)
@@ -717,8 +719,12 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
 {
   dim3 dim_block(128, 1);           // 4 warps per stream, 1 stream per block
   dim3 dim_grid(inputs.size(), 1);  // TODO: Check max grid dimensions vs max expected count
+  
+  //FIXME(HIP): with the template kernel, we would run into the error "reproducer_struct.hip:16:30: error: initialization is not supported for __shared__ variables.
+  // __shared__ unsnap_state_s state_g;" with hipcc and std=c++17
+  // unsnap_kernel<128><<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
 
-  unsnap_kernel<128><<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
+  unsnap_kernel<<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
 }
 
 }  // namespace io

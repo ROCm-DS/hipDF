@@ -400,10 +400,10 @@ add_library(
   src/io/comp/gpuinflate.hip
   src/io/comp/hipcomp_adapter.cpp
   src/io/comp/hipcomp_adapter.hip
-  # src/io/comp/snap.hip
+  src/io/comp/snap.hip
   src/io/comp/statistics.hip
   src/io/comp/uncomp.cpp
-  # src/io/comp/unsnap.hip
+  src/io/comp/unsnap.hip
   # src/io/csv/csv_gpu.hip
   # src/io/csv/durations.hip
   # src/io/csv/reader_impl.hip
