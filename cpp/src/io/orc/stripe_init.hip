@@ -19,7 +19,7 @@
 #include <cudf/io/orc_types.hpp>
 #include <io/utilities/block_utils.cuh>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <rmm/cuda_stream_view.hpp>
 #include <thrust/copy.h>
 #include <thrust/execution_policy.h>
@@ -115,7 +115,7 @@ __global__ void __launch_bounds__(128, 8) gpuParseCompressedStripeData(
       if (!lane_id && init_in_ctl) {
         s->ctl = {cur, block_len, uncompressed + max_uncompressed_size, uncompressed_size};
       }
-      __syncwarp();
+      hip_extensions::__syncwarp();
       if (init_in_ctl && lane_id == 0) {
         *init_in_ctl  = {s->ctl.in_ptr, s->ctl.in_size};
         *init_out_ctl = {s->ctl.out_ptr, s->ctl.out_size};
@@ -124,7 +124,7 @@ __global__ void __launch_bounds__(128, 8) gpuParseCompressedStripeData(
       max_uncompressed_size += uncompressed_size;
       max_uncompressed_block_size = max(max_uncompressed_block_size, uncompressed_size);
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
     if (!lane_id) {
       s->info.num_compressed_blocks       = num_compressed_blocks;
       s->info.num_uncompressed_blocks     = num_uncompressed_blocks;

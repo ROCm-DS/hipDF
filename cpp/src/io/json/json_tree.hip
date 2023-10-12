@@ -33,7 +33,7 @@
 #include <rmm/exec_policy.hpp>
 #include <rmm/mr/device/polymorphic_allocator.hpp>
 
-#include <cub/device/device_radix_sort.cuh>
+#include <hipcub/device/device_radix_sort.hpp>
 
 #include <hipco/static_set.cuh>
 

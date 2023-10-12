@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <hipcub/hipcub.hpp>
 #include "nested_json.hpp"
 #include <io/utilities/parsing_utils.cuh>
 #include <io/utilities/type_inference.cuh>
@@ -46,7 +46,7 @@
 #include <thrust/sort.h>
 #include <thrust/transform.h>
 #include <thrust/unique.h>
-
+#include <thrust/sequence.h>
 #include <hip/atomic>
 
 #include <algorithm>

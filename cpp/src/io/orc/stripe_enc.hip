@@ -27,7 +27,7 @@
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/utilities/bit.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
@@ -732,7 +732,7 @@ __global__ void __launch_bounds__(block_size)
     typename hipcub::BlockReduce<int32_t, block_size>::TempStorage i32;
     typename hipcub::BlockReduce<int64_t, block_size>::TempStorage i64;
     typename hipcub::BlockReduce<uint32_t, block_size>::TempStorage u32;
-    typename cub::BlockReduce<uint64_t, block_size>::TempStorage u64;
+    typename hipcub::BlockReduce<uint64_t, block_size>::TempStorage u64;
   } temp_storage;
 
   orcenc_state_s* const s = &state_g;

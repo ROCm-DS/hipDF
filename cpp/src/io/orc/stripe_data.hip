@@ -19,7 +19,7 @@
 #include <cudf/io/orc_types.hpp>
 #include <io/utilities/block_utils.cuh>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
 namespace cudf {
@@ -151,7 +151,7 @@ static __device__ void bytestream_init(volatile orc_bytestream_s* bs,
   bs->pos        = pos;
   bs->len        = (len + pos + 7) & ~7;
   bs->fill_pos   = 0;
-  bs->fill_count = min(bs->len, bytestream_buffer_size) >> 3;
+  bs->fill_count = (int)min(bs->len, bytestream_buffer_size) >> 3;
 }
 
 /**
@@ -782,7 +782,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
     pos  = shuffle(pos);
     n    = shuffle(n);
     w    = shuffle(w);
-    __syncwarp();  // Not required, included to fix the racecheck warning
+    hip_extensions::__syncwarp();  // Not required, included to fix the racecheck warning
     for (uint32_t i = tr; i < n; i += 32) {
       if constexpr (sizeof(T) <= 4) {
         if (mode == 0) {
@@ -826,7 +826,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         }
       }
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
     // Patch values
     if (mode == 2) {
       uint32_t pw_byte3 = rle->m2_pw_byte3[r];
@@ -852,11 +852,11 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         if (tr < pll && patch_pos < n) { vals[base + patch_pos] += patch; }
       }
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
     if (mode == 3) {
       T baseval;
       for (uint32_t i = 1; i < n; i <<= 1) {
-        __syncwarp();
+        hip_extensions::__syncwarp();
         for (uint32_t j = tr; j < n; j += 32) {
           if (j & i) vals[base + j] += vals[base + ((j & ~i) | (i - 1))];
         }
@@ -869,7 +869,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         vals[base + j] += baseval;
       }
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
   }
   __syncthreads();
   return rle->num_vals;
@@ -1241,7 +1241,7 @@ __global__ void __launch_bounds__(block_size)
       }
       __syncthreads();
       while (s->top.dict.dict_len > 0) {
-        uint32_t numvals        = min(s->top.dict.dict_len, blockDim.x), len;
+        uint32_t numvals        = min((int)s->top.dict.dict_len, blockDim.x), len;
         volatile uint32_t* vals = s->vals.u32;
         bytestream_fill(&s->bs, t);
         __syncthreads();
@@ -1257,7 +1257,7 @@ __global__ void __launch_bounds__(block_size)
         __syncthreads();
         if (numvals == 0) {
           // This is an error (ran out of data)
-          numvals = min(s->top.dict.dict_len, blockDim.x);
+          numvals = min((int)s->top.dict.dict_len, blockDim.x);
           vals[t] = 0;
         }
         if (t < numvals) {
@@ -1293,7 +1293,7 @@ static __device__ void DecodeRowPositions(orcdec_state_s* s,
 
   if (t == 0) {
     if (s->chunk.skip_count != 0) {
-      s->u.rowdec.nz_count = min(min(s->chunk.skip_count, s->top.data.max_vals), blockDim.x);
+      s->u.rowdec.nz_count = min(min((int)s->chunk.skip_count, s->top.data.max_vals), blockDim.x);
       s->chunk.skip_count -= s->u.rowdec.nz_count;
       s->top.data.nrows = s->u.rowdec.nz_count;
     } else {
@@ -1306,8 +1306,8 @@ static __device__ void DecodeRowPositions(orcdec_state_s* s,
   }
   while (s->u.rowdec.nz_count < s->top.data.max_vals &&
          s->top.data.cur_row + s->top.data.nrows < s->top.data.end_row) {
-    uint32_t nrows = min(s->top.data.end_row - (s->top.data.cur_row + s->top.data.nrows),
-                         min((row_decoder_buffer_size - s->u.rowdec.nz_count) * 2, blockDim.x));
+    uint32_t nrows = min((int)s->top.data.end_row - (s->top.data.cur_row + s->top.data.nrows),
+                         min((int)(row_decoder_buffer_size - s->u.rowdec.nz_count) * 2, blockDim.x));
     if (s->chunk.valid_map_base != nullptr) {
       // We have a present stream
       uint32_t rmax  = s->top.data.end_row - min((uint32_t)first_row, s->top.data.end_row);
@@ -1417,7 +1417,7 @@ __global__ void __launch_bounds__(block_size)
       uint32_t ofs0 = min(s->top.data.index.strm_offset[0], s->chunk.strm_len[CI_DATA]);
       uint32_t ofs1 = min(s->top.data.index.strm_offset[1], s->chunk.strm_len[CI_DATA2]);
       uint32_t rowgroup_rowofs =
-        (level == 0) ? (blockIdx.y - min(s->chunk.rowgroup_id, blockIdx.y)) * rowidx_stride
+        (level == 0) ? (blockIdx.y - min((int)s->chunk.rowgroup_id, blockIdx.y)) * rowidx_stride
                      : s->top.data.index.start_row;
       ;
       s->chunk.streams[CI_DATA] += ofs0;
@@ -1585,7 +1585,7 @@ __global__ void __launch_bounds__(block_size)
         __syncthreads();
         if (t == 0) {
           s->top.data.buffered_count = 0;
-          s->top.data.max_vals       = min(s->top.data.max_vals, blockDim.x);
+          s->top.data.max_vals       = min((int)s->top.data.max_vals, blockDim.x);
         }
         __syncthreads();
         // If the condition is false, then it means that s->top.data.max_vals is last set of values.

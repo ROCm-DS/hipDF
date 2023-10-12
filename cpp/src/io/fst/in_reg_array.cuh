@@ -68,7 +68,12 @@ class MultiFragmentInRegArray {
                                               uint32_t num_bits) const
   {
 #if HIPCUB_ARCH > 0
+  #ifdef __HIP_DEVICE_COMPILE__
     return hipcub::BFE(data, bit_start, num_bits);
+  #else
+    uint32_t const MASK = (1 << num_bits) - 1;
+    return (data >> bit_start) & MASK;
+  #endif
 #else
     uint32_t const MASK = (1 << num_bits) - 1;
     return (data >> bit_start) & MASK;
@@ -85,7 +90,9 @@ class MultiFragmentInRegArray {
                             uint32_t num_bits) const
   {
 #if HIPCUB_ARCH > 0
+  #ifdef __HIP_DEVICE_COMPILE__
     hipcub::BFI(data, data, bits, bit_start, num_bits);
+  #endif
 #else
     uint32_t x      = bits << bit_start;
     uint32_t y      = data;

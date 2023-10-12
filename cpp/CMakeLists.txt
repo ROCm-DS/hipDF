@@ -404,26 +404,26 @@ add_library(
   src/io/comp/statistics.hip
   src/io/comp/uncomp.cpp
   src/io/comp/unsnap.hip
-  # src/io/csv/csv_gpu.hip
-  # src/io/csv/durations.hip
-  # src/io/csv/reader_impl.hip
-  # src/io/csv/writer_impl.hip
-  # src/io/functions.cpp
-  # src/io/json/byte_range_info.hip
-  # src/io/json/json_column.hip
+  src/io/csv/csv_gpu.hip
+  src/io/csv/durations.hip
+  src/io/csv/reader_impl.hip
+  src/io/csv/writer_impl.hip
+  src/io/functions.cpp
+  src/io/json/byte_range_info.hip
+  src/io/json/json_column.hip
   # src/io/json/json_tree.hip
   # src/io/json/nested_json_gpu.hip
-  # src/io/json/read_json.hip
-  # src/io/json/legacy/json_gpu.hip
-  # src/io/json/legacy/reader_impl.hip
-  # src/io/json/write_json.hip
-  # src/io/orc/aggregate_orc_metadata.cpp
-  # src/io/orc/dict_enc.hip
-  # src/io/orc/orc.cpp
-  # src/io/orc/reader_impl.hip
+  src/io/json/read_json.hip
+  src/io/json/legacy/json_gpu.hip
+  src/io/json/legacy/reader_impl.hip
+  src/io/json/write_json.hip
+  src/io/orc/aggregate_orc_metadata.cpp
+  src/io/orc/dict_enc.hip
+  src/io/orc/orc.cpp
+  src/io/orc/reader_impl.hip
   # src/io/orc/stats_enc.hip
   # src/io/orc/stripe_data.hip
-  # src/io/orc/stripe_enc.hip
+  src/io/orc/stripe_enc.hip
   # src/io/orc/stripe_init.hip
   # src/datetime/timezone.cpp
   # src/io/orc/writer_impl.hip
