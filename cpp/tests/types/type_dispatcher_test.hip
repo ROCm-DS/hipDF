@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *
@@ -71,7 +72,7 @@ TYPED_TEST(TypedDispatcherTest, DeviceDispatch)
     1, cudf::get_default_stream(), rmm::mr::get_current_device_resource());
   dispatch_test_kernel<<<1, 1, 0, cudf::get_default_stream().value()>>>(
     cudf::type_to_id<TypeParam>(), result.data());
-  CUDF_CUDA_TRY(cudaDeviceSynchronize());
+  CUDF_CUDA_TRY(hipDeviceSynchronize());
   EXPECT_EQ(true, result.front_element(cudf::get_default_stream()));
 }
 
@@ -132,7 +133,7 @@ TYPED_TEST(TypedDoubleDispatcherTest, DeviceDoubleDispatch)
     1, cudf::get_default_stream(), rmm::mr::get_current_device_resource());
   double_dispatch_test_kernel<<<1, 1, 0, cudf::get_default_stream().value()>>>(
     cudf::type_to_id<TypeParam>(), cudf::type_to_id<TypeParam>(), result.data());
-  CUDF_CUDA_TRY(cudaDeviceSynchronize());
+  CUDF_CUDA_TRY(hipDeviceSynchronize());
   EXPECT_EQ(true, result.front_element(cudf::get_default_stream()));
 }
 
