@@ -1649,7 +1649,7 @@ void make_json_column(json_column& root_column,
         // The child column has yet to be created
         if (current_data_path.top().column->child_columns.empty()) {
           current_data_path.top().column->child_columns.emplace(std::string{list_child_name},
-                                                                json_column{json_col_t::Unknown});
+                                                                json_column{/*Todo(HIP): json_col_t::Unknown*/});
           current_data_path.top().column->column_order.push_back(list_child_name);
         }
         current_data_path.top().current_selected_col =

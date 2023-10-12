@@ -411,8 +411,8 @@ add_library(
   src/io/functions.cpp
   src/io/json/byte_range_info.hip
   src/io/json/json_column.hip
-  # src/io/json/json_tree.hip
-  # src/io/json/nested_json_gpu.hip
+  src/io/json/json_tree.hip
+  src/io/json/nested_json_gpu.hip
   src/io/json/read_json.hip
   src/io/json/legacy/json_gpu.hip
   src/io/json/legacy/reader_impl.hip

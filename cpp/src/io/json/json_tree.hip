@@ -36,7 +36,8 @@
 #include <hipcub/device/device_radix_sort.hpp>
 
 #include <hipco/static_set.cuh>
-
+//Todo(HIP): Remove once we hace the missing APIs in hipCo
+#include <hipco/static_map.cuh>
 #include <thrust/binary_search.h>
 #include <thrust/copy.h>
 #include <thrust/count.h>
@@ -159,14 +160,14 @@ std::pair<rmm::device_uvector<KeyType>, rmm::device_uvector<IndexType>> stable_s
   hipcub::DoubleBuffer<IndexType> order_buffer(order_buffer1.data(), order_buffer2.data());
   hipcub::DoubleBuffer<KeyType> keys_buffer(keys_buffer1.data(), keys_buffer2.data());
   size_t temp_storage_bytes = 0;
-  hipcub::DeviceRadixSort::SortPairs(
+  (void) hipcub::DeviceRadixSort::SortPairs(
     nullptr, temp_storage_bytes, keys_buffer, order_buffer, keys.size());
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   thrust::copy(rmm::exec_policy(stream), keys.begin(), keys.end(), keys_buffer1.begin());
   thrust::sequence(rmm::exec_policy(stream), order_buffer1.begin(), order_buffer1.end());
 
-  hipcub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
+  (void) hipcub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   keys_buffer,
                                   order_buffer,
@@ -398,61 +399,127 @@ rmm::device_uvector<size_type> hash_node_type_with_field_name(device_span<Symbol
                                                               tree_meta_t const& d_tree,
                                                               rmm::cuda_stream_view stream)
 {
+  // Todo(HIP): We used an old version as a workaround for the missing APIs in hipCo
+  // CUDF_FUNC_RANGE();
+  // using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
+
+  // auto const num_nodes  = d_tree.node_categories.size();
+  // auto const num_fields = thrust::count(rmm::exec_policy(stream),
+  //                                       d_tree.node_categories.begin(),
+  //                                       d_tree.node_categories.end(),
+  //                                       node_t::NC_FN);
+
+  // auto const d_hasher = [d_input          = d_input.data(),
+  //                        node_range_begin = d_tree.node_range_begin.data(),
+  //                        node_range_end   = d_tree.node_range_end.data()] __device__(auto node_id) {
+  //   auto const field_name = cudf::string_view(d_input + node_range_begin[node_id],
+  //                                             node_range_end[node_id] - node_range_begin[node_id]);
+  //   return cudf::hashing::detail::default_hash<cudf::string_view>{}(field_name);
+  // };
+  // auto const d_equal = [d_input          = d_input.data(),
+  //                       node_range_begin = d_tree.node_range_begin.data(),
+  //                       node_range_end   = d_tree.node_range_end.data()] __device__(auto node_id1,
+  //                                                                                 auto node_id2) {
+  //   auto const field_name1 = cudf::string_view(
+  //     d_input + node_range_begin[node_id1], node_range_end[node_id1] - node_range_begin[node_id1]);
+  //   auto const field_name2 = cudf::string_view(
+  //     d_input + node_range_begin[node_id2], node_range_end[node_id2] - node_range_begin[node_id2]);
+  //   return field_name1 == field_name2;
+  // };
+  // // key-value pairs: uses node_id itself as node_type. (unique node_id for a field name due to
+  // // hashing)
+  // auto const iter = thrust::make_counting_iterator<size_type>(0);
+
+  // auto const is_field_name_node = [node_categories =
+  //                                    d_tree.node_categories.data()] __device__(auto node_id) {
+  //   return node_categories[node_id] == node_t::NC_FN;
+  // };
+
+  // using hasher_type                             = decltype(d_hasher);
+  // constexpr size_type empty_node_index_sentinel = -1;
+  // auto key_set =
+  //   hipco::experimental::static_set{hipco::experimental::extent{compute_hash_table_size(
+  //                                    num_fields, 40)},  // 40% occupancy in hash map
+  //                                  hipco::empty_key{empty_node_index_sentinel},
+  //                                  d_equal,
+  //                                  hipco::experimental::linear_probing<1, hasher_type>{d_hasher},
+  //                                  hash_table_allocator_type{default_allocator<char>{}, stream},
+  //                                  stream.value()};
+  // //Todo(HIP): Use insert_if_async once hipco is updated with upstream
+  // key_set.insert_async(iter,
+  //                         iter + num_nodes,
+  //                         //thrust::counting_iterator<size_type>(0),  // stencil
+  //                         //is_field_name_node,
+  //                         stream.value());
+
+  // auto const get_hash_value =
+  //   [key_set = key_set.ref(hipco::experimental::op::find)] __device__(auto node_id) -> size_type {
+  //   auto const it = key_set.find(node_id);
+  //   return (it == key_set.end()) ? size_type{0} : *it;
+  // };
+
+  // // convert field nodes to node indices, and other nodes to enum value.
+  // rmm::device_uvector<size_type> node_type(num_nodes, stream);
+  // thrust::tabulate(rmm::exec_policy(stream),
+  //                  node_type.begin(),
+  //                  node_type.end(),
+  //                  [node_categories = d_tree.node_categories.data(),
+  //                   is_field_name_node,
+  //                   get_hash_value] __device__(auto node_id) -> size_type {
+  //                    if (is_field_name_node(node_id))
+  //                      return static_cast<size_type>(NUM_NODE_CLASSES) + get_hash_value(node_id);
+  //                    else
+  //                      return static_cast<size_type>(node_categories[node_id]);
+  //                  });
+  // return node_type;
+
   CUDF_FUNC_RANGE();
   using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
+  using hash_map_type =
+    hipco::static_map<size_type, size_type, hip::thread_scope_device, hash_table_allocator_type>;
+  auto num_nodes = d_tree.node_categories.size();
 
-  auto const num_nodes  = d_tree.node_categories.size();
-  auto const num_fields = thrust::count(rmm::exec_policy(stream),
-                                        d_tree.node_categories.begin(),
-                                        d_tree.node_categories.end(),
-                                        node_t::NC_FN);
-
-  auto const d_hasher = [d_input          = d_input.data(),
-                         node_range_begin = d_tree.node_range_begin.data(),
-                         node_range_end   = d_tree.node_range_end.data()] __device__(auto node_id) {
+  constexpr size_type empty_node_index_sentinel = -1;
+  hash_map_type key_map{compute_hash_table_size(num_nodes),  // TODO reduce oversubscription
+                        hipco::sentinel::empty_key{empty_node_index_sentinel},
+                        hipco::sentinel::empty_value{empty_node_index_sentinel},
+                        hash_table_allocator_type{default_allocator<char>{}, stream},
+                        stream.value()};
+  auto d_hasher = [d_input          = d_input.data(),
+                   node_range_begin = d_tree.node_range_begin.data(),
+                   node_range_end   = d_tree.node_range_end.data()] __device__(auto node_id) {
     auto const field_name = cudf::string_view(d_input + node_range_begin[node_id],
                                               node_range_end[node_id] - node_range_begin[node_id]);
-    return cudf::hashing::detail::default_hash<cudf::string_view>{}(field_name);
+    return hashing::detail::default_hash<cudf::string_view>{}(field_name);
   };
-  auto const d_equal = [d_input          = d_input.data(),
-                        node_range_begin = d_tree.node_range_begin.data(),
-                        node_range_end   = d_tree.node_range_end.data()] __device__(auto node_id1,
-                                                                                  auto node_id2) {
+  auto d_equal = [d_input          = d_input.data(),
+                  node_range_begin = d_tree.node_range_begin.data(),
+                  node_range_end   = d_tree.node_range_end.data()] __device__(auto node_id1,
+                                                                            auto node_id2) {
     auto const field_name1 = cudf::string_view(
       d_input + node_range_begin[node_id1], node_range_end[node_id1] - node_range_begin[node_id1]);
     auto const field_name2 = cudf::string_view(
       d_input + node_range_begin[node_id2], node_range_end[node_id2] - node_range_begin[node_id2]);
     return field_name1 == field_name2;
   };
+  auto is_field_name_node = [node_categories = d_tree.node_categories.data()] __device__(
+                              auto node_id) { return node_categories[node_id] == node_t::NC_FN; };
   // key-value pairs: uses node_id itself as node_type. (unique node_id for a field name due to
   // hashing)
-  auto const iter = thrust::make_counting_iterator<size_type>(0);
+  auto iter = cudf::detail::make_counting_transform_iterator(
+    0, [] __device__(size_type i) { return hipco::make_pair(i, i); });
 
-  auto const is_field_name_node = [node_categories =
-                                     d_tree.node_categories.data()] __device__(auto node_id) {
-    return node_categories[node_id] == node_t::NC_FN;
-  };
-
-  using hasher_type                             = decltype(d_hasher);
-  constexpr size_type empty_node_index_sentinel = -1;
-  auto key_set =
-    hipco::experimental::static_set{hipco::experimental::extent{compute_hash_table_size(
-                                     num_fields, 40)},  // 40% occupancy in hash map
-                                   hipco::empty_key{empty_node_index_sentinel},
-                                   d_equal,
-                                   hipco::experimental::linear_probing<1, hasher_type>{d_hasher},
-                                   hash_table_allocator_type{default_allocator<char>{}, stream},
-                                   stream.value()};
-  key_set.insert_if_async(iter,
-                          iter + num_nodes,
-                          thrust::counting_iterator<size_type>(0),  // stencil
-                          is_field_name_node,
-                          stream.value());
-
-  auto const get_hash_value =
-    [key_set = key_set.ref(hipco::experimental::op::find)] __device__(auto node_id) -> size_type {
-    auto const it = key_set.find(node_id);
-    return (it == key_set.end()) ? size_type{0} : *it;
+  key_map.insert_if(iter,
+                    iter + num_nodes,
+                    thrust::counting_iterator<size_type>(0),  // stencil
+                    is_field_name_node,
+                    d_hasher,
+                    d_equal,
+                    stream.value());
+  auto get_hash_value =
+    [key_map = key_map.get_device_view(), d_hasher, d_equal] __device__(auto node_id) -> size_type {
+    auto it = key_map.find(node_id, d_hasher, d_equal);
+    return (it == key_map.end()) ? size_type{0} : it->second.load(hip::std::memory_order_relaxed);
   };
 
   // convert field nodes to node indices, and other nodes to enum value.
@@ -638,7 +705,8 @@ std::pair<rmm::device_uvector<size_type>, rmm::device_uvector<size_type>> hash_n
 
   rmm::device_uvector<size_type> unique_keys(num_columns, stream);
   rmm::device_uvector<size_type> col_id(num_nodes, stream, mr);
-  key_set.find_async(nodes_itr, nodes_itr + num_nodes, col_id.begin(), stream.value());
+  //Todo(HIP): Enable once we have the API in hipCo
+  // key_set.find_async(nodes_itr, nodes_itr + num_nodes, col_id.begin(), stream.value());
   std::ignore = key_set.retrieve_all(unique_keys.begin(), stream.value());
 
   return {std::move(col_id), std::move(unique_keys)};
