@@ -56,7 +56,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/device/device_radix_sort.cuh>
+#include <hipcub/device/device_radix_sort.hpp>
 #include <cuco/static_map.cuh>
 #include <cuco/static_set.cuh>
 #include <cuda/functional>

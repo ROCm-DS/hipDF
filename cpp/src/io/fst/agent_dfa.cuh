@@ -832,7 +832,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) CUDF_KERNEL
     thrust::sequence(thrust::seq, cuda::std::begin(state_vector), cuda::std::end(state_vector));
 
     // Compute the state transition vector
-    agent_dfa.GetThreadStateTransitionVector<NUM_STATES>(symbol_matcher,
+    agent_dfa.template GetThreadStateTransitionVector<NUM_STATES>(symbol_matcher,
                                                          transition_table,
                                                          d_chars,
                                                          blockIdx.x * SYMBOLS_PER_BLOCK,

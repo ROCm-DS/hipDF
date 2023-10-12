@@ -685,11 +685,12 @@ CUDF_KERNEL void __launch_bounds__(rowofs_block_dim)
   char const* cur = start + block_pos;
 
   // Initial state is neutral context (no state transitions), zero rows
-  uint4 ctx_map = {
-    .x = 0,
-    .y = 0,
-    .z = 0,
-    .w = (ROW_CTX_NONE << 0) | (ROW_CTX_QUOTE << 2) | (ROW_CTX_COMMENT << 4) | (ROW_CTX_EOF << 6)};
+  //Todo(HIP): unrolled the initialization
+  uint4 ctx_map;
+  ctx_map.x = 0;
+  ctx_map.y = 0;
+  ctx_map.z = 0;
+  ctx_map.w = (ROW_CTX_NONE << 0) | (ROW_CTX_QUOTE << 2) | (ROW_CTX_COMMENT << 4) | (ROW_CTX_EOF << 6);
   int c, c_prev = (cur > start && cur <= end) ? cur[-1] : terminator;
   // Loop through all 32 bytes and keep a bitmask of row starts for each possible input context
   for (uint32_t pos = 0; pos < 32; pos++, cur++, c_prev = c) {

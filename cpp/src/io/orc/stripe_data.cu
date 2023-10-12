@@ -43,7 +43,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 namespace cudf {
 namespace io {
@@ -343,7 +343,7 @@ static __device__ void bytestream_init(orc_bytestream_s* bs, uint8_t const* base
   bs->pos        = pos;
   bs->len        = (len + pos + 7) & ~7;
   bs->fill_pos   = 0;
-  bs->fill_count = min(bs->len, bytestream_buffer_size) >> 3;
+  bs->fill_count = (int)min(bs->len, bytestream_buffer_size) >> 3;
 }
 
 /**
@@ -1461,7 +1461,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
         __syncthreads();
         if (numvals == 0) {
           // This is an error (ran out of data)
-          numvals = min(s->top.dict.dict_len, blockDim.x);
+          numvals = min((int)s->top.dict.dict_len, blockDim.x);
           vals[t] = 0;
         }
         if (t < numvals) {
@@ -1801,7 +1801,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
         __syncthreads();
         if (t == 0) {
           s->top.data.buffered_count = 0;
-          s->top.data.max_vals       = min(s->top.data.max_vals, blockDim.x);
+          s->top.data.max_vals       = min((int)s->top.data.max_vals, blockDim.x);
         }
         __syncthreads();
         // If the condition is false, then it means that s->top.data.max_vals is last set of values.

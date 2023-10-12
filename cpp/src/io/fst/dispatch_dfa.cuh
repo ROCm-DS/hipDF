@@ -464,12 +464,12 @@ struct DispatchFSM : DeviceFSMPolicy {
       // TODO tag dispatch or constexpr if depending on single-pass config to avoid superfluous
       // template instantiations
       // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-      auto dummy = ComputeStateTransitionVector<ActivePolicyT>(
+      auto dummy1 = ComputeStateTransitionVector<ActivePolicyT>(
         sm_count, stv_tile_state, fst_offset_tile_state, d_thread_state_transition);
 
       // State-transition vector scan computing using the composition operator
       // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-      dummy = hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
+      dummy1 = hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
                                      allocation_sizes[MEM_SCAN],
                                      d_thread_state_transition,
                                      d_thread_state_transition,
