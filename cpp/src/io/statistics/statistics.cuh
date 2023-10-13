@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 /**
  * @file statistics.cuh
  * @brief Common structures and utility functions for statistics
@@ -113,6 +135,23 @@ struct statistics_merge_group {
   statistics_dtype stats_dtype{dtype_none};  //!< Statistics data type for this column
   uint32_t start_chunk{};                    //!< Start chunk of this group
   uint32_t num_chunks{};                     //!< Number of chunks in group
+};
+
+// Todo(HIP): hipdf/cpp/src/io/orc/stats_enc.cu:224:41: error: initialization is not supported for __shared__ variables.
+//  __shared__ __align__(8) stats_state_s state_g[encode_chunks_per_block];
+// Added this struct without col_dtype because it is the only member with a ctor 
+// and it is never used!
+struct statistics_merge_group_hip {
+  // data_type col_dtype;           //!< Column data type <- it is never used inside stats_enc
+  statistics_dtype stats_dtype;  //!< Statistics data type for this column
+  uint32_t start_chunk;          //!< Start chunk of this group
+  uint32_t num_chunks;           //!< Number of chunks in group
+  __host__ __device__
+  statistics_merge_group_hip& operator=(const statistics_merge_group& t){
+    stats_dtype = t.stats_dtype;
+    start_chunk = t.start_chunk;
+    num_chunks  = t.num_chunks;
+  }
 };
 
 template <typename T, std::enable_if_t<!std::is_same_v<T, statistics::byte_array_view>>* = nullptr>
