@@ -25,8 +25,6 @@
 #include "hip/hip_runtime.h"
 #include <hipcub/hipcub.hpp>
 
-namespace hipcub_extensions {
-
 #ifndef HIPCUB_QUOTIENT_CEILING
     /// Quotient of x/y rounded up to nearest integer
     #define HIPCUB_QUOTIENT_CEILING(x, y) (((x) + (y) - 1) / (y))
@@ -70,16 +68,54 @@ namespace hipcub_extensions {
     #endif
 #endif
 
+namespace hipcub_extensions {
 
 namespace detail
 {
 template <bool Test, class T1, class T2>
 using conditional_t = typename std::conditional<Test, T1, T2>::type;
+
+/**
+ * Call `cudaDeviceSynchronize()` using the proper API for the current CUB and
+ * CUDA configuration.
+ */
+// HIPCUB_EXEC_CHECK_DISABLE
+HIPCUB_RUNTIME_FUNCTION inline hipError_t device_synchronize()
+{
+  hipError_t result = hipErrorUnknown;
+
+  if (HIPCUB_IS_HOST_CODE)
+  {
+#if HIPCUB_INCLUDE_HOST_CODE
+    result = hipDeviceSynchronize();
+#endif
+  }
+  else
+  {
+    // Device code with the CUDA runtime.
+#if defined(HIPCUB_INCLUDE_DEVICE_CODE) && defined(HIPCUB_RUNTIME_ENABLED)
+
+#if defined(__HIPCC__) &&                                                     \
+  ((__HIPCC_VER_MAJOR__ > 11) ||                                              \
+   ((__HIPCC_VER_MAJOR__ == 11) && (__HIPCC_VER_MINOR__ >= 6)))
+    // CUDA >= 11.6
+    result = __hipDeviceSynchronizeDeprecationAvoidance();
+#else // CUDA < 11.6
+    result = hipDeviceSynchronize();
+#endif
+
+#else // Device code without the CUDA runtime.
+    // Device side CUDA API calls are not supported in this configuration.
+    result = hipErrorInvalidConfiguration;
+#endif
+  }
+
+  return result;
+}
 }
 
 #include "util_device.cuh"
 #include "single_pass_scan_operators.cuh"
-// #include "thread_load.cuh"
-}
+}// End of namespace hipcub_extensions
 
 #endif

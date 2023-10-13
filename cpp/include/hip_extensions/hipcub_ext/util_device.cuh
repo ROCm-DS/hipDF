@@ -27,6 +27,28 @@
  *
  ******************************************************************************/
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 /**
  * \file
  * Properties of a given CUDA device and the corresponding PTX bundle
@@ -34,22 +56,9 @@
 
 #pragma once
 
-// #include "detail/device_synchronize.cuh"
-
-// #include "util_type.cuh"
-// #include "util_arch.cuh"
-// #include "util_debug.cuh"
-// #include "util_cpp_dialect.cuh"
-// #include "util_namespace.cuh"
-// #include "util_macro.cuh"
-#include <hipcub/hipcub.hpp>
-
 #include <atomic>
 #include <array>
 #include <cassert>
-
-// BEGIN_HIPCUB_NAMESPACE
-
 
 /**
  * \addtogroup UtilMgmt
@@ -64,7 +73,7 @@
  */
 template <int ALLOCATIONS>
 __host__ __device__ __forceinline__
-cudaError_t AliasTemporaries(
+hipError_t AliasTemporaries(
     void    *d_temp_storage,                    ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
     size_t& temp_storage_bytes,                 ///< [in,out] Size in bytes of \t d_temp_storage allocation
     void*   (&allocations)[ALLOCATIONS],        ///< [in,out] Pointers to device allocations needed
@@ -88,13 +97,13 @@ cudaError_t AliasTemporaries(
     if (!d_temp_storage)
     {
         temp_storage_bytes = bytes_needed;
-        return cudaSuccess;
+        return hipSuccess;
     }
 
     // Check if enough storage provided
     if (temp_storage_bytes < bytes_needed)
     {
-        return HipcubDebug(cudaErrorInvalidValue);
+        return HipcubDebug(hipErrorInvalidValue);
     }
 
     // Alias
@@ -104,7 +113,7 @@ cudaError_t AliasTemporaries(
         allocations[i] = static_cast<char*>(d_temp_storage) + allocation_offsets[i];
     }
 
-    return cudaSuccess;
+    return hipSuccess;
 }
 
 
@@ -124,7 +133,7 @@ HIPCUB_RUNTIME_FUNCTION inline int CurrentDevice()
 #if defined(HIPCUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
 
     int device = -1;
-    if (HipcubDebug(cudaGetDevice(&device))) return -1;
+    if (HipcubDebug(hipGetDevice(&device))) return -1;
     return device;
 
 #else // Device code without the CUDA runtime.
@@ -149,14 +158,14 @@ public:
       : old_device(CurrentDevice()), needs_reset(old_device != new_device)
     {
         if (needs_reset)
-            auto a = cudaSetDevice(new_device);
+            auto a = hipSetDevice(new_device);
             // HipcubDebug();
     }
 
     __host__ inline ~SwitchDevice()
     {
         if (needs_reset)
-            auto a = cudaSetDevice(old_device);
+            auto a = hipSetDevice(old_device);
             // HipcubDebug();
     }
 };
@@ -170,9 +179,9 @@ HIPCUB_RUNTIME_FUNCTION inline int DeviceCountUncached()
 #if defined(HIPCUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
 
     int count = -1;
-    if (HipcubDebug(cudaGetDeviceCount(&count)))
+    if (HipcubDebug(hipGetDeviceCount(&count)))
         // CUDA makes no guarantees about the state of the output parameter if
-        // `cudaGetDeviceCount` fails; in practice, they don't, but out of
+        // `hipGetDeviceCount` fails; in practice, they don't, but out of
         // paranoia we'll reset `count` to `-1`.
         count = -1;
     return count;
@@ -254,7 +263,7 @@ struct PerDeviceAttributeCache
     struct DevicePayload
     {
         int         attribute;
-        cudaError_t error;
+        hipError_t error;
     };
 
     // Each entry starts in the `DeviceEntryEmpty` state, then proceeds to the
@@ -296,7 +305,7 @@ public:
     __host__ DevicePayload operator()(Invocable&& f, int device)
     {
         if (device >= DeviceCount())
-            return DevicePayload{0, cudaErrorInvalidDevice};
+            return DevicePayload{0, hipErrorInvalidDevice};
 
         auto& entry   = entries_[device];
         auto& flag    = entry.flag;
@@ -325,7 +334,7 @@ public:
                     // Clear the global CUDA error state which may have been
                     // set by the last call. Otherwise, errors may "leak" to
                     // unrelated kernel launches.
-                    cudaGetLastError();
+                    hipGetLastError();
 
                 // Release the lock by setting the state to `DeviceEntryReady`.
                 flag.store(DeviceEntryReady, std::memory_order_release);
@@ -359,7 +368,7 @@ public:
 /**
  * \brief Retrieves the PTX version that will be used on the current device (major * 100 + minor * 10).
  */
-HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
+HIPCUB_RUNTIME_FUNCTION inline hipError_t PtxVersionUncached(int& ptx_version)
 {
     // Instantiate `EmptyKernel<void>` in both host and device code to ensure
     // it can be called.
@@ -370,7 +379,7 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
     // usual syntax of (void)empty_kernel; was not sufficient on MSVC2015.
     (void)reinterpret_cast<void*>(empty_kernel);
 
-    cudaError_t result = cudaSuccess;
+    hipError_t result = hipSuccess;
     if (HIPCUB_IS_HOST_CODE) {
        #if HIPCUB_INCLUDE_HOST_CODE
             hipFuncAttributes empty_kernel_attrs;
@@ -397,7 +406,7 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersionUncached(int& ptx_version)
 /**
  * \brief Retrieves the PTX version that will be used on \p device (major * 100 + minor * 10).
  */
-__host__ inline cudaError_t PtxVersionUncached(int& ptx_version, int device)
+__host__ inline hipError_t PtxVersionUncached(int& ptx_version, int device)
 {
     SwitchDevice sd(device);
     (void)sd;
@@ -424,7 +433,7 @@ struct SmVersionCacheTag {};
  *
  * \note This function is thread safe.
  */
-__host__ inline cudaError_t PtxVersion(int& ptx_version, int device)
+__host__ inline hipError_t PtxVersion(int& ptx_version, int device)
 {
 #if HIPCUB_CPP_DIALECT >= 2011 // C++11 and later.
 
@@ -453,9 +462,9 @@ __host__ inline cudaError_t PtxVersion(int& ptx_version, int device)
  *
  * \note This function is thread safe.
  */
-HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersion(int& ptx_version)
+HIPCUB_RUNTIME_FUNCTION inline hipError_t PtxVersion(int& ptx_version)
 {
-    cudaError_t result = cudaErrorUnknown;
+    hipError_t result = hipErrorUnknown;
     if (HIPCUB_IS_HOST_CODE) {
         #if HIPCUB_INCLUDE_HOST_CODE
             #if HIPCUB_CPP_DIALECT >= 2011
@@ -489,16 +498,16 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t PtxVersion(int& ptx_version)
 /**
  * \brief Retrieves the SM version of \p device (major * 100 + minor * 10)
  */
-HIPCUB_RUNTIME_FUNCTION inline cudaError_t SmVersionUncached(int& sm_version, int device = CurrentDevice())
+HIPCUB_RUNTIME_FUNCTION inline hipError_t SmVersionUncached(int& sm_version, int device = CurrentDevice())
 {
 #if defined(HIPCUB_RUNTIME_ENABLED) // Host code or device code with the CUDA runtime.
 
-    cudaError_t error = cudaSuccess;
+    hipError_t error = hipSuccess;
     do
     {
         int major = 0, minor = 0;
-        if (HipcubDebug(error = cudaDeviceGetAttribute(&major, cudaDevAttrComputeCapabilityMajor, device))) break;
-        if (HipcubDebug(error = cudaDeviceGetAttribute(&minor, cudaDevAttrComputeCapabilityMinor, device))) break;
+        if (HipcubDebug(error = hipDeviceGetAttribute(&major, hipDeviceAttributeComputeCapabilityMajor, device))) break;
+        if (HipcubDebug(error = hipDeviceGetAttribute(&minor, hipDeviceAttributeComputeCapabilityMinor, device))) break;
         sm_version = major * 100 + minor * 10;
     }
     while (0);
@@ -511,7 +520,7 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t SmVersionUncached(int& sm_version, in
     (void)device;
 
     // CUDA API calls are not supported from this device.
-    return HipcubDebug(cudaErrorInvalidConfiguration);
+    return HipcubDebug(hipErrorInvalidConfiguration);
 
 #endif
 }
@@ -523,9 +532,9 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t SmVersionUncached(int& sm_version, in
  *
  * \note This function is thread safe.
  */
-HIPCUB_RUNTIME_FUNCTION inline cudaError_t SmVersion(int& sm_version, int device = CurrentDevice())
+HIPCUB_RUNTIME_FUNCTION inline hipError_t SmVersion(int& sm_version, int device = CurrentDevice())
 {
-    cudaError_t result = cudaErrorUnknown;
+    hipError_t result = hipErrorUnknown;
     if (HIPCUB_IS_HOST_CODE) {
         #if HIPCUB_INCLUDE_HOST_CODE
             #if HIPCUB_CPP_DIALECT >= 2011
@@ -556,12 +565,12 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t SmVersion(int& sm_version, int device
 /**
  * Synchronize the specified \p stream.
  */
-HIPCUB_RUNTIME_FUNCTION inline cudaError_t SyncStream(cudaStream_t stream)
+HIPCUB_RUNTIME_FUNCTION inline hipError_t SyncStream(hipStream_t stream)
 {
-    cudaError_t result = cudaErrorUnknown;
+    hipError_t result = hipErrorUnknown;
     if (HIPCUB_IS_HOST_CODE) {
         #if HIPCUB_INCLUDE_HOST_CODE
-            result = HipcubDebug(cudaStreamSynchronize(stream));
+            result = HipcubDebug(hipStreamSynchronize(stream));
         #endif
     } else {
         #if HIPCUB_INCLUDE_DEVICE_CODE
@@ -572,7 +581,7 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t SyncStream(cudaStream_t stream)
             #else // Device code without the CUDA runtime.
                 (void)stream;
                 // CUDA API calls are not supported from this device.
-                result = HipcubDebug(cudaErrorInvalidConfiguration);
+                result = HipcubDebug(hipErrorInvalidConfiguration);
             #endif
         #endif
     }
@@ -613,7 +622,7 @@ HIPCUB_RUNTIME_FUNCTION inline cudaError_t SyncStream(cudaStream_t stream)
  */
 template <typename KernelPtr>
 HIPCUB_RUNTIME_FUNCTION inline
-cudaError_t MaxSmOccupancy(
+hipError_t MaxSmOccupancy(
     int&                max_sm_occupancy,          ///< [out] maximum number of thread blocks that can reside on a single SM
     KernelPtr           kernel_ptr,                 ///< [in] Kernel pointer for which to compute SM occupancy
     int                 block_threads,              ///< [in] Number of threads per thread block
@@ -627,11 +636,11 @@ cudaError_t MaxSmOccupancy(
     (void)max_sm_occupancy;
 
     // CUDA API calls not supported from this device
-    return HipcubDebug(cudaErrorInvalidConfiguration);
+    return HipcubDebug(hipErrorInvalidConfiguration);
 
 #else
 
-    return HipcubDebug(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+    return HipcubDebug(hipOccupancyMaxActiveBlocksPerMultiprocessor(
         &max_sm_occupancy,
         kernel_ptr,
         block_threads,
@@ -660,12 +669,12 @@ struct KernelConfig
 
     template <typename AgentPolicyT, typename KernelPtrT>
     HIPCUB_RUNTIME_FUNCTION __forceinline__
-    cudaError_t Init(KernelPtrT kernel_ptr)
+    hipError_t Init(KernelPtrT kernel_ptr)
     {
         block_threads        = AgentPolicyT::BLOCK_THREADS;
         items_per_thread     = AgentPolicyT::ITEMS_PER_THREAD;
         tile_size            = block_threads * items_per_thread;
-        cudaError_t retval   = MaxSmOccupancy(sm_occupancy, kernel_ptr, block_threads);
+        hipError_t retval   = MaxSmOccupancy(sm_occupancy, kernel_ptr, block_threads);
         return retval;
     }
 };
@@ -685,7 +694,7 @@ struct ChainedPolicy
   /// Specializes and dispatches op in accordance to the first policy in the chain of adequate PTX version
   template <typename FunctorT>
   HIPCUB_RUNTIME_FUNCTION __forceinline__
-  static cudaError_t Invoke(int ptx_version, FunctorT& op)
+  static hipError_t Invoke(int ptx_version, FunctorT& op)
   {
       if (ptx_version < PTX_VERSION) {
           return PrevPolicyT::Invoke(ptx_version, op);
@@ -704,7 +713,7 @@ struct ChainedPolicy<PTX_VERSION, PolicyT, PolicyT>
     /// Specializes and dispatches op in accordance to the first policy in the chain of adequate PTX version
     template <typename FunctorT>
     HIPCUB_RUNTIME_FUNCTION __forceinline__
-    static cudaError_t Invoke(int /*ptx_version*/, FunctorT& op) {
+    static hipError_t Invoke(int /*ptx_version*/, FunctorT& op) {
         return op.template Invoke<PolicyT>();
     }
 };
@@ -713,5 +722,3 @@ struct ChainedPolicy<PTX_VERSION, PolicyT, PolicyT>
 
 
 /** @} */       // end group UtilMgmt
-
-// END_HIPCUB_NAMESPACE
