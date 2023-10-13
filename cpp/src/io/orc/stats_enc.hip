@@ -124,7 +124,10 @@ struct stats_state_s {
   uint8_t* base;  ///< Output buffer start
   uint8_t* end;   ///< Output buffer end
   statistics_chunk chunk;
-  statistics_merge_group group;
+  // Todo(HIP): Use statistics_merge_group_hip instead which does not have member col_dtype 
+  // Definition in: hipdf/cpp/src/io/statistics/statistics.cuh
+  // statistics_merge_group group; 
+  statistics_merge_group_hip group;
   statistics_dtype stats_dtype;  //!< Statistics data type for this column
   // ORC stats
   uint64_t numberOfValues;
