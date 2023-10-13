@@ -3,8 +3,6 @@
 #include "hip/hip_runtime.h"
 #include <hipcub/hipcub.hpp>
 
-namespace hipcub_extensions {
-
 #ifndef HIPCUB_QUOTIENT_CEILING
     /// Quotient of x/y rounded up to nearest integer
     #define HIPCUB_QUOTIENT_CEILING(x, y) (((x) + (y) - 1) / (y))
@@ -48,6 +46,7 @@ namespace hipcub_extensions {
     #endif
 #endif
 
+namespace hipcub_extensions {
 
 namespace detail
 {
@@ -57,7 +56,6 @@ using conditional_t = typename std::conditional<Test, T1, T2>::type;
 
 #include "util_device.cuh"
 #include "single_pass_scan_operators.cuh"
-// #include "thread_load.cuh"
-}
+}// End of namespace hipcub_extensions
 
 #endif

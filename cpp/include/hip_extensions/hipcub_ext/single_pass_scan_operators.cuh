@@ -35,14 +35,7 @@
 
 #include <iterator>
 
-// #include "../thread/thread_load.cuh"
-// #include "../thread/thread_store.cuh"
-// #include "../warp/warp_reduce.cuh"
-// #include "../config.cuh"
-// #include "../util_device.cuh"
-
-// BEGIN_HIPCUB_NAMESPACE
-
+#include "thread_load.cuh"
 
 /******************************************************************************
  * Prefix functor type for maintaining a running prefix while scanning a
@@ -106,169 +99,169 @@ enum ScanTileStatus
 };
 
 
-// /**
-//  * Tile status interface.
-//  */
-// template <
-//     typename    T,
-//     bool        SINGLE_WORD = hipcub::Traits<T>::PRIMITIVE>
-// struct ScanTileState;
+/**
+ * Tile status interface.
+ */
+template <
+    typename    T,
+    bool        SINGLE_WORD = hipcub::Traits<T>::PRIMITIVE>
+struct ScanTileState;
 
 
-// /**
-//  * Tile status interface specialized for scan status and value types
-//  * that can be combined into one machine word that can be
-//  * read/written coherently in a single access.
-//  */
-// template <typename T>
-// struct ScanTileState<T, true>
-// {
-//     // Status word type
-//     using StatusWord = hipcub_extensions::detail::conditional_t<
-//       sizeof(T) == 8,
-//       long long,
-//       hipcub_extensions::detail::conditional_t<
-//         sizeof(T) == 4,
-//         int,
-//         hipcub_extensions::detail::conditional_t<sizeof(T) == 2, short, char>>>;
+/**
+ * Tile status interface specialized for scan status and value types
+ * that can be combined into one machine word that can be
+ * read/written coherently in a single access.
+ */
+template <typename T>
+struct ScanTileState<T, true>
+{
+    // Status word type
+    using StatusWord = hipcub_extensions::detail::conditional_t<
+      sizeof(T) == 8,
+      long long,
+      hipcub_extensions::detail::conditional_t<
+        sizeof(T) == 4,
+        int,
+        hipcub_extensions::detail::conditional_t<sizeof(T) == 2, short, char>>>;
 
-//     // Unit word type
-//     using TxnWord = hipcub_extensions::detail::conditional_t<
-//       sizeof(T) == 8,
-//       longlong2,
-//       hipcub_extensions::detail::conditional_t<
-//         sizeof(T) == 4,
-//         int2,
-//         hipcub_extensions::detail::conditional_t<sizeof(T) == 2, int, uchar2>>>;
+    // Unit word type
+    using TxnWord = hipcub_extensions::detail::conditional_t<
+      sizeof(T) == 8,
+      longlong2,
+      hipcub_extensions::detail::conditional_t<
+        sizeof(T) == 4,
+        int2,
+        hipcub_extensions::detail::conditional_t<sizeof(T) == 2, int, uchar2>>>;
 
-//     // Device word type
-//     struct TileDescriptor
-//     {
-//         StatusWord  status;
-//         T           value;
-//     };
-
-
-//     // Constants
-//     enum
-//     {
-//         TILE_STATUS_PADDING = HIPCUB_WARP_THREADS,
-//     };
+    // Device word type
+    struct TileDescriptor
+    {
+        StatusWord  status;
+        T           value;
+    };
 
 
-//     // Device storage
-//     TxnWord *d_tile_descriptors;
-
-//     /// Constructor
-//     __host__ __device__ __forceinline__
-//     ScanTileState()
-//     :
-//         d_tile_descriptors(NULL)
-//     {}
+    // Constants
+    enum
+    {
+        TILE_STATUS_PADDING = HIPCUB_WARP_THREADS,
+    };
 
 
-//     /// Initializer
-//     __host__ __device__ __forceinline__
-//     hipError_t Init(
-//         int     /*num_tiles*/,                      ///< [in] Number of tiles
-//         void    *d_temp_storage,                    ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
-//         size_t  /*temp_storage_bytes*/)             ///< [in] Size in bytes of \t d_temp_storage allocation
-//     {
-//         d_tile_descriptors = reinterpret_cast<TxnWord*>(d_temp_storage);
-//         return hipSuccess;
-//     }
+    // Device storage
+    TxnWord *d_tile_descriptors;
+
+    /// Constructor
+    __host__ __device__ __forceinline__
+    ScanTileState()
+    :
+        d_tile_descriptors(NULL)
+    {}
 
 
-//     /**
-//      * Compute device memory needed for tile status
-//      */
-//     __host__ __device__ __forceinline__
-//     static hipError_t AllocationSize(
-//         int     num_tiles,                          ///< [in] Number of tiles
-//         size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
-//     {
-//         temp_storage_bytes = (num_tiles + TILE_STATUS_PADDING) * sizeof(TileDescriptor);       // bytes needed for tile status descriptors
-//         return hipSuccess;
-//     }
+    /// Initializer
+    __host__ __device__ __forceinline__
+    hipError_t Init(
+        int     /*num_tiles*/,                      ///< [in] Number of tiles
+        void    *d_temp_storage,                    ///< [in] Device-accessible allocation of temporary storage.  When NULL, the required allocation size is written to \p temp_storage_bytes and no work is done.
+        size_t  /*temp_storage_bytes*/)             ///< [in] Size in bytes of \t d_temp_storage allocation
+    {
+        d_tile_descriptors = reinterpret_cast<TxnWord*>(d_temp_storage);
+        return hipSuccess;
+    }
 
 
-//     /**
-//      * Initialize (from device)
-//      */
-//     __device__ __forceinline__ void InitializeStatus(int num_tiles)
-//     {
-//         int tile_idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-
-//         TxnWord val = TxnWord();
-//         TileDescriptor *descriptor = reinterpret_cast<TileDescriptor*>(&val);
-
-//         if (tile_idx < num_tiles)
-//         {
-//             // Not-yet-set
-//             descriptor->status = StatusWord(SCAN_TILE_INVALID);
-//             d_tile_descriptors[TILE_STATUS_PADDING + tile_idx] = val;
-//         }
-
-//         if ((blockIdx.x == 0) && (threadIdx.x < TILE_STATUS_PADDING))
-//         {
-//             // Padding
-//             descriptor->status = StatusWord(SCAN_TILE_OOB);
-//             d_tile_descriptors[threadIdx.x] = val;
-//         }
-//     }
+    /**
+     * Compute device memory needed for tile status
+     */
+    __host__ __device__ __forceinline__
+    static hipError_t AllocationSize(
+        int     num_tiles,                          ///< [in] Number of tiles
+        size_t  &temp_storage_bytes)                ///< [out] Size in bytes of \t d_temp_storage allocation
+    {
+        temp_storage_bytes = (num_tiles + TILE_STATUS_PADDING) * sizeof(TileDescriptor);       // bytes needed for tile status descriptors
+        return hipSuccess;
+    }
 
 
-//     /**
-//      * Update the specified tile's inclusive value and corresponding status
-//      */
-//     __device__ __forceinline__ void SetInclusive(int tile_idx, T tile_inclusive)
-//     {
-//         TileDescriptor tile_descriptor;
-//         tile_descriptor.status = SCAN_TILE_INCLUSIVE;
-//         tile_descriptor.value = tile_inclusive;
+    /**
+     * Initialize (from device)
+     */
+    __device__ __forceinline__ void InitializeStatus(int num_tiles)
+    {
+        int tile_idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
-//         TxnWord alias;
-//         *reinterpret_cast<TileDescriptor*>(&alias) = tile_descriptor;
-//         hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx, alias);
-//     }
+        TxnWord val = TxnWord();
+        TileDescriptor *descriptor = reinterpret_cast<TileDescriptor*>(&val);
+
+        if (tile_idx < num_tiles)
+        {
+            // Not-yet-set
+            descriptor->status = StatusWord(SCAN_TILE_INVALID);
+            d_tile_descriptors[TILE_STATUS_PADDING + tile_idx] = val;
+        }
+
+        if ((blockIdx.x == 0) && (threadIdx.x < TILE_STATUS_PADDING))
+        {
+            // Padding
+            descriptor->status = StatusWord(SCAN_TILE_OOB);
+            d_tile_descriptors[threadIdx.x] = val;
+        }
+    }
 
 
-//     /**
-//      * Update the specified tile's partial value and corresponding status
-//      */
-//     __device__ __forceinline__ void SetPartial(int tile_idx, T tile_partial)
-//     {
-//         TileDescriptor tile_descriptor;
-//         tile_descriptor.status = SCAN_TILE_PARTIAL;
-//         tile_descriptor.value = tile_partial;
+    /**
+     * Update the specified tile's inclusive value and corresponding status
+     */
+    __device__ __forceinline__ void SetInclusive(int tile_idx, T tile_inclusive)
+    {
+        TileDescriptor tile_descriptor;
+        tile_descriptor.status = SCAN_TILE_INCLUSIVE;
+        tile_descriptor.value = tile_inclusive;
 
-//         TxnWord alias;
-//         *reinterpret_cast<TileDescriptor*>(&alias) = tile_descriptor;
-//         hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx, alias);
-//     }
+        TxnWord alias;
+        *reinterpret_cast<TileDescriptor*>(&alias) = tile_descriptor;
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx, alias);
+    }
 
-//     /**
-//      * Wait for the corresponding tile to become non-invalid
-//      */
-//     __device__ __forceinline__ void WaitForValid(
-//         int             tile_idx,
-//         StatusWord      &status,
-//         T               &value)
-//     {
-//         TileDescriptor tile_descriptor;
-//         do
-//         {
-//             __threadfence_block(); // prevent hoisting loads from loop
-//             TxnWord alias = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
-//             tile_descriptor = reinterpret_cast<TileDescriptor&>(alias);
 
-//         } while (hipcub::WARP_ANY((tile_descriptor.status == SCAN_TILE_INVALID), 0xffffffff));
+    /**
+     * Update the specified tile's partial value and corresponding status
+     */
+    __device__ __forceinline__ void SetPartial(int tile_idx, T tile_partial)
+    {
+        TileDescriptor tile_descriptor;
+        tile_descriptor.status = SCAN_TILE_PARTIAL;
+        tile_descriptor.value = tile_partial;
 
-//         status = tile_descriptor.status;
-//         value = tile_descriptor.value;
-//     }
+        TxnWord alias;
+        *reinterpret_cast<TileDescriptor*>(&alias) = tile_descriptor;
+        hipcub::ThreadStore<hipcub::STORE_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx, alias);
+    }
 
-// };
+    /**
+     * Wait for the corresponding tile to become non-invalid
+     */
+    __device__ __forceinline__ void WaitForValid(
+        int             tile_idx,
+        StatusWord      &status,
+        T               &value)
+    {
+        TileDescriptor tile_descriptor;
+        do
+        {
+            __threadfence_block(); // prevent hoisting loads from loop
+            TxnWord alias = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
+            tile_descriptor = reinterpret_cast<TileDescriptor&>(alias);
+
+        } while (hipcub::WARP_ANY((tile_descriptor.status == SCAN_TILE_INVALID), 0xffffffff));
+
+        status = tile_descriptor.status;
+        value = tile_descriptor.value;
+    }
+
+};
 
 
 
@@ -277,7 +270,7 @@ enum ScanTileStatus
  * cannot be combined into one machine word.
  */
 template <typename T>
-struct ScanTileState
+struct ScanTileState<T, false>
 {
     // Status word type
     typedef char StatusWord;
@@ -414,16 +407,16 @@ struct ScanTileState
         T               &value)
     {
         do {
-            status = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_status + TILE_STATUS_PADDING + tile_idx);
+            status = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_status + TILE_STATUS_PADDING + tile_idx);
 
             __threadfence();    // prevent hoisting loads from loop or loads below above this one
 
         } while (status == SCAN_TILE_INVALID);
 
         if (status == StatusWord(SCAN_TILE_PARTIAL)) 
-            value = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_partial + TILE_STATUS_PADDING + tile_idx);
+            value = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_partial + TILE_STATUS_PADDING + tile_idx);
         else
-            value = hipcub::ThreadLoad<hipcub::LOAD_CG>(d_tile_inclusive + TILE_STATUS_PADDING + tile_idx);
+            value = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_inclusive + TILE_STATUS_PADDING + tile_idx);
     }
 };
 
@@ -574,7 +567,3 @@ struct TilePrefixCallbackOp
     }
 
 };
-
-
-// END_HIPCUB_NAMESPACE
-

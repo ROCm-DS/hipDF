@@ -34,22 +34,9 @@
 
 #pragma once
 
-// #include "detail/device_synchronize.cuh"
-
-// #include "util_type.cuh"
-// #include "util_arch.cuh"
-// #include "util_debug.cuh"
-// #include "util_cpp_dialect.cuh"
-// #include "util_namespace.cuh"
-// #include "util_macro.cuh"
-#include <hipcub/hipcub.hpp>
-
 #include <atomic>
 #include <array>
 #include <cassert>
-
-// BEGIN_HIPCUB_NAMESPACE
-
 
 /**
  * \addtogroup UtilMgmt
@@ -713,5 +700,3 @@ struct ChainedPolicy<PTX_VERSION, PolicyT, PolicyT>
 
 
 /** @} */       // end group UtilMgmt
-
-// END_HIPCUB_NAMESPACE
