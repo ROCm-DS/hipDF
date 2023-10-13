@@ -350,8 +350,9 @@ std::unique_ptr<cudf::column> byte_pair_encoding(
   bpe_merge_pairs::bpe_merge_pairs_impl const& merge_pairs,
   rmm::cuda_stream_view stream)
 {
-  auto const d_merges = merge_pairs.get_merge_pairs();
-  CUDF_EXPECTS(d_merges.size() > 0, "Merge pairs table must not be empty");
+  //TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+  // auto const d_merges = merge_pairs.get_merge_pairs();
+  // CUDF_EXPECTS(d_merges.size() > 0, "Merge pairs table must not be empty");
 
   // build working vector to hold index values per byte
   rmm::device_uvector<cudf::size_type> d_byte_indices(input.chars().size(), stream);
@@ -364,12 +365,13 @@ std::unique_ptr<cudf::column> byte_pair_encoding(
                                            stream,
                                            rmm::mr::get_current_device_resource());
   auto d_offsets = offsets->mutable_view().data<cudf::size_type>();
-
-  auto map_ref = merge_pairs.get_merge_pairs_ref();
-  byte_pair_encoding_fn<decltype(map_ref)> fn{
-    d_merges, *d_strings, map_ref, d_offsets, string_hasher_type{}, d_byte_indices.data()};
-  thrust::for_each_n(
-    rmm::exec_policy(stream), thrust::make_counting_iterator<cudf::size_type>(0), input.size(), fn);
+  
+  //TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+  // auto map_ref = merge_pairs.get_merge_pairs_ref();
+  // byte_pair_encoding_fn<decltype(map_ref)> fn{
+  //   d_merges, *d_strings, map_ref, d_offsets, string_hasher_type{}, d_byte_indices.data()};
+  // thrust::for_each_n(
+  //   rmm::exec_policy(stream), thrust::make_counting_iterator<cudf::size_type>(0), input.size(), fn);
 
   // build the output: add spaces between the remaining pairs in each string
   thrust::exclusive_scan(

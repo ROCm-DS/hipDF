@@ -161,7 +161,7 @@ struct strings_tokenizer {
    * @param idx Index of the string to tokenize in the d_strings column.
    * @return The number of tokens for this string.
    */
-  __device__ cudf::size_type operator()(cudf::size_type idx)
+  __host__ __device__ cudf::size_type operator()(cudf::size_type idx)
   {
     if (d_strings.is_null(idx)) return 0;
     auto d_str = d_strings.element<cudf::string_view>(idx);

@@ -434,7 +434,7 @@ struct copy_if_fn {  // inline lambda not allowed in private or protected member
 };
 
 struct tranform_fn {  // just converting uint8 value to uint32
-  __device__ uint32_t operator()(uint8_t count) { return count; }
+  __host__ __device__ uint32_t operator()(uint8_t count) { return count; }  //TODO(HIP): __host__ is needed here to avoid thrust compilation error "no type type"
 };
 
 void wordpiece_tokenizer::tokenize(uvector_pair& cps_and_offsets, rmm::cuda_stream_view stream)

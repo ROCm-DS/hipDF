@@ -639,22 +639,22 @@ add_library(
   src/table/table.cpp
   src/table/table_device_view.hip
   src/table/table_view.cpp
-  # src/text/detokenize.hip
-  # src/text/edit_distance.hip
-  # src/text/generate_ngrams.hip
-  # src/text/jaccard.hip
-  # src/text/minhash.hip
-  # src/text/ngrams_tokenize.hip
-  # src/text/normalize.hip
-  # src/text/replace.hip
-  # src/text/stemmer.hip
-  # src/text/subword/bpe_tokenizer.hip
-  # src/text/subword/data_normalizer.hip
-  # src/text/subword/load_hash_file.hip
-  # src/text/subword/load_merges_file.hip
-  # src/text/subword/subword_tokenize.hip
-  # src/text/subword/wordpiece_tokenizer.hip
-  # src/text/tokenize.hip
+  src/text/detokenize.hip
+  src/text/edit_distance.hip
+  src/text/generate_ngrams.hip
+  src/text/jaccard.hip
+  src/text/minhash.hip
+  src/text/ngrams_tokenize.hip
+  src/text/normalize.hip
+  src/text/replace.hip
+  src/text/stemmer.hip
+  src/text/subword/bpe_tokenizer.hip  #TODO(HIP): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
+  src/text/subword/data_normalizer.hip
+  src/text/subword/load_hash_file.hip
+  src/text/subword/load_merges_file.hip #TODO(HIP): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
+  src/text/subword/subword_tokenize.hip
+  src/text/subword/wordpiece_tokenizer.hip
+  src/text/tokenize.hip
   # src/transform/bools_to_mask.hip
   # src/transform/compute_column.hip
   # src/transform/encode.hip

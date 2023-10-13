@@ -85,6 +85,8 @@ std::unique_ptr<cudf::column> load_file_to_column(std::string const& filename_me
   return cudf::make_strings_column(d_chars, d_offsets, {}, 0);
 }
 
+//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+#if 0
 std::unique_ptr<detail::merge_pairs_map_type> initialize_merge_pairs_map(
   cudf::column_device_view const& input, rmm::cuda_stream_view stream)
 {
@@ -124,9 +126,12 @@ std::unique_ptr<bpe_merge_pairs::bpe_merge_pairs_impl> create_bpe_merge_pairs_im
   return create_bpe_merge_pairs_impl(std::make_unique<cudf::column>(input.parent(), stream, mr),
                                      stream);
 }
+#endif
 
 }  // namespace
 
+//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+#if 0
 std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filename_merges,
                                                        rmm::cuda_stream_view stream,
                                                        rmm::mr::device_memory_resource* mr)
@@ -135,8 +140,11 @@ std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filena
   return std::make_unique<bpe_merge_pairs>(std::move(input_column), stream, mr);
 }
 
+#endif
 }  // namespace detail
 
+//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+#if 0 
 std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filename_merges,
                                                        rmm::mr::device_memory_resource* mr)
 {
@@ -170,5 +178,5 @@ bpe_merge_pairs::bpe_merge_pairs(cudf::strings_column_view const& input,
 }
 
 bpe_merge_pairs::~bpe_merge_pairs() = default;
-
+#endif
 }  // namespace nvtext
