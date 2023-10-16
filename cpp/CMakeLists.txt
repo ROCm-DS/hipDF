@@ -412,7 +412,7 @@ add_library(
   src/io/json/byte_range_info.hip
   src/io/json/json_column.hip
   src/io/json/json_tree.hip
-  # src/io/json/nested_json_gpu.hip
+  src/io/json/nested_json_gpu.hip
   src/io/json/read_json.hip
   src/io/json/legacy/json_gpu.hip
   src/io/json/legacy/reader_impl.hip
@@ -578,59 +578,59 @@ add_library(
   # src/stream_compaction/unique_count_column.hip
   src/strings/attributes.hip
   src/strings/capitalize.hip
-  # src/strings/case.hip
-  # src/strings/char_types/char_cases.hip
-  # src/strings/char_types/char_types.hip
-  # src/strings/combine/concatenate.hip
-  # src/strings/combine/join.hip
-  # src/strings/combine/join_list_elements.hip
-  # src/strings/contains.hip
-  # src/strings/convert/convert_booleans.hip
+  src/strings/case.hip
+  src/strings/char_types/char_cases.hip
+  src/strings/char_types/char_types.hip
+  src/strings/combine/concatenate.hip
+  src/strings/combine/join.hip
+  src/strings/combine/join_list_elements.hip
+  src/strings/contains.hip
+  src/strings/convert/convert_booleans.hip
   src/strings/convert/convert_datetime.hip
   src/strings/convert/convert_durations.hip
-  #src/strings/convert/convert_fixed_point.hip
-  # src/strings/convert/convert_floats.hip
-  # src/strings/convert/convert_hex.hip
-  # src/strings/convert/convert_integers.hip
-  # src/strings/convert/convert_ipv4.hip
-  # src/strings/convert/convert_urls.hip
-  # src/strings/convert/convert_lists.hip
-  # src/strings/copying/concatenate.hip
-  # src/strings/copying/copying.hip
-  # src/strings/copying/shift.hip
-  # src/strings/count_matches.hip
-  # src/strings/extract/extract.hip
-  # src/strings/extract/extract_all.hip
-  # src/strings/filling/fill.hip
-  # src/strings/filter_chars.hip
-  # src/strings/like.hip
-  # src/strings/padding.hip
-  # src/strings/json/json_path.hip
-  # src/strings/regex/regcomp.cpp
-  # src/strings/regex/regexec.cpp
-  # src/strings/regex/regex_program.cpp
-  # src/strings/repeat_strings.hip
-  # src/strings/replace/backref_re.hip
-  # src/strings/replace/multi.hip
-  # src/strings/replace/multi_re.hip
-  # src/strings/replace/replace.hip
-  # src/strings/replace/replace_re.hip
-  # src/strings/reverse.hip
-  # src/strings/search/findall.hip
-  # src/strings/search/find.hip
-  # src/strings/search/find_multiple.hip
-  # src/strings/slice.hip
-  # src/strings/split/partition.hip
+  src/strings/convert/convert_fixed_point.hip
+  src/strings/convert/convert_floats.hip
+  src/strings/convert/convert_hex.hip
+  src/strings/convert/convert_integers.hip
+  src/strings/convert/convert_ipv4.hip
+  src/strings/convert/convert_urls.hip
+  src/strings/convert/convert_lists.hip
+  src/strings/copying/concatenate.hip
+  src/strings/copying/copying.hip
+  src/strings/copying/shift.hip
+  src/strings/count_matches.hip
+  src/strings/extract/extract.hip
+  src/strings/extract/extract_all.hip
+  src/strings/filling/fill.hip
+  src/strings/filter_chars.hip
+  src/strings/like.hip
+  src/strings/padding.hip
+  src/strings/json/json_path.hip
+  src/strings/regex/regcomp.cpp
+  src/strings/regex/regexec.cpp
+  src/strings/regex/regex_program.cpp
+  src/strings/repeat_strings.hip
+  src/strings/replace/backref_re.hip
+  src/strings/replace/multi.hip
+  src/strings/replace/multi_re.hip
+  src/strings/replace/replace.hip
+  src/strings/replace/replace_re.hip
+  src/strings/reverse.hip
+  src/strings/search/findall.hip
+  src/strings/search/find.hip
+  src/strings/search/find_multiple.hip
+  src/strings/slice.hip
+  src/strings/split/partition.hip
   # src/strings/split/split.hip
-  # src/strings/split/split_re.hip
-  # src/strings/split/split_record.hip
+  src/strings/split/split_re.hip
+  src/strings/split/split_record.hip
   src/strings/strings_column_factories.hip
   src/strings/strings_column_view.cpp
   src/strings/strings_scalar_factories.cpp
-  # src/strings/strip.hip
-  # src/strings/translate.hip
-  # src/strings/utilities.hip
-  # src/strings/wrap.hip
+  src/strings/strip.hip
+  src/strings/translate.hip
+  src/strings/utilities.hip
+  src/strings/wrap.hip
   src/structs/copying/concatenate.hip
   src/structs/structs_column_factories.hip
   src/structs/structs_column_view.cpp

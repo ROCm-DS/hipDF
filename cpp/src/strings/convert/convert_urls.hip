@@ -32,7 +32,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <thrust/scan.h>
 
@@ -80,7 +80,7 @@ struct url_encoder_fn {
   }
 
   // main part of the functor the performs the url-encoding
-  __device__ void operator()(size_type idx)
+  __host__ __device__ void operator()(size_type idx)
   {
     if (d_strings.is_null(idx)) {
       if (!d_chars) d_offsets[idx] = 0;
@@ -239,7 +239,7 @@ __global__ void url_decode_char_counter(column_device_view const in_strings,
         in_chars_shared[char_idx] = in_idx < string_length ? in_chars[in_idx] : 0;
       }
 
-      __syncwarp();
+      hip_extensions::__syncwarp();
 
       // `char_idx_start` represents the start character index of the current warp.
       for (size_type char_idx_start = 0; char_idx_start < string_length_block;
@@ -256,7 +256,7 @@ __global__ void url_decode_char_counter(column_device_view const in_strings,
 
         if (warp_lane == 0) { escape_char_count += total_escape_char; }
 
-        __syncwarp();
+        hip_extensions::__syncwarp();
       }
     }
     // URL decoding replaces 3 bytes with 1 for each escape character.
@@ -321,7 +321,7 @@ __global__ void url_decode_char_replacer(column_device_view const in_strings,
         in_chars_shared[char_idx] = in_idx >= 0 && in_idx < string_length ? in_chars[in_idx] : 0;
       }
 
-      __syncwarp();
+      hip_extensions::__syncwarp();
 
       // `char_idx_start` represents the start character index of the current warp.
       for (size_type char_idx_start = 0; char_idx_start < string_length_block;
@@ -359,7 +359,7 @@ __global__ void url_decode_char_replacer(column_device_view const in_strings,
           out_idx[local_warp_id] += (out_offset + out_size);
         }
 
-        __syncwarp();
+        hip_extensions::__syncwarp();
       }
     }
   }
