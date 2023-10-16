@@ -360,7 +360,7 @@ if(CUDA_BACKEND)
 else()
   # TODO(HIP): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
   # header conflicts during jitify preprocessing
-	#  include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
+  #include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
 endif()
 
 # find KvikIO
