@@ -55,7 +55,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 namespace cudf {
 namespace strings {
@@ -100,7 +100,7 @@ struct url_encoder_fn {
   }
 
   // main part of the functor the performs the url-encoding
-  __device__ void operator()(size_type idx)
+  __host__ __device__ void operator()(size_type idx)
   {
     if (d_strings.is_null(idx)) {
       if (!d_chars) { d_sizes[idx] = 0; }

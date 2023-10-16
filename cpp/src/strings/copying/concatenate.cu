@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/device_scalar.hpp>
@@ -59,7 +81,9 @@ constexpr bool use_fused_kernel_heuristic(bool const has_nulls,
 // error: The enclosing parent function ("create_strings_device_views") for an
 // extended __device__ lambda must not have deduced return type
 struct chars_size_transform {
-  __device__ size_t operator()(column_device_view const& col) const
+  // Todo(HIP): error: no type named 'type' in 'std::invoke_result<cudf::strings::detail::chars_size_transform, cudf::column_device_view>'
+  // Adding __host__ fixes the issue
+  __host__ __device__ size_t operator()(column_device_view const& col) const
   {
     if (col.size() > 0) {
       auto const offsets   = col.child(strings_column_view::offsets_column_index);

@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/null_mask.hpp>
@@ -60,8 +82,9 @@ struct string_to_integer_check_fn {
     auto iter           = d_str + static_cast<int>((d_str[0] == '-' || d_str[0] == '+'));
     auto const iter_end = d_str + p.first.size_bytes();
     if (iter == iter_end) { return false; }
-
-    auto const sign = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
+    //Todo(HIP): error: constant expression evaluates to -1 which cannot be narrowed to type 'unsigned char' [-Wc++11-narrowing]
+    // auto const sign = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
+    auto const sign = d_str[0] == '-' ? -1 : 1;
     auto const bound_val =
       sign > 0 ? std::numeric_limits<IntegerType>::max() : std::numeric_limits<IntegerType>::min();
 
@@ -73,9 +96,13 @@ struct string_to_integer_check_fn {
 
       // Check for underflow and overflow:
       auto const digit       = static_cast<IntegerType>(chr - '0');
-      auto const bound_check = (bound_val - sign * digit) / IntegerType{10} * sign;
+      // Todo(HIP): error: constant expression evaluates to 10 which cannot be narrowed to type 'bool' [-Wc++11-narrowing]
+      // auto const bound_check = (bound_val - sign * digit) / IntegerType{10} * sign;
+      auto const bound_check = (bound_val - sign * digit) / 10 * sign;
       if (value > bound_check) return false;
-      value = value * IntegerType{10} + digit;
+      // Todo(HIP): error: constant expression evaluates to 10 which cannot be narrowed to type 'bool' [-Wc++11-narrowing]
+      // value = value * IntegerType{10} + digit;
+      value = value * 10 + digit;
     }
 
     return true;
