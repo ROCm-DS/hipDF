@@ -412,7 +412,7 @@ add_library(
   src/io/json/byte_range_info.hip
   src/io/json/json_column.hip
   src/io/json/json_tree.hip
-  src/io/json/nested_json_gpu.hip
+  # src/io/json/nested_json_gpu.hip
   src/io/json/read_json.hip
   src/io/json/legacy/json_gpu.hip
   src/io/json/legacy/reader_impl.hip
@@ -655,15 +655,15 @@ add_library(
   src/text/subword/subword_tokenize.hip
   src/text/subword/wordpiece_tokenizer.hip
   src/text/tokenize.hip
-  # src/transform/bools_to_mask.hip
-  # src/transform/compute_column.hip
-  # src/transform/encode.hip
-  # src/transform/mask_to_bools.hip
-  # src/transform/nans_to_nulls.hip
-  # src/transform/one_hot_encode.hip
-  # src/transform/row_bit_count.hip
+  src/transform/bools_to_mask.hip
+  src/transform/compute_column.hip
+  src/transform/encode.hip
+  src/transform/mask_to_bools.hip
+  src/transform/nans_to_nulls.hip
+  src/transform/one_hot_encode.hip
+  src/transform/row_bit_count.hip
   # src/transform/transform.cpp
-  # src/transpose/transpose.hip
+  src/transpose/transpose.hip
   src/unary/cast_ops.hip
   src/unary/math_ops.hip
   src/unary/nan_ops.hip
