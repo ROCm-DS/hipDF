@@ -563,7 +563,7 @@ add_library(
   src/io/json/column_tree_construction.cu
   src/io/json/json_normalization.cu
   src/io/json/json_tree.cu
-  src/io/json/nested_json_gpu.cu
+  # src/io/json/nested_json_gpu.cu
   src/io/json/read_json.cu
   src/io/json/parser_features.cpp
   src/io/json/process_tokens.cu
