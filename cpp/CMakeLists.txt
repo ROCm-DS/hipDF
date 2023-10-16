@@ -422,7 +422,7 @@ add_library(
   src/io/orc/orc.cpp
   src/io/orc/reader_impl.hip
   src/io/orc/stats_enc.hip
-  # src/io/orc/stripe_data.hip
+  src/io/orc/stripe_data.hip
   src/io/orc/stripe_enc.hip
   # src/io/orc/stripe_init.hip
   # src/datetime/timezone.cpp

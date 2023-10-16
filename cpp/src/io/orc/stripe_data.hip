@@ -449,8 +449,11 @@ inline __device__ int decode_base128_varint(volatile orc_bytestream_s* bs, int p
 inline __device__ __int128_t decode_varint128(volatile orc_bytestream_s* bs, int pos)
 {
   auto byte                  = bytestream_readbyte(bs, pos++);
-  __int128_t const sign_mask = -(int32_t)(byte & 1);
-  __int128_t value           = (byte >> 1) & 0x3f;
+  // Todo(HIP): fatal error: error in backend: unsupported libcall legalization
+  // converted type of sign_mask and value to auto (__int128_t -> auto)
+  // https://github.com/AMD-AI/hipdf/issues/3 
+  auto const sign_mask = -(int32_t)(byte & 1);
+  auto value           = (byte >> 1) & 0x3f;
   uint32_t bitpos            = 6;
   while (byte & 0x80 && bitpos < 128) {
     byte = bytestream_readbyte(bs, pos++);
@@ -1695,6 +1698,11 @@ __global__ void __launch_bounds__(block_size)
         if (row < max_num_rows) {
           void* data_out = s->chunk.column_data_base;
           switch (s->chunk.type_kind) {
+            // Todo(HIP): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION' 
+            // not handled in switch [-Werror,-Wswitch]
+            case INVALID_TYPE_KIND: 
+            case STRUCT: 
+            case UNION: 
             case FLOAT:
             case INT: static_cast<uint32_t*>(data_out)[row] = s->vals.u32[t + vals_skipped]; break;
             case DOUBLE:
