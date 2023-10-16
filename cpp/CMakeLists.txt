@@ -554,10 +554,10 @@ add_library(
   # src/round/round.hip
   src/scalar/scalar.cpp
   src/scalar/scalar_factories.cpp
-  # src/search/contains_column.hip
-  # src/search/contains_scalar.hip
-  # src/search/contains_table.hip
-  # src/search/search_ordered.hip
+  src/search/contains_column.hip
+  src/search/contains_scalar.hip
+  src/search/contains_table.hip
+  src/search/search_ordered.hip
   src/sort/is_sorted.hip
   src/sort/rank.hip
   src/sort/segmented_sort.hip
@@ -566,16 +566,16 @@ add_library(
   src/sort/stable_segmented_sort.hip
   src/sort/stable_sort_column.hip
   src/sort/stable_sort.hip
-  # src/stream_compaction/apply_boolean_mask.hip
-  # src/stream_compaction/distinct.hip
-  # src/stream_compaction/distinct_count.hip
-  # src/stream_compaction/distinct_reduce.hip
-  # src/stream_compaction/drop_nans.hip
-  # src/stream_compaction/drop_nulls.hip
-  # src/stream_compaction/stable_distinct.hip
-  # src/stream_compaction/unique.hip
-  # src/stream_compaction/unique_count.hip
-  # src/stream_compaction/unique_count_column.hip
+  src/stream_compaction/apply_boolean_mask.hip
+  src/stream_compaction/distinct.hip
+  # src/stream_compaction/distinct_count.hip #TODO(HIP): There are hipCollection integration errors
+  src/stream_compaction/distinct_reduce.hip
+  src/stream_compaction/drop_nans.hip
+  src/stream_compaction/drop_nulls.hip
+  src/stream_compaction/stable_distinct.hip
+  src/stream_compaction/unique.hip
+  src/stream_compaction/unique_count.hip
+  src/stream_compaction/unique_count_column.hip
   src/strings/attributes.hip
   src/strings/capitalize.hip
   src/strings/case.hip
@@ -621,7 +621,7 @@ add_library(
   src/strings/search/find_multiple.hip
   src/strings/slice.hip
   src/strings/split/partition.hip
-  # src/strings/split/split.hip
+  # src/strings/split/split.hip #TODO(HIP): There are RMM integration errors
   src/strings/split/split_re.hip
   src/strings/split/split_record.hip
   src/strings/strings_column_factories.hip
