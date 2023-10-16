@@ -172,7 +172,7 @@ CUDF_HOST_DEVICE inline Result select_quantile(ValueAccessor get_value,
     case interpolation::NEAREST: return static_cast<Result>(get_value(idx.nearest));
 
     default: {
-#ifndef __CUDA_ARCH__
+#ifndef __HIP_DEVICE_COMPILE__
       CUDF_FAIL("Invalid interpolation operation for quantiles.");
 #else
       CUDF_UNREACHABLE("Invalid interpolation operation for quantiles");
@@ -231,7 +231,7 @@ CUDF_HOST_DEVICE inline bool select_quantile_validity(Iterator begin,
     case interpolation::LINEAR:
     case interpolation::MIDPOINT: return *(begin + idx.lower) and *(begin + idx.higher);
     default: {
-#ifndef __CUDA_ARCH__
+#ifndef __HIP_DEVICE_COMPILE__
       CUDF_FAIL("Invalid interpolation operation for quantiles.");
 #else
       CUDF_UNREACHABLE("Invalid interpolation operation for quantiles");
