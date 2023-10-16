@@ -223,7 +223,7 @@ CUDF_HOST_DEVICE inline constexpr void ast_operator_dispatcher(ast_operator op, 
       f.template operator()<ast_operator::CAST_TO_FLOAT64>(std::forward<Ts>(args)...);
       break;
     default: {
-#ifndef __CUDA_ARCH__
+#ifndef __HIP_DEVICE_COMPILE__	
       CUDF_FAIL("Invalid operator.");
 #else
       CUDF_UNREACHABLE("Invalid operator.");
