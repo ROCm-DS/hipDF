@@ -69,7 +69,7 @@ template <typename T>
 struct make_centroid {
   column_device_view const col;
 
-  centroid operator() __device__(size_type index) const
+  __device__ centroid operator() (size_type index) const
   {
     auto const is_valid = col.is_valid(index);
     auto const mean     = is_valid ? static_cast<double>(col.element<T>(index)) : 0.0;
@@ -84,7 +84,7 @@ template <typename T>
 struct make_centroid_no_nulls {
   column_device_view const col;
 
-  centroid operator() __device__(size_type index) const
+  __device__ centroid operator() (size_type index) const
   {
     return {static_cast<double>(col.element<T>(index)), 1.0, true};
   }
@@ -95,12 +95,12 @@ struct make_weighted_centroid {
   double const* mean;
   double const* weight;
 
-  centroid operator() __device__(size_type index) { return {mean[index], weight[index], true}; }
+  __device__ centroid operator() (size_type index) { return {mean[index], weight[index], true}; }
 };
 
 // merge two centroids
 struct merge_centroids {
-  centroid operator() __device__(centroid const& lhs, centroid const& rhs) const
+  __device__ centroid operator() (centroid const& lhs, centroid const& rhs) const
   {
     bool const lhs_valid = thrust::get<2>(lhs);
     bool const rhs_valid = thrust::get<2>(rhs);
@@ -129,7 +129,7 @@ struct merge_centroids {
 struct nearest_value_scalar_weights_grouped {
   size_type const* group_offsets;
 
-  thrust::pair<double, int> operator() __device__(double next_limit, size_type group_index) const
+  __device__ thrust::pair<double, int> operator() (double next_limit, size_type group_index) const
   {
     double const f                   = floor(next_limit);
     auto const relative_weight_index = max(0, static_cast<int>(next_limit) - 1);
@@ -150,7 +150,7 @@ struct nearest_value_scalar_weights_grouped {
 struct nearest_value_scalar_weights {
   size_type const input_size;
 
-  thrust::pair<double, int> operator() __device__(double next_limit, size_type) const
+  __device__ thrust::pair<double, int> operator() (double next_limit, size_type) const
   {
     double const f                   = floor(next_limit);
     auto const relative_weight_index = max(0, static_cast<int>(next_limit) - 1);
@@ -170,7 +170,7 @@ struct nearest_value_centroid_weights {
   GroupOffsetsIter outer_offsets;  // groups
   size_type const* inner_offsets;  // tdigests within a group
 
-  thrust::pair<double, int> operator() __device__(double next_limit, size_type group_index) const
+  __device__ thrust::pair<double, int> operator() (double next_limit, size_type group_index) const
   {
     auto const tdigest_begin = outer_offsets[group_index];
     auto const tdigest_end   = outer_offsets[group_index + 1];
@@ -202,7 +202,7 @@ struct nearest_value_centroid_weights {
 struct cumulative_scalar_weight_grouped {
   cudf::device_span<size_type const> group_offsets;
   cudf::device_span<size_type const> group_labels;
-  std::tuple<size_type, size_type, double> operator() __device__(size_type value_index) const
+  __device__ std::tuple<size_type, size_type, double> operator() (size_type value_index) const
   {
     auto const group_index          = group_labels[value_index];
     auto const relative_value_index = value_index - group_offsets[group_index];
@@ -218,7 +218,7 @@ struct cumulative_scalar_weight_grouped {
  * the cumulative weight for a given value index I is simply I+1.
  */
 struct cumulative_scalar_weight {
-  std::tuple<size_type, size_type, double> operator() __device__(size_type value_index) const
+  __device__ std::tuple<size_type, size_type, double> operator() (size_type value_index) const
   {
     return {0, value_index, value_index + 1};
   }
@@ -237,7 +237,7 @@ struct cumulative_centroid_weight {
   GroupOffsetsIter outer_offsets;                    // groups
   cudf::device_span<size_type const> inner_offsets;  // tdigests with a group
 
-  std::tuple<size_type, size_type, double> operator() __device__(size_type value_index) const
+  __device__ std::tuple<size_type, size_type, double> operator() (size_type value_index) const
   {
     auto const tdigest_index =
       static_cast<size_type>(
@@ -1019,11 +1019,11 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
   // bring tdigest offsets back to the host
   auto tdigest_offsets = tdv.centroids().offsets();
   std::vector<size_type> h_inner_offsets(tdigest_offsets.size());
-  hipMemcpyAsync(h_inner_offsets.data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(h_inner_offsets.data(),
                   tdigest_offsets.begin<size_type>(),
                   sizeof(size_type) * tdigest_offsets.size(),
                   hipMemcpyDefault,
-                  stream);
+                  stream));
 
   stream.synchronize();
 
@@ -1076,8 +1076,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         min_iter,
                         thrust::make_discard_iterator(),
                         merged_min_col->mutable_view().begin<double>(),
-                        thrust::equal_to{},  // key equality check
-                        thrust::minimum{});
+                        thrust::equal_to<double>{},  // key equality check //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        thrust::minimum<double>{}); //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
 
   auto merged_max_col = cudf::make_numeric_column(
     data_type{type_id::FLOAT64}, num_groups, mask_state::UNALLOCATED, stream, mr);
@@ -1091,8 +1091,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         max_iter,
                         thrust::make_discard_iterator(),
                         merged_max_col->mutable_view().begin<double>(),
-                        thrust::equal_to{},  // key equality check
-                        thrust::maximum{});
+                        thrust::equal_to<double>{},  // key equality check //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        thrust::maximum<double>{}); //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
 
   // for any empty groups, set the min and max to be 0. not technically necessary but it makes
   // testing simpler.
@@ -1272,11 +1272,11 @@ std::unique_ptr<column> group_merge_tdigest(column_view const& input,
 
   // bring group offsets back to the host
   std::vector<size_type> h_group_offsets(group_offsets.size());
-  hipMemcpyAsync(h_group_offsets.data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(h_group_offsets.data(),
                   group_offsets.begin(),
                   sizeof(size_type) * group_offsets.size(),
                   hipMemcpyDefault,
-                  stream);
+                  stream));
 
   return merge_tdigests(tdv,
                         h_group_offsets.begin(),

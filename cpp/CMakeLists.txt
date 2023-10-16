@@ -500,11 +500,11 @@ add_library(
   # src/merge/merge.hip
   # src/partitioning/partitioning.hip
   # src/partitioning/round_robin.hip
-  # src/quantiles/tdigest/tdigest.hip
-  # src/quantiles/tdigest/tdigest_aggregation.hip
-  # src/quantiles/tdigest/tdigest_column_view.cpp
-  # src/quantiles/quantile.hip
-  # src/quantiles/quantiles.hip
+  src/quantiles/tdigest/tdigest.hip
+  src/quantiles/tdigest/tdigest_aggregation.hip
+  src/quantiles/tdigest/tdigest_column_view.cpp
+  src/quantiles/quantile.hip
+  src/quantiles/quantiles.hip
   # src/reductions/all.hip
   # src/reductions/any.hip
   # src/reductions/collect_ops.hip
