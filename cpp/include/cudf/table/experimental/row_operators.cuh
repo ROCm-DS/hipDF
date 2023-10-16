@@ -140,8 +140,8 @@ struct strong_index_iterator : public thrust::iterator_facade<strong_index_itera
  private:
   __device__ constexpr void increment() { ++begin; }
   __device__ constexpr void decrement() { --begin; }
-
-  __device__ constexpr void advance(Underlying n) { begin += n; }
+  // Todo(HIP): added __host__
+  __host__ __device__ constexpr void advance(Underlying n) { begin += n; }
 
   __device__ constexpr bool equal(strong_index_iterator<Index> const& other) const noexcept
   {
@@ -149,8 +149,8 @@ struct strong_index_iterator : public thrust::iterator_facade<strong_index_itera
   }
 
   __device__ constexpr Index dereference() const noexcept { return static_cast<Index>(begin); }
-
-  __device__ constexpr Underlying distance_to(
+  // Todo(HIP): added __host__
+  __host__ __device__ constexpr Underlying distance_to(
     strong_index_iterator<Index> const& other) const noexcept
   {
     return other.begin - begin;
