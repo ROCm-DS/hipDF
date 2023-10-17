@@ -237,7 +237,7 @@ enum row_entry_state_e {
  */
 static auto __device__ index_order_from_index_types(uint32_t index_types_bitmap)
 {
-  constexpr std::array full_order = {CI_PRESENT, CI_DATA, CI_DATA2};
+  constexpr std::array<StreamIndexType, 3> full_order = {CI_PRESENT, CI_DATA, CI_DATA2};
 
   std::array<uint32_t, full_order.size()> partial_order;
   thrust::copy_if(thrust::seq,

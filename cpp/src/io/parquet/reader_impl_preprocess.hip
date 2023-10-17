@@ -988,8 +988,8 @@ void print_cumulative_row_info(
  * @brief Functor which reduces two cumulative_row_info structs of the same key.
  */
 struct cumulative_row_sum {
-  cumulative_row_info operator()
-    __device__(cumulative_row_info const& a, cumulative_row_info const& b) const
+  cumulative_row_info __device__ operator()
+    (cumulative_row_info const& a, cumulative_row_info const& b) const
   {
     return cumulative_row_info{a.row_count + b.row_count, a.size_bytes + b.size_bytes, a.key};
   }
@@ -1874,7 +1874,7 @@ std::vector<size_t> reader::impl::calculate_page_string_offsets()
                         reduce_keys.begin(),
                         d_col_sizes.begin());
 
-  hipMemcpyAsync(col_sizes.data(),
+  (void)hipMemcpyAsync(col_sizes.data(),
                   d_col_sizes.data(),
                   sizeof(size_t) * col_sizes.size(),
                   hipMemcpyDeviceToHost,

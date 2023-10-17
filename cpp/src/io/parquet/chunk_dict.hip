@@ -165,7 +165,8 @@ __global__ void __launch_bounds__(block_size)
               "encoding!");
           }
           case Type::FIXED_LEN_BYTE_ARRAY:
-            if (data_col.type().id() == type_id::DECIMAL128) { return sizeof(__int128_t); }
+            // Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+            // if (data_col.type().id() == type_id::DECIMAL128) { return sizeof(__int128_t); }
             CUDF_UNREACHABLE(
               "Fixed length byte array only supports decimal 128 column types for dictionary "
               "encoding!");

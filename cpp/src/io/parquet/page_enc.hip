@@ -98,9 +98,10 @@ struct page_enc_state_s {
  */
 constexpr uint32_t physical_type_len(Type physical_type, type_id id)
 {
-  if (physical_type == FIXED_LEN_BYTE_ARRAY and id == type_id::DECIMAL128) {
-    return sizeof(__int128_t);
-  }
+  //Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+  // if (physical_type == FIXED_LEN_BYTE_ARRAY and id == type_id::DECIMAL128) {
+  //   return sizeof(__int128_t);
+  // }
   switch (physical_type) {
     case INT96: return 12u;
     case INT64:
@@ -1323,6 +1324,9 @@ __global__ void __launch_bounds__(128, 8)
                 case type_id::TIMESTAMP_NANOSECONDS: {
                   return julian_days_with_time<hip::std::micro>(v);
                 } break;
+                // Todo(HIP): 25 enumeration values not handled in switch: 'EMPTY', 'INT8', 'INT16'... [-Werror,-Wswitch]
+                default:
+                  break;
               }
               return julian_days_with_time<hip::std::nano>(0);
             }();
@@ -1370,16 +1374,20 @@ __global__ void __launch_bounds__(128, 8)
             if (v != 0) memcpy(dst + pos + 4, bytes, v);
           } break;
           case FIXED_LEN_BYTE_ARRAY: {
-            if (type_id == type_id::DECIMAL128) {
-              // When using FIXED_LEN_BYTE_ARRAY for decimals, the rep is encoded in big-endian
-              auto const v = s->col.leaf_column->element<numeric::decimal128>(val_idx).value();
-              auto const v_char_ptr = reinterpret_cast<char const*>(&v);
-              thrust::copy(thrust::seq,
-                           thrust::make_reverse_iterator(v_char_ptr + sizeof(v)),
-                           thrust::make_reverse_iterator(v_char_ptr),
-                           dst + pos);
-            }
+            // Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+            // if (type_id == type_id::DECIMAL128) {
+            //   // When using FIXED_LEN_BYTE_ARRAY for decimals, the rep is encoded in big-endian
+            //   auto const v = s->col.leaf_column->element<numeric::decimal128>(val_idx).value();
+            //   auto const v_char_ptr = reinterpret_cast<char const*>(&v);
+            //   thrust::copy(thrust::seq,
+            //                thrust::make_reverse_iterator(v_char_ptr + sizeof(v)),
+            //                thrust::make_reverse_iterator(v_char_ptr),
+            //                dst + pos);
+            // }
           } break;
+          // Todo(HIP): error: enumeration values 'UNDEFINED_TYPE' and 'BOOLEAN' not handled in switch [-Werror,-Wswitch]
+          default:
+            break;
         }
       }
       __syncthreads();
@@ -2094,6 +2102,9 @@ __device__ int32_t compare_values(Type ptype,
     case Type::BYTE_ARRAY: return static_cast<string_view>(v1.str_val).compare(v2.str_val);
     case Type::FIXED_LEN_BYTE_ARRAY:
       if (ctype == ConvertedType::DECIMAL) { return compare(v1.d128_val, v2.d128_val); }
+    // Todo(HIP): error: enumeration values 'UNDEFINED_TYPE' and 'INT96' not handled in switch [-Werror,-Wswitch]
+    default:
+      break;
   }
   // calling is_comparable() should prevent reaching here
   CUDF_UNREACHABLE("Trying to compare non-comparable type");
@@ -2151,8 +2162,11 @@ __device__ int32_t calculate_boundary_order(statistics_chunk const* s,
   return BoundaryOrder::UNORDERED;
 }
 
+// Todo(HIP): reinterpret_cast is not allowed in a constant expression
+// Removed constexpr
+// constexpr __device__ void* align8(void* ptr)
 // align ptr to an 8-byte boundary. address returned will be <= ptr.
-constexpr __device__ void* align8(void* ptr)
+__device__ void* align8(void* ptr)
 {
   // it's ok to round down because we have an extra 7 bytes in the buffer
   auto algn = 3 & reinterpret_cast<std::uintptr_t>(ptr);

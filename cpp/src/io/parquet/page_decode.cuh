@@ -109,7 +109,7 @@ struct null_count_back_copier {
  */
 constexpr bool is_string_col(PageInfo const& page, device_span<ColumnChunkDesc const> chunks)
 {
-  if (page.flags & PAGEINFO_FLAGS_DICTIONARY != 0) { return false; }
+  if (page.flags & (PAGEINFO_FLAGS_DICTIONARY != 0)) { return false; }
   auto const& col = chunks[page.chunk_idx];
   return is_string_col(col);
 }
@@ -898,7 +898,7 @@ inline __device__ uint32_t InitLevelSection(page_state_s* s,
 
   auto start = cur;
 
-  auto init_rle = [s, lvl, end, level_bits](uint8_t const* cur, uint8_t const* end) {
+  auto init_rle = [s, lvl, /*Todo(HIP): end,*/ level_bits](uint8_t const* cur, uint8_t const* end) {
     uint32_t const run      = get_vlq32(cur, end);
     s->initial_rle_run[lvl] = run;
     if (!(run & 1)) {

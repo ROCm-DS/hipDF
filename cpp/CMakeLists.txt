@@ -286,39 +286,39 @@ add_library(
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
   # src/binaryop/binaryop.cpp  //TODO(HIP): fix jitify issues
-  # src/binaryop/compiled/ATan2.hip
-  # src/binaryop/compiled/Add.hip
-  # src/binaryop/compiled/BitwiseAnd.hip
-  # src/binaryop/compiled/BitwiseOr.hip
-  # src/binaryop/compiled/BitwiseXor.hip
-  # src/binaryop/compiled/Div.hip
-  # src/binaryop/compiled/FloorDiv.hip
-  # src/binaryop/compiled/Greater.hip
-  # src/binaryop/compiled/GreaterEqual.hip
-  # src/binaryop/compiled/IntPow.hip
-  # src/binaryop/compiled/Less.hip
-  # src/binaryop/compiled/LessEqual.hip
-  # src/binaryop/compiled/LogBase.hip
-  # src/binaryop/compiled/LogicalAnd.hip
-  # src/binaryop/compiled/LogicalOr.hip
-  # src/binaryop/compiled/Mod.hip
-  # src/binaryop/compiled/Mul.hip
-  # src/binaryop/compiled/NullEquals.hip
-  # src/binaryop/compiled/NullLogicalAnd.hip
-  # src/binaryop/compiled/NullLogicalOr.hip
-  # src/binaryop/compiled/NullMax.hip
-  # src/binaryop/compiled/NullMin.hip
-  # src/binaryop/compiled/PMod.hip
-  # src/binaryop/compiled/Pow.hip
-  # src/binaryop/compiled/PyMod.hip
-  # src/binaryop/compiled/ShiftLeft.hip
-  # src/binaryop/compiled/ShiftRight.hip
-  # src/binaryop/compiled/ShiftRightUnsigned.hip
-  # src/binaryop/compiled/Sub.hip
-  # src/binaryop/compiled/TrueDiv.hip
-  # src/binaryop/compiled/binary_ops.hip
-  # src/binaryop/compiled/equality_ops.hip
-  # src/binaryop/compiled/util.cpp
+  src/binaryop/compiled/ATan2.hip
+  src/binaryop/compiled/Add.hip
+  src/binaryop/compiled/BitwiseAnd.hip
+  src/binaryop/compiled/BitwiseOr.hip
+  src/binaryop/compiled/BitwiseXor.hip
+  src/binaryop/compiled/Div.hip
+  src/binaryop/compiled/FloorDiv.hip
+  src/binaryop/compiled/Greater.hip
+  src/binaryop/compiled/GreaterEqual.hip
+  src/binaryop/compiled/IntPow.hip
+  src/binaryop/compiled/Less.hip
+  src/binaryop/compiled/LessEqual.hip
+  src/binaryop/compiled/LogBase.hip
+  src/binaryop/compiled/LogicalAnd.hip
+  src/binaryop/compiled/LogicalOr.hip
+  src/binaryop/compiled/Mod.hip
+  src/binaryop/compiled/Mul.hip
+  src/binaryop/compiled/NullEquals.hip
+  src/binaryop/compiled/NullLogicalAnd.hip
+  src/binaryop/compiled/NullLogicalOr.hip
+  src/binaryop/compiled/NullMax.hip
+  src/binaryop/compiled/NullMin.hip
+  src/binaryop/compiled/PMod.hip
+  src/binaryop/compiled/Pow.hip
+  src/binaryop/compiled/PyMod.hip
+  src/binaryop/compiled/ShiftLeft.hip
+  src/binaryop/compiled/ShiftRight.hip
+  src/binaryop/compiled/ShiftRightUnsigned.hip
+  src/binaryop/compiled/Sub.hip
+  src/binaryop/compiled/TrueDiv.hip
+  src/binaryop/compiled/binary_ops.hip
+  src/binaryop/compiled/equality_ops.hip
+  # src/binaryop/compiled/util.cpp # Todo(HIP): error: member reference base type 'int' is not a structure or union
   src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
   src/bitmask/is_element_valid.cpp
@@ -424,23 +424,23 @@ add_library(
   src/io/orc/stats_enc.hip
   src/io/orc/stripe_data.hip
   src/io/orc/stripe_enc.hip
-  # src/io/orc/stripe_init.hip
-  # src/datetime/timezone.cpp
-  # src/io/orc/writer_impl.hip
-  # src/io/parquet/compact_protocol_reader.cpp
-  # src/io/parquet/compact_protocol_writer.cpp
-  # src/io/parquet/decode_preprocess.hip
-  # src/io/parquet/page_data.hip
-  # src/io/parquet/chunk_dict.hip
-  # src/io/parquet/page_enc.hip
-  # src/io/parquet/page_hdr.hip
-  # src/io/parquet/page_delta_decode.hip
-  # src/io/parquet/page_string_decode.hip
-  # src/io/parquet/predicate_pushdown.cpp
-  # src/io/parquet/reader.cpp
-  # src/io/parquet/reader_impl.cpp
-  # src/io/parquet/reader_impl_helpers.cpp
-  # src/io/parquet/reader_impl_preprocess.hip
+  src/io/orc/stripe_init.hip
+  src/datetime/timezone.cpp
+  # src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/compact_protocol_reader.cpp
+  src/io/parquet/compact_protocol_writer.cpp
+  # src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  # src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/chunk_dict.hip
+  # src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  # src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  # src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  # src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/predicate_pushdown.cpp
+  src/io/parquet/reader.cpp
+  src/io/parquet/reader_impl.cpp
+  src/io/parquet/reader_impl_helpers.cpp
+  src/io/parquet/reader_impl_preprocess.hip
   # src/io/parquet/writer_impl.hip
   # src/io/statistics/orc_column_statistics.hip
   # src/io/statistics/parquet_column_statistics.hip

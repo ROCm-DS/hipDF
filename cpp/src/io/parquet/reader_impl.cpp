@@ -243,7 +243,7 @@ void reader::impl::decode_page_data(size_t skip_rows, size_t num_rows)
       } else if (out_buf.type.id() == type_id::STRING) {
         // need to cap off the string offsets column
         size_type const sz = static_cast<size_type>(col_sizes[idx]);
-        hipMemcpyAsync(static_cast<int32_t*>(out_buf.data()) + out_buf.size,
+        (void)hipMemcpyAsync(static_cast<int32_t*>(out_buf.data()) + out_buf.size,
                         &sz,
                         sizeof(size_type),
                         hipMemcpyDefault,
