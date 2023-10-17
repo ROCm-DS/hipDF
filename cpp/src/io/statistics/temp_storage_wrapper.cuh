@@ -51,7 +51,7 @@
 #include <cudf/wrappers/durations.hpp>
 #include <cudf/wrappers/timestamps.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 namespace cudf {
 namespace io {

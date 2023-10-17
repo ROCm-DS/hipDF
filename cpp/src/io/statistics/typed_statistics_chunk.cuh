@@ -279,9 +279,9 @@ get_untyped_chunk(typed_statistics_chunk<T, include_aggregate> const& chunk)
   if (chunk.has_minmax) {
     if constexpr (std::is_floating_point_v<E>) {
       union_member::get<E>(stat.min_value) =
-        (chunk.minimum_value != 0.0) ? chunk.minimum_value : CUDART_NEG_ZERO;
+        (chunk.minimum_value != 0.0) ? chunk.minimum_value : HIP_NEG_ZERO;
       union_member::get<E>(stat.max_value) =
-        (chunk.maximum_value != 0.0) ? chunk.maximum_value : CUDART_ZERO;
+        (chunk.maximum_value != 0.0) ? chunk.maximum_value : HIP_ZERO;
     } else {
       union_member::get<E>(stat.min_value) = chunk.minimum_value;
       union_member::get<E>(stat.max_value) = chunk.maximum_value;

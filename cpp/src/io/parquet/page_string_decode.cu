@@ -942,6 +942,9 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size) gpuComputePageStringSi
         str_bytes = is_bounds_pg ? totalPlainEntriesSize(data, dict_size, start_value, end_value)
                                  : dict_size - sizeof(int) * pp->num_valids;
         break;
+      // Todo(HIP): 8 enumeration values not handled in switch: 'GROUP_VAR_INT', 'RLE', 'BIT_PACKED'... [-Werror,-Wswitch]
+      default:
+        break;
     }
   }
 

@@ -3203,6 +3203,9 @@ __device__ int32_t compare_values(Type ptype,
     case Type::BYTE_ARRAY: return static_cast<string_view>(v1.str_val).compare(v2.str_val);
     case Type::FIXED_LEN_BYTE_ARRAY:
       if (ctype == ConvertedType::DECIMAL) { return compare(v1.d128_val, v2.d128_val); }
+    // Todo(HIP): error: enumeration values 'UNDEFINED_TYPE' and 'INT96' not handled in switch [-Werror,-Wswitch]
+    default:
+      break;
   }
   // calling is_comparable() should prevent reaching here
   CUDF_UNREACHABLE("Trying to compare non-comparable type");
@@ -3260,6 +3263,9 @@ __device__ int32_t calculate_boundary_order(statistics_chunk const* s,
   return BoundaryOrder::UNORDERED;
 }
 
+// Todo(HIP): reinterpret_cast is not allowed in a constant expression
+// Removed constexpr
+// constexpr __device__ void* align8(void* ptr)
 // align ptr to an 8-byte boundary. address returned will be <= ptr.
 inline __device__ void* align8(void* ptr)
 {
