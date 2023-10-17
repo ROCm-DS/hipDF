@@ -441,14 +441,14 @@ add_library(
   src/io/parquet/reader_impl.cpp
   src/io/parquet/reader_impl_helpers.cpp
   src/io/parquet/reader_impl_preprocess.hip
-  # src/io/parquet/writer_impl.hip
-  # src/io/statistics/orc_column_statistics.hip
-  # src/io/statistics/parquet_column_statistics.hip
-  # src/io/text/byte_range_info.cpp
-  # src/io/text/data_chunk_source_factories.cpp
-  # src/io/text/bgzip_data_chunk_source.hip
-  # src/io/text/bgzip_utils.cpp
-  # src/io/text/multibyte_split.hip
+  # src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  # src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  # src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/text/byte_range_info.cpp
+  src/io/text/data_chunk_source_factories.cpp
+  src/io/text/bgzip_data_chunk_source.hip
+  src/io/text/bgzip_utils.cpp
+  # src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
   # src/io/utilities/arrow_io_source.cpp
   # src/io/utilities/column_buffer.cpp
   # src/io/utilities/config_utils.cpp

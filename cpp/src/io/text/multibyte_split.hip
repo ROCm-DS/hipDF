@@ -43,8 +43,8 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
-#include <cub/block/block_load.cuh>
-#include <cub/block/block_scan.cuh>
+#include <hipcub/block/block_load.hpp>
+#include <hipcub/block/block_scan.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -303,24 +303,24 @@ namespace detail {
 
 void fork_stream(std::vector<rmm::cuda_stream_view> streams, rmm::cuda_stream_view stream)
 {
-  cudaEvent_t event;
-  CUDF_CUDA_TRY(cudaEventCreate(&event));
-  CUDF_CUDA_TRY(cudaEventRecord(event, stream));
+  hipEvent_t event;
+  CUDF_CUDA_TRY(hipEventCreate(&event));
+  CUDF_CUDA_TRY(hipEventRecord(event, stream));
   for (uint32_t i = 0; i < streams.size(); i++) {
-    CUDF_CUDA_TRY(cudaStreamWaitEvent(streams[i], event, 0));
+    CUDF_CUDA_TRY(hipStreamWaitEvent(streams[i], event, 0));
   }
-  CUDF_CUDA_TRY(cudaEventDestroy(event));
+  CUDF_CUDA_TRY(hipEventDestroy(event));
 }
 
 void join_stream(std::vector<rmm::cuda_stream_view> streams, rmm::cuda_stream_view stream)
 {
-  cudaEvent_t event;
-  CUDF_CUDA_TRY(cudaEventCreate(&event));
+  hipEvent_t event;
+  CUDF_CUDA_TRY(hipEventCreate(&event));
   for (uint32_t i = 0; i < streams.size(); i++) {
-    CUDF_CUDA_TRY(cudaEventRecord(event, streams[i]));
-    CUDF_CUDA_TRY(cudaStreamWaitEvent(stream, event, 0));
+    CUDF_CUDA_TRY(hipEventRecord(event, streams[i]));
+    CUDF_CUDA_TRY(hipStreamWaitEvent(stream, event, 0));
   }
-  CUDF_CUDA_TRY(cudaEventDestroy(event));
+  CUDF_CUDA_TRY(hipEventDestroy(event));
 }
 
 std::vector<rmm::cuda_stream_view> get_streams(int32_t count, rmm::cuda_stream_pool& stream_pool)
@@ -413,8 +413,8 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
 
   fork_stream(streams, stream);
 
-  cudaEvent_t last_launch_event;
-  CUDF_CUDA_TRY(cudaEventCreate(&last_launch_event));
+  hipEvent_t last_launch_event;
+  CUDF_CUDA_TRY(hipEventCreate(&last_launch_event));
 
   auto& read_stream     = streams[0];
   auto& scan_stream     = streams[1];
@@ -447,8 +447,9 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
       tiles_in_launch,
       tile_multistates,
       tile_offsets);
-
-    CUDF_CUDA_TRY(cudaStreamWaitEvent(scan_stream.value(), last_launch_event));
+    // Todo(HIP): what should be the value of flag? 0?
+    // CUDF_CUDA_TRY(hipStreamWaitEvent(scan_stream.value(), last_launch_event));
+    CUDF_CUDA_TRY(hipStreamWaitEvent(scan_stream.value(), last_launch_event, 0));
 
     if (delimiter.size() == 1) {
       // the single-byte case allows for a much more efficient kernel, so we special-case it
@@ -522,7 +523,7 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
       char_storage.advance_output(output_size, scan_stream);
     }
 
-    CUDF_CUDA_TRY(cudaEventRecord(last_launch_event, scan_stream.value()));
+    CUDF_CUDA_TRY(hipEventRecord(last_launch_event, scan_stream.value()));
 
     std::swap(read_stream, scan_stream);
     base_tile_idx += tiles_in_launch;
@@ -530,7 +531,7 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
     chunk = std::move(next_chunk);
   }
 
-  CUDF_CUDA_TRY(cudaEventDestroy(last_launch_event));
+  CUDF_CUDA_TRY(hipEventDestroy(last_launch_event));
 
   join_stream(streams, stream);
 

@@ -22,7 +22,7 @@ __global__ void kernel() { printf("The kernel ran!\n"); }
 void test_cudaLaunchKernel()
 {
   hipStream_t stream;
-  hipStreamCreate(&stream);
+  (void)hipStreamCreate(&stream);
   kernel<<<1, 1, 0, stream>>>();
   hipError_t err{hipDeviceSynchronize()};
   if (err != hipSuccess) { throw std::runtime_error("Kernel failed on non-default stream!"); }

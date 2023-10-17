@@ -24,8 +24,8 @@
 #include <cudf/scalar/scalar_factories.hpp>
 #include <cudf/strings/repeat_strings.hpp>
 #include <cudf/types.hpp>
-
-#include <rmm/cuda_stream.hpp>
+//Todo(HIP): cuda_stream.hpp -> hip_stream.hpp
+#include <rmm/hip_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_buffer.hpp>
 #include <rmm/device_uvector.hpp>

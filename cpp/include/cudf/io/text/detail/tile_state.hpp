@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <cub/block/block_scan.cuh>
+#include <hipcub/block/block_scan.hpp>
 
 #include <hip/atomic>
 
