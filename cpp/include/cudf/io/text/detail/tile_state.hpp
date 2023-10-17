@@ -42,7 +42,7 @@
 
 #include <rmm/resource_ref.hpp>
 
-#include <cub/block/block_scan.cuh>
+#include <hipcub/block/block_scan.hpp>
 #include <cuda/atomic>
 
 namespace CUDF_EXPORT cudf {

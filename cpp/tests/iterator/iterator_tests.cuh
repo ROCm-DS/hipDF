@@ -50,7 +50,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/device/device_reduce.cuh>
+#include <hipcub/device/device_reduce.hpp>
 #include <thrust/distance.h>
 #include <thrust/equal.h>
 #include <thrust/execution_policy.h>
@@ -77,7 +77,7 @@ struct IteratorTest : public cudf::test::BaseFixture {
 
     // Get temporary storage size
     size_t temp_storage_bytes = 0;
-    hipcub::DeviceReduce::Reduce(nullptr,
+    (void)hipcub::DeviceReduce::Reduce(nullptr,
                               temp_storage_bytes,
                               d_in,
                               dev_result.begin(),
@@ -90,7 +90,7 @@ struct IteratorTest : public cudf::test::BaseFixture {
     rmm::device_buffer d_temp_storage(temp_storage_bytes, cudf::get_default_stream());
 
     // Run reduction
-    hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+    (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                               temp_storage_bytes,
                               d_in,
                               dev_result.begin(),

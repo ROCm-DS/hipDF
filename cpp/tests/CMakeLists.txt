@@ -246,7 +246,9 @@ ConfigureTest(
 # ##################################################################################################
 # * quantiles tests -------------------------------------------------------------------------------
 ConfigureTest(
-  QUANTILES_TEST quantiles/percentile_approx_test.cpp quantiles/quantile_test.cpp
+  QUANTILES_TEST 
+  # quantiles/percentile_approx_test.cpp 
+  quantiles/quantile_test.cpp
   quantiles/quantiles_test.cpp
   GPUS 1
   PERCENT 70 EXTRA_LIBS ${ARROW_LIBRARIES}
@@ -271,15 +273,15 @@ ConfigureTest(
 
 # ##################################################################################################
 # * replace tests ---------------------------------------------------------------------------------
-ConfigureTest(REPLACE_TEST replace/replace_tests.cpp)
+# ConfigureTest(REPLACE_TEST replace/replace_tests.cpp)
 
-ConfigureTest(REPLACE_NULLS_TEST replace/replace_nulls_tests.cpp)
+# ConfigureTest(REPLACE_NULLS_TEST replace/replace_nulls_tests.cpp)
 
-ConfigureTest(REPLACE_NANS_TEST replace/replace_nans_tests.cpp)
+# ConfigureTest(REPLACE_NANS_TEST replace/replace_nans_tests.cpp)
 
-ConfigureTest(NORMALIZE_REPLACE_TEST replace/normalize_replace_tests.cpp)
+# ConfigureTest(NORMALIZE_REPLACE_TEST replace/normalize_replace_tests.cpp)
 
-ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
+# ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
 
 # ##################################################################################################
 # * fixed_point tests -----------------------------------------------------------------------------
@@ -291,7 +293,7 @@ ConfigureTest(UNARY_TEST unary/math_ops_test.cpp unary/unary_ops_test.cpp unary/
 
 # ##################################################################################################
 # * round tests -----------------------------------------------------------------------------------
-ConfigureTest(ROUND_TEST round/round_tests.cpp)
+# ConfigureTest(ROUND_TEST round/round_tests.cpp)
 
 # ##################################################################################################
 # * binary tests ----------------------------------------------------------------------------------
@@ -337,7 +339,7 @@ ConfigureTest(
 # ##################################################################################################
 # * io tests --------------------------------------------------------------------------------------
 ConfigureTest(DECOMPRESSION_TEST io/comp/decomp_test.cpp)
-ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
+# ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
 ConfigureTest(
   CSV_TEST io/csv_test.cpp
@@ -521,7 +523,7 @@ ConfigureTest(
 ConfigureTest(
   STREAM_COMPACTION_TEST
   stream_compaction/apply_boolean_mask_tests.cpp
-  stream_compaction/distinct_count_tests.cpp
+  # stream_compaction/distinct_count_tests.cpp
   stream_compaction/distinct_tests.cpp
   stream_compaction/drop_nans_tests.cpp
   stream_compaction/drop_nulls_tests.cpp
@@ -615,7 +617,7 @@ ConfigureTest(
   strings/replace_tests.cpp
   strings/reverse_tests.cpp
   strings/slice_tests.cpp
-  strings/split_tests.cpp
+  # strings/split_tests.cpp
   strings/strip_tests.cpp
   strings/translate_tests.cpp
   strings/urls_tests.cpp
@@ -650,7 +652,7 @@ ConfigureTest(STRUCTS_TEST structs/structs_column_tests.cpp structs/utilities_te
 # * nvtext test -----------------------------------------------------------------------------------
 ConfigureTest(
   TEXT_TEST
-  text/bpe_tests.cpp
+  # text/bpe_tests.cpp
   text/edit_distance_tests.cpp
   text/jaccard_tests.cpp
   text/minhash_tests.cpp

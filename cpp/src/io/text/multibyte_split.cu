@@ -62,8 +62,8 @@
 #include <rmm/exec_policy.hpp>
 #include <rmm/mr/device/device_memory_resource.hpp>
 
-#include <cub/block/block_load.cuh>
-#include <cub/block/block_scan.cuh>
+#include <hipcub/block/block_load.hpp>
+#include <hipcub/block/block_scan.hpp>
 #include <cuda/functional>
 #include <thrust/copy.h>
 #include <thrust/find.h>
