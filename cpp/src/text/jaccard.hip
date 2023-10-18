@@ -210,7 +210,8 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
   // this is wicked fast and much faster than using cudf::lists::detail::sort_list
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
-  CUDF_CHECK_CUDA(hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
+  //TODO(HIP): add proper error checking
+  (void) hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,
                                      sorted.data(),
@@ -218,9 +219,9 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
                                      input.size(),
                                      offsets,
                                      offsets + 1,
-                                     stream.value()));
+                                     stream.value());
   d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-  CUDF_CHECK_CUDA(hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
+  (void) hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,
                                      sorted.data(),
@@ -228,7 +229,7 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
                                      input.size(),
                                      offsets,
                                      offsets + 1,
-                                     stream.value()));
+                                     stream.value());
 
   auto contents = hashes->release();
   // the offsets are taken from the hashes column since they are the same
