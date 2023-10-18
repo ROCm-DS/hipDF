@@ -318,7 +318,7 @@ add_library(
   src/binaryop/compiled/TrueDiv.hip
   src/binaryop/compiled/binary_ops.hip
   src/binaryop/compiled/equality_ops.hip
-  # src/binaryop/compiled/util.cpp # Todo(HIP): error: member reference base type 'int' is not a structure or union
+  src/binaryop/compiled/util.cpp # Todo(HIP): error: member reference base type 'int' is not a structure or union
   src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
   src/bitmask/is_element_valid.cpp
