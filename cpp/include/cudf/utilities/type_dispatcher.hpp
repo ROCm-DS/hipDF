@@ -603,12 +603,10 @@ struct double_type_dispatcher_first_type {
                                                              F&& f,
                                                              Ts&&... args) const
   {
-    //Todo(HIP)
-    return 0;
-    //  type_dispatcher<IdTypeMap>(type2,
-    //                                   detail::double_type_dispatcher_second_type<T1>{},
-    //                                   std::forward<F>(f),
-    //                                   std::forward<Ts>(args)...);
+    return  type_dispatcher<IdTypeMap>(type2,
+                                      detail::double_type_dispatcher_second_type<T1>{},
+                                       std::forward<F>(f),
+                                       std::forward<Ts>(args)...);
   }
 };
 }  // namespace detail
@@ -635,14 +633,12 @@ struct double_type_dispatcher_first_type {
 template <template <cudf::type_id> typename IdTypeMap = id_to_type_impl, typename F, typename... Ts>
 CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) double_type_dispatcher(
   cudf::data_type type1, cudf::data_type type2, F&& f, Ts&&... args)
-{
-  //Todo(HIP)
-  return 0; 
-  // type_dispatcher<IdTypeMap>(type1,
-  //                                   detail::double_type_dispatcher_first_type<IdTypeMap>{},
-  //                                   type2,
-  //                                   std::forward<F>(f),
-  //                                   std::forward<Ts>(args)...);
+{ 
+  return type_dispatcher<IdTypeMap>(type1,
+                                     detail::double_type_dispatcher_first_type<IdTypeMap>{},
+                                     type2,
+                                     std::forward<F>(f),
+                                     std::forward<Ts>(args)...);
 }
 
 /**
