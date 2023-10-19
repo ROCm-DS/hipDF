@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 /**
@@ -64,7 +86,7 @@ CUDF_HOST_DEVICE inline auto max(LHS const& lhs, RHS const& rhs)
  */
 struct DeviceSum {
   template <typename T, std::enable_if_t<!cudf::is_timestamp<T>()>* = nullptr>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) -> decltype(lhs + rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const -> decltype(lhs + rhs)
   {
     return lhs + rhs;
   }
@@ -122,7 +144,7 @@ struct DeviceCount {
  */
 struct DeviceMin {
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(cudf::detail::min(lhs, rhs))
   {
     return numeric::detail::min(lhs, rhs);
@@ -174,7 +196,7 @@ struct DeviceMin {
  */
 struct DeviceMax {
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(cudf::detail::max(lhs, rhs))
   {
     return numeric::detail::max(lhs, rhs);
@@ -225,7 +247,7 @@ struct DeviceMax {
  */
 struct DeviceProduct {
   template <typename T, std::enable_if_t<!cudf::is_timestamp<T>()>* = nullptr>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) -> decltype(lhs * rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const -> decltype(lhs * rhs)
   {
     return lhs * rhs;
   }

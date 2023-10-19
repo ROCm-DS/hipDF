@@ -484,8 +484,6 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
     case type_id::INT8:
       return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
         std::forward<Ts>(args)...);
-      // return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
-      //   std::forward<Ts>(args)...);
     case type_id::INT16:
        return f.template operator()<typename IdTypeMap<type_id::INT16>::type>(
          std::forward<Ts>(args)...);
@@ -605,8 +603,8 @@ struct double_type_dispatcher_first_type {
   {
     return  type_dispatcher<IdTypeMap>(type2,
                                       detail::double_type_dispatcher_second_type<T1>{},
-                                       std::forward<F>(f),
-                                       std::forward<Ts>(args)...);
+                                      std::forward<F>(f),
+                                      std::forward<Ts>(args)...);
   }
 };
 }  // namespace detail
@@ -633,12 +631,12 @@ struct double_type_dispatcher_first_type {
 template <template <cudf::type_id> typename IdTypeMap = id_to_type_impl, typename F, typename... Ts>
 CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) double_type_dispatcher(
   cudf::data_type type1, cudf::data_type type2, F&& f, Ts&&... args)
-{ 
+{
   return type_dispatcher<IdTypeMap>(type1,
-                                     detail::double_type_dispatcher_first_type<IdTypeMap>{},
-                                     type2,
-                                     std::forward<F>(f),
-                                     std::forward<Ts>(args)...);
+                                    detail::double_type_dispatcher_first_type<IdTypeMap>{},
+                                    type2,
+                                    std::forward<F>(f),
+                                    std::forward<Ts>(args)...);
 }
 
 /**
