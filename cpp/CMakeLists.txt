@@ -411,7 +411,7 @@ add_library(
   src/io/functions.cpp
   src/io/json/byte_range_info.hip
   src/io/json/json_column.hip
-  src/io/json/json_tree.hip
+  src/io/json/json_tree.hip # Todo(HIP): HipCollections
   src/io/json/nested_json_gpu.hip
   src/io/json/read_json.hip
   src/io/json/legacy/json_gpu.hip
@@ -505,38 +505,38 @@ add_library(
   src/quantiles/tdigest/tdigest_column_view.cpp
   src/quantiles/quantile.hip
   src/quantiles/quantiles.hip
-  # src/reductions/all.hip
-  # src/reductions/any.hip
-  # src/reductions/collect_ops.hip
-  # src/reductions/max.hip
-  # src/reductions/mean.hip
-  # src/reductions/min.hip
-  # src/reductions/minmax.hip
-  # src/reductions/nth_element.hip
-  # src/reductions/product.hip
-  # src/reductions/reductions.cpp
-  # src/reductions/scan/rank_scan.hip
-  # src/reductions/scan/scan.cpp
-  # src/reductions/scan/scan_exclusive.hip
-  # src/reductions/scan/scan_inclusive.hip
-  # src/reductions/segmented/all.hip
-  # src/reductions/segmented/any.hip
-  # src/reductions/segmented/counts.hip
-  # src/reductions/segmented/max.hip
-  # src/reductions/segmented/mean.hip
-  # src/reductions/segmented/min.hip
-  # src/reductions/segmented/nunique.hip
-  # src/reductions/segmented/product.hip
-  # src/reductions/segmented/reductions.cpp
-  # src/reductions/segmented/std.hip
-  # src/reductions/segmented/sum.hip
-  # src/reductions/segmented/sum_of_squares.hip
-  # src/reductions/segmented/update_validity.hip
-  # src/reductions/segmented/var.hip
-  # src/reductions/std.hip
-  # src/reductions/sum.hip
-  # src/reductions/sum_of_squares.hip
-  # src/reductions/var.hip
+  src/reductions/all.hip
+  src/reductions/any.hip
+  src/reductions/collect_ops.hip
+  src/reductions/max.hip
+  src/reductions/mean.hip
+  src/reductions/min.hip
+  src/reductions/minmax.hip
+  src/reductions/nth_element.hip
+  src/reductions/product.hip
+  src/reductions/reductions.cpp
+  src/reductions/scan/rank_scan.hip
+  src/reductions/scan/scan.cpp
+  src/reductions/scan/scan_exclusive.hip
+  src/reductions/scan/scan_inclusive.hip
+  src/reductions/segmented/all.hip
+  src/reductions/segmented/any.hip
+  src/reductions/segmented/counts.hip
+  src/reductions/segmented/max.hip
+  src/reductions/segmented/mean.hip
+  src/reductions/segmented/min.hip
+  src/reductions/segmented/nunique.hip
+  src/reductions/segmented/product.hip
+  src/reductions/segmented/reductions.cpp
+  src/reductions/segmented/std.hip
+  src/reductions/segmented/sum.hip
+  src/reductions/segmented/sum_of_squares.hip
+  src/reductions/segmented/update_validity.hip
+  src/reductions/segmented/var.hip
+  src/reductions/std.hip
+  src/reductions/sum.hip
+  src/reductions/sum_of_squares.hip
+  src/reductions/var.hip
   # src/replace/clamp.hip
   # src/replace/nans.hip
   # src/replace/nulls.hip
@@ -621,7 +621,7 @@ add_library(
   src/strings/search/find_multiple.hip
   src/strings/slice.hip
   src/strings/split/partition.hip
-  # src/strings/split/split.hip #TODO(HIP): There are RMM integration errors
+  src/strings/split/split.hip
   src/strings/split/split_re.hip
   src/strings/split/split_record.hip
   src/strings/strings_column_factories.hip

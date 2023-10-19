@@ -22,7 +22,7 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/device/device_segmented_reduce.cuh>
+#include <hipcub/device/device_segmented_reduce.hpp>
 
 #include <thrust/iterator/iterator_traits.h>
 #include <thrust/transform.h>
@@ -69,7 +69,7 @@ void segmented_reduce(InputIterator d_in,
 
   // Allocate temporary storage
   size_t temp_storage_bytes = 0;
-  cub::DeviceSegmentedReduce::Reduce(nullptr,
+  (void)hipcub::DeviceSegmentedReduce::Reduce(nullptr,
                                      temp_storage_bytes,
                                      d_in,
                                      d_out,
@@ -82,7 +82,7 @@ void segmented_reduce(InputIterator d_in,
   auto d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
 
   // Run reduction
-  cub::DeviceSegmentedReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceSegmentedReduce::Reduce(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      d_in,
                                      d_out,
@@ -156,7 +156,7 @@ void segmented_reduce(InputIterator d_in,
 
   // Allocate temporary storage
   size_t temp_storage_bytes = 0;
-  cub::DeviceSegmentedReduce::Reduce(nullptr,
+  (void) hipcub::DeviceSegmentedReduce::Reduce(nullptr,
                                      temp_storage_bytes,
                                      d_in,
                                      intermediate_result.data(),
@@ -169,7 +169,7 @@ void segmented_reduce(InputIterator d_in,
   auto d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
 
   // Run reduction
-  cub::DeviceSegmentedReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceSegmentedReduce::Reduce(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      d_in,
                                      intermediate_result.data(),

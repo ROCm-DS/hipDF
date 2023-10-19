@@ -19,7 +19,7 @@
 #include <cudf/strings/detail/utf8.hpp>
 #include <cudf/strings/string_view.hpp>
 
-#ifndef __CUDA_ARCH__
+#ifndef __HIP_DEVICE_COMPILE__
 #include <cudf/utilities/error.hpp>
 #endif
 
@@ -124,7 +124,7 @@ CUDF_HOST_DEVICE inline string_view string_view::min() { return string_view(); }
 CUDF_HOST_DEVICE inline string_view string_view::max()
 {
   char const* psentinel{nullptr};
-#if defined(__CUDA_ARCH__)
+#if defined(__HIP_DEVICE_COMPILE__)
   psentinel = &cudf::strings::detail::max_string_sentinel[0];
 #else
   CUDF_CUDA_TRY(

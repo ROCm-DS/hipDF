@@ -71,7 +71,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
   // Allocate temporary storage
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
-  hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                             temp_storage_bytes,
                             d_in,
                             dev_result.data(),
@@ -82,7 +82,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
   d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
 
   // Run reduction
-  hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                             temp_storage_bytes,
                             d_in,
                             dev_result.data(),
@@ -131,7 +131,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
   // Allocate temporary storage
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
-  hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                             temp_storage_bytes,
                             d_in,
                             dev_result.data(),
@@ -142,7 +142,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
   d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
 
   // Run reduction
-  hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                             temp_storage_bytes,
                             d_in,
                             dev_result.data(),
@@ -198,7 +198,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
   // Allocate temporary storage
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
-  hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                             temp_storage_bytes,
                             d_in,
                             intermediate_result.data(),
@@ -209,7 +209,7 @@ std::unique_ptr<scalar> reduce(InputIterator d_in,
   d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
 
   // Run reduction
-  hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(d_temp_storage.data(),
                             temp_storage_bytes,
                             d_in,
                             intermediate_result.data(),

@@ -83,12 +83,12 @@ rmm::device_scalar<OutputType> reduce_device(InputIterator d_in,
 
   // Allocate temporary storage
   size_t storage_bytes = 0;
-  hipcub::DeviceReduce::Reduce(
+  (void)hipcub::DeviceReduce::Reduce(
     nullptr, storage_bytes, d_in, result.data(), num_items, binary_op, identity, stream.value());
   auto temp_storage = rmm::device_buffer{storage_bytes, stream};
 
   // Run reduction
-  hipcub::DeviceReduce::Reduce(temp_storage.data(),
+  (void)hipcub::DeviceReduce::Reduce(temp_storage.data(),
                             storage_bytes,
                             d_in,
                             result.data(),
@@ -108,7 +108,7 @@ rmm::device_scalar<OutputType> reduce_device(InputIterator d_in,
 template <typename T>
 struct minmax_binary_op
   : public thrust::binary_function<minmax_pair<T>, minmax_pair<T>, minmax_pair<T>> {
-  __device__ minmax_pair<T> operator()(minmax_pair<T> const& lhs, minmax_pair<T> const& rhs) const
+  __host__ __device__ minmax_pair<T> operator()(minmax_pair<T> const& lhs, minmax_pair<T> const& rhs) const
   {
     return minmax_pair<T>{thrust::min(lhs.min_val, rhs.min_val),
                           thrust::max(lhs.max_val, rhs.max_val)};
@@ -120,7 +120,7 @@ struct minmax_binary_op
  */
 template <typename T>
 struct create_minmax {
-  __device__ minmax_pair<T> operator()(T e) { return minmax_pair<T>{e}; }
+  __host__ __device__ minmax_pair<T> operator()(T e) { return minmax_pair<T>{e}; }
 };
 
 /**
@@ -130,7 +130,7 @@ struct create_minmax {
  */
 template <typename T>
 struct create_minmax_with_nulls {
-  __device__ minmax_pair<T> operator()(thrust::pair<T, bool> i)
+  __host__ __device__ minmax_pair<T> operator()(thrust::pair<T, bool> i)
   {
     return i.second ? minmax_pair<T>{i.first} : minmax_pair<T>{};
   }
@@ -175,7 +175,7 @@ struct minmax_functor {
    */
   template <typename T, typename ResultType = minmax_pair<T>>
   struct assign_min_max {
-    __device__ void operator()()
+    __host__ __device__ void operator()()
     {
       *min_data = result->min_val;
       *max_data = result->max_val;
