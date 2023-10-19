@@ -36,8 +36,8 @@
 #include <thrust/scan.h>
 #include <thrust/transform.h>
 
-#include <cub/block/block_scan.cuh>
-#include <cub/device/device_histogram.cuh>
+#include <hipcub/block/block_scan.hpp>
+#include <hipcub/device/device_histogram.hpp>
 
 namespace cudf {
 namespace {
@@ -667,7 +667,7 @@ struct dispatch_map_type {
     std::size_t const num_levels = num_partitions + 1;
     size_type const lower_level  = 0;
     size_type const upper_level  = num_partitions;
-    hipcub::DeviceHistogram::HistogramEven(nullptr,
+    (void)hipcub::DeviceHistogram::HistogramEven(nullptr,
                                         temp_storage_bytes,
                                         partition_map.begin<MapType>(),
                                         histogram.data(),
@@ -679,7 +679,7 @@ struct dispatch_map_type {
 
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
 
-    hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
+    (void)hipcub::DeviceHistogram::HistogramEven(temp_storage.data(),
                                         temp_storage_bytes,
                                         partition_map.begin<MapType>(),
                                         histogram.data(),

@@ -2304,7 +2304,7 @@ TEST_F(ContiguousSplitTableCornerCases, OutBufferToSmall)
 {
   // internally, contiguous split chunks GPU work in 1MB contiguous copies
   // so the output buffer must be 1MB or larger.
-  EXPECT_THROW(cudf::chunked_pack::create({}, 1 * 1024, mr()), cudf::logic_error);
+  EXPECT_THROW((void)cudf::chunked_pack::create({}, 1 * 1024, mr()), cudf::logic_error);
 }
 
 TEST_F(ContiguousSplitTableCornerCases, ChunkSpanTooSmall)

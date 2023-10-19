@@ -449,15 +449,15 @@ add_library(
   src/io/text/bgzip_data_chunk_source.hip
   src/io/text/bgzip_utils.cpp
   # src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
-  # src/io/utilities/arrow_io_source.cpp
-  # src/io/utilities/column_buffer.cpp
-  # src/io/utilities/config_utils.cpp
-  # src/io/utilities/data_sink.cpp
-  # src/io/utilities/datasource.cpp
-  # src/io/utilities/file_io_utilities.cpp
-  # src/io/utilities/parsing_utils.hip
-  # src/io/utilities/row_selection.cpp
-  # src/io/utilities/trie.hip
+  src/io/utilities/arrow_io_source.cpp
+  src/io/utilities/column_buffer.cpp
+  src/io/utilities/config_utils.cpp
+  src/io/utilities/data_sink.cpp
+  src/io/utilities/datasource.cpp
+  src/io/utilities/file_io_utilities.cpp
+  src/io/utilities/parsing_utils.hip
+  src/io/utilities/row_selection.cpp
+  src/io/utilities/trie.hip
   src/jit/cache.cpp
   src/jit/parser.cpp
   src/jit/util.cpp
@@ -497,9 +497,9 @@ add_library(
   src/lists/stream_compaction/apply_boolean_mask.hip
   src/lists/stream_compaction/distinct.hip
   src/lists/utilities.hip
-  # src/merge/merge.hip
-  # src/partitioning/partitioning.hip
-  # src/partitioning/round_robin.hip
+  src/merge/merge.hip
+  src/partitioning/partitioning.hip
+  src/partitioning/round_robin.hip
   src/quantiles/tdigest/tdigest.hip
   src/quantiles/tdigest/tdigest_aggregation.hip
   src/quantiles/tdigest/tdigest_column_view.cpp
@@ -537,21 +537,21 @@ add_library(
   src/reductions/sum.hip
   src/reductions/sum_of_squares.hip
   src/reductions/var.hip
-  # src/replace/clamp.hip
-  # src/replace/nans.hip
-  # src/replace/nulls.hip
-  # src/replace/replace.hip
-  # src/reshape/byte_cast.hip
-  # src/reshape/interleave_columns.hip
-  # src/reshape/tile.hip
-  # src/rolling/detail/optimized_unbounded_window.cpp
+  src/replace/clamp.hip
+  src/replace/nans.hip
+  src/replace/nulls.hip
+  src/replace/replace.hip
+  src/reshape/byte_cast.hip
+  src/reshape/interleave_columns.hip
+  src/reshape/tile.hip
+  # src/rolling/detail/optimized_unbounded_window.cpp # Todo(HIP): JIT
   # src/rolling/detail/rolling_collect_list.hip
   # src/rolling/detail/rolling_fixed_window.hip
   # src/rolling/detail/rolling_variable_window.hip
   # src/rolling/grouped_rolling.hip
   # src/rolling/range_window_bounds.cpp
   # src/rolling/rolling.hip
-  # src/round/round.hip
+  src/round/round.hip
   src/scalar/scalar.cpp
   src/scalar/scalar_factories.cpp
   src/search/contains_column.hip
@@ -662,7 +662,7 @@ add_library(
   src/transform/nans_to_nulls.hip
   src/transform/one_hot_encode.hip
   src/transform/row_bit_count.hip
-  # src/transform/transform.cpp
+  # src/transform/transform.cpp # Todo(HIP): JIT
   src/transpose/transpose.hip
   src/unary/cast_ops.hip
   src/unary/math_ops.hip

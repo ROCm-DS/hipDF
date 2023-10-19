@@ -107,8 +107,8 @@ std::pair<std::unique_ptr<cudf::table>, std::shared_ptr<arrow::Table>> get_table
     cudf::test::strings_column_wrapper(string_data.begin(), string_data.end(), validity.begin())
       .release();
   vector_of_columns cols;
-  cols.push_back(move(int_column));
-  cols.push_back(move(str_column));
+  cols.push_back(std::move(int_column));
+  cols.push_back(std::move(str_column));
   auto [null_mask, null_count] = cudf::bools_to_mask(cudf::test::fixed_width_column_wrapper<bool>(
     bool_data_validity.begin(), bool_data_validity.end()));
   columns.emplace_back(

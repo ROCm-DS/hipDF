@@ -97,13 +97,15 @@ __global__ void materialize_merged_bitmask_kernel(
 
     // Use ballot to find all valid bits in this warp and create the output
     // bitmask element
-    bitmask_type const result_mask{__ballot_sync(active_threads, source_bit_is_valid)};
+    // Todo(HIP): error: non-constant-expression cannot be narrowed from type 'lane_mask' 
+    // (aka 'unsigned long long') to 'bitmask_type' (aka 'unsigned int') in initializer list [-Wc++11-narrowing]
+    bitmask_type const result_mask{static_cast<bitmask_type>(hip_extensions::__ballot_sync(active_threads, source_bit_is_valid))};
 
     // Only one thread writes output
     if (0 == threadIdx.x % warpSize) { out_validity[word_index(destination_row)] = result_mask; }
 
     tid += stride;
-    active_threads = __ballot_sync(active_threads, tid < num_destination_rows);
+    active_threads = hip_extensions::__ballot_sync(active_threads, tid < num_destination_rows);
   }
 }
 
