@@ -1,11 +1,14 @@
 # Copyright (c) 2020-2023, NVIDIA CORPORATION.
 
 cmake_minimum_required(VERSION 3.26.4)
-
+set( AMDGPU_TARGETS "gfx90a" CACHE STRING "Compile for gfx90a only")
+if(NOT (DEFINED CMAKE_HIP_ARCHITECTURES))
+  set(CMAKE_HIP_ARCHITECTURES "gfx90a")
+  endif()
 project(
   basic_example
   VERSION 0.0.1
-  LANGUAGES CXX CUDA
+  LANGUAGES CXX HIP
 )
 
 set(CPM_DOWNLOAD_VERSION v0.35.3)
@@ -16,9 +19,9 @@ file(
 )
 include(${CMAKE_BINARY_DIR}/cmake/get_cpm.cmake)
 
-set(CUDF_TAG branch-23.10)
+set(CUDF_TAG feat/enabling_example)
 CPMFindPackage(
-  NAME cudf GIT_REPOSITORY https://github.com/rapidsai/cudf
+  NAME cudf GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/hipdf
   GIT_TAG ${CUDF_TAG}
   GIT_SHALLOW
     TRUE
@@ -28,5 +31,5 @@ CPMFindPackage(
 
 # Configure your project here
 add_executable(basic_example src/process_csv.cpp)
-target_link_libraries(basic_example PRIVATE cudf::cudf)
+target_link_libraries(basic_example PRIVATE hipdf::hipdf)
 target_compile_features(basic_example PRIVATE cxx_std_17)
