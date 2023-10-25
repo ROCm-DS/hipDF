@@ -67,7 +67,6 @@ dependencies:
 - protobuf>=4.21,<5
 - pyarrow==14.0.1.*
 - pydata-sphinx-theme
-- pyorc
 - pytest
 - pytest-benchmark
 - pytest-cases

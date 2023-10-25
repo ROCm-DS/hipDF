@@ -76,7 +76,7 @@ dependencies:
 - ptxcompiler
 - pyarrow==14.0.1.*
 - pydata-sphinx-theme
-- pyorc
+#: - pyorc
 - pytest==7.4.3 # NOTE(HIP/AMD): Changed 7.4.4 to 7.4.3 because this version captures the warning which is generated in python/cudf/cudf_pandas_tests/test_cudf_pandas.py:666
 - pytest-benchmark=4.0.0
 - pytest-cases==3.8.1
