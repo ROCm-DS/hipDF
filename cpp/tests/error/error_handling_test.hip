@@ -52,7 +52,7 @@ TEST(StreamCheck, FailedKernel)
 {
   rmm::cuda_stream stream;
   int a;
-  test_kernel<<<0, 0, 0, stream.value()>>>(&a);
+  test_kernel<<<1, 1, 0, stream.value()>>>(&a);
 #ifdef NDEBUG
   stream.synchronize();
 #endif
@@ -70,7 +70,8 @@ TEST(StreamCheck, CatchFailedKernel)
   EXPECT_THROW(CUDF_CHECK_CUDA(stream.value()), cudf::cuda_error);
 }
 
-__global__ void kernel() { asm("trap;"); }
+//TODO(HIP): should we use s_trap here?
+__global__ void kernel() { abort(); }
 
 TEST(DeathTest, CudaFatalError)
 {

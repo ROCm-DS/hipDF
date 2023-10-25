@@ -166,7 +166,7 @@ ConfigureTest(TIMESTAMPS_TEST wrappers/timestamps_test.hip)
 
 # ##################################################################################################
 # * cudf tests ------------------------------------------------------------------------------------
-# ConfigureTest(ERROR_TEST error/error_handling_test.hip) # todo(HIP): PTX asm("trap;");
+ConfigureTest(ERROR_TEST error/error_handling_test.hip) # todo(HIP): PTX asm("trap;");
 
 # ##################################################################################################
 # * groupby tests ---------------------------------------------------------------------------------

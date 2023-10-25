@@ -285,7 +285,7 @@ add_library(
   src/aggregation/result_cache.cpp
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
-  # src/binaryop/binaryop.cpp  #TODO(HIP): fix jitify issues
+  #src/binaryop/binaryop.cpp  #TODO(HIP): fix jitify issues
   src/binaryop/compiled/ATan2.hip
   src/binaryop/compiled/Add.hip
   src/binaryop/compiled/BitwiseAnd.hip
@@ -422,7 +422,7 @@ add_library(
   src/io/orc/orc.cpp
   src/io/orc/reader_impl.hip
   src/io/orc/stats_enc.hip
-  #src/io/orc/stripe_data. # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
+  #src/io/orc/stripe_data.hip # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
   src/io/orc/stripe_enc.hip
   src/io/orc/stripe_init.hip
   src/datetime/timezone.cpp
