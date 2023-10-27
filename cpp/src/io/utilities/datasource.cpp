@@ -120,7 +120,7 @@ class file_source : public datasource {
   [[nodiscard]] bool supports_device_read() const override
   {
 #ifdef HAS_KVIKIO
-    return \ !_kvikio_file.closed() ||  _cufile_in != nullptr;
+    return !_kvikio_file.closed() ||  _cufile_in != nullptr;
 #else
     return _cufile_in != nullptr;
 #endif 
