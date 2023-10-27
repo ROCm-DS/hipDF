@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.26.4)
 set( AMDGPU_TARGETS "gfx90a" CACHE STRING "Compile for gfx90a only")
 if(NOT (DEFINED CMAKE_HIP_ARCHITECTURES))
   set(CMAKE_HIP_ARCHITECTURES "gfx90a")
-  endif()
+endif()
 project(
   basic_example
   VERSION 0.0.1

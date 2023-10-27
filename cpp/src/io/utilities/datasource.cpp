@@ -23,9 +23,9 @@
 #include <cudf/utilities/span.hpp>
 #include <io/utilities/config_utils.hpp>
 
-#ifdef HAS_KVIKIO
-#include <kvikio/file_handle.hpp>
-#endif
+// #ifdef HAS_KVIKIO
+// #include <kvikio/file_handle.hpp>
+// #endif
 #include <rmm/device_buffer.hpp>
 
 #include <arrow/io/memory.h>
@@ -47,29 +47,29 @@ class file_source : public datasource {
  public:
   explicit file_source(char const* filepath) : _file(filepath, O_RDONLY)
   {
-    if (detail::cufile_integration::is_kvikio_enabled()) {
-#ifdef HAS_KVIKIO
-      _kvikio_file = kvikio::FileHandle(filepath);
-      CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode {}.",
-                    _kvikio_file.is_compat_mode_on() ? "on" : "off");
-#else
-      //TODO(HIP): improve error handling
-      throw std::runtime_error("Error: Kvikio is not supported\n");
-#endif
-    } else {
+//     if (detail::cufile_integration::is_kvikio_enabled()) {
+// #ifdef HAS_KVIKIO
+//       _kvikio_file = kvikio::FileHandle(filepath);
+//       CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode {}.",
+//                     _kvikio_file.is_compat_mode_on() ? "on" : "off");
+// #else
+//       //TODO(HIP): improve error handling
+//       throw std::runtime_error("Error: Kvikio is not supported\n");
+// #endif
+//     } else {
       _cufile_in = detail::make_cufile_input(filepath);
-    }
+    // }
   }
 
   virtual ~file_source() = default;
 
   [[nodiscard]] bool supports_device_read() const override
   {
-#ifdef HAS_KVIKIO
-    return \ !_kvikio_file.closed() ||  _cufile_in != nullptr;
-#else
+// #ifdef HAS_KVIKIO
+//     return \ !_kvikio_file.closed() ||  _cufile_in != nullptr;
+// #else
     return _cufile_in != nullptr;
-#endif 
+// #endif 
   }
 
   [[nodiscard]] bool is_device_read_preferred(size_t size) const override
@@ -86,9 +86,9 @@ class file_source : public datasource {
     CUDF_EXPECTS(supports_device_read(), "Device reads are not supported for this file.");
 
     auto const read_size = std::min(size, _file.size() - offset);
-#ifdef HAS_KVIKIO
-    if (!_kvikio_file.closed()) { return _kvikio_file.pread(dst, read_size, offset); }
-#endif
+// #ifdef HAS_KVIKIO
+//     if (!_kvikio_file.closed()) { return _kvikio_file.pread(dst, read_size, offset); }
+// #endif
     return _cufile_in->read_async(offset, read_size, dst, stream);
   }
 
@@ -117,9 +117,9 @@ class file_source : public datasource {
 
  private:
   std::unique_ptr<detail::cufile_input_impl> _cufile_in;
-#ifdef HAS_KVIKIO
-  kvikio::FileHandle _kvikio_file;
-#endif
+// #ifdef HAS_KVIKIO
+//   kvikio::FileHandle _kvikio_file;
+// #endif
   // The read size above which GDS is faster then posix-read + h2d-copy
   static constexpr size_t _gds_read_preferred_threshold = 128 << 10;  // 128KB
 };
