@@ -544,8 +544,10 @@ TYPED_TEST(ListsColumnTest, ListsSlicedNonNestedEmpty)
   // Column of List<int>
   LCW list{{1, 2}, {}, {3, 4}, {8, 9}};
   // Column of 1 row, an empty List<int>
-  LCW expect{LCW{}};
-
+  //TODO(HIP): the original code used LCW expect{LCW{}}; -> this resulted in the wrong constructor being called,
+  //so the object would not get initialized properly
+  LCW expect = LCW{std::initializer_list<LCW>{LCW{}}};
+  
   auto sliced = cudf::slice(list, {1, 2}).front();
   auto result = std::make_unique<cudf::column>(sliced);
 
@@ -614,6 +616,9 @@ TYPED_TEST(ListsColumnTest, ListsSlicedZeroSliceLengthNonNested)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*expect, result->view());
 }
 
+
+//TODO(HIP): this test is currently not passing due to mismatches in null counts
+// We need to revisit this later when bitmask and concatenate are validated
 TYPED_TEST(ListsColumnTest, ListsSlicedColumnViewConstructorWithNulls)
 {
   auto valids =
