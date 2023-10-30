@@ -32,7 +32,7 @@ struct common_type_functor {
   std::optional<data_type> operator()() const
   {
     if constexpr (cudf::has_common_type_v<TypeLhs, TypeRhs>) {
-      using TypeCommon = std::common_type_t<TypeLhs, TypeRhs>;
+      using TypeCommon = hip::std::common_type_t<TypeLhs, TypeRhs>;
       return data_type{type_to_id<TypeCommon>()};
     }
 
@@ -86,10 +86,10 @@ struct is_binary_operation_supported {
     if constexpr (column_device_view::has_element_accessor<TypeLhs>() and
                   column_device_view::has_element_accessor<TypeRhs>()) {
       if constexpr (has_common_type_v<TypeLhs, TypeRhs>) {
-        using common_t = std::common_type_t<TypeLhs, TypeRhs>;
-        return std::is_invocable_v<BinaryOperator, common_t, common_t>;
+        using common_t = hip::std::common_type_t<TypeLhs, TypeRhs>;
+        return hip::std::is_invocable_v<BinaryOperator, common_t, common_t>;
       } else {
-        return std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>;
+        return hip::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>;
       }
     } else {
       return false;
@@ -103,14 +103,14 @@ struct is_binary_operation_supported {
                   column_device_view::has_element_accessor<TypeRhs>()) {
       if (has_mutable_element_accessor(out_type) or is_fixed_point(out_type)) {
         if constexpr (has_common_type_v<TypeLhs, TypeRhs>) {
-          using common_t = std::common_type_t<TypeLhs, TypeRhs>;
-          if constexpr (std::is_invocable_v<BinaryOperator, common_t, common_t>) {
-            using ReturnType = std::invoke_result_t<BinaryOperator, common_t, common_t>;
+          using common_t = hip::std::common_type_t<TypeLhs, TypeRhs>;
+          if constexpr (hip::std::is_invocable_v<BinaryOperator, common_t, common_t>) {
+            using ReturnType = hip::std::invoke_result_t<BinaryOperator, common_t, common_t>;
             return is_constructible<ReturnType>(out_type) or
                    (is_fixed_point<ReturnType>() and is_fixed_point(out_type));
           }
-        } else if constexpr (std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) {
-          using ReturnType = std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
+        } else if constexpr (hip::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) {
+          using ReturnType = hip::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
           return is_constructible<ReturnType>(out_type);
         }
       }

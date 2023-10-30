@@ -285,7 +285,7 @@ add_library(
   src/aggregation/result_cache.cpp
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
-  #src/binaryop/binaryop.cpp  #TODO(HIP): fix jitify issues
+  src/binaryop/binaryop.cpp  #TODO(HIP): fix jitify issues
   src/binaryop/compiled/ATan2.hip
   src/binaryop/compiled/Add.hip
   src/binaryop/compiled/BitwiseAnd.hip
