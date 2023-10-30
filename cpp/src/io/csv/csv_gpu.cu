@@ -768,7 +768,10 @@ CUDF_KERNEL void __launch_bounds__(rowofs_block_dim)
         rows_out_of_range += (start_offset + block_pos - 1 >= byte_range_end);
       }
       row++;
-      rowmap >>= pos;
+      // TODO: HIP: & with mask necessary to treat UB of right shift when pos==32
+      // With pos==32, the result of this expression should be equal to 0.
+       
+      rowmap = (pos==32) ? 0 : (rowmap >> pos);
     }
     __syncthreads();
     // Return the number of rows out of range
