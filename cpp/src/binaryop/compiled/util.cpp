@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "operation.cuh"
 
 #include <cudf/binaryop.hpp>
@@ -89,7 +111,7 @@ struct is_binary_operation_supported {
         using common_t = binary_op_common_type_t<TypeLhs, TypeRhs>;
         return std::is_invocable_v<BinaryOperator, common_t, common_t>;
       } else {
-        return std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>;
+        return cuda::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>;
       }
     } else {
       return false;
@@ -109,8 +131,8 @@ struct is_binary_operation_supported {
             return is_constructible<ReturnType>(out_type) or
                    (is_fixed_point<ReturnType>() and is_fixed_point(out_type));
           }
-        } else if constexpr (std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) {
-          using ReturnType = std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
+        } else if constexpr (cuda::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) {
+          using ReturnType = cuda::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
           return is_constructible<ReturnType>(out_type);
         }
       }
