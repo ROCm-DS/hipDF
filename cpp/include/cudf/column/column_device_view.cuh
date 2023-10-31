@@ -1236,6 +1236,25 @@ namespace detail {
 #if defined(__CUDACC__) || defined(__HIPCC__)
 // because set_bit in bit.hpp is wrapped with __CUDACC__
 
+// TODO: HIP reimplement this macro
+#define GENERATE_BITMASK(__TYPE__, __INPUT__) \
+    ((__TYPE__) (-((__INPUT__) != 0))) \
+    & (((__TYPE__) -1) >> ((sizeof(__TYPE__) * CHAR_BIT) - (__INPUT__)))
+
+// Rotate right a 64bit by n
+__device__ inline uint64_t rotater64 (const uint64_t a, const int n)
+{
+  return ((a >> n) | (a << (64 - n)));
+}
+// HIP funnelshift implementation using shift and rotate
+__device__ inline bitmask_type __m_funnelshift_r(bitmask_type lo, bitmask_type hi, unsigned int shift)
+{
+    bitmask_type _lo      = (bitmask_type)lo >> (bitmask_type)shift;
+    bitmask_type _hi      = hi & GENERATE_BITMASK(uint64_t, shift);
+    bitmask_type _r       = _lo | rotater64(_hi, shift);
+
+    return _r;
+}
 /**
  * @brief Convenience function to get offset word from a bitmask
  *
@@ -1255,7 +1274,9 @@ __device__ inline bitmask_type get_mask_offset_word(bitmask_type const* __restri
                  destination_word_index * detail::size_in_bits<bitmask_type>())) {
     next_word = source[source_word_index + 1];
   }
-  return __funnelshift_r(curr_word, next_word, source_begin_bit);
+
+  //TODO: HIP optimize the funnelshift.
+  return __m_funnelshift_r(curr_word, next_word, source_begin_bit);
 }
 
 #endif

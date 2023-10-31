@@ -154,7 +154,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
 {
   auto tidx         = cudf::detail::grid_1d::global_thread_id<block_size>();
   auto const stride = cudf::detail::grid_1d::grid_stride<block_size>();
-  auto active_mask  = __ballot_sync(0xFFFF'FFFFu, tidx < number_of_mask_bits);
+  auto active_mask  = __ballot_sync(0xFFFFFFFFFFFFFFFFu, tidx < number_of_mask_bits);
 
   size_type warp_valid_count = 0;
 
@@ -173,7 +173,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
 
     if (threadIdx.x % detail::warp_size == 0) {
       dest_mask[word_index(mask_index)] = new_word;
-      warp_valid_count += __popc(new_word);
+      warp_valid_count += __popcll(new_word);
     }
 
     tidx += stride;

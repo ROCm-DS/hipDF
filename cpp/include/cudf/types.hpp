@@ -115,7 +115,7 @@ class mutable_table_view;
  */
 
 using size_type         = int32_t;   ///< Row index type for columns and tables
-using bitmask_type      = uint32_t;  ///< Bitmask type stored as 32-bit unsigned integer
+using bitmask_type      = uint64_t;  ///< Bitmask type stored as 64-bit unsigned integer
 using valid_type        = uint8_t;   ///< Valid type in host memory
 using thread_index_type = int64_t;   ///< Thread index type in kernels
 using char_utf8         = uint32_t;  ///< UTF-8 characters are 1-4 bytes

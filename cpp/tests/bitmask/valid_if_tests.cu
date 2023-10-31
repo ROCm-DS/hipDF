@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
@@ -62,27 +84,27 @@ TEST_F(ValidIfTest, InvalidRange)
                                       cudf::get_current_device_resource_ref()),
                cudf::logic_error);
 }
-
+// This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, OddsValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, odds_valid{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10000),
+                                       thrust::make_counting_iterator(10240),
                                        odds_valid{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());
   CUDF_TEST_EXPECT_EQUAL_BUFFERS(expected.first.data(), actual.first.data(), expected.first.size());
-  EXPECT_EQ(5000, actual.second);
+  EXPECT_EQ(5120, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
-
+// This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, AllValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_valid{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10000),
+                                       thrust::make_counting_iterator(10240),
                                        all_valid{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());
@@ -90,17 +112,17 @@ TEST_F(ValidIfTest, AllValid)
   EXPECT_EQ(0, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
-
+// This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, AllNull)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_null{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10000),
+                                       thrust::make_counting_iterator(10240),
                                        all_null{},
                                        cudf::get_default_stream(),
                                        cudf::get_current_device_resource_ref());
   CUDF_TEST_EXPECT_EQUAL_BUFFERS(expected.first.data(), actual.first.data(), expected.first.size());
-  EXPECT_EQ(10000, actual.second);
+  EXPECT_EQ(10240, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }

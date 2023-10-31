@@ -52,9 +52,9 @@
 namespace cudf {
 namespace detail {
 /**
- * @brief Size of a warp in a CUDA kernel.
+ * @brief Size of a warp in a HIP kernel.
  */
-static constexpr size_type warp_size{32};
+static constexpr size_type warp_size{64};
 
 /**
  * @brief A kernel grid configuration construction gadget for simple

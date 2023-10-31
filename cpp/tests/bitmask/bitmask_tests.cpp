@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
@@ -55,17 +78,17 @@ TEST_F(BitmaskUtilitiesTest, BitmaskAllocationSize)
   EXPECT_EQ(128u, cudf::bitmask_allocation_size_bytes(1024));
   EXPECT_EQ(192u, cudf::bitmask_allocation_size_bytes(1025));
 }
-
+// This test has been modified to fit the warpsize of 64
 TEST_F(BitmaskUtilitiesTest, NumBitmaskWords)
 {
   EXPECT_EQ(0, cudf::num_bitmask_words(0));
   EXPECT_EQ(1, cudf::num_bitmask_words(1));
-  EXPECT_EQ(1, cudf::num_bitmask_words(31));
-  EXPECT_EQ(1, cudf::num_bitmask_words(32));
-  EXPECT_EQ(2, cudf::num_bitmask_words(33));
-  EXPECT_EQ(2, cudf::num_bitmask_words(63));
-  EXPECT_EQ(2, cudf::num_bitmask_words(64));
-  EXPECT_EQ(3, cudf::num_bitmask_words(65));
+  EXPECT_EQ(1, cudf::num_bitmask_words(63));
+  EXPECT_EQ(1, cudf::num_bitmask_words(64));
+  EXPECT_EQ(2, cudf::num_bitmask_words(65));
+  EXPECT_EQ(2, cudf::num_bitmask_words(127));
+  EXPECT_EQ(2, cudf::num_bitmask_words(128));
+  EXPECT_EQ(3, cudf::num_bitmask_words(129));
 }
 
 struct CountBitmaskTest : public cudf::test::BaseFixture {};
@@ -93,8 +116,9 @@ rmm::device_uvector<cudf::bitmask_type> make_mask(cudf::size_type size, bool fil
       size, cudf::get_default_stream(), cudf::get_current_device_resource_ref());
   } else {
     auto ret = rmm::device_uvector<cudf::bitmask_type>(size, cudf::get_default_stream());
+    uint64_t init_value=0;
     CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(),
-                                  ~cudf::bitmask_type{0},
+                                  ~cudf::bitmask_type{init_value},
                                   size * sizeof(cudf::bitmask_type),
                                   cudf::get_default_stream().value()));
     return ret;
@@ -537,11 +561,11 @@ void cleanEndWord(rmm::device_buffer& mask, int begin_bit, int end_bit)
 
   auto number_of_mask_words = cudf::num_bitmask_words(static_cast<size_t>(end_bit - begin_bit));
   auto number_of_bits       = end_bit - begin_bit;
-  if (number_of_bits % 32 != 0) {
+  if (number_of_bits % 64 != 0) {
     cudf::bitmask_type end_mask = 0;
     CUDF_CUDA_TRY(
       cudaMemcpy(&end_mask, ptr + number_of_mask_words - 1, sizeof(end_mask), cudaMemcpyDefault));
-    end_mask = end_mask & ((1 << (number_of_bits % 32)) - 1);
+    end_mask = end_mask & ((1l << (number_of_bits % 64)) - 1);
     CUDF_CUDA_TRY(
       cudaMemcpy(ptr + number_of_mask_words - 1, &end_mask, sizeof(end_mask), cudaMemcpyDefault));
   }
