@@ -56,18 +56,15 @@ __global__ void valid_if_kernel(
   auto const stride = cudf::detail::grid_1d::grid_stride();
   size_type warp_valid_count{0};
 
-  //Todo(HIP)
-  auto active_mask = hip_extensions::__ballot_sync(0xFFFF'FFFFu, i < size);
+  auto active_mask = hip_extensions::__ballot_sync(0xFFFFFFFFFFFFFFFFu, i < size);
   while (i < size) {
-    //Todo(HIP)
     bitmask_type ballot = hip_extensions::__ballot_sync(active_mask, p(*(begin + i)));
     if (lane_id == leader_lane) {
       output[cudf::word_index(i)] = ballot;
-      warp_valid_count += __popc(ballot);
+      warp_valid_count += __popcll(ballot); 
     }
     i += stride;
-    //Todo(HIP)
-    active_mask = hip_extensions::__ballot_sync(active_mask, i < size);
+    active_mask = hip_extensions::__ballot_sync(active_mask, i < size); 
   }
 
   size_type block_count = single_lane_block_sum_reduce<block_size, leader_lane>(warp_valid_count);
@@ -179,12 +176,12 @@ __global__ void valid_if_n_kernel(InputIterator1 begin1,
       auto const arg_2         = *(begin2 + thread_idx);
       auto const bit_is_valid  = thread_active && p(arg_1, arg_2);
       //Todo(HIP)
-      auto const warp_validity = hip_extensions::__ballot_sync(0xffff'ffffu, bit_is_valid);
+      auto const warp_validity = hip_extensions::__ballot_sync(0xffffffffffffffffu, bit_is_valid);
       auto const mask_idx      = word_index(thread_idx);
 
       if (thread_active && threadIdx.x % warp_size == 0) { mask[mask_idx] = warp_validity; }
 
-      warp_valid_count += __popc(warp_validity);
+      warp_valid_count += __popcll(warp_validity);
       block_offset += blockDim.x * gridDim.x;
     }
 

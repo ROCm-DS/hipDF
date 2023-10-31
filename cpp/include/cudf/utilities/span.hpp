@@ -179,8 +179,8 @@ class span_base {
   }
 
  private:
-  pointer _data; //FIXME(HIP): _data{nullptr} initialization in struct does not work in c++17 with hip; CAUTION: for now, we leave this uninitialized!!
-  size_type _size; //FIXME(HIP): _size{0} initialization in struct does not work in c++17 with hip; CAUTION: for now, we leave this uninitialized!!
+  pointer _data{nullptr}; //initialization in struct does not work in c++17 with hip; CAUTION: for now, we leave this uninitialized!!
+  size_type _size{0}; //initialization in struct does not work in c++17 with hip; CAUTION: for now, we leave this uninitialized!!
 };
 
 }  // namespace detail

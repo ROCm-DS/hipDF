@@ -73,6 +73,7 @@ BUILD_DIRS="${LIB_BUILD_DIR} ${HIPDF_BUILD_DIR} ${DASK_HIPDF_BUILD_DIR} ${KAFKA_
 # Set defaults for vars modified by flags to this script
 VERBOSE_FLAG=""
 BUILD_TYPE=Release
+#BUILD_TYPE=Debug
 INSTALL_TARGET=install
 BUILD_BENCHMARKS=OFF
 BUILD_ALL_GPU_ARCH=0

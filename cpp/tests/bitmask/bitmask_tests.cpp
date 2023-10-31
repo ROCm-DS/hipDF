@@ -50,17 +50,17 @@ TEST_F(BitmaskUtilitiesTest, BitmaskAllocationSize)
   EXPECT_EQ(128u, cudf::bitmask_allocation_size_bytes(1024));
   EXPECT_EQ(192u, cudf::bitmask_allocation_size_bytes(1025));
 }
-
+// This test has been modified to fit the warpsize of 64
 TEST_F(BitmaskUtilitiesTest, NumBitmaskWords)
 {
   EXPECT_EQ(0, cudf::num_bitmask_words(0));
   EXPECT_EQ(1, cudf::num_bitmask_words(1));
-  EXPECT_EQ(1, cudf::num_bitmask_words(31));
-  EXPECT_EQ(1, cudf::num_bitmask_words(32));
-  EXPECT_EQ(2, cudf::num_bitmask_words(33));
-  EXPECT_EQ(2, cudf::num_bitmask_words(63));
-  EXPECT_EQ(2, cudf::num_bitmask_words(64));
-  EXPECT_EQ(3, cudf::num_bitmask_words(65));
+  EXPECT_EQ(1, cudf::num_bitmask_words(63));
+  EXPECT_EQ(1, cudf::num_bitmask_words(64));
+  EXPECT_EQ(2, cudf::num_bitmask_words(65));
+  EXPECT_EQ(2, cudf::num_bitmask_words(127));
+  EXPECT_EQ(2, cudf::num_bitmask_words(128));
+  EXPECT_EQ(3, cudf::num_bitmask_words(129));
 }
 
 struct CountBitmaskTest : public cudf::test::BaseFixture {};
@@ -88,8 +88,9 @@ rmm::device_uvector<cudf::bitmask_type> make_mask(cudf::size_type size, bool fil
       size, cudf::get_default_stream(), rmm::mr::get_current_device_resource());
   } else {
     auto ret = rmm::device_uvector<cudf::bitmask_type>(size, cudf::get_default_stream());
+    uint64_t init_value=0;
     CUDF_CUDA_TRY(hipMemsetAsync(ret.data(),
-                                  ~cudf::bitmask_type{0},
+                                  ~cudf::bitmask_type{init_value},
                                   size * sizeof(cudf::bitmask_type),
                                   cudf::get_default_stream().value()));
     return ret;
@@ -532,11 +533,11 @@ void cleanEndWord(rmm::device_buffer& mask, int begin_bit, int end_bit)
 
   auto number_of_mask_words = cudf::num_bitmask_words(static_cast<size_t>(end_bit - begin_bit));
   auto number_of_bits       = end_bit - begin_bit;
-  if (number_of_bits % 32 != 0) {
+  if (number_of_bits % 64 != 0) {
     cudf::bitmask_type end_mask = 0;
     CUDF_CUDA_TRY(
       hipMemcpy(&end_mask, ptr + number_of_mask_words - 1, sizeof(end_mask), hipMemcpyDefault));
-    end_mask = end_mask & ((1 << (number_of_bits % 32)) - 1);
+    end_mask = end_mask & ((1l << (number_of_bits % 64)) - 1);
     CUDF_CUDA_TRY(
       hipMemcpy(ptr + number_of_mask_words - 1, &end_mask, sizeof(end_mask), hipMemcpyDefault));
   }

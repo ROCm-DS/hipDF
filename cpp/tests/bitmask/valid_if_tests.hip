@@ -59,27 +59,27 @@ TEST_F(ValidIfTest, InvalidRange)
                                       rmm::mr::get_current_device_resource()),
                cudf::logic_error);
 }
-
+// This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, OddsValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, odds_valid{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10000),
+                                       thrust::make_counting_iterator(10240),
                                        odds_valid{},
                                        cudf::get_default_stream(),
                                        rmm::mr::get_current_device_resource());
   CUDF_TEST_EXPECT_EQUAL_BUFFERS(expected.first.data(), actual.first.data(), expected.first.size());
-  EXPECT_EQ(5000, actual.second);
+  EXPECT_EQ(5120, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
-
+// This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, AllValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_valid{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10000),
+                                       thrust::make_counting_iterator(10240),
                                        all_valid{},
                                        cudf::get_default_stream(),
                                        rmm::mr::get_current_device_resource());
@@ -87,17 +87,17 @@ TEST_F(ValidIfTest, AllValid)
   EXPECT_EQ(0, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
-
+// This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, AllNull)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_null{});
-  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10000);
+  auto expected = cudf::test::detail::make_null_mask(iter, iter + 10240);
   auto actual   = cudf::detail::valid_if(thrust::make_counting_iterator(0),
-                                       thrust::make_counting_iterator(10000),
+                                       thrust::make_counting_iterator(10240),
                                        all_null{},
                                        cudf::get_default_stream(),
                                        rmm::mr::get_current_device_resource());
   CUDF_TEST_EXPECT_EQUAL_BUFFERS(expected.first.data(), actual.first.data(), expected.first.size());
-  EXPECT_EQ(10000, actual.second);
+  EXPECT_EQ(10240, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
