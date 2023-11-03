@@ -34,7 +34,7 @@ namespace compiled {
 template <typename BinaryOperator, typename TypeLhs, typename TypeRhs>
 constexpr bool is_bool_result()
 {
-  using ReturnType = std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
+  using ReturnType = hip::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
   return std::is_same_v<bool, ReturnType>;
 }
 
@@ -74,9 +74,9 @@ struct typed_casted_writer {
                          (is_fixed_point<FromType>() or
                           std::is_constructible_v<Element, FromType>)) {
       if constexpr (is_fixed_point<FromType>())
-        col.data<Element::rep>()[i] = val.rescaled(numeric::scale_type{col.type().scale()}).value();
+        col.data<typename Element::rep>()[i] = val.rescaled(numeric::scale_type{col.type().scale()}).value();
       else
-        col.data<Element::rep>()[i] = Element{val, numeric::scale_type{col.type().scale()}}.value();
+        col.data<typename Element::rep>()[i] = Element{val, numeric::scale_type{col.type().scale()}}.value();
     }
   }
 };
@@ -98,7 +98,7 @@ struct ops_wrapper {
   template <typename TypeCommon>
   __device__ void operator()(size_type i)
   {
-    if constexpr (std::is_invocable_v<BinaryOperator, TypeCommon, TypeCommon>) {
+    if constexpr (hip::std::is_invocable_v<BinaryOperator, TypeCommon, TypeCommon>) {
       TypeCommon x =
         type_dispatcher(lhs.type(), type_casted_accessor<TypeCommon>{}, i, lhs, is_lhs_scalar);
       TypeCommon y =
@@ -122,7 +122,7 @@ struct ops_wrapper {
           return BinaryOperator{}.template operator()<TypeCommon, TypeCommon>(x, y);
         }
         // To suppress nvcc warning
-        return std::invoke_result_t<BinaryOperator, TypeCommon, TypeCommon>{};
+        return hip::std::invoke_result_t<BinaryOperator, TypeCommon, TypeCommon>{};
       }();
       if constexpr (is_bool_result<BinaryOperator, TypeCommon, TypeCommon>())
         out.element<decltype(result)>(i) = result;
@@ -171,7 +171,7 @@ struct ops2_wrapper {
           return BinaryOperator{}.template operator()<TypeLhs, TypeRhs>(x, y);
         }
         // To suppress nvcc warning
-        return std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>{};
+        return hip::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>{};
       }();
       if constexpr (is_bool_result<BinaryOperator, TypeLhs, TypeRhs>())
         out.element<decltype(result)>(i) = result;

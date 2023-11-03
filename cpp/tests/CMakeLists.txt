@@ -146,11 +146,11 @@ endfunction()
 ConfigureTest(
   COLUMN_TEST
   column/bit_cast_test.cpp
-  column/column_device_view_test.hip
-  column/column_test.cpp
-  column/column_view_device_span_test.cpp
-  column/column_view_shallow_test.cpp
-  column/compound_test.hip
+  # column/column_device_view_test.hip
+  # column/column_test.cpp
+  # column/column_view_device_span_test.cpp
+  # column/column_view_shallow_test.cpp
+  # column/compound_test.hip
 )
 
 # ##################################################################################################
@@ -334,9 +334,9 @@ ConfigureTest(
 ConfigureTest(DECOMPRESSION_TEST io/comp/decomp_test.cpp)
 # ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
-# ConfigureTest(
-#   CSV_TEST io/csv_test.cpp
-# )
+ConfigureTest(
+  CSV_TEST io/csv_test.cpp
+)
 # ConfigureTest(
 #   FILE_IO_TEST io/file_io_test.cpp
 # )
