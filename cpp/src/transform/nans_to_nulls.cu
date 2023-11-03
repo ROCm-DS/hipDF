@@ -80,6 +80,7 @@ struct dispatch_nan_to_null {
       return std::pair(std::make_unique<rmm::device_buffer>(std::move(mask.first)), mask.second);
     } else {
       auto pred = [input_device_view] __device__(cudf::size_type idx) {
+        printf("THIS SHOULD NOT BE CALLED!");
         return false; //not(std::isnan(input_device_view.element<T>(idx)));
                       //FIXME(HIP): original code doesn't compile, see internal issue 1
       };
