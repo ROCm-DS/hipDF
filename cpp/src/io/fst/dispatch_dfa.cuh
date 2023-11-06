@@ -20,6 +20,7 @@
 #include "in_reg_array.cuh"
 
 #include <hipcub/hipcub.hpp>
+#include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
 
 #include <cstdint>
 
@@ -47,7 +48,7 @@ struct DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // Architecture-specific tuning policies
   //------------------------------------------------------------------------------
-  struct Policy900 : hipcub::ChainedPolicy<900, Policy900, Policy900> {
+  struct Policy900 : hipcub_extensions::ChainedPolicy<900, Policy900, Policy900> {
     enum {
       BLOCK_THREADS    = 128,
       ITEMS_PER_THREAD = 32,
@@ -168,7 +169,7 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Get PTX version
     int ptx_version;
-    error = hipcub::PtxVersion(ptx_version);
+    error = hipcub_extensions::PtxVersion(ptx_version);
     if (error != hipSuccess) return error;
 
     // Create dispatch functor
@@ -206,14 +207,14 @@ struct DispatchFSM : DeviceFSMPolicy {
 
   {
     hipError_t error = hipSuccess;
-    hipcub::KernelConfig dfa_simulation_config;
+    hipcub_extensions::KernelConfig dfa_simulation_config;
 
     using PolicyT = typename ActivePolicyT::AgentDFAPolicy;
     if (HipcubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
 
     // Kernel invocation
     uint32_t grid_size = std::max(
-      1u, CUB_QUOTIENT_CEILING(num_chars, PolicyT::BLOCK_THREADS * PolicyT::ITEMS_PER_THREAD));
+      1u, HIPCUB_QUOTIENT_CEILING(num_chars, PolicyT::BLOCK_THREADS * PolicyT::ITEMS_PER_THREAD));
     uint32_t block_threads = dfa_simulation_config.block_threads;
 
     dfa_kernel<<<grid_size, block_threads, 0, stream>>>(dfa,
@@ -328,10 +329,10 @@ struct DispatchFSM : DeviceFSMPolicy {
     using StateVectorT = MultiFragmentInRegArray<MAX_NUM_STATES, MAX_NUM_STATES - 1>;
 
     // Scan tile state used for propagating composed state transition vectors
-    using ScanTileStateT = typename hipcub::ScanTileState<StateVectorT>;
+    using ScanTileStateT = typename hipcub_extensions::ScanTileState<StateVectorT>;
 
     // Scan tile state used for propagating transduced output offsets
-    using FstScanTileStateT = typename hipcub::ScanTileState<OffsetT>;
+    using FstScanTileStateT = typename hipcub_extensions::ScanTileState<OffsetT>;
 
     // STATE-TRANSITION IDENTITY VECTOR
     StateVectorT state_identity_vector;
@@ -349,7 +350,7 @@ struct DispatchFSM : DeviceFSMPolicy {
       NUM_SYMBOLS_PER_BLOCK = BLOCK_THREADS * SYMBOLS_PER_THREAD
     };
 
-    BlockOffsetT num_blocks = std::max(1u, CUB_QUOTIENT_CEILING(num_chars, NUM_SYMBOLS_PER_BLOCK));
+    BlockOffsetT num_blocks = std::max(1u, HIPCUB_QUOTIENT_CEILING(num_chars, NUM_SYMBOLS_PER_BLOCK));
     size_t num_threads      = num_blocks * BLOCK_THREADS;
 
     //------------------------------------------------------------------------------
@@ -363,7 +364,8 @@ struct DispatchFSM : DeviceFSMPolicy {
     size_t vector_scan_storage_bytes = 0;
 
     // [MEMORY REQUIREMENTS] STATE-TRANSITION SCAN
-    hipcub::DeviceScan::ExclusiveScan(nullptr,
+    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+    auto dummy = hipcub::DeviceScan::ExclusiveScan(nullptr,
                                    vector_scan_storage_bytes,
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
@@ -391,7 +393,7 @@ struct DispatchFSM : DeviceFSMPolicy {
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
     error =
-      hipcub::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
+      hipcub_extensions::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
     if (error != hipSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation
@@ -411,7 +413,7 @@ struct DispatchFSM : DeviceFSMPolicy {
         num_blocks, allocations[MEM_FST_OFFSET], allocation_sizes[MEM_FST_OFFSET]);
       if (error != hipSuccess) return error;
       constexpr uint32_t FST_INIT_TPB = 256;
-      uint32_t num_fst_init_blocks    = CUB_QUOTIENT_CEILING(num_blocks, FST_INIT_TPB);
+      uint32_t num_fst_init_blocks    = HIPCUB_QUOTIENT_CEILING(num_blocks, FST_INIT_TPB);
       initialization_pass_kernel<<<num_fst_init_blocks, FST_INIT_TPB, 0, stream>>>(
         fst_offset_tile_state, num_blocks);
     }
@@ -426,18 +428,20 @@ struct DispatchFSM : DeviceFSMPolicy {
         num_blocks, allocations[MEM_SINGLE_PASS_STV], allocation_sizes[MEM_SINGLE_PASS_STV]);
       if (error != hipSuccess) return error;
       constexpr uint32_t STV_INIT_TPB = 256;
-      uint32_t num_stv_init_blocks    = CUB_QUOTIENT_CEILING(num_blocks, STV_INIT_TPB);
+      uint32_t num_stv_init_blocks    = HIPCUB_QUOTIENT_CEILING(num_blocks, STV_INIT_TPB);
       initialization_pass_kernel<<<num_stv_init_blocks, STV_INIT_TPB, 0, stream>>>(stv_tile_state,
                                                                                    num_blocks);
     } else {
       // Compute state-transition vectors
       // TODO tag dispatch or constexpr if depending on single-pass config to avoid superfluous
       // template instantiations
-      ComputeStateTransitionVector<ActivePolicyT>(
+      // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+      auto dummy1 = ComputeStateTransitionVector<ActivePolicyT>(
         sm_count, stv_tile_state, fst_offset_tile_state, d_thread_state_transition);
 
       // State-transition vector scan computing using the composition operator
-      hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
+      // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+      dummy1 = hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
                                      allocation_sizes[MEM_SCAN],
                                      d_thread_state_transition,
                                      d_thread_state_transition,

@@ -19,7 +19,7 @@
 #include "in_reg_array.cuh"
 
 #include <hipcub/hipcub.hpp>
-
+#include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/sequence.h>
 
@@ -93,7 +93,7 @@ class DFASimulationCallbackWrapper {
   {
     uint32_t const count = transducer_table(old_state, symbol_id, read_symbol);
     if (write) {
-#if __CUDA_ARCH__ > 0
+#if __HIP_DEVICE_COMPILE__
 #pragma unroll 1
 #endif
       for (uint32_t out_char = 0; out_char < count; out_char++) {
@@ -191,9 +191,9 @@ struct AgentDFA {
   static constexpr uint32_t SYMBOLS_PER_BLOCK  = BLOCK_THREADS * SYMBOLS_PER_THREAD;
 
   static constexpr uint32_t MIN_UINTS_PER_BLOCK =
-    CUB_QUOTIENT_CEILING(SYMBOLS_PER_BLOCK, sizeof(AliasedLoadT));
+    HIPCUB_QUOTIENT_CEILING(SYMBOLS_PER_BLOCK, sizeof(AliasedLoadT));
   static constexpr uint32_t UINTS_PER_THREAD =
-    CUB_QUOTIENT_CEILING(MIN_UINTS_PER_BLOCK, BLOCK_THREADS);
+    HIPCUB_QUOTIENT_CEILING(MIN_UINTS_PER_BLOCK, BLOCK_THREADS);
   static constexpr uint32_t UINTS_PER_BLOCK        = UINTS_PER_THREAD * BLOCK_THREADS;
   static constexpr uint32_t SYMBOLS_PER_UINT_BLOCK = UINTS_PER_BLOCK * sizeof(AliasedLoadT);
 
@@ -549,7 +549,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
     thrust::sequence(thrust::seq, std::begin(state_vector), std::end(state_vector));
 
     // Compute the state transition vector
-    agent_dfa.GetThreadStateTransitionVector<NUM_STATES>(symbol_matcher,
+    agent_dfa.template GetThreadStateTransitionVector<NUM_STATES>(symbol_matcher,
                                                          transition_table,
                                                          d_chars,
                                                          blockIdx.x * SYMBOLS_PER_BLOCK,
@@ -583,7 +583,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
       using StateVectorCompositeOpT = VectorCompositeOp<NUM_STATES>;
 
       using PrefixCallbackOpT_ =
-        hipcub::TilePrefixCallbackOp<StateVectorT, StateVectorCompositeOpT, TileStateT>;
+        hipcub_extensions::TilePrefixCallbackOp<StateVectorT, StateVectorCompositeOpT, TileStateT>;
 
       using ItemsBlockScan =
         hipcub::BlockScan<StateVectorT, BLOCK_THREADS, hipcub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;
@@ -643,7 +643,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) __global__
     __syncthreads();
 
     using OffsetPrefixScanCallbackOpT_ =
-      hipcub::TilePrefixCallbackOp<OffsetT, hipcub::Sum, OutOffsetScanTileState>;
+      hipcub_extensions::TilePrefixCallbackOp<OffsetT, hipcub::Sum, OutOffsetScanTileState>;
 
     using OutOffsetBlockScan =
       hipcub::BlockScan<OffsetT, BLOCK_THREADS, hipcub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;

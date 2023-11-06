@@ -26,10 +26,10 @@
 
 #include <rmm/mr/device/polymorphic_allocator.hpp>
 
-#include <cuco/static_map.cuh>
-#include <cuco/static_multimap.cuh>
+#include <hipco/static_map.cuh>
+#include <hipco/static_multimap.cuh>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 #include <limits>
 
@@ -40,9 +40,9 @@ constexpr int DEFAULT_JOIN_BLOCK_SIZE = 128;
 constexpr int DEFAULT_JOIN_CACHE_SIZE = 128;
 constexpr size_type JoinNoneValue     = std::numeric_limits<size_type>::min();
 
-using pair_type = cuco::pair<hash_value_type, size_type>;
+using pair_type = hipco::pair<hash_value_type, size_type>;
 
-using hash_type = cuco::murmurhash3_32<hash_value_type>;
+using hash_type = hipco::murmurhash3_32<hash_value_type>;
 
 using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
 
@@ -51,14 +51,14 @@ using multimap_type = cudf::hash_join::impl_type::map_type;
 // Multimap type used for mixed joins. TODO: This is a temporary alias used
 // until the mixed joins are converted to using CGs properly. Right now it's
 // using a cooperative group of size 1.
-using mixed_multimap_type = cuco::static_multimap<hash_value_type,
+using mixed_multimap_type = hipco::static_multimap<hash_value_type,
                                                   size_type,
-                                                  cuda::thread_scope_device,
+                                                  hip::thread_scope_device,
                                                   hash_table_allocator_type,
-                                                  cuco::double_hashing<1, hash_type, hash_type>>;
+                                                  hipco::double_hashing<1, hash_type, hash_type>>;
 
-using semi_map_type = cuco::
-  static_map<hash_value_type, size_type, cuda::thread_scope_device, hash_table_allocator_type>;
+using semi_map_type = hipco::
+  static_map<hash_value_type, size_type, hip::thread_scope_device, hash_table_allocator_type>;
 
 using row_hash_legacy =
   cudf::row_hasher<cudf::hashing::detail::default_hash, cudf::nullate::DYNAMIC>;

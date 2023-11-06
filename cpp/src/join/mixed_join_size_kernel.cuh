@@ -24,14 +24,15 @@
 #include <cudf/table/table_device_view.cuh>
 #include <cudf/utilities/span.hpp>
 
-#include <cooperative_groups.h>
-
-#include <cub/cub.cuh>
+// #include <hip/hip_cooperative_groups.h>
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hipcub/hipcub.hpp>
 #include <thrust/iterator/discard_iterator.h>
 
 namespace cudf {
 namespace detail {
-namespace cg = cooperative_groups;
+// Todo(HIP)
+namespace cg = hip_extensions::hip_cooperative_groups_ext;
 
 template <int block_size, bool has_nulls>
 __launch_bounds__(block_size) __global__ void compute_mixed_join_output_size(
@@ -90,14 +91,14 @@ __launch_bounds__(block_size) __global__ void compute_mixed_join_output_size(
     thread_counter += matches_per_row[outer_row_index];
   }
 
-  using BlockReduce = cub::BlockReduce<cudf::size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<cudf::size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   std::size_t block_counter = BlockReduce(temp_storage).Sum(thread_counter);
 
   // Add block counter to global counter
   if (threadIdx.x == 0) {
-    cuda::atomic_ref<std::size_t, cuda::thread_scope_device> ref{*output_size};
-    ref.fetch_add(block_counter, cuda::std::memory_order_relaxed);
+    hip::atomic_ref<std::size_t, hip::thread_scope_device> ref{*output_size};
+    ref.fetch_add(block_counter, hip::std::memory_order_relaxed);
   }
 }
 

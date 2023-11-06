@@ -27,6 +27,8 @@
 #include <thrust/iterator/iterator_traits.h>
 #include <thrust/optional.h>
 
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+
 namespace cudf {
 namespace detail {
 namespace {  // anonymous
@@ -53,7 +55,7 @@ __launch_bounds__(block_size) __global__
   size_type end   = out.size();
   // warp indices.  since 1 warp == 32 threads == sizeof(bitmask_type) * 8,
   // each warp will process one (32 bit) of the validity mask via
-  // __ballot_sync()
+  // hip_extensions::__ballot_sync()
   size_type warp_begin = cudf::word_index(begin);
   size_type warp_end   = cudf::word_index(end - 1);
 
@@ -74,7 +76,7 @@ __launch_bounds__(block_size) __global__
     // update validity
     if (has_nulls) {
       // the final validity mask for this warp
-      int warp_mask = __ballot_sync(0xFFFF'FFFFu, opt_value.has_value());
+      int warp_mask = hip_extensions::__ballot_sync(0xFFFF'FFFFu, opt_value.has_value());
       // only one guy in the warp needs to update the mask and count
       if (lane_id == 0) {
         out.set_mask_word(warp_cur, warp_mask);

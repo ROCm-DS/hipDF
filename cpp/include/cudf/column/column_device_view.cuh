@@ -501,7 +501,9 @@ class alignas(16) column_device_view : public detail::column_device_view_base {
   {
     size_type index    = element_index + offset();  // account for this view's _offset
     auto const indices = d_children[0];
-    return dictionary32{type_dispatcher(indices.type(), index_element_fn{}, indices, index)};
+    //Todo(HIP)
+  return dictionary32{};
+    // return dictionary32{type_dispatcher(indices.type(), index_element_fn{}, indices, index)};
   }
 
   /**
@@ -1077,7 +1079,7 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
    * @return Pointer to the first element after casting
    */
   template <typename T, CUDF_ENABLE_IF(mutable_column_device_view::has_element_accessor<T>())>
-  iterator<T> begin()
+  __host__ __device__ iterator<T> begin()
   {
     return iterator<T>{count_it{0}, detail::mutable_value_accessor<T>{*this}};
   }
@@ -1093,7 +1095,7 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
    * @return Pointer to one past the last element after casting
    */
   template <typename T, CUDF_ENABLE_IF(mutable_column_device_view::has_element_accessor<T>())>
-  iterator<T> end()
+  __host__ __device__ iterator<T> end()
   {
     return iterator<T>{count_it{size()}, detail::mutable_value_accessor<T>{*this}};
   }
@@ -1109,7 +1111,7 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
     return d_children[child_index];
   }
 
-#ifdef __CUDACC__  // because set_bit in bit.hpp is wrapped with __CUDACC__
+#if defined(__CUDACC__) || defined(__HIPCC__)  // because set_bit in bit.hpp is wrapped with __CUDACC__
   /**
    * @brief Updates the null mask to indicate that the specified element is
    * valid
@@ -1201,8 +1203,9 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
 };
 
 namespace detail {
-
-#ifdef __CUDACC__  // because set_bit in bit.hpp is wrapped with __CUDACC__
+//Todo(HIP)
+#if defined(__CUDACC__) || defined(__HIPCC__)
+// because set_bit in bit.hpp is wrapped with __CUDACC__
 
 /**
  * @brief Convenience function to get offset word from a bitmask
@@ -1261,8 +1264,7 @@ struct value_accessor {
    * @param[in] i index of element
    * @return value of element at index `i`
    */
-  //TODO(HIP): why is __host__ necessary to avoid a thrust-related compiler error?
-  __host__ __device__ T operator()(cudf::size_type i) const { return col.element<T>(i); }
+   __device__ T operator()(cudf::size_type i) const { return col.element<T>(i); }
 };
 
 /**

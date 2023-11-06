@@ -24,6 +24,7 @@
 #include <string>
 #include <type_traits>
 
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
 namespace cudf {
 /**
  * @addtogroup utility_error

@@ -96,10 +96,10 @@ class type_conversion {
   {
     using Type = typename type_selector::template type<T>;
     if constexpr (cudf::is_duration<T>()) {
-      return cuda::std::chrono::duration_cast<Type>(elem);
+      return hip::std::chrono::duration_cast<Type>(elem);
     } else if constexpr (cudf::is_timestamp<T>()) {
       using Duration = typename Type::duration;
-      return cuda::std::chrono::time_point_cast<Duration>(elem);
+      return hip::std::chrono::time_point_cast<Duration>(elem);
     } else {
       return elem;
     }
@@ -244,7 +244,7 @@ __inline__ __device__ constexpr T minimum_identity()
   } else if constexpr (std::is_same_v<T, byte_array_view>) {
     return byte_array_view::max();
   }
-  return cuda::std::numeric_limits<T>::max();
+  return hip::std::numeric_limits<T>::max();
 }
 
 template <typename T>
@@ -255,7 +255,7 @@ __inline__ __device__ constexpr T maximum_identity()
   } else if constexpr (std::is_same_v<T, byte_array_view>) {
     return byte_array_view::min();
   }
-  return cuda::std::numeric_limits<T>::lowest();
+  return hip::std::numeric_limits<T>::lowest();
 }
 
 /**

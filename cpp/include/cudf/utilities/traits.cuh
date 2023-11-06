@@ -19,7 +19,7 @@
 #include <cudf/types.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
-#include <cuda/std/atomic>
+#include <hip/std/atomic>
 
 namespace cudf {
 
@@ -39,7 +39,7 @@ namespace cudf {
 template <typename T>
 constexpr inline bool has_atomic_support()
 {
-  return cuda::std::atomic<T>::is_always_lock_free;
+  return hip::std::atomic<T>::is_always_lock_free;
 }
 
 struct has_atomic_support_impl {

@@ -22,7 +22,7 @@
 
 #include <io/utilities/block_utils.cuh>
 
-#include <cuda/std/tuple>
+#include <hip/std/tuple>
 
 namespace cudf::io::parquet::gpu {
 
@@ -109,7 +109,7 @@ struct null_count_back_copier {
  */
 constexpr bool is_string_col(PageInfo const& page, device_span<ColumnChunkDesc const> chunks)
 {
-  if (page.flags & PAGEINFO_FLAGS_DICTIONARY != 0) { return false; }
+  if (page.flags & (PAGEINFO_FLAGS_DICTIONARY != 0)) { return false; }
   auto const& col = chunks[page.chunk_idx];
   return is_string_col(col);
 }
@@ -172,7 +172,7 @@ inline __device__ bool is_page_contained(page_state_s* const s, size_t start_row
  * @return A pair containing a pointer to the string and its length
  */
 template <typename state_buf>
-inline __device__ cuda::std::pair<char const*, size_t> gpuGetStringData(page_state_s volatile* s,
+inline __device__ hip::std::pair<char const*, size_t> gpuGetStringData(page_state_s volatile* s,
                                                                         state_buf volatile* sb,
                                                                         int src_pos)
 {
@@ -219,7 +219,7 @@ inline __device__ cuda::std::pair<char const*, size_t> gpuGetStringData(page_sta
  * additional values.
  */
 template <bool sizes_only, typename state_buf>
-__device__ cuda::std::pair<int, int> gpuDecodeDictionaryIndices(
+__device__ hip::std::pair<int, int> gpuDecodeDictionaryIndices(
   page_state_s volatile* s, [[maybe_unused]] state_buf volatile* sb, int target_pos, int t)
 {
   uint8_t const* end = s->data_end;
@@ -267,7 +267,7 @@ __device__ cuda::std::pair<int, int> gpuDecodeDictionaryIndices(
       is_literal    = run & 1;
       __threadfence_block();
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
     is_literal = shuffle(is_literal);
     batch_len  = shuffle(batch_len);
 
@@ -374,7 +374,7 @@ inline __device__ int gpuDecodeRleBooleans(page_state_s volatile* s,
       is_literal    = run & 1;
       __threadfence_block();
     }
-    __syncwarp();
+    hip_extensions::__syncwarp();
     is_literal = shuffle(is_literal);
     batch_len  = shuffle(batch_len);
     if (t < batch_len) {
@@ -807,7 +807,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
     }
 
     input_value_count += min(32, (target_input_value_count - input_value_count));
-    __syncwarp();
+    hip_extensions::__syncwarp();
   }
 
   // update
@@ -858,7 +858,7 @@ __device__ void gpuDecodeLevels(page_state_s* s,
       gpuDecodeStream<level_t, rolling_buf_size>(rep, s, cur_leaf_count, t, level_type::REPETITION);
     }
     gpuDecodeStream<level_t, rolling_buf_size>(def, s, cur_leaf_count, t, level_type::DEFINITION);
-    __syncwarp();
+    hip_extensions::__syncwarp();
 
     // because the rep and def streams are encoded separately, we cannot request an exact
     // # of values to be decoded at once. we can only process the lowest # of decoded rep/def
@@ -871,7 +871,7 @@ __device__ void gpuDecodeLevels(page_state_s* s,
     gpuUpdateValidityOffsetsAndRowIndices<level_t, state_buf, rolling_buf_size>(
       actual_leaf_count, s, sb, rep, def, t);
     cur_leaf_count = actual_leaf_count + batch_size;
-    __syncwarp();
+    hip_extensions::__syncwarp();
   }
 }
 
@@ -898,7 +898,7 @@ inline __device__ uint32_t InitLevelSection(page_state_s* s,
 
   auto start = cur;
 
-  auto init_rle = [s, lvl, end, level_bits](uint8_t const* cur, uint8_t const* end) {
+  auto init_rle = [s, lvl, /*Todo(HIP): end,*/ level_bits](uint8_t const* cur, uint8_t const* end) {
     uint32_t const run      = get_vlq32(cur, end);
     s->initial_rle_run[lvl] = run;
     if (!(run & 1)) {

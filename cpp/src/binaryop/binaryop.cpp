@@ -18,8 +18,7 @@
  */
 
 #include "compiled/binary_ops.hpp"
-
-#include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
+//#include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
@@ -132,33 +131,33 @@ bool is_same_scale_necessary(binary_operator op)
   return op != binary_operator::MUL && op != binary_operator::DIV;
 }
 
-namespace jit {
-void binary_operation(mutable_column_view& out,
-                      column_view const& lhs,
-                      column_view const& rhs,
-                      std::string const& ptx,
-                      rmm::cuda_stream_view stream)
-{
-  std::string const output_type_name = cudf::type_to_name(out.type());
+// namespace jit {
+// void binary_operation(mutable_column_view& out,
+//                       column_view const& lhs,
+//                       column_view const& rhs,
+//                       std::string const& ptx,
+//                       rmm::cuda_stream_view stream)
+// {
+//   std::string const output_type_name = cudf::type_to_name(out.type());
 
-  std::string cuda_source =
-    cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
+//   std::string cuda_source =
+//     cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
 
-  std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
-                              .instantiate(output_type_name,  // list of template arguments
-                                           cudf::type_to_name(lhs.type()),
-                                           cudf::type_to_name(rhs.type()),
-                                           std::string("cudf::binops::jit::UserDefinedOp"));
+//   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
+//                               .instantiate(output_type_name,  // list of template arguments
+//                                            cudf::type_to_name(lhs.type()),
+//                                            cudf::type_to_name(rhs.type()),
+//                                            std::string("cudf::binops::jit::UserDefinedOp"));
 
-  cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-    .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})
-    ->configure_1d_max_occupancy(0, 0, 0, stream.value())
-    ->launch(out.size(),
-             cudf::jit::get_data_ptr(out),
-             cudf::jit::get_data_ptr(lhs),
-             cudf::jit::get_data_ptr(rhs));
-}
-}  // namespace jit
+//   cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
+//     .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})
+//     ->configure_1d_max_occupancy(0, 0, 0, stream.value())
+//     ->launch(out.size(),
+//              cudf::jit::get_data_ptr(out),
+//              cudf::jit::get_data_ptr(lhs),
+//              cudf::jit::get_data_ptr(rhs));
+// }
+// }  // namespace jit
 
 // Compiled Binary operation
 namespace compiled {
@@ -347,37 +346,37 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
     lhs, rhs, op, output_type, stream, mr);
 }
 
-std::unique_ptr<column> binary_operation(column_view const& lhs,
-                                         column_view const& rhs,
-                                         std::string const& ptx,
-                                         data_type output_type,
-                                         rmm::cuda_stream_view stream,
-                                         rmm::mr::device_memory_resource* mr)
-{
-  // Check for datatype
-  auto is_type_supported_ptx = [](data_type type) -> bool {
-    return is_fixed_width(type) and not is_fixed_point(type) and
-           type.id() != type_id::INT8;  // Numba PTX doesn't support int8
-  };
+// std::unique_ptr<column> binary_operation(column_view const& lhs,
+//                                          column_view const& rhs,
+//                                          std::string const& ptx,
+//                                          data_type output_type,
+//                                          rmm::cuda_stream_view stream,
+//                                          rmm::mr::device_memory_resource* mr)
+// {
+//   // Check for datatype
+//   auto is_type_supported_ptx = [](data_type type) -> bool {
+//     return is_fixed_width(type) and not is_fixed_point(type) and
+//            type.id() != type_id::INT8;  // Numba PTX doesn't support int8
+//   };
 
-  CUDF_EXPECTS(is_type_supported_ptx(lhs.type()), "Invalid/Unsupported lhs datatype");
-  CUDF_EXPECTS(is_type_supported_ptx(rhs.type()), "Invalid/Unsupported rhs datatype");
-  CUDF_EXPECTS(is_type_supported_ptx(output_type), "Invalid/Unsupported output datatype");
+//   CUDF_EXPECTS(is_type_supported_ptx(lhs.type()), "Invalid/Unsupported lhs datatype");
+//   CUDF_EXPECTS(is_type_supported_ptx(rhs.type()), "Invalid/Unsupported rhs datatype");
+//   CUDF_EXPECTS(is_type_supported_ptx(output_type), "Invalid/Unsupported output datatype");
 
-  CUDF_EXPECTS((lhs.size() == rhs.size()), "Column sizes don't match");
+//   CUDF_EXPECTS((lhs.size() == rhs.size()), "Column sizes don't match");
 
-  auto [new_mask, null_count] = bitmask_and(table_view({lhs, rhs}), stream, mr);
-  auto out =
-    make_fixed_width_column(output_type, lhs.size(), std::move(new_mask), null_count, stream, mr);
+//   auto [new_mask, null_count] = bitmask_and(table_view({lhs, rhs}), stream, mr);
+//   auto out =
+//     make_fixed_width_column(output_type, lhs.size(), std::move(new_mask), null_count, stream, mr);
 
-  // Check for 0 sized data
-  if (lhs.is_empty() or rhs.is_empty()) return out;
+//   // Check for 0 sized data
+//   if (lhs.is_empty() or rhs.is_empty()) return out;
 
-  auto out_view = out->mutable_view();
-  binops::jit::binary_operation(out_view, lhs, rhs, ptx, stream);
-  out->set_null_count(cudf::detail::null_count(out_view.null_mask(), 0, out->size(), stream));
-  return out;
-}
+//   auto out_view = out->mutable_view();
+//   binops::jit::binary_operation(out_view, lhs, rhs, ptx, stream);
+//   out->set_null_count(cudf::detail::null_count(out_view.null_mask(), 0, out->size(), stream));
+//   return out;
+// }
 }  // namespace detail
 
 int32_t binary_operation_fixed_point_scale(binary_operator op,
@@ -429,14 +428,14 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
   return detail::binary_operation(lhs, rhs, op, output_type, cudf::get_default_stream(), mr);
 }
 
-std::unique_ptr<column> binary_operation(column_view const& lhs,
-                                         column_view const& rhs,
-                                         std::string const& ptx,
-                                         data_type output_type,
-                                         rmm::mr::device_memory_resource* mr)
-{
-  CUDF_FUNC_RANGE();
-  return detail::binary_operation(lhs, rhs, ptx, output_type, cudf::get_default_stream(), mr);
-}
+// std::unique_ptr<column> binary_operation(column_view const& lhs,
+//                                          column_view const& rhs,
+//                                          std::string const& ptx,
+//                                          data_type output_type,
+//                                          rmm::mr::device_memory_resource* mr)
+// {
+//   CUDF_FUNC_RANGE();
+//   return detail::binary_operation(lhs, rhs, ptx, output_type, cudf::get_default_stream(), mr);
+// }
 
 }  // namespace cudf

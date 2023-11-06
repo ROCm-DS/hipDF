@@ -34,7 +34,7 @@
 #include <limits>
 #include <type_traits>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 namespace {
 template <std::size_t N>
@@ -275,9 +275,9 @@ class concurrent_unordered_map {
     using packed_type = typename pair_packer<pair_type>::packed_type;
 
     auto* insert_ptr = reinterpret_cast<packed_type*>(insert_location);
-    cuda::atomic_ref<packed_type, cuda::thread_scope_device> ref{*insert_ptr};
+    hip::atomic_ref<packed_type, hip::thread_scope_device> ref{*insert_ptr};
     auto const success =
-      ref.compare_exchange_strong(expected.packed, desired.packed, cuda::std::memory_order_relaxed);
+      ref.compare_exchange_strong(expected.packed, desired.packed, hip::std::memory_order_relaxed);
 
     if (success) {
       return insert_result::SUCCESS;
@@ -299,9 +299,9 @@ class concurrent_unordered_map {
     value_type* const __restrict__ insert_location, value_type const& insert_pair)
   {
     auto expected = m_unused_key;
-    cuda::atomic_ref<key_type, cuda::thread_scope_device> ref{insert_location->first};
+    hip::atomic_ref<key_type, hip::thread_scope_device> ref{insert_location->first};
     auto const key_success =
-      ref.compare_exchange_strong(expected, insert_pair.first, cuda::std::memory_order_relaxed);
+      ref.compare_exchange_strong(expected, insert_pair.first, hip::std::memory_order_relaxed);
 
     // Hash bucket empty
     if (key_success) {
@@ -442,10 +442,10 @@ class concurrent_unordered_map {
 
       m_hashtbl_values = m_allocator.allocate(m_capacity, stream);
     }
-    CUDF_CUDA_TRY(cudaMemcpyAsync(m_hashtbl_values,
+    CUDF_CUDA_TRY(hipMemcpyAsync(m_hashtbl_values,
                                   other.m_hashtbl_values,
                                   m_capacity * sizeof(value_type),
-                                  cudaMemcpyDefault,
+                                  hipMemcpyDefault,
                                   stream.value()));
   }
 
@@ -466,14 +466,14 @@ class concurrent_unordered_map {
 
   void prefetch(int const dev_id, rmm::cuda_stream_view stream)
   {
-    cudaPointerAttributes hashtbl_values_ptr_attributes;
-    cudaError_t status = cudaPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
+    hipPointerAttribute_t hashtbl_values_ptr_attributes;
+    hipError_t status = hipPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
 
-    if (cudaSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
-      CUDF_CUDA_TRY(cudaMemPrefetchAsync(
+    if (hipSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
+      CUDF_CUDA_TRY(hipMemPrefetchAsync(
         m_hashtbl_values, m_capacity * sizeof(value_type), dev_id, stream.value()));
     }
-    CUDF_CUDA_TRY(cudaMemPrefetchAsync(this, sizeof(*this), dev_id, stream.value()));
+    CUDF_CUDA_TRY(hipMemPrefetchAsync(this, sizeof(*this), dev_id, stream.value()));
   }
 
   /**
@@ -536,14 +536,14 @@ class concurrent_unordered_map {
     m_hashtbl_values         = m_allocator.allocate(m_capacity, stream);
     constexpr int block_size = 128;
     {
-      cudaPointerAttributes hashtbl_values_ptr_attributes;
-      cudaError_t status =
-        cudaPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
+      hipPointerAttribute_t hashtbl_values_ptr_attributes;
+      hipError_t status =
+        hipPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
 
-      if (cudaSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
+      if (hipSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
         int dev_id = 0;
-        CUDF_CUDA_TRY(cudaGetDevice(&dev_id));
-        CUDF_CUDA_TRY(cudaMemPrefetchAsync(
+        CUDF_CUDA_TRY(hipGetDevice(&dev_id));
+        CUDF_CUDA_TRY(hipMemPrefetchAsync(
           m_hashtbl_values, m_capacity * sizeof(value_type), dev_id, stream.value()));
       }
     }

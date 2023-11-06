@@ -23,7 +23,7 @@
 
 #include <rmm/mr/device/polymorphic_allocator.hpp>
 
-#include <cuco/static_map.cuh>
+#include <hipco/static_map.cuh>
 
 #include <limits>
 
@@ -33,12 +33,12 @@ namespace detail {
 constexpr auto COMPACTION_EMPTY_KEY_SENTINEL   = std::numeric_limits<size_type>::max();
 constexpr auto COMPACTION_EMPTY_VALUE_SENTINEL = std::numeric_limits<size_type>::min();
 
-using hash_type = cuco::murmurhash3_32<size_type>;
+using hash_type = hipco::murmurhash3_32<size_type>;
 
 using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
 
 using hash_map_type =
-  cuco::static_map<size_type, size_type, cuda::thread_scope_device, hash_table_allocator_type>;
+  hipco::static_map<size_type, size_type, hip::thread_scope_device, hash_table_allocator_type>;
 
 }  // namespace detail
 }  // namespace cudf

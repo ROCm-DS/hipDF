@@ -24,7 +24,7 @@
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/table/table_device_view.cuh>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 namespace cudf {
 namespace detail {
@@ -103,14 +103,14 @@ __global__ void compute_conditional_join_output_size(
     }
   }
 
-  using BlockReduce = cub::BlockReduce<cudf::size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<cudf::size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   std::size_t block_counter = BlockReduce(temp_storage).Sum(thread_counter);
 
   // Add block counter to global counter
   if (threadIdx.x == 0) {
-    cuda::atomic_ref<std::size_t, cuda::thread_scope_device> ref{*output_size};
-    ref.fetch_add(block_counter, cuda::std::memory_order_relaxed);
+    hip::atomic_ref<std::size_t, hip::thread_scope_device> ref{*output_size};
+    ref.fetch_add(block_counter, hip::std::memory_order_relaxed);
   }
 }
 
@@ -172,11 +172,11 @@ __global__ void conditional_join(table_device_view left_table,
 
   if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
 
-  __syncwarp();
+  hip_extensions::__syncwarp();
 
   auto outer_row_index = cudf::detail::grid_1d::global_thread_id();
 
-  unsigned int const activemask = __ballot_sync(0xffff'ffffu, outer_row_index < outer_num_rows);
+  unsigned int const activemask = hip_extensions::__ballot_sync(0xffff'ffffu, outer_row_index < outer_num_rows);
 
   auto evaluator = cudf::ast::detail::expression_evaluator<has_nulls>(
     left_table, right_table, device_expression_data);
@@ -215,7 +215,7 @@ __global__ void conditional_join(table_device_view left_table,
 
       // flush output cache if next iteration does not fit
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
-      auto const flush_mask = __ballot_sync(activemask, do_flush);
+      auto const flush_mask = hip_extensions::__ballot_sync(activemask, do_flush);
       if (do_flush) {
         flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                          max_size,
@@ -255,7 +255,7 @@ __global__ void conditional_join(table_device_view left_table,
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
-    auto const flush_mask = __ballot_sync(activemask, do_flush);
+    auto const flush_mask = hip_extensions::__ballot_sync(activemask, do_flush);
     if (do_flush) {
       flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                        max_size,

@@ -27,8 +27,8 @@
 #include <rmm/device_scalar.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/block/block_reduce.cuh>
-#include <cub/device/device_segmented_reduce.cuh>
+#include <hipcub/block/block_reduce.hpp>
+#include <hipcub/device/device_segmented_reduce.hpp>
 
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -101,7 +101,7 @@ __global__ void offset_bitmask_binop(Binop op,
     thread_count += __popc(destination_word);
   }
 
-  using BlockReduce = cub::BlockReduce<size_type, block_size>;
+  using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename BlockReduce::TempStorage temp_storage;
   size_type block_count = BlockReduce(temp_storage).Sum(thread_count);
 
@@ -168,12 +168,12 @@ size_type inplace_bitmask_binop(Binop op,
   rmm::device_uvector<bitmask_type const*> d_masks(masks.size(), stream, mr);
   rmm::device_uvector<size_type> d_begin_bits(masks_begin_bits.size(), stream, mr);
 
-  CUDF_CUDA_TRY(cudaMemcpyAsync(
-    d_masks.data(), masks.data(), masks.size_bytes(), cudaMemcpyDefault, stream.value()));
-  CUDF_CUDA_TRY(cudaMemcpyAsync(d_begin_bits.data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(
+    d_masks.data(), masks.data(), masks.size_bytes(), hipMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(hipMemcpyAsync(d_begin_bits.data(),
                                 masks_begin_bits.data(),
                                 masks_begin_bits.size_bytes(),
-                                cudaMemcpyDefault,
+                                hipMemcpyDefault,
                                 stream.value()));
 
   auto constexpr block_size = 256;
@@ -263,7 +263,7 @@ __global__ void subtract_set_bits_range_boundaries_kernel(bitmask_type const* bi
  */
 struct bit_to_word_index {
   bit_to_word_index(bool inclusive) : inclusive(inclusive) {}
-  __device__ inline size_type operator()(size_type const& bit_index) const
+  __host__ __device__ inline size_type operator()(size_type const& bit_index) const
   {
     return word_index(bit_index) + ((inclusive || intra_word_index(bit_index) == 0) ? 0 : 1);
   }
@@ -271,7 +271,7 @@ struct bit_to_word_index {
 };
 
 struct popc {
-  __device__ inline size_type operator()(bitmask_type word) const { return __popc(word); }
+  __host__ __device__ inline size_type operator()(bitmask_type word) const { return __popc(word); }
 };
 
 // Count set/unset bits in a segmented null mask, using offset iterators accessible by the device.
@@ -284,10 +284,8 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
                                                     rmm::cuda_stream_view stream,
                                                     rmm::mr::device_memory_resource* mr)
 {
-  auto const num_ranges =
-    static_cast<size_type>(std::distance(first_bit_indices_begin, first_bit_indices_end));
+  auto const num_ranges = static_cast<size_type>(std::distance(first_bit_indices_begin, first_bit_indices_end));
   rmm::device_uvector<size_type> d_bit_counts(num_ranges, stream);
-
   auto num_set_bits_in_word = thrust::make_transform_iterator(bitmask, popc{});
   auto first_word_indices =
     thrust::make_transform_iterator(first_bit_indices_begin, bit_to_word_index{true});
@@ -296,7 +294,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
 
   // Allocate temporary memory.
   size_t temp_storage_bytes{0};
-  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(nullptr,
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(nullptr,
                                                 temp_storage_bytes,
                                                 num_set_bits_in_word,
                                                 d_bit_counts.begin(),
@@ -307,7 +305,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   // Perform segmented reduction.
-  CUDF_CUDA_TRY(cub::DeviceSegmentedReduce::Sum(d_temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedReduce::Sum(d_temp_storage.data(),
                                                 temp_storage_bytes,
                                                 num_set_bits_in_word,
                                                 d_bit_counts.begin(),
@@ -331,7 +329,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
     auto segments_begin =
       thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
     auto segment_length_iterator =
-      thrust::transform_iterator(segments_begin, [] __device__(auto const& segment) {
+      thrust::transform_iterator(segments_begin, [] __host__ __device__(auto const& segment) {
         auto const begin = thrust::get<0>(segment);
         auto const end   = thrust::get<1>(segment);
         return end - begin;
@@ -341,7 +339,7 @@ rmm::device_uvector<size_type> segmented_count_bits(bitmask_type const* bitmask,
                       segment_length_iterator + num_ranges,
                       d_bit_counts.data(),
                       d_bit_counts.data(),
-                      [] __device__(auto segment_size, auto segment_bit_count) {
+                      [] __host__ __device__(auto segment_size, auto segment_bit_count) {
                         return segment_size - segment_bit_count;
                       });
   }
@@ -379,7 +377,7 @@ size_type validate_segmented_indices(IndexIterator indices_begin, IndexIterator 
 }
 
 struct index_alternator {
-  __device__ inline size_type operator()(size_type const& i) const
+  __host__ __device__ inline size_type operator()(size_type const& i) const
   {
     return *(d_indices + 2 * i + (is_end ? 1 : 0));
   }
@@ -542,7 +540,7 @@ std::pair<rmm::device_buffer, size_type> segmented_null_mask_reduction(
   auto const segments_begin =
     thrust::make_zip_iterator(first_bit_indices_begin, last_bit_indices_begin);
   auto const segment_length_iterator =
-    thrust::make_transform_iterator(segments_begin, [] __device__(auto const& segment) {
+    thrust::make_transform_iterator(segments_begin, [] __host__ __device__(auto const& segment) {
       auto const begin = thrust::get<0>(segment);
       auto const end   = thrust::get<1>(segment);
       return end - begin;

@@ -167,7 +167,7 @@ struct calculate_group_statistics_functor {
         }
       }
     }
-    cub::BlockReduce<uint32_t, block_size>(storage.template get<uint32_t>()).Sum(chunk.non_nulls);
+    hipcub::BlockReduce<uint32_t, block_size>(storage.template get<uint32_t>()).Sum(chunk.non_nulls);
 
     if (t == 0) { s.ck = get_untyped_chunk(chunk); }
   }

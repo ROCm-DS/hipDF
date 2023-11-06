@@ -141,18 +141,19 @@ struct dispatch_compute_indices {
              rmm::cuda_stream_view stream,
              rmm::mr::device_memory_resource* mr)
   {
+// TODO FIXME
+#if 0
     auto keys_view     = column_device_view::create(all_keys, stream);
     auto indices_view  = column_device_view::create(all_indices, stream);
     auto d_all_indices = *indices_view;
 
     auto indices_itr = cudf::detail::indexalator_factory::make_input_iterator(all_indices);
     // map the concatenated indices to the concatenated keys
-    // TODO(HIP): why is __host__ necessary in lambda to avoid a thrust-related compiler error?
     auto all_itr = thrust::make_permutation_iterator(
       keys_view->begin<Element>(),
       thrust::make_transform_iterator(
         thrust::make_counting_iterator<size_type>(0),
-        [d_offsets, d_map_to_keys, d_all_indices, indices_itr] __host__ __device__(size_type idx) {
+        [d_offsets, d_map_to_keys, d_all_indices, indices_itr] __device__(size_type idx) {
           if (d_all_indices.is_null(idx)) return 0;
           return indices_itr[idx] + d_offsets[d_map_to_keys[idx]].first;
         }));
@@ -190,6 +191,9 @@ struct dispatch_compute_indices {
                         return static_cast<size_type>(thrust::distance(begin, itr));
                       });
 #endif
+    return result;
+#endif
+    std::enable_if_t<cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>> result{};
     return result;
   }
 

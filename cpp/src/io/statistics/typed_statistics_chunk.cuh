@@ -30,7 +30,7 @@
 #include <cudf/fixed_point/fixed_point.hpp>
 #include <cudf/wrappers/timestamps.hpp>
 
-#include <math_constants.h>
+#include <hip/hip_math_constants.h>
 
 #include <thrust/extrema.h>
 
@@ -200,13 +200,13 @@ __inline__ __device__ typed_statistics_chunk<T, include_aggregate> block_reduce(
   typed_statistics_chunk<T, include_aggregate> output_chunk = chunk;
 
   using E              = typename detail::extrema_type<T>::type;
-  using extrema_reduce = cub::BlockReduce<E, block_size>;
-  using count_reduce   = cub::BlockReduce<uint32_t, block_size>;
+  using extrema_reduce = hipcub::BlockReduce<E, block_size>;
+  using count_reduce   = hipcub::BlockReduce<uint32_t, block_size>;
   output_chunk.minimum_value =
-    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.minimum_value, cub::Min());
+    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.minimum_value, hipcub::Min());
   __syncthreads();
   output_chunk.maximum_value =
-    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.maximum_value, cub::Max());
+    extrema_reduce(storage.template get<E>()).Reduce(output_chunk.maximum_value, hipcub::Max());
   __syncthreads();
   output_chunk.non_nulls =
     count_reduce(storage.template get<uint32_t>()).Sum(output_chunk.non_nulls);
@@ -220,7 +220,7 @@ __inline__ __device__ typed_statistics_chunk<T, include_aggregate> block_reduce(
   if constexpr (include_aggregate) {
     if (output_chunk.has_minmax) {
       using A                = typename detail::aggregation_type<T>::type;
-      using aggregate_reduce = cub::BlockReduce<A, block_size>;
+      using aggregate_reduce = hipcub::BlockReduce<A, block_size>;
       output_chunk.aggregate =
         aggregate_reduce(storage.template get<A>()).Sum(output_chunk.aggregate);
     }
@@ -257,9 +257,9 @@ get_untyped_chunk(typed_statistics_chunk<T, include_aggregate> const& chunk)
   if (chunk.has_minmax) {
     if constexpr (std::is_floating_point_v<E>) {
       union_member::get<E>(stat.min_value) =
-        (chunk.minimum_value != 0.0) ? chunk.minimum_value : CUDART_NEG_ZERO;
+        (chunk.minimum_value != 0.0) ? chunk.minimum_value : HIP_NEG_ZERO;
       union_member::get<E>(stat.max_value) =
-        (chunk.maximum_value != 0.0) ? chunk.maximum_value : CUDART_ZERO;
+        (chunk.maximum_value != 0.0) ? chunk.maximum_value : HIP_ZERO;
     } else {
       union_member::get<E>(stat.min_value) = chunk.minimum_value;
       union_member::get<E>(stat.max_value) = chunk.maximum_value;

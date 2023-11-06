@@ -44,9 +44,11 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 #include <algorithm>
+// Todo(HIP)
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
 
 namespace cudf {
 namespace detail {
@@ -174,7 +176,8 @@ __launch_bounds__(block_size) __global__
         int valid_index = (block_offset / cudf::detail::warp_size) + wid;
 
         // compute the valid mask for this warp
-        uint32_t valid_warp = __ballot_sync(0xffff'ffffu, temp_valids[threadIdx.x]);
+        //Todo(HIP)
+        uint32_t valid_warp = hip_extensions::__ballot_sync(0xffff'ffffu, temp_valids[threadIdx.x]);
 
         // Note the atomicOr's below assume that output_valid has been set to
         // all zero before the kernel
@@ -183,20 +186,21 @@ __launch_bounds__(block_size) __global__
           if (wid > 0 && wid < last_warp)
             output_valid[valid_index] = valid_warp;
           else {
-            cuda::atomic_ref<cudf::bitmask_type, cuda::thread_scope_device> ref{
+            hip::atomic_ref<cudf::bitmask_type, hip::thread_scope_device> ref{
               output_valid[valid_index]};
-            ref.fetch_or(valid_warp, cuda::std::memory_order_relaxed);
+            ref.fetch_or(valid_warp, hip::std::memory_order_relaxed);
           }
         }
 
         // if the block is full and not aligned then we have one more warp to cover
         if ((wid == 0) && (last_warp == num_warps)) {
-          uint32_t valid_warp = __ballot_sync(0xffff'ffffu, temp_valids[block_size + threadIdx.x]);
+          //Todo(HIP)
+          uint32_t valid_warp = hip_extensions::__ballot_sync(0xffff'ffffu, temp_valids[block_size + threadIdx.x]);
           if (lane == 0 && valid_warp != 0) {
             tmp_warp_valid_counts += __popc(valid_warp);
-            cuda::atomic_ref<cudf::bitmask_type, cuda::thread_scope_device> ref{
+            hip::atomic_ref<cudf::bitmask_type, hip::thread_scope_device> ref{
               output_valid[valid_index + num_warps]};
-            ref.fetch_or(valid_warp, cuda::std::memory_order_relaxed);
+            ref.fetch_or(valid_warp, hip::std::memory_order_relaxed);
           }
         }
       }
@@ -212,8 +216,8 @@ __launch_bounds__(block_size) __global__
     cudf::detail::single_lane_block_sum_reduce<block_size, leader_lane>(warp_valid_counts);
 
   if (threadIdx.x == 0) {  // one thread computes and adds to null count
-    cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{*output_null_count};
-    ref.fetch_add(block_sum - block_valid_count, cuda::std::memory_order_relaxed);
+    hip::atomic_ref<size_type, hip::thread_scope_device> ref{*output_null_count};
+    ref.fetch_add(block_sum - block_valid_count, hip::std::memory_order_relaxed);
   }
 }
 
@@ -355,7 +359,8 @@ std::unique_ptr<table> copy_if(table_view const& input,
   if (grid.num_blocks > 1) {
     // Determine and allocate temporary device storage
     size_t temp_storage_bytes = 0;
-    hipcub::DeviceScan::InclusiveSum(nullptr,
+    //Todo(HIP)
+    auto dummy = hipcub::DeviceScan::InclusiveSum(nullptr,
                                   temp_storage_bytes,
                                   block_counts.begin(),
                                   block_offsets.begin() + 1,
@@ -364,7 +369,8 @@ std::unique_ptr<table> copy_if(table_view const& input,
     rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
     // Run exclusive prefix sum
-    hipcub::DeviceScan::InclusiveSum(d_temp_storage.data(),
+    //Todo(HIP)
+    auto dummy2 = hipcub::DeviceScan::InclusiveSum(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   block_counts.begin(),
                                   block_offsets.begin() + 1,

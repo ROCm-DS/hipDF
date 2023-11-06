@@ -1,5 +1,5 @@
 if(GPU_WARNINGS_AS_ERRORS)
-  list(APPEND HIPDF_GPU_FLAGS -Werror)
+  list(APPEND HIPDF_GPU_FLAGS -Werror -Wno-deprecated  -Wno-pass-failed -Wno-implicit-conversion-floating-point-to-bool ) #FIXME(HIP): WAR for some transformation passes failing in hipcub, might degrade performance; accept implicit conversion of math operations to integer types like bool
 endif()
 
 if(GPU_ENABLE_LINEINFO)
@@ -19,7 +19,7 @@ macro(set_hipdf_target_properties)
                # set target compile options
                CXX_STANDARD 17
                CXX_STANDARD_REQUIRED ON
-               # For std:: support of __int128_t. Can be removed once using cuda::std
+               # For std:: support of __int128_t. Can be removed once using hip::std
                CXX_EXTENSIONS ON
                HIP_STANDARD 17
                HIP_STANDARD_REQUIRED ON

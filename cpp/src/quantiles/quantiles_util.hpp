@@ -29,7 +29,7 @@ CUDF_HOST_DEVICE inline Result get_array_value(T const* devarr, size_type locati
 #if defined(__CUDA_ARCH__)
   result = devarr[location];
 #else
-  CUDF_CUDA_TRY(cudaMemcpy(&result, devarr + location, sizeof(T), cudaMemcpyDefault));
+  CUDF_CUDA_TRY(hipMemcpy(&result, devarr + location, sizeof(T), hipMemcpyDefault));
 #endif
   return static_cast<Result>(result);
 }
@@ -147,7 +147,7 @@ CUDF_HOST_DEVICE inline Result select_quantile(ValueAccessor get_value,
     case interpolation::NEAREST: return static_cast<Result>(get_value(idx.nearest));
 
     default: {
-#ifndef __CUDA_ARCH__
+#ifndef __HIP_DEVICE_COMPILE__
       CUDF_FAIL("Invalid interpolation operation for quantiles.");
 #else
       CUDF_UNREACHABLE("Invalid interpolation operation for quantiles");
@@ -179,7 +179,7 @@ CUDF_HOST_DEVICE inline Result select_quantile_data(Iterator begin,
     case interpolation::MIDPOINT:
       return interpolate::midpoint<Result>(*(begin + idx.lower), *(begin + idx.higher));
     default: {
-#ifndef __CUDA_ARCH__
+#if !__HIP_DEVICE_COMPILE__
       CUDF_FAIL("Invalid interpolation operation for quantiles.");
 #else
       CUDF_UNREACHABLE("Invalid interpolation operation for quantiles");
@@ -206,7 +206,7 @@ CUDF_HOST_DEVICE inline bool select_quantile_validity(Iterator begin,
     case interpolation::LINEAR:
     case interpolation::MIDPOINT: return *(begin + idx.lower) and *(begin + idx.higher);
     default: {
-#ifndef __CUDA_ARCH__
+#ifndef __HIP_DEVICE_COMPILE__
       CUDF_FAIL("Invalid interpolation operation for quantiles.");
 #else
       CUDF_UNREACHABLE("Invalid interpolation operation for quantiles");

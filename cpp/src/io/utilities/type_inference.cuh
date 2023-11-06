@@ -31,7 +31,7 @@
 #include <thrust/distance.h>
 #include <thrust/tuple.h>
 
-#include <cub/block/block_reduce.cuh>
+#include <hipcub/block/block_reduce.hpp>
 
 #include <cstddef>
 

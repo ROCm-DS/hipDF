@@ -23,7 +23,7 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <cuda/std/iterator>
+#include <hip/std/iterator>
 
 #include <algorithm>
 #include <cstdint>
@@ -174,9 +174,10 @@ class SingleSymbolSmemLUT {
 
   constexpr CUDF_HOST_DEVICE int32_t lookup(SymbolT const symbol) const
   {
+    // Todo(HIP): error: array subscript is not integer -> used static_cast<int>
     // Look up the symbol group for given symbol
     return temp_storage
-      .sym_to_sgid[min(static_cast<SymbolGroupIdT>(symbol), num_valid_entries - 1U)];
+      .sym_to_sgid[static_cast<int>(min(static_cast<SymbolGroupIdT>(symbol), num_valid_entries - 1U))];
   }
 };
 
@@ -862,7 +863,8 @@ class Dfa {
   {
     std::size_t temp_storage_bytes = 0;
     rmm::device_buffer temp_storage{};
-    DeviceTransduce(nullptr,
+    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+    auto dummy = DeviceTransduce(nullptr,
                     temp_storage_bytes,
                     this->get_device_view(),
                     d_chars_it,
@@ -876,8 +878,8 @@ class Dfa {
     if (temp_storage.size() < temp_storage_bytes) {
       temp_storage.resize(temp_storage_bytes, stream);
     }
-
-    DeviceTransduce(temp_storage.data(),
+    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
+    auto dummy1 = DeviceTransduce(temp_storage.data(),
                     temp_storage_bytes,
                     this->get_device_view(),
                     d_chars_it,

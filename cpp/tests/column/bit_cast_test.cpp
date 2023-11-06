@@ -112,7 +112,6 @@ TYPED_TEST(ColumnViewAllTypesTests, BitCast)
   auto end   = thrust::make_counting_iterator(16);
 
   cudf::test::fixed_width_column_wrapper<TypeParam, cudf::size_type> input(begin, end);
-
   do_bit_cast<TypeParam, int8_t>(input, begin, end);
   do_bit_cast<TypeParam, int16_t>(input, begin, end);
   do_bit_cast<TypeParam, int32_t>(input, begin, end);

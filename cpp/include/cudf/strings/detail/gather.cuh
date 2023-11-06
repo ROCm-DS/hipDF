@@ -301,7 +301,7 @@ std::unique_ptr<cudf::column> gather(strings_column_view const& strings,
   auto const d_in_offsets = !strings.is_empty() ? strings.offsets_begin() : nullptr;
 
   auto offsets_itr = thrust::make_transform_iterator(
-    begin, [d_strings = *d_strings, d_in_offsets] __device__(size_type idx) {
+    begin, [d_strings = *d_strings, d_in_offsets] __host__ __device__(size_type idx) {
       if (NullifyOutOfBounds && (idx < 0 || idx >= d_strings.size())) { return 0; }
       if (not d_strings.is_valid(idx)) { return 0; }
       return d_in_offsets[idx + 1] - d_in_offsets[idx];

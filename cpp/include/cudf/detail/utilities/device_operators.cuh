@@ -62,7 +62,7 @@ CUDF_HOST_DEVICE inline auto max(LHS const& lhs, RHS const& rhs)
  */
 struct DeviceSum {
   template <typename T, std::enable_if_t<!cudf::is_timestamp<T>()>* = nullptr>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) -> decltype(lhs + rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const -> decltype(lhs + rhs)
   {
     return lhs + rhs;
   }
@@ -116,7 +116,7 @@ struct DeviceCount {
  */
 struct DeviceMin {
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(cudf::detail::min(lhs, rhs))
   {
     return numeric::detail::min(lhs, rhs);
@@ -164,7 +164,7 @@ struct DeviceMin {
  */
 struct DeviceMax {
   template <typename T>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const
     -> decltype(cudf::detail::max(lhs, rhs))
   {
     return numeric::detail::max(lhs, rhs);
@@ -211,7 +211,7 @@ struct DeviceMax {
  */
 struct DeviceProduct {
   template <typename T, std::enable_if_t<!cudf::is_timestamp<T>()>* = nullptr>
-  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) -> decltype(lhs * rhs)
+  CUDF_HOST_DEVICE inline auto operator()(T const& lhs, T const& rhs) const -> decltype(lhs * rhs)
   {
     return lhs * rhs;
   }

@@ -26,8 +26,8 @@
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/cudf_gtest.hpp>
-
-#include <rmm/cuda_stream.hpp>
+//Todo(HIP): cuda_stream.hpp -> hip_stream.hpp
+#include <rmm/hip_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
 #include <string>

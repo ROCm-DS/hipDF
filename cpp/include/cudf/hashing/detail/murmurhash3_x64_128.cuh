@@ -61,7 +61,7 @@ struct MurmurHash3_x64_128 {
     return k;
   }
 
-  result_type __device__ inline operator()(Key const& key) const { return compute(key); }
+  result_type __host__ __device__ inline operator()(Key const& key) const { return compute(key); }
 
   template <typename T>
   result_type __device__ inline compute(T const& key) const
@@ -166,21 +166,21 @@ struct MurmurHash3_x64_128 {
 };
 
 template <>
-MurmurHash3_x64_128<bool>::result_type __device__ inline MurmurHash3_x64_128<bool>::operator()(
+MurmurHash3_x64_128<bool>::result_type __host__ __device__ inline MurmurHash3_x64_128<bool>::operator()(
   bool const& key) const
 {
   return compute<uint8_t>(key);
 }
 
 template <>
-MurmurHash3_x64_128<float>::result_type __device__ inline MurmurHash3_x64_128<float>::operator()(
+MurmurHash3_x64_128<float>::result_type __host__ __device__ inline MurmurHash3_x64_128<float>::operator()(
   float const& key) const
 {
   return compute(normalize_nans(key));
 }
 
 template <>
-MurmurHash3_x64_128<double>::result_type __device__ inline MurmurHash3_x64_128<double>::operator()(
+MurmurHash3_x64_128<double>::result_type __host__ __device__ inline MurmurHash3_x64_128<double>::operator()(
   double const& key) const
 {
   return compute(normalize_nans(key));
@@ -188,7 +188,7 @@ MurmurHash3_x64_128<double>::result_type __device__ inline MurmurHash3_x64_128<d
 
 template <>
 MurmurHash3_x64_128<cudf::string_view>::result_type
-  __device__ inline MurmurHash3_x64_128<cudf::string_view>::operator()(
+  __host__ __device__ inline MurmurHash3_x64_128<cudf::string_view>::operator()(
     cudf::string_view const& key) const
 {
   auto const data = reinterpret_cast<std::byte const*>(key.data());
@@ -198,7 +198,7 @@ MurmurHash3_x64_128<cudf::string_view>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal32>::result_type
-  __device__ inline MurmurHash3_x64_128<numeric::decimal32>::operator()(
+  __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal32>::operator()(
     numeric::decimal32 const& key) const
 {
   return compute(key.value());
@@ -206,7 +206,7 @@ MurmurHash3_x64_128<numeric::decimal32>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal64>::result_type
-  __device__ inline MurmurHash3_x64_128<numeric::decimal64>::operator()(
+  __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal64>::operator()(
     numeric::decimal64 const& key) const
 {
   return compute(key.value());
@@ -214,7 +214,7 @@ MurmurHash3_x64_128<numeric::decimal64>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal128>::result_type
-  __device__ inline MurmurHash3_x64_128<numeric::decimal128>::operator()(
+  __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal128>::operator()(
     numeric::decimal128 const& key) const
 {
   return compute(key.value());

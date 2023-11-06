@@ -304,7 +304,7 @@ struct string_parse {
   size_type* d_offsets{};
   char* d_chars{};
 
-  __device__ void operator()(size_type idx)
+  __host__ __device__ void operator()(size_type idx)
   {
     if (null_mask != nullptr && not bit_is_set(null_mask, idx)) {
       if (!d_chars) d_offsets[idx] = 0;
@@ -412,7 +412,7 @@ std::unique_ptr<column> parse_data(str_tuple_it str_tuples,
                                                    ConvertFunctor{},
                                                    in_begin,
                                                    in_end,
-                                                   col.data<char>(),
+                                                   col.template data<char>(),
                                                    row,
                                                    col_type,
                                                    options,

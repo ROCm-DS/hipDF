@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 #include <cudf/detail/iterator.cuh>
 #include <cudf/lists/lists_column_device_view.cuh>
 #include <cudf/types.hpp>
@@ -35,7 +35,9 @@ class list_device_view {
   using lists_column_device_view = cudf::detail::lists_column_device_view;
 
  public:
-  list_device_view() = default;
+ //Todo(HIP)
+  list_device_view() ;
+//  list_device_view() = default;
 
   /**
    * @brief Constructs a list_device_view from a list column and index.
@@ -253,6 +255,8 @@ class list_device_view {
    *
    * @tparam T The element-type of the list row
    */
+  //Todo(HIP)
+  public:
   template <typename T>
   struct pair_accessor {
     list_device_view const& list;  ///< The list_device_view to access
@@ -270,7 +274,7 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-    __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
+    __host__ __device__ inline thrust::pair<T, bool> operator()(cudf::size_type i) const
     {
       return {list.element<T>(i), !list.is_null(i)};
     }
@@ -309,7 +313,7 @@ class list_device_view {
      * @param i Index into the list_device_view
      * @return A pair of data element and its validity flag.
      */
-    __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
+    __host__ __device__ inline thrust::pair<rep_type, bool> operator()(cudf::size_type i) const
     {
       return {get_rep<T>(i), !list.is_null(i)};
     }
@@ -350,7 +354,7 @@ struct list_size_functor {
    * @param idx row index
    * @return size of the list
    */
-  __device__ inline size_type operator()(size_type idx)
+  __host__ __device__ inline size_type operator()(size_type idx)
   {
     if (d_column.is_null(idx)) return size_type{0};
     return d_column.offset_at(idx + 1) - d_column.offset_at(idx);

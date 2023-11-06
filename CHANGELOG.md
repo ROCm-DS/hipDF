@@ -139,7 +139,7 @@
 - Add murmurhash3_x64_128 function to libcudf ([#13604](https://github.com/rapidsai/cudf/pull/13604)) [@davidwendt](https://github.com/davidwendt)
 - Performance improvement for cudf::strings::like ([#13594](https://github.com/rapidsai/cudf/pull/13594)) [@davidwendt](https://github.com/davidwendt)
 - Remove deprecated cudf.set_allocator. ([#13591](https://github.com/rapidsai/cudf/pull/13591)) [@bdice](https://github.com/bdice)
-- Clean up cudf device atomic with `cuda::atomic_ref` ([#13583](https://github.com/rapidsai/cudf/pull/13583)) [@PointKernel](https://github.com/PointKernel)
+- Clean up cudf device atomic with `hip::atomic_ref` ([#13583](https://github.com/rapidsai/cudf/pull/13583)) [@PointKernel](https://github.com/PointKernel)
 - Add java bindings for distinct count ([#13573](https://github.com/rapidsai/cudf/pull/13573)) [@revans2](https://github.com/revans2)
 - Use nvcomp conda package. ([#13566](https://github.com/rapidsai/cudf/pull/13566)) [@bdice](https://github.com/bdice)
 - Add exception to string_scalar if input string exceeds size_type ([#13560](https://github.com/rapidsai/cudf/pull/13560)) [@davidwendt](https://github.com/davidwendt)
@@ -802,7 +802,7 @@
 - Rework nvtext::generate_character_ngrams to use make_strings_children ([#12480](https://github.com/rapidsai/cudf/pull/12480)) [@davidwendt](https://github.com/davidwendt)
 - Raise warnings as errors in the test suite ([#12468](https://github.com/rapidsai/cudf/pull/12468)) [@vyasr](https://github.com/vyasr)
 - Remove `int32` hard-coding in python ([#12467](https://github.com/rapidsai/cudf/pull/12467)) [@galipremsagar](https://github.com/galipremsagar)
-- Use cudaMemcpyDefault. ([#12466](https://github.com/rapidsai/cudf/pull/12466)) [@bdice](https://github.com/bdice)
+- Use hipMemcpyDefault. ([#12466](https://github.com/rapidsai/cudf/pull/12466)) [@bdice](https://github.com/bdice)
 - Update workflows for nightly tests ([#12462](https://github.com/rapidsai/cudf/pull/12462)) [@ajschmidt8](https://github.com/ajschmidt8)
 - Build CUDA `11.8` and Python `3.10` Packages ([#12457](https://github.com/rapidsai/cudf/pull/12457)) [@ajschmidt8](https://github.com/ajschmidt8)
 - JNI build image default as cuda11.8 ([#12441](https://github.com/rapidsai/cudf/pull/12441)) [@pxLi](https://github.com/pxLi)
@@ -2332,7 +2332,7 @@
 - Unpin `dask` and `distributed` in CI ([#10028](https://github.com/rapidsai/cudf/pull/10028)) [@galipremsagar](https://github.com/galipremsagar)
 - Add `_from_column_like_self` factory ([#10022](https://github.com/rapidsai/cudf/pull/10022)) [@isVoid](https://github.com/isVoid)
 - Replace custom CUDA bindings previously provided by RMM with official CUDA Python bindings ([#10008](https://github.com/rapidsai/cudf/pull/10008)) [@shwina](https://github.com/shwina)
-- Use `cuda::std::is_arithmetic` in `cudf::is_numeric` trait. ([#9996](https://github.com/rapidsai/cudf/pull/9996)) [@bdice](https://github.com/bdice)
+- Use `hip::std::is_arithmetic` in `cudf::is_numeric` trait. ([#9996](https://github.com/rapidsai/cudf/pull/9996)) [@bdice](https://github.com/bdice)
 - Clean up CUDA stream use in cuIO ([#9991](https://github.com/rapidsai/cudf/pull/9991)) [@vuule](https://github.com/vuule)
 - Use addressed-ordered first fit for the pinned memory pool ([#9989](https://github.com/rapidsai/cudf/pull/9989)) [@rongou](https://github.com/rongou)
 - Add strings tests to transpose_test.cpp ([#9985](https://github.com/rapidsai/cudf/pull/9985)) [@davidwendt](https://github.com/davidwendt)
@@ -2419,7 +2419,7 @@
 - Support Python UDFs written in terms of rows ([#9343](https://github.com/rapidsai/cudf/pull/9343)) [@brandon-b-miller](https://github.com/brandon-b-miller)
 - JNI: Support nested types in ORC writer ([#9334](https://github.com/rapidsai/cudf/pull/9334)) [@firestarman](https://github.com/firestarman)
 - Optionally nullify out-of-bounds indices in segmented_gather(). ([#9318](https://github.com/rapidsai/cudf/pull/9318)) [@mythrocks](https://github.com/mythrocks)
-- Refactor cuIO timestamp processing with `cuda::std::chrono` ([#9278](https://github.com/rapidsai/cudf/pull/9278)) [@PointKernel](https://github.com/PointKernel)
+- Refactor cuIO timestamp processing with `hip::std::chrono` ([#9278](https://github.com/rapidsai/cudf/pull/9278)) [@PointKernel](https://github.com/PointKernel)
 - Various internal MultiIndex improvements ([#9243](https://github.com/rapidsai/cudf/pull/9243)) [@vyasr](https://github.com/vyasr)
 
 ## 🐛 Bug Fixes
@@ -2621,7 +2621,7 @@
 - Pin mypy in .pre-commit-config.yaml to match conda environment pinning. ([#9300](https://github.com/rapidsai/cudf/pull/9300)) [@bdice](https://github.com/bdice)
 - Use gather.hpp when gather-map exists in device memory ([#9299](https://github.com/rapidsai/cudf/pull/9299)) [@davidwendt](https://github.com/davidwendt)
 - Fix Automerger for `Branch-21.12` from `branch-21.10` ([#9285](https://github.com/rapidsai/cudf/pull/9285)) [@galipremsagar](https://github.com/galipremsagar)
-- Refactor cuIO timestamp processing with `cuda::std::chrono` ([#9278](https://github.com/rapidsai/cudf/pull/9278)) [@PointKernel](https://github.com/PointKernel)
+- Refactor cuIO timestamp processing with `hip::std::chrono` ([#9278](https://github.com/rapidsai/cudf/pull/9278)) [@PointKernel](https://github.com/PointKernel)
 - Change strings copy_if_else to use optional-iterator instead of pair-iterator ([#9266](https://github.com/rapidsai/cudf/pull/9266)) [@davidwendt](https://github.com/davidwendt)
 - Update cudf java bindings to 21.12.0-SNAPSHOT ([#9248](https://github.com/rapidsai/cudf/pull/9248)) [@pxLi](https://github.com/pxLi)
 - Various internal MultiIndex improvements ([#9243](https://github.com/rapidsai/cudf/pull/9243)) [@vyasr](https://github.com/vyasr)
@@ -3570,7 +3570,7 @@
 - Replace ORC writer api with class (#7099) @rgsl888prabhu
 - Pack/unpack functionality to convert tables to and from a serialized format. (#7096) @nvdbaranec
 - Replace parquet writer api with class (#7058) @rgsl888prabhu
-- Add days check to cudf::is_timestamp using cuda::std::chrono classes (#7028) @davidwendt
+- Add days check to cudf::is_timestamp using hip::std::chrono classes (#7028) @davidwendt
 - Fix default parameter values of `write_csv` and `write_parquet` (#6967) @vuule
 - Align `Series.groupby` API to match Pandas (#6964) @kkraus14
 - Share `factorize` implementation with Index and cudf module (#6885) @brandon-b-miller
@@ -3617,7 +3617,7 @@
 - Fix backward compatibility of loading a 0.16 pkl file (#7033) @galipremsagar
 - Decimal casts in JNI became a NOOP (#7032) @revans2
 - Restore usual instance/subclass checking to cudf.DateOffset (#7029) @shwina
-- Add days check to cudf::is_timestamp using cuda::std::chrono classes (#7028) @davidwendt
+- Add days check to cudf::is_timestamp using hip::std::chrono classes (#7028) @davidwendt
 - Fix to_csv delimiter handling of timestamp format (#7023) @davidwendt
 - Pin librdkakfa to gcc 7 compatible version (#7021) @raydouglass
 - Fix `fillna` &amp; `dropna` to also consider `np.nan` as a missing value (#7019) @galipremsagar
@@ -3938,7 +3938,7 @@
 - PR #6693 Fix issue related to `na_values` input in `read_csv`
 - PR #6701 Fix issue when `numpy.str_` is given as input to string parameters in io APIs
 - PR #6704 Fix leak warnings in JNI unit tests
-- PR #6713 Fix missing call to cudaStreamSynchronize in get_value
+- PR #6713 Fix missing call to hipStreamSynchronize in get_value
 - PR #6708 Apply `na_rep` to column names in csv writer
 - PR #6720 Fix implementation of `dtype` parameter in `cudf.read_csv`
 - PR #6721 Add missing serialization methods for ListColumn
@@ -4110,7 +4110,7 @@
 - PR #6379 Add list hashing functionality to MD5
 - PR #6498 Add helper method to ColumnBuilder with some nits
 - PR #6336 Add `join` functionality in cudf concat
-- PR #6653 Replaced SHFL_XOR calls with cub::WarpReduce
+- PR #6653 Replaced SHFL_XOR calls with hipcub::WarpReduce
 - PR #6751 Rework ColumnViewAccess and its usage
 - PR #6698 Remove macros from ORC reader and writer
 - PR #6782 Replace cuio macros with constexpr and inline functions
@@ -4316,7 +4316,7 @@
 - PR #5381 Change numpy usages to cupy in `10min.ipynb`
 - PR #5408 Update pyrrow and arrow-cpp to 0.17.1
 - PR #5366 Add benchmarks for cuIO writers
-- PR #5913 Call cudaMemcpyAsync/cudaMemsetAsync in JNI
+- PR #5913 Call hipMemcpyAsync/hipMemsetAsync in JNI
 - PR #5405 Add Error message to `StringColumn.unary_operator`
 - PR #5424 Add python plumbing for `.str.character_tokenize`
 - PR #5420 Aligning signature of `Series.value_counts` to Pandas

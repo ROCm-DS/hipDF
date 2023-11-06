@@ -57,7 +57,7 @@ struct genericAtomicOperationImpl;
 // single byte atomic operation
 template <typename T, typename Op>
 struct genericAtomicOperationImpl<T, Op, 1> {
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, Op op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, Op op)
   {
     using T_int = unsigned int;
 
@@ -82,7 +82,7 @@ struct genericAtomicOperationImpl<T, Op, 1> {
 // 2 bytes atomic operation
 template <typename T, typename Op>
 struct genericAtomicOperationImpl<T, Op, 2> {
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, Op op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, Op op)
   {
     using T_int      = unsigned int;
     bool is_32_align = (reinterpret_cast<size_t>(addr) & 2) == 0;
@@ -110,7 +110,7 @@ struct genericAtomicOperationImpl<T, Op, 2> {
 // 4 bytes atomic operation
 template <typename T, typename Op>
 struct genericAtomicOperationImpl<T, Op, 4> {
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, Op op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, Op op)
   {
     using T_int = unsigned int;
 
@@ -134,7 +134,7 @@ struct genericAtomicOperationImpl<T, Op, 4> {
 // 8 bytes atomic operation
 template <typename T, typename Op>
 struct genericAtomicOperationImpl<T, Op, 8> {
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, Op op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, Op op)
   {
     using T_int = unsigned long long int;
     static_assert(sizeof(T) == sizeof(T_int));
@@ -163,7 +163,7 @@ struct genericAtomicOperationImpl<T, Op, 8> {
 template <>
 struct genericAtomicOperationImpl<float, DeviceSum, 4> {
   using T = float;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
   {
     return atomicAdd(addr, update_value);
   }
@@ -174,7 +174,7 @@ struct genericAtomicOperationImpl<float, DeviceSum, 4> {
 template <>
 struct genericAtomicOperationImpl<double, DeviceSum, 8> {
   using T = double;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
   {
     return atomicAdd(addr, update_value);
   }
@@ -184,7 +184,7 @@ struct genericAtomicOperationImpl<double, DeviceSum, 8> {
 template <>
 struct genericAtomicOperationImpl<int32_t, DeviceSum, 4> {
   using T = int32_t;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
   {
     return atomicAdd(addr, update_value);
   }
@@ -200,7 +200,7 @@ struct genericAtomicOperationImpl<int32_t, DeviceSum, 4> {
 template <>
 struct genericAtomicOperationImpl<int64_t, DeviceSum, 8> {
   using T = int64_t;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceSum op)
   {
     using T_int = unsigned long long int;
     static_assert(sizeof(T) == sizeof(T_int));
@@ -212,7 +212,7 @@ struct genericAtomicOperationImpl<int64_t, DeviceSum, 8> {
 template <>
 struct genericAtomicOperationImpl<int32_t, DeviceMin, 4> {
   using T = int32_t;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceMin op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceMin op)
   {
     return atomicMin(addr, update_value);
   }
@@ -221,7 +221,7 @@ struct genericAtomicOperationImpl<int32_t, DeviceMin, 4> {
 template <>
 struct genericAtomicOperationImpl<int32_t, DeviceMax, 4> {
   using T = int32_t;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceMax op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceMax op)
   {
     return atomicMax(addr, update_value);
   }
@@ -230,7 +230,7 @@ struct genericAtomicOperationImpl<int32_t, DeviceMax, 4> {
 template <>
 struct genericAtomicOperationImpl<int64_t, DeviceMin, 8> {
   using T = int64_t;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceMin op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceMin op)
   {
     using T_int = long long int;
     static_assert(sizeof(T) == sizeof(T_int));
@@ -242,7 +242,7 @@ struct genericAtomicOperationImpl<int64_t, DeviceMin, 8> {
 template <>
 struct genericAtomicOperationImpl<int64_t, DeviceMax, 8> {
   using T = int64_t;
-  __forceinline__ __device__ T operator()(T* addr, T const& update_value, DeviceMax op)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& update_value, DeviceMax op)
   {
     using T_int = long long int;
     static_assert(sizeof(T) == sizeof(T_int));
@@ -257,7 +257,7 @@ struct typesAtomicCASImpl;
 
 template <typename T>
 struct typesAtomicCASImpl<T, 1> {
-  __forceinline__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
   {
     using T_int = unsigned int;
 
@@ -289,7 +289,7 @@ struct typesAtomicCASImpl<T, 1> {
 
 template <typename T>
 struct typesAtomicCASImpl<T, 2> {
-  __forceinline__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
   {
     using T_int = unsigned int;
 
@@ -318,7 +318,7 @@ struct typesAtomicCASImpl<T, 2> {
 
 template <typename T>
 struct typesAtomicCASImpl<T, 4> {
-  __forceinline__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
   {
     using T_int = unsigned int;
 
@@ -333,7 +333,7 @@ struct typesAtomicCASImpl<T, 4> {
 // 8 bytes atomic operation
 template <typename T>
 struct typesAtomicCASImpl<T, 8> {
-  __forceinline__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
+  __forceinline__ __host__ __device__ T operator()(T* addr, T const& compare, T const& update_value)
   {
     using T_int = unsigned long long int;
     static_assert(sizeof(T) == sizeof(T_int));
@@ -382,7 +382,7 @@ genericAtomicOperation(T* address, T const& update_value, BinaryOp op)
   // Use the underlying representation's type to apply operation for the cudf::detail::timestamp
   auto update_value_rep = update_value.time_since_epoch().count();
   auto fun              = cudf::detail::genericAtomicOperationImpl<R, BinaryOp>{};
-  return T{T::duration(fun(reinterpret_cast<R*>(address), update_value_rep, op))};
+  return T{typename T::duration(fun(reinterpret_cast<R*>(address), update_value_rep, op))};
 }
 
 // specialization for cudf::detail::duration types

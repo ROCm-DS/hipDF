@@ -199,7 +199,7 @@ struct delta_binary_decoder {
         current_value_idx++;
         value[0] = last_value;
       }
-      __syncwarp();
+      hip_extensions::__syncwarp();
       if (current_value_idx >= value_count) { return; }
     }
 
@@ -255,7 +255,7 @@ struct delta_binary_decoder {
       // save value from last lane in warp. this will become the 'first value' added to the
       // deltas calculated in the next iteration (or invocation).
       if (lane_id == warp_size - 1) { last_value = delta; }
-      __syncwarp();
+      hip_extensions::__syncwarp();
     }
   }
 

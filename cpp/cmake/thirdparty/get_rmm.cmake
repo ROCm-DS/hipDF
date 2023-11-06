@@ -14,10 +14,15 @@
 
 # This function finds rmm and sets any additional necessary environment variables.
 function(find_and_configure_rmm)
-  include(${rapids-cmake-dir}/cpm/rmm.cmake)
+  # include(${rapids-cmake-dir}/cpm/rmm.cmake)
 
-  # Find or install RMM
-  rapids_cpm_rmm(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+  # # # Find or install RMM
+  # rapids_cpm_rmm(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+  rapids_cpm_find(
+    rmm 1.0.0
+    GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/rmm
+    GIT_TAG dev
+  )
 
 endfunction()
 

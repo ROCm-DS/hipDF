@@ -26,15 +26,15 @@
 #include <cudf/table/table_device_view.cuh>
 #include <cudf/utilities/span.hpp>
 
-#include <cooperative_groups.h>
-
-#include <cub/cub.cuh>
+// #include <hip/hip_cooperative_groups.h>
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hipcub/hipcub.hpp>
 #include <thrust/iterator/discard_iterator.h>
 
 namespace cudf {
 namespace detail {
-
-namespace cg = cooperative_groups;
+// Todo(HIP)
+namespace cg = hip_extensions::hip_cooperative_groups_ext;
 
 template <cudf::size_type block_size, bool has_nulls>
 __launch_bounds__(block_size) __global__

@@ -40,7 +40,7 @@ namespace {
  * No string data is copied.
  */
 struct udf_string_to_string_view_transform_fn {
-  __device__ cudf::string_view operator()(cudf::strings::udf::udf_string const& dstr)
+  __host__ __device__ cudf::string_view operator()(cudf::strings::udf::udf_string const& dstr)
   {
     return dstr.data() == nullptr ? cudf::string_view{}
                                   : cudf::string_view{dstr.data(), dstr.size_bytes()};

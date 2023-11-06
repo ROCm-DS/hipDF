@@ -26,7 +26,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/mr/device/polymorphic_allocator.hpp>
 
-#include <cuco/static_multimap.cuh>
+#include <hipco/static_multimap.cuh>
 
 #include <cstddef>
 #include <memory>
@@ -59,11 +59,11 @@ template <typename Hasher>
 struct hash_join {
  public:
   using map_type =
-    cuco::static_multimap<hash_value_type,
+    hipco::static_multimap<hash_value_type,
                           cudf::size_type,
-                          cuda::thread_scope_device,
+                          hip::thread_scope_device,
                           rmm::mr::stream_allocator_adaptor<default_allocator<char>>,
-                          cuco::double_hashing<DEFAULT_JOIN_CG_SIZE, Hasher, Hasher>>;
+                          hipco::double_hashing<DEFAULT_JOIN_CG_SIZE, Hasher, Hasher>>;
 
   hash_join()                            = delete;
   ~hash_join()                           = default;

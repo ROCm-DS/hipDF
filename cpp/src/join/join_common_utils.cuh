@@ -25,7 +25,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <thrust/iterator/counting_iterator.h>
 
@@ -62,7 +62,7 @@ class make_pair_function {
   {
     // Compute the hash value of row `i`
     auto row_hash_value = remap_sentinel_hash(_hash(i), _empty_key_sentinel);
-    return cuco::make_pair(row_hash_value, T{i});
+    return hipco::make_pair(row_hash_value, T{i});
   }
 
  private:
@@ -89,7 +89,7 @@ class row_is_valid {
 /**
  * @brief Device functor to determine if two pairs are identical.
  *
- * This equality comparator is designed for use with cuco::static_multimap's
+ * This equality comparator is designed for use with hipco::static_multimap's
  * pair* APIs, which will compare equality based on comparing (key, value)
  * pairs. In the context of joins, these pairs are of the form
  * (row_hash, row_id). A hash probe hit indicates that hash of a probe row's hash is
@@ -111,7 +111,7 @@ class pair_equality {
   }
 
   // The parameters are build/probe rather than left/right because the operator
-  // is called by cuco's kernels with parameters in this order (note that this
+  // is called by hipco's kernels with parameters in this order (note that this
   // is an implementation detail that we should eventually stop relying on by
   // defining operators with suitable heterogeneous typing). Rather than
   // converting to left/right semantics, we can operate directly on build/probe
@@ -310,7 +310,7 @@ __device__ void flush_output_cache(unsigned int const activemask,
   // (__shfl_sync instead of __shfl). __shfl is technically not guaranteed to
   // be safe by the compiler because it is not required by the standard to
   // converge divergent branches before executing.
-  output_offset = cub::ShuffleIndex<detail::warp_size>(output_offset, 0, activemask);
+  output_offset = hipcub::ShuffleIndex<detail::warp_size>(output_offset, 0, activemask);
 
   for (int shared_out_idx = lane_id; shared_out_idx < current_idx_shared[warp_id];
        shared_out_idx += num_threads) {
