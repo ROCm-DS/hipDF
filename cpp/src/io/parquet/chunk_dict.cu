@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2021-2023, NVIDIA CORPORATION.
  *
@@ -112,7 +113,7 @@ __global__ void __launch_bounds__(block_size)
 
   if (not chunk->use_dictionary) { return; }
 
-  using block_reduce = cub::BlockReduce<size_type, block_size>;
+  using block_reduce = hipcub::BlockReduce<size_type, block_size>;
   __shared__ typename block_reduce::TempStorage reduce_storage;
 
   size_type start_row = frag.start_row;

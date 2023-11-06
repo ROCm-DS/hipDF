@@ -26,7 +26,7 @@
 #include <thrust/optional.h>
 #include <thrust/pair.h>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <memory>
 

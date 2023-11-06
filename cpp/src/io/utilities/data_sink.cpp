@@ -20,8 +20,9 @@
 #include <cudf/io/data_sink.hpp>
 #include <cudf/utilities/error.hpp>
 #include <io/utilities/config_utils.hpp>
-
+#ifdef HAS_KVIKIO
 #include <kvikio/file_handle.hpp>
+#endif
 #include <rmm/cuda_stream_view.hpp>
 
 namespace cudf {
@@ -37,9 +38,14 @@ class file_sink : public data_sink {
     CUDF_EXPECTS(_output_stream.is_open(), "Cannot open output file");
 
     if (detail::cufile_integration::is_kvikio_enabled()) {
+#ifdef HAS_KVIKIO
       _kvikio_file = kvikio::FileHandle(filepath, "w");
       CUDF_LOG_INFO("Writing a file using kvikIO, with compatibility mode {}.",
                     _kvikio_file.is_compat_mode_on() ? "on" : "off");
+#else
+      //TODO(HIP): Improve error handling
+      throw std::runtime_error("Kvikio is not available\n");
+#endif
     } else {
       _cufile_out = detail::make_cufile_output(filepath);
     }
@@ -60,7 +66,11 @@ class file_sink : public data_sink {
 
   [[nodiscard]] bool supports_device_write() const override
   {
-    return !_kvikio_file.closed() || _cufile_out != nullptr;
+#ifdef HAS_KVIKIO
+     return !_kvikio_file.closed() ||  _cufile_out != nullptr;
+#else
+     return _cufile_out != nullptr;
+#endif
   }
 
   [[nodiscard]] bool is_device_write_preferred(size_t size) const override
@@ -78,6 +88,7 @@ class file_sink : public data_sink {
     size_t offset = _bytes_written;
     _bytes_written += size;
 
+#ifdef HAS_KVIKIO
     if (!_kvikio_file.closed()) {
       // KvikIO's `pwrite()` returns a `std::future<size_t>` so we convert it
       // to `std::future<void>`
@@ -85,6 +96,7 @@ class file_sink : public data_sink {
         _kvikio_file.pwrite(gpu_data, size, offset).get();
       });
     }
+#endif
     return _cufile_out->write_async(gpu_data, offset, size);
   }
 
@@ -97,7 +109,9 @@ class file_sink : public data_sink {
   std::ofstream _output_stream;
   size_t _bytes_written = 0;
   std::unique_ptr<detail::cufile_output_impl> _cufile_out;
+#ifdef HAS_KVIKIO
   kvikio::FileHandle _kvikio_file;
+#endif
   // The write size above which GDS is faster then d2h-copy + posix-write
   static constexpr size_t _gds_write_preferred_threshold = 128 << 10;  // 128KB
 };

@@ -1026,7 +1026,7 @@ TYPED_TEST(FixedPointTests, DecimalRescaleOverflowAndNullMask)
   using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
 
   auto const vec      = std::vector{1729, 17290, 172900, 1729000};
-  auto const scale    = cuda::std::numeric_limits<RepType>::digits10 + 1;
+  auto const scale    = hip::std::numeric_limits<RepType>::digits10 + 1;
   auto const input    = fp_wrapper{vec.cbegin(), vec.cend(), {1, 0, 0, 1}, scale_type{0}};
   auto const expected = fp_wrapper{{0, 0, 0, 0}, {1, 0, 0, 1}, scale_type{scale}};
   auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(scale));

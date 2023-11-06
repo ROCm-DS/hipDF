@@ -51,6 +51,15 @@ namespace cudf {
 namespace detail {
 namespace {
 
+
+// TODO Need fix?
+// Taken from https://github.com/AMD-AI/warp-primitives/tree/cc1ccce8d25eee12873a34e2076d05fcfdfac3e4
+#include <hip/hip_cooperative_groups.h>
+__device__ inline lane_mask __ballot_sync(lane_mask mask, int predicate)
+{
+    return __ballot(predicate) & mask;
+}
+
 // From benchmark data, the fused kernel optimization appears to perform better
 // when there are more than a trivial number of columns, or when the null mask
 // can also be computed at the same time

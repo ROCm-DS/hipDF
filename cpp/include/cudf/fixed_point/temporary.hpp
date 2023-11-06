@@ -17,12 +17,12 @@
 #pragma once
 // To avoid https://github.com/NVIDIA/libcudacxx/issues/460
 // in libcudacxx with CTK 12.0/12.1
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <cudf/types.hpp>
 
-#include <cuda/std/limits>
-#include <cuda/std/type_traits>
+#include <hip/std/limits>
+#include <hip/std/type_traits>
 
 #include <algorithm>
 #include <string>
@@ -33,13 +33,13 @@ namespace detail {
 template <typename T>
 auto to_string(T value) -> std::string
 {
-  if constexpr (cuda::std::is_same_v<T, __int128_t>) {
+  if constexpr (hip::std::is_same_v<T, __int128_t>) {
     auto s          = std::string{};
     auto const sign = value < 0;
     if (sign) {
       value += 1;  // avoid overflowing if value == _int128_t lowest
       value *= -1;
-      if (value == cuda::std::numeric_limits<__int128_t>::max())
+      if (value == hip::std::numeric_limits<__int128_t>::max())
         return "-170141183460469231731687303715884105728";
       value += 1;  // can add back the one, no need to avoid overflow anymore
     }

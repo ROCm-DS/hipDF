@@ -51,7 +51,7 @@ enum class gzip_header_included { NO, YES };
  * @brief The value used for padding a data buffer such that its size will be multiple of it.
  *
  * Padding is necessary for input/output buffers of several compression/decompression kernels
- * (inflate_kernel and nvcomp snappy). Such kernels operate on aligned data pointers, which require
+ * (inflate_kernel and hipcomp snappy). Such kernels operate on aligned data pointers, which require
  * padding to the buffers so that the pointers can shift along the address space to satisfy their
  * alignment requirement.
  *

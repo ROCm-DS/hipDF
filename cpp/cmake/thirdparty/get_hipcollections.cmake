@@ -12,20 +12,14 @@
 # the License.
 # =============================================================================
 
-# This function finds nvcomp and sets any additional necessary environment variables.
-function(find_and_configure_nvcomp)
-
-  include(${rapids-cmake-dir}/cpm/nvcomp.cmake)
-  rapids_cpm_nvcomp(
-    BUILD_EXPORT_SET cudf-exports
-    INSTALL_EXPORT_SET cudf-exports
-    USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_NVCOMP}
-  )
-
-  # Per-thread default stream
-  if(TARGET nvcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
-    target_compile_definitions(nvcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM)
+# This function finds hipCollections and performs any additional configuration.
+function(find_and_configure_hipcollections)
+  include(${rapids-cmake-dir}/cpm/hipco.cmake)
+  if(BUILD_SHARED_LIBS)
+    rapids_cpm_hipco(BUILD_EXPORT_SET cudf-exports)
+  else()
+    rapids_cpm_hipco(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
   endif()
 endfunction()
 
-find_and_configure_nvcomp()
+find_and_configure_hipcollections()

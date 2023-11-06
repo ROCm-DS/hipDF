@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2018-2023, NVIDIA CORPORATION.
  *
@@ -56,8 +57,8 @@ __device__ thrust::pair<int, int> page_bounds(page_state_s* const s,
                                               bool has_repetition,
                                               rle_stream<level_t, rle_buf_size>* decoders)
 {
-  using block_reduce = cub::BlockReduce<int, preprocess_block_size>;
-  using block_scan   = cub::BlockScan<int, preprocess_block_size>;
+  using block_reduce = hipcub::BlockReduce<int, preprocess_block_size>;
+  using block_scan   = hipcub::BlockScan<int, preprocess_block_size>;
   __shared__ union {
     typename block_reduce::TempStorage reduce_storage;
     typename block_scan::TempStorage scan_storage;
@@ -404,7 +405,7 @@ __device__ size_t totalDictEntriesSize(uint8_t const* data,
   }
   __syncthreads();
 
-  using block_reduce = cub::BlockReduce<size_t, preprocess_block_size>;
+  using block_reduce = hipcub::BlockReduce<size_t, preprocess_block_size>;
   __shared__ typename block_reduce::TempStorage reduce_storage;
   size_t sum_l = block_reduce(reduce_storage).Sum(l_str_len);
 
@@ -683,9 +684,9 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodeStringPageData(
                               ? gpuGetStringData(s, sb, src_pos + skipped_leaf_values + i)
                               : cuda::std::pair<char const*, size_t>{nullptr, 0};
 
-          __shared__ cub::WarpScan<size_type>::TempStorage temp_storage;
+          __shared__ hipcub::WarpScan<size_type>::TempStorage temp_storage;
           size_type offset;
-          cub::WarpScan<size_type>(temp_storage).ExclusiveSum(len, offset);
+          hipcub::WarpScan<size_type>(temp_storage).ExclusiveSum(len, offset);
           offset += last_offset;
 
           if (use_char_ll) {

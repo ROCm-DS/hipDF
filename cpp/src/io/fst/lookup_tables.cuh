@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2022-2023, NVIDIA CORPORATION.
  *
@@ -20,7 +21,7 @@
 #include <io/fst/device_dfa.cuh>
 #include <io/utilities/hostdevice_vector.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <cuda/std/iterator>
 
@@ -70,7 +71,7 @@ class SingleSymbolSmemLUT {
   };
 
  public:
-  using TempStorage = cub::Uninitialized<_TempStorage>;
+  using TempStorage = hipcub::Uninitialized<_TempStorage>;
 
   struct KernelParameter {
     using LookupTableT = SingleSymbolSmemLUT<SymbolT, PreMapOpT>;
@@ -91,7 +92,7 @@ class SingleSymbolSmemLUT {
    *
    * @param symbol_strings Array of strings, where the i-th string holds all symbols
    * (characters!) that correspond to the i-th symbol group index
-   * @param stream The stream that shall be used to cudaMemcpyAsync the lookup table
+   * @param stream The stream that shall be used to hipMemcpyAsync the lookup table
    * @return
    */
   template <typename SymbolGroupItT>
@@ -152,7 +153,7 @@ class SingleSymbolSmemLUT {
     : temp_storage(temp_storage.Alias()), num_valid_entries(kernel_param.num_valid_entries)
   {
     // GPU-side init
-#if CUB_PTX_ARCH > 0
+#if HIPCUB_ARCH > 0
     for (int32_t i = threadIdx.x; i < kernel_param.num_valid_entries; i += blockDim.x) {
       this->temp_storage.sym_to_sgid[i] = kernel_param.sym_to_sgid[i];
     }
@@ -192,7 +193,7 @@ class SymbolGroupLookupOp {
   struct _TempStorage {};
 
  public:
-  using TempStorage = cub::Uninitialized<_TempStorage>;
+  using TempStorage = hipcub::Uninitialized<_TempStorage>;
 
   struct KernelParameter {
     // Declare the member type that the DFA is going to instantiate
@@ -355,7 +356,7 @@ class TransitionTable {
 
  public:
   static constexpr int32_t NUM_STATES = MAX_NUM_STATES;
-  using TempStorage                   = cub::Uninitialized<_TempStorage>;
+  using TempStorage                   = hipcub::Uninitialized<_TempStorage>;
 
   struct KernelParameter {
     using LookupTableT = TransitionTable<MAX_NUM_SYMBOLS, MAX_NUM_STATES>;
@@ -387,7 +388,7 @@ class TransitionTable {
                                              TempStorage& temp_storage)
     : temp_storage(temp_storage.Alias())
   {
-#if CUB_PTX_ARCH > 0
+#if HIPCUB_ARCH > 0
     for (int i = threadIdx.x; i < MAX_NUM_STATES * MAX_NUM_SYMBOLS; i += blockDim.x) {
       this->temp_storage.transitions[i] = kernel_param.transitions[i];
     }
@@ -494,13 +495,13 @@ class dfa_device_view {
 
   using SymbolGroupStorageT      = std::conditional_t<is_complex_op<SymbolGroupIdLookupT>::value,
                                                  typename SymbolGroupIdLookupT::TempStorage,
-                                                 typename cub::NullType>;
+                                                 typename hipcub::NullType>;
   using TransitionTableStorageT  = std::conditional_t<is_complex_op<TransitionTableT>::value,
                                                      typename TransitionTableT::TempStorage,
-                                                     typename cub::NullType>;
+                                                     typename hipcub::NullType>;
   using TranslationTableStorageT = std::conditional_t<is_complex_op<TranslationTableT>::value,
                                                       typename TranslationTableT::TempStorage,
-                                                      typename cub::NullType>;
+                                                      typename hipcub::NullType>;
 
   __device__ auto InitSymbolGroupLUT(SymbolGroupStorageT& temp_storage)
   {
@@ -558,7 +559,7 @@ class TransducerLookupTable {
   };
 
  public:
-  using TempStorage = cub::Uninitialized<_TempStorage>;
+  using TempStorage = hipcub::Uninitialized<_TempStorage>;
 
   struct KernelParameter {
     using LookupTableT = TransducerLookupTable<OutSymbolT,
@@ -640,7 +641,7 @@ class TransducerLookupTable {
     : temp_storage(temp_storage.Alias())
   {
     constexpr uint32_t num_offsets = MAX_NUM_STATES * MAX_NUM_SYMBOLS + 1;
-#if CUB_PTX_ARCH > 0
+#if HIPCUB_ARCH > 0
     for (int i = threadIdx.x; i < num_offsets; i += blockDim.x) {
       this->temp_storage.out_offset[i] = kernel_param.d_out_offsets[i];
     }
@@ -713,7 +714,7 @@ class TranslationOp {
   struct _TempStorage {};
 
  public:
-  using TempStorage = cub::Uninitialized<_TempStorage>;
+  using TempStorage = hipcub::Uninitialized<_TempStorage>;
 
   struct KernelParameter {
     using LookupTableT = TranslationOp<TranslationOpT>;

@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *
@@ -640,7 +641,7 @@ __global__ void __launch_bounds__(rowofs_block_dim)
                          int commentchar)
 {
   auto start         = data.begin();
-  using block_reduce = typename cub::BlockReduce<uint32_t, rowofs_block_dim>;
+  using block_reduce = typename hipcub::BlockReduce<uint32_t, rowofs_block_dim>;
   __shared__ union {
     typename block_reduce::TempStorage bk_storage;
     __align__(8) uint64_t ctxtree[rowofs_block_dim * 2];

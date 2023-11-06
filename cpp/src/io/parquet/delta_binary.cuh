@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023, NVIDIA CORPORATION.
  *
@@ -242,8 +243,8 @@ struct delta_binary_decoder {
       delta += cur_min_delta;
 
       // do inclusive scan to get value - first_value at each position
-      __shared__ cub::WarpScan<int64_t>::TempStorage temp_storage;
-      cub::WarpScan<int64_t>(temp_storage).InclusiveSum(delta, delta);
+      __shared__ hipcub::WarpScan<int64_t>::TempStorage temp_storage;
+      hipcub::WarpScan<int64_t>(temp_storage).InclusiveSum(delta, delta);
 
       // now add first value from header or last value from previous block to get true value
       delta += last_value;

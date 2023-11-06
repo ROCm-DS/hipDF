@@ -23,7 +23,9 @@
 #include <cudf/utilities/span.hpp>
 #include <io/utilities/config_utils.hpp>
 
+#ifdef HAS_KVIKIO
 #include <kvikio/file_handle.hpp>
+#endif
 #include <rmm/device_buffer.hpp>
 
 #include <arrow/io/memory.h>
@@ -46,9 +48,14 @@ class file_source : public datasource {
   explicit file_source(char const* filepath) : _file(filepath, O_RDONLY)
   {
     if (detail::cufile_integration::is_kvikio_enabled()) {
+#ifdef HAS_KVIKIO
       _kvikio_file = kvikio::FileHandle(filepath);
       CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode {}.",
                     _kvikio_file.is_compat_mode_on() ? "on" : "off");
+#else
+      //TODO(HIP): improve error handling
+      throw std::runtime_error("Error: Kvikio is not supported\n");
+#endif
     } else {
       _cufile_in = detail::make_cufile_input(filepath);
     }
@@ -58,7 +65,11 @@ class file_source : public datasource {
 
   [[nodiscard]] bool supports_device_read() const override
   {
-    return !_kvikio_file.closed() || _cufile_in != nullptr;
+#ifdef HAS_KVIKIO
+    return \ !_kvikio_file.closed() ||  _cufile_in != nullptr;
+#else
+    return _cufile_in != nullptr;
+#endif 
   }
 
   [[nodiscard]] bool is_device_read_preferred(size_t size) const override
@@ -75,7 +86,9 @@ class file_source : public datasource {
     CUDF_EXPECTS(supports_device_read(), "Device reads are not supported for this file.");
 
     auto const read_size = std::min(size, _file.size() - offset);
+#ifdef HAS_KVIKIO
     if (!_kvikio_file.closed()) { return _kvikio_file.pread(dst, read_size, offset); }
+#endif
     return _cufile_in->read_async(offset, read_size, dst, stream);
   }
 
@@ -104,7 +117,9 @@ class file_source : public datasource {
 
  private:
   std::unique_ptr<detail::cufile_input_impl> _cufile_in;
+#ifdef HAS_KVIKIO
   kvikio::FileHandle _kvikio_file;
+#endif
   // The read size above which GDS is faster then posix-read + h2d-copy
   static constexpr size_t _gds_read_preferred_threshold = 128 << 10;  // 128KB
 };
@@ -117,11 +132,11 @@ class file_source : public datasource {
   static std::unordered_map<int, bool> result_cache{};
 
   int deviceId{};
-  CUDF_CUDA_TRY(cudaGetDevice(&deviceId));
+  CUDF_CUDA_TRY(hipGetDevice(&deviceId));
 
   if (result_cache.find(deviceId) == result_cache.end()) {
-    cudaDeviceProp props{};
-    CUDF_CUDA_TRY(cudaGetDeviceProperties(&props, deviceId));
+    hipDeviceProp_t props{};
+    CUDF_CUDA_TRY(hipGetDeviceProperties(&props, deviceId));
     result_cache[deviceId] = (props.pageableMemoryAccessUsesHostPageTables == 1);
     CUDF_LOG_INFO(
       "Device {} pageableMemoryAccessUsesHostPageTables: {}", deviceId, result_cache[deviceId]);
@@ -190,11 +205,11 @@ class memory_mapped_source : public file_source {
       return;
     }
 
-    auto const result = cudaHostRegister(_map_addr, _map_size, cudaHostRegisterDefault);
-    if (result == cudaSuccess) {
+    auto const result = hipHostRegister(_map_addr, _map_size, hipHostRegisterDefault);
+    if (result == hipSuccess) {
       _is_map_registered = true;
     } else {
-      CUDF_LOG_WARN("cudaHostRegister failed with {} ({})", result, cudaGetErrorString(result));
+      CUDF_LOG_WARN("hipHostRegister failed with {} ({})", result, hipGetErrorString(result));
     }
   }
 
@@ -205,9 +220,9 @@ class memory_mapped_source : public file_source {
   {
     if (not _is_map_registered) { return; }
 
-    auto const result = cudaHostUnregister(_map_addr);
-    if (result != cudaSuccess) {
-      CUDF_LOG_WARN("cudaHostUnregister failed with {} ({})", result, cudaGetErrorString(result));
+    auto const result = hipHostUnregister(_map_addr);
+    if (result != hipSuccess) {
+      CUDF_LOG_WARN("hipHostUnregister failed with {} ({})", result, hipGetErrorString(result));
     }
   }
 
@@ -284,7 +299,7 @@ class device_buffer_source final : public datasource {
     auto const count  = std::min(size, this->size() - offset);
     auto const stream = cudf::get_default_stream();
     CUDF_CUDA_TRY(
-      cudaMemcpyAsync(dst, _d_buffer.data() + offset, count, cudaMemcpyDefault, stream.value()));
+      hipMemcpyAsync(dst, _d_buffer.data() + offset, count, hipMemcpyDefault, stream.value()));
     stream.synchronize();
     return count;
   }
@@ -308,7 +323,7 @@ class device_buffer_source final : public datasource {
   {
     auto const count = std::min(size, this->size() - offset);
     CUDF_CUDA_TRY(
-      cudaMemcpyAsync(dst, _d_buffer.data() + offset, count, cudaMemcpyDefault, stream.value()));
+      hipMemcpyAsync(dst, _d_buffer.data() + offset, count, hipMemcpyDefault, stream.value()));
     return std::async(std::launch::deferred, [count] { return count; });
   }
 

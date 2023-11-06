@@ -131,10 +131,10 @@ struct DeviceMin {
     // https://eel.is/c++draft/numeric.limits.general#6
     if constexpr (cudf::is_chrono<T>()) {
       return T::max();
-    } else if constexpr (cuda::std::numeric_limits<T>::has_infinity) {
-      return cuda::std::numeric_limits<T>::infinity();
+    } else if constexpr (hip::std::numeric_limits<T>::has_infinity) {
+      return hip::std::numeric_limits<T>::infinity();
     } else {
-      return cuda::std::numeric_limits<T>::max();
+      return hip::std::numeric_limits<T>::max();
     }
   }
 
@@ -142,7 +142,7 @@ struct DeviceMin {
   static constexpr T identity()
   {
     CUDF_FAIL("fixed_point does not yet support DeviceMin identity");
-    return cuda::std::numeric_limits<T>::max();
+    return hip::std::numeric_limits<T>::max();
   }
 
   // @brief identity specialized for string_view
@@ -179,10 +179,10 @@ struct DeviceMax {
     // https://eel.is/c++draft/numeric.limits.general#6
     if constexpr (cudf::is_chrono<T>()) {
       return T::min();
-    } else if constexpr (cuda::std::numeric_limits<T>::has_infinity) {
-      return -cuda::std::numeric_limits<T>::infinity();
+    } else if constexpr (hip::std::numeric_limits<T>::has_infinity) {
+      return -hip::std::numeric_limits<T>::infinity();
     } else {
-      return cuda::std::numeric_limits<T>::lowest();
+      return hip::std::numeric_limits<T>::lowest();
     }
   }
 
@@ -190,7 +190,7 @@ struct DeviceMax {
   static constexpr T identity()
   {
     CUDF_FAIL("fixed_point does not yet support DeviceMax identity");
-    return cuda::std::numeric_limits<T>::lowest();
+    return hip::std::numeric_limits<T>::lowest();
   }
 
   template <typename T, std::enable_if_t<std::is_same_v<T, cudf::string_view>>* = nullptr>

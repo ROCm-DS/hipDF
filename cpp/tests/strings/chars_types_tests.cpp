@@ -88,7 +88,7 @@ TEST_P(CharsTypes, AllTypes)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
 }
 
-INSTANTIATE_TEST_CASE_P(StringsCharsTest,
+INSTANTIATE_TEST_SUITE_P(StringsCharsTest,
                         CharsTypes,
                         testing::ValuesIn(std::array<cudf::strings::string_character_types, 7>{
                           cudf::strings::string_character_types::DECIMAL,

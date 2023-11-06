@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 /**
  * @brief `assert`-like macro for device code

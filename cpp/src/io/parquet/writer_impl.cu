@@ -25,7 +25,7 @@
 #include "parquet_gpu.cuh"
 #include "writer_impl.hpp"
 
-#include <io/comp/nvcomp_adapter.hpp>
+#include <io/comp/hipcomp_adapter.hpp>
 #include <io/statistics/column_statistics.cuh>
 #include <io/utilities/column_utils.cuh>
 #include <io/utilities/config_utils.hpp>
@@ -867,7 +867,7 @@ parquet_column_view::parquet_column_view(schema_tree_node const& schema_node,
   }
   _nullability = std::vector<uint8_t>(r_nullability.crbegin(), r_nullability.crend());
   // TODO(cp): Explore doing this for all columns in a single go outside this ctor. Maybe using
-  // hostdevice_vector. Currently this involves a cudaMemcpyAsync for each column.
+  // hostdevice_vector. Currently this involves a hipMemcpyAsync for each column.
   _d_nullability = cudf::detail::make_device_uvector_async(
     _nullability, stream, rmm::mr::get_current_device_resource());
 
@@ -981,28 +981,28 @@ void gather_fragment_statistics(device_span<statistics_chunk> frag_stats,
   stream.synchronize();
 }
 
-auto to_nvcomp_compression_type(Compression codec)
+auto to_hipcomp_compression_type(Compression codec)
 {
-  if (codec == Compression::SNAPPY) return nvcomp::compression_type::SNAPPY;
-  if (codec == Compression::ZSTD) return nvcomp::compression_type::ZSTD;
+  if (codec == Compression::SNAPPY) return hipcomp::compression_type::SNAPPY;
+  if (codec == Compression::ZSTD) return hipcomp::compression_type::ZSTD;
   CUDF_FAIL("Unsupported compression type");
 }
 
 auto page_alignment(Compression codec)
 {
   if (codec == Compression::UNCOMPRESSED or
-      nvcomp::is_compression_disabled(to_nvcomp_compression_type(codec))) {
+      hipcomp::is_compression_disabled(to_hipcomp_compression_type(codec))) {
     return 1u;
   }
 
-  return 1u << nvcomp::compress_input_alignment_bits(to_nvcomp_compression_type(codec));
+  return 1u << hipcomp::compress_input_alignment_bits(to_hipcomp_compression_type(codec));
 }
 
 size_t max_compression_output_size(Compression codec, uint32_t compression_blocksize)
 {
   if (codec == Compression::UNCOMPRESSED) return 0;
 
-  return compress_max_output_chunk_size(to_nvcomp_compression_type(codec), compression_blocksize);
+  return compress_max_output_chunk_size(to_hipcomp_compression_type(codec), compression_blocksize);
 }
 
 auto init_page_sizes(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
@@ -1090,12 +1090,12 @@ size_t max_page_bytes(Compression compression, size_t max_page_size_bytes)
 {
   if (compression == parquet::Compression::UNCOMPRESSED) { return max_page_size_bytes; }
 
-  auto const ncomp_type   = to_nvcomp_compression_type(compression);
-  auto const nvcomp_limit = nvcomp::is_compression_disabled(ncomp_type)
+  auto const ncomp_type   = to_hipcomp_compression_type(compression);
+  auto const hipcomp_limit = hipcomp::is_compression_disabled(ncomp_type)
                               ? std::nullopt
-                              : nvcomp::compress_max_allowed_chunk_size(ncomp_type);
+                              : hipcomp::compress_max_allowed_chunk_size(ncomp_type);
 
-  auto max_size = std::min(nvcomp_limit.value_or(max_page_size_bytes), max_page_size_bytes);
+  auto max_size = std::min(hipcomp_limit.value_or(max_page_size_bytes), max_page_size_bytes);
   // page size must fit in a 32-bit signed integer
   return std::min<size_t>(max_size, std::numeric_limits<int32_t>::max());
 }
@@ -1319,19 +1319,19 @@ void encode_pages(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
   gpu::EncodePages(batch_pages, write_v2_headers, comp_in, comp_out, comp_res, stream);
   switch (compression) {
     case parquet::Compression::SNAPPY:
-      if (nvcomp::is_compression_disabled(nvcomp::compression_type::SNAPPY)) {
+      if (hipcomp::is_compression_disabled(hipcomp::compression_type::SNAPPY)) {
         gpu_snap(comp_in, comp_out, comp_res, stream);
       } else {
-        nvcomp::batched_compress(
-          nvcomp::compression_type::SNAPPY, comp_in, comp_out, comp_res, stream);
+        hipcomp::batched_compress(
+          hipcomp::compression_type::SNAPPY, comp_in, comp_out, comp_res, stream);
       }
       break;
     case parquet::Compression::ZSTD: {
-      if (auto const reason = nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD);
+      if (auto const reason = hipcomp::is_compression_disabled(hipcomp::compression_type::ZSTD);
           reason) {
         CUDF_FAIL("Compression error: " + reason.value());
       }
-      nvcomp::batched_compress(nvcomp::compression_type::ZSTD, comp_in, comp_out, comp_res, stream);
+      hipcomp::batched_compress(hipcomp::compression_type::ZSTD, comp_in, comp_out, comp_res, stream);
 
       break;
     }
@@ -1355,10 +1355,10 @@ void encode_pages(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
   }
 
   auto h_chunks_in_batch = chunks.host_view().subspan(first_rowgroup, rowgroups_in_batch);
-  CUDF_CUDA_TRY(cudaMemcpyAsync(h_chunks_in_batch.data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(h_chunks_in_batch.data(),
                                 d_chunks_in_batch.data(),
                                 d_chunks_in_batch.flat_view().size_bytes(),
-                                cudaMemcpyDefault,
+                                hipMemcpyDefault,
                                 stream.value()));
 
   if (comp_stats.has_value()) {
@@ -2171,10 +2171,10 @@ void writer::impl::write_parquet_data_to_sink(
         } else {
           CUDF_EXPECTS(bounce_buffer.size() >= ck.compressed_size,
                        "Bounce buffer was not properly initialized.");
-          CUDF_CUDA_TRY(cudaMemcpyAsync(bounce_buffer.data(),
+          CUDF_CUDA_TRY(hipMemcpyAsync(bounce_buffer.data(),
                                         dev_bfr + ck.ck_stat_size,
                                         ck.compressed_size,
-                                        cudaMemcpyDefault,
+                                        hipMemcpyDefault,
                                         _stream.value()));
           _stream.synchronize();
           _out_sink[p]->host_write(bounce_buffer.data(), ck.compressed_size);
@@ -2212,10 +2212,10 @@ void writer::impl::write_parquet_data_to_sink(
           // start transfer of the column index
           std::vector<uint8_t> column_idx;
           column_idx.resize(ck.column_index_size);
-          CUDF_CUDA_TRY(cudaMemcpyAsync(column_idx.data(),
+          CUDF_CUDA_TRY(hipMemcpyAsync(column_idx.data(),
                                         ck.column_index_blob,
                                         ck.column_index_size,
-                                        cudaMemcpyDefault,
+                                        hipMemcpyDefault,
                                         _stream.value()));
 
           // calculate offsets while the column index is transferring

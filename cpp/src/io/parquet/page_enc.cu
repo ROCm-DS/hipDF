@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *
@@ -26,7 +27,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <cuda/std/chrono>
 
@@ -164,7 +165,7 @@ void __device__ init_frag_state(frag_init_state_s* const s,
 template <int block_size>
 void __device__ calculate_frag_size(frag_init_state_s* const s, int t)
 {
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ typename block_reduce::TempStorage reduce_storage;
 
   auto const physical_type   = s->col.physical_type;
@@ -229,7 +230,7 @@ Encoding __device__ determine_encoding(PageType page_type,
   }
 }
 
-// operator to use with warp_reduce. stolen from cub::Sum
+// operator to use with warp_reduce. stolen from hipcub::Sum
 struct BitwiseOr {
   /// Binary OR operator, returns <tt>a | b</tt>
   template <typename T>
@@ -1005,8 +1006,8 @@ __global__ void __launch_bounds__(128, 8)
                  bool write_v2_headers)
 {
   __shared__ __align__(8) page_enc_state_s state_g;
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
-  using block_scan   = cub::BlockScan<uint32_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
+  using block_scan   = hipcub::BlockScan<uint32_t, block_size>;
   __shared__ union {
     typename block_reduce::TempStorage reduce_storage;
     typename block_scan::TempStorage scan_storage;
@@ -1438,7 +1439,7 @@ __global__ void __launch_bounds__(decide_compression_block_size)
 {
   __shared__ __align__(8) EncColumnChunk ck_g[decide_compression_warps_in_block];
   __shared__ __align__(4) unsigned int compression_error[decide_compression_warps_in_block];
-  using warp_reduce = cub::WarpReduce<uint32_t>;
+  using warp_reduce = hipcub::WarpReduce<uint32_t>;
   __shared__ typename warp_reduce::TempStorage temp_storage[decide_compression_warps_in_block][2];
 
   auto const lane_id  = threadIdx.x % cudf::detail::warp_size;

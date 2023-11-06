@@ -15,7 +15,7 @@
  */
 
 #include "io_uncomp.hpp"
-#include "nvcomp_adapter.hpp"
+#include "hipcomp_adapter.hpp"
 #include "unbz2.hpp"  // bz2 uncompress
 
 #include <io/utilities/hostdevice_vector.hpp>
@@ -24,7 +24,7 @@
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/span.hpp>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <cstring>  // memset
 
@@ -503,7 +503,7 @@ size_t decompress_snappy(host_span<uint8_t const> src, host_span<uint8_t> dst)
 }
 
 /**
- * @brief ZSTD decompressor that uses nvcomp
+ * @brief ZSTD decompressor that uses hipcomp
  */
 size_t decompress_zstd(host_span<uint8_t const> src,
                        host_span<uint8_t> dst,
@@ -526,7 +526,7 @@ size_t decompress_zstd(host_span<uint8_t const> src,
   hd_stats[0]   = compression_result{0, compression_status::FAILURE};
   hd_stats.host_to_device_async(stream);
   auto const max_uncomp_page_size = dst.size();
-  nvcomp::batched_decompress(nvcomp::compression_type::ZSTD,
+  hipcomp::batched_decompress(hipcomp::compression_type::ZSTD,
                              hd_srcs,
                              hd_dsts,
                              hd_stats,
@@ -538,8 +538,8 @@ size_t decompress_zstd(host_span<uint8_t const> src,
   CUDF_EXPECTS(hd_stats[0].status == compression_status::SUCCESS, "ZSTD decompression failed");
 
   // Copy temporary output to `dst`
-  CUDF_CUDA_TRY(cudaMemcpyAsync(
-    dst.data(), d_dst.data(), hd_stats[0].bytes_written, cudaMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(hipMemcpyAsync(
+    dst.data(), d_dst.data(), hd_stats[0].bytes_written, hipMemcpyDefault, stream.value()));
 
   return hd_stats[0].bytes_written;
 }

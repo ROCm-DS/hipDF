@@ -41,7 +41,7 @@
 #include <thrust/iterator/transform_output_iterator.h>
 #include <thrust/tabulate.h>
 
-#include <nvcomp/snappy.h>
+#include <hipcomp/snappy.h>
 
 #include <memory>
 #include <numeric>
@@ -288,13 +288,13 @@ rmm::device_buffer decompress_data(datasource& source,
     compressed_data_sizes.host_to_device_async(stream);
 
     cudf::detail::hostdevice_vector<size_t> uncompressed_data_sizes(num_blocks, stream);
-    nvcompStatus_t status =
-      nvcompBatchedSnappyGetDecompressSizeAsync(compressed_data_ptrs.device_ptr(),
+    hipcompStatus_t status =
+      hipcompBatchedSnappyGetDecompressSizeAsync(compressed_data_ptrs.device_ptr(),
                                                 compressed_data_sizes.device_ptr(),
                                                 uncompressed_data_sizes.device_ptr(),
                                                 num_blocks,
                                                 stream.value());
-    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess,
+    CUDF_EXPECTS(status == hipcompStatus_t::hipcompSuccess,
                  "Unable to get uncompressed sizes for snappy compressed blocks");
     uncompressed_data_sizes.device_to_host_sync(stream);
 
@@ -305,8 +305,8 @@ rmm::device_buffer decompress_data(datasource& source,
 
     size_t temp_size;
     status =
-      nvcompBatchedSnappyDecompressGetTempSize(num_blocks, max_uncomp_block_size, &temp_size);
-    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess,
+      hipcompBatchedSnappyDecompressGetTempSize(num_blocks, max_uncomp_block_size, &temp_size);
+    CUDF_EXPECTS(status == hipcompStatus_t::hipcompSuccess,
                  "Unable to get scratch size for snappy decompression");
 
     rmm::device_buffer scratch(temp_size, stream);
@@ -329,9 +329,9 @@ rmm::device_buffer decompress_data(datasource& source,
                      });
 
     rmm::device_uvector<size_t> actual_uncompressed_data_sizes(num_blocks, stream);
-    rmm::device_uvector<nvcompStatus_t> statuses(num_blocks, stream);
+    rmm::device_uvector<hipcompStatus_t> statuses(num_blocks, stream);
 
-    status = nvcompBatchedSnappyDecompressAsync(compressed_data_ptrs.device_ptr(),
+    status = hipcompBatchedSnappyDecompressAsync(compressed_data_ptrs.device_ptr(),
                                                 compressed_data_sizes.device_ptr(),
                                                 uncompressed_data_sizes.device_ptr(),
                                                 actual_uncompressed_data_sizes.data(),
@@ -341,7 +341,7 @@ rmm::device_buffer decompress_data(datasource& source,
                                                 uncompressed_data_ptrs.data(),
                                                 statuses.data(),
                                                 stream);
-    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess, "unable to perform snappy decompression");
+    CUDF_EXPECTS(status == hipcompStatus_t::hipcompSuccess, "unable to perform snappy decompression");
 
     CUDF_EXPECTS(thrust::equal(rmm::exec_policy(stream),
                                uncompressed_data_sizes.d_begin(),
@@ -351,7 +351,7 @@ rmm::device_buffer decompress_data(datasource& source,
     CUDF_EXPECTS(thrust::equal(rmm::exec_policy(stream),
                                statuses.begin(),
                                statuses.end(),
-                               thrust::make_constant_iterator(nvcompStatus_t::nvcompSuccess)),
+                               thrust::make_constant_iterator(hipcompStatus_t::hipcompSuccess)),
                  "Error during snappy decompression");
 
     // Update blocks offsets & sizes to refer to uncompressed data
@@ -463,10 +463,10 @@ std::vector<column_buffer> decode_data(metadata& meta,
   // Copy valid bits that are shared between columns
   for (size_t i = 0; i < out_buffers.size(); i++) {
     if (valid_alias[i] != nullptr) {
-      CUDF_CUDA_TRY(cudaMemcpyAsync(out_buffers[i].null_mask(),
+      CUDF_CUDA_TRY(hipMemcpyAsync(out_buffers[i].null_mask(),
                                     valid_alias[i],
                                     out_buffers[i].null_mask_size(),
-                                    cudaMemcpyDefault,
+                                    hipMemcpyDefault,
                                     stream.value()));
     }
   }

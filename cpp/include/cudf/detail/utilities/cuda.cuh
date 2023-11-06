@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *
@@ -24,7 +25,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <type_traits>
 
@@ -152,9 +153,9 @@ __device__ T single_lane_block_sum_reduce(T lane_value)
   // threadId.x == 0
   T result{0};
   if (warp_id == 0) {
-    __shared__ typename cub::WarpReduce<T>::TempStorage temp;
+    __shared__ typename hipcub::WarpReduce<T>::TempStorage temp;
     lane_value = (lane_id < warps_per_block) ? lane_values[lane_id] : T{0};
-    result     = cub::WarpReduce<T>(temp).Sum(lane_value);
+    result     = hipcub::WarpReduce<T>(temp).Sum(lane_value);
   }
   // Shared memory has block scope, so sync here to ensure no data
   // races between successive calls to this function in the same
@@ -182,12 +183,12 @@ cudf::size_type elements_per_thread(Kernel kernel,
 
   // calculate theoretical occupancy
   int max_blocks = 0;
-  CUDF_CUDA_TRY(cudaOccupancyMaxActiveBlocksPerMultiprocessor(&max_blocks, kernel, block_size, 0));
+  CUDF_CUDA_TRY(hipOccupancyMaxActiveBlocksPerMultiprocessor(&max_blocks, kernel, block_size, 0));
 
   int device = 0;
-  CUDF_CUDA_TRY(cudaGetDevice(&device));
+  CUDF_CUDA_TRY(hipGetDevice(&device));
   int num_sms = 0;
-  CUDF_CUDA_TRY(cudaDeviceGetAttribute(&num_sms, cudaDevAttrMultiProcessorCount, device));
+  CUDF_CUDA_TRY(hipDeviceGetAttribute(&num_sms, hipDeviceAttributeMultiprocessorCount, device));
   int per_thread = total_size / (max_blocks * num_sms * block_size);
   return std::clamp(per_thread, 1, max_per_thread);
 }

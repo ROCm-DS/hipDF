@@ -156,17 +156,17 @@ std::pair<rmm::device_uvector<KeyType>, rmm::device_uvector<IndexType>> stable_s
   rmm::device_uvector<KeyType> keys_buffer2(keys.size(), stream);
   rmm::device_uvector<IndexType> order_buffer1(keys.size(), stream);
   rmm::device_uvector<IndexType> order_buffer2(keys.size(), stream);
-  cub::DoubleBuffer<IndexType> order_buffer(order_buffer1.data(), order_buffer2.data());
-  cub::DoubleBuffer<KeyType> keys_buffer(keys_buffer1.data(), keys_buffer2.data());
+  hipcub::DoubleBuffer<IndexType> order_buffer(order_buffer1.data(), order_buffer2.data());
+  hipcub::DoubleBuffer<KeyType> keys_buffer(keys_buffer1.data(), keys_buffer2.data());
   size_t temp_storage_bytes = 0;
-  cub::DeviceRadixSort::SortPairs(
+  hipcub::DeviceRadixSort::SortPairs(
     nullptr, temp_storage_bytes, keys_buffer, order_buffer, keys.size());
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   thrust::copy(rmm::exec_policy(stream), keys.begin(), keys.end(), keys_buffer1.begin());
   thrust::sequence(rmm::exec_policy(stream), order_buffer1.begin(), order_buffer1.end());
 
-  cub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
+  hipcub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   keys_buffer,
                                   order_buffer,
@@ -255,10 +255,10 @@ tree_meta_t get_tree_representation(device_span<PdaTokenT const> tokens,
       thrust::find(rmm::exec_policy(stream), tokens.begin(), tokens.end(), token_t::ErrorBegin);
     SymbolOffsetT error_index;
     CUDF_CUDA_TRY(
-      cudaMemcpyAsync(&error_index,
+      hipMemcpyAsync(&error_index,
                       token_indices.data() + thrust::distance(tokens.begin(), error_location),
                       sizeof(SymbolOffsetT),
-                      cudaMemcpyDefault,
+                      hipMemcpyDefault,
                       stream.value()));
     stream.synchronize();
     CUDF_FAIL("JSON Parser encountered an invalid format at location " +

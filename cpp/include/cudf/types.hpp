@@ -16,7 +16,8 @@
 
 #pragma once
 
-#ifdef __CUDACC__
+// TODO is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
+#ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
 #else
 #define CUDF_HOST_DEVICE
@@ -26,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+
 
 /**
  * @file
@@ -93,7 +95,13 @@ using thread_index_type = int64_t;   ///< Thread index type in kernels
 template <typename T>
 size_type distance(T f, T l)
 {
+  //TODO(HIP): HIPRTC doesn't define std::distance, while NVRTC does (even if iterator is not included!)
+  // investigate further workarounds if required
+  // We could e.g. add an sample implementation to the jitsafe iterator
+  // header in jitify (header <iterator> is supposed to provide std::distance)
+  #ifndef __HIPCC_RTC__
   return static_cast<size_type>(std::distance(f, l));
+  #endif
 }
 
 /**

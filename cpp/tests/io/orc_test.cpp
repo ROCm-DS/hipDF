@@ -32,7 +32,7 @@
 #include <cudf/table/table.hpp>
 #include <cudf/table/table_view.hpp>
 #include <cudf/utilities/span.hpp>
-#include <src/io/comp/nvcomp_adapter.hpp>
+#include <src/io/comp/hipcomp_adapter.hpp>
 
 #include <type_traits>
 
@@ -1098,8 +1098,8 @@ TEST_F(OrcReaderTest, SingleInputs)
 
 TEST_F(OrcReaderTest, zstdCompressionRegression)
 {
-  if (cudf::io::nvcomp::is_decompression_disabled(cudf::io::nvcomp::compression_type::ZSTD)) {
-    GTEST_SKIP() << "Newer nvCOMP version is required";
+  if (cudf::io::hipcomp::is_decompression_disabled(cudf::io::hipcomp::compression_type::ZSTD)) {
+    GTEST_SKIP() << "Newer hipcomp version is required";
   }
 
   // Test with zstd compressed orc file with high compression ratio.
@@ -1184,7 +1184,7 @@ TEST_P(OrcWriterTestDecimal, Decimal64)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(tbl.column(0), result.tbl->view().column(0));
 }
 
-INSTANTIATE_TEST_CASE_P(OrcWriterTest,
+INSTANTIATE_TEST_SUITE_P(OrcWriterTest,
                         OrcWriterTestDecimal,
                         ::testing::Combine(::testing::Values(1, 10000, 10001, 34567),
                                            ::testing::Values(-2, 0, 2)));
@@ -1367,7 +1367,7 @@ TEST_P(OrcWriterTestStripes, StripeSize)
   }
 }
 
-INSTANTIATE_TEST_CASE_P(OrcWriterTest,
+INSTANTIATE_TEST_SUITE_P(OrcWriterTest,
                         OrcWriterTestStripes,
                         ::testing::Values(std::make_tuple(800000ul, 1000000),
                                           std::make_tuple(2000000ul, 1000000),
@@ -1682,9 +1682,9 @@ TEST_F(OrcMetadataReaderTest, TestNested)
 
 TEST_F(OrcReaderTest, ZstdMaxCompressionRate)
 {
-  if (cudf::io::nvcomp::is_decompression_disabled(cudf::io::nvcomp::compression_type::ZSTD) or
-      cudf::io::nvcomp::is_compression_disabled(cudf::io::nvcomp::compression_type::ZSTD)) {
-    GTEST_SKIP() << "Newer nvCOMP version is required";
+  if (cudf::io::hipcomp::is_decompression_disabled(cudf::io::hipcomp::compression_type::ZSTD) or
+      cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD)) {
+    GTEST_SKIP() << "Newer hipcomp version is required";
   }
 
   // Encodes as 64KB of zeros, which compresses to 18 bytes with ZSTD

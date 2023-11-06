@@ -1,5 +1,5 @@
 # =============================================================================
-# Copyright (c) 2023, NVIDIA CORPORATION.
+# Copyright (c) 2020-2023, NVIDIA CORPORATION.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
 # in compliance with the License. You may obtain a copy of the License at
@@ -13,25 +13,34 @@
 # =============================================================================
 
 # This function finds thrust and sets any additional necessary environment variables.
-function(find_and_configure_libcudacxx)
-  # Make sure we install libcudacxx beside our patched version of thrust
+function(find_and_configure_thrust)
+
+  include(${rapids-cmake-dir}/cpm/rocthrust.cmake)
+  include(${rapids-cmake-dir}/cpm/package_override.cmake)
+
+  set(cudf_patch_dir "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches")
+  rapids_cpm_package_override("${cudf_patch_dir}/thrust_override.json")
+
+  # Make sure we install thrust into the `include/libcudf` subdirectory instead of the default
   include(GNUInstallDirs)
-  set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/libcudf")
+  set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/libhipdf")
   set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_INCLUDEDIR}/lib")
 
-  include(${rapids-cmake-dir}/cpm/libcudacxx.cmake)
-  rapids_cpm_libcudacxx(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+  # Find or install Thrust with our custom set of patches
+  rapids_cpm_rocthrust(
+    NAMESPACE cudf
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+  )
 
-  if(libcudacxx_SOURCE_DIR)
+  if(Thrust_SOURCE_DIR)
     # Store where CMake can find our custom Thrust install
     include("${rapids-cmake-dir}/export/find_package_root.cmake")
     rapids_export_find_package_root(
-      INSTALL
-      libcudacxx
-      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/libcudacxx]=]
-      cudf-exports
+      INSTALL Thrust
+      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/thrust]=] cudf-exports
     )
   endif()
 endfunction()
 
-find_and_configure_libcudacxx()
+find_and_configure_thrust()

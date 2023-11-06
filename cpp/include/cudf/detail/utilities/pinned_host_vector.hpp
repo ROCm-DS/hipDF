@@ -27,7 +27,7 @@
 namespace cudf::detail {
 
 /*! \p pinned_allocator is a CUDA-specific host memory allocator
- *  that employs \c cudaMallocHost for allocation.
+ *  that employs \c hipHostMalloc for allocation.
  *
  * This implementation is ported from the experimental/pinned_allocator
  * that Thrust used to provide.
@@ -38,7 +38,7 @@ template <typename T>
 class pinned_allocator;
 
 /*! \p pinned_allocator is a CUDA-specific host memory allocator
- *  that employs \c cudaMallocHost for allocation.
+ *  that employs \c hipHostMalloc for allocation.
  *
  * This implementation is ported from the experimental/pinned_allocator
  * that Thrust used to provide.
@@ -64,7 +64,7 @@ class pinned_allocator<void> {
 };
 
 /*! \p pinned_allocator is a CUDA-specific host memory allocator
- *  that employs \c cudaMallocHost for allocation.
+ *  that employs \c hipHostMalloc for allocation.
  *
  * This implementation is ported from the experimental/pinned_allocator
  * that Thrust used to provide.
@@ -154,7 +154,7 @@ class pinned_allocator {
     if (cnt > this->max_size()) { throw std::bad_alloc(); }  // end if
 
     pointer result(0);
-    CUDF_CUDA_TRY(cudaMallocHost(reinterpret_cast<void**>(&result), cnt * sizeof(value_type)));
+    CUDF_CUDA_TRY(hipHostMalloc(reinterpret_cast<void**>(&result), cnt * sizeof(value_type)));
     return result;
   }
 
@@ -169,7 +169,7 @@ class pinned_allocator {
    *        It is the responsibility of the caller to destroy
    *        the objects stored at \p p.
    */
-  __host__ inline void deallocate(pointer p, size_type /*cnt*/) { CUDF_CUDA_TRY(cudaFreeHost(p)); }
+  __host__ inline void deallocate(pointer p, size_type /*cnt*/) { CUDF_CUDA_TRY(hipHostFree(p)); }
 
   /**
    * @brief This method returns the maximum size of the \c cnt parameter

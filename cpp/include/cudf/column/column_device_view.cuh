@@ -1261,7 +1261,8 @@ struct value_accessor {
    * @param[in] i index of element
    * @return value of element at index `i`
    */
-  __device__ T operator()(cudf::size_type i) const { return col.element<T>(i); }
+  //TODO(HIP): why is __host__ necessary to avoid a thrust-related compiler error?
+  __host__ __device__ T operator()(cudf::size_type i) const { return col.element<T>(i); }
 };
 
 /**

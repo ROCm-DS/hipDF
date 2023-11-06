@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2023, NVIDIA CORPORATION.
  *
@@ -92,7 +93,7 @@ inline __device__ void ll_strcpy(uint8_t* dst, uint8_t const* src, size_t len, u
 template <int block_size>
 __device__ void block_excl_sum(size_type* arr, size_type length, size_type initial_value)
 {
-  using block_scan = cub::BlockScan<size_type, block_size>;
+  using block_scan = hipcub::BlockScan<size_type, block_size>;
   __shared__ typename block_scan::TempStorage scan_storage;
   int const t = threadIdx.x;
 
@@ -101,7 +102,7 @@ __device__ void block_excl_sum(size_type* arr, size_type length, size_type initi
     int const tidx = pos + t;
     size_type tval = tidx < length ? arr[tidx] : 0;
     size_type block_sum;
-    block_scan(scan_storage).ExclusiveScan(tval, tval, initial_value, cub::Sum(), block_sum);
+    block_scan(scan_storage).ExclusiveScan(tval, tval, initial_value, hipcub::Sum(), block_sum);
     if (tidx < length) { arr[tidx] = tval; }
     initial_value += block_sum;
   }

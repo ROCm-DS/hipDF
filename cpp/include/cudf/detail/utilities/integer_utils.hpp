@@ -185,7 +185,7 @@ constexpr bool is_a_power_of_two(I val) noexcept
 template <typename T>
 constexpr auto absolute_value(T value) -> T
 {
-  if constexpr (cuda::std::is_signed<T>()) return numeric::detail::abs(value);
+  if constexpr (hip::std::is_signed<T>()) return numeric::detail::abs(value);
   return value;
 }
 

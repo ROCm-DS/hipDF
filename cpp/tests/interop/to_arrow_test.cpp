@@ -571,7 +571,7 @@ TEST_P(ToArrowTestSlice, SliceTest)
   ASSERT_EQ(expected_arrow_table->Equals(*got_arrow_table, true), true);
 }
 
-INSTANTIATE_TEST_CASE_P(ToArrowTest,
+INSTANTIATE_TEST_SUITE_P(ToArrowTest,
                         ToArrowTestSlice,
                         ::testing::Values(std::make_tuple(0, 10000),
                                           std::make_tuple(100, 3000),

@@ -16,10 +16,10 @@
 
 #include <cudf/detail/utilities/stacktrace.hpp>
 
-#include <rmm/cuda_stream.hpp>
+#include <rmm/hip_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 #include <cstdlib>
 #include <cstring>
@@ -37,10 +37,10 @@
 // 1. STREAM_MODE_TESTING=OFF: In this mode, cudf::get_default_stream will
 //    return a custom stream and stream_is_invalid will return true if any CUDA
 //    API is called using any of CUDA's default stream constants
-//    (cudaStreamLegacy, cudaStreamDefault, or cudaStreamPerThread). This check
+//    (cudaStreamLegacy, hipStreamDefault, or hipStreamPerThread). This check
 //    is sufficient to ensure that cudf is using cudf::get_default_stream
 //    everywhere internally rather than implicitly using stream 0,
-//    cudaStreamDefault, cudaStreamLegacy, thrust execution policies, etc. It
+//    hipStreamDefault, cudaStreamLegacy, thrust execution policies, etc. It
 //    is not sufficient to guarantee a stream-ordered API because it will not
 //    identify places in the code that use cudf::get_default_stream instead of
 //    properly forwarding along a user-provided stream.
@@ -68,7 +68,7 @@ rmm::cuda_stream_view const get_default_stream()
 
 }  // namespace cudf
 
-bool stream_is_invalid(cudaStream_t stream)
+bool stream_is_invalid(hipStream_t stream)
 {
 #ifdef STREAM_MODE_TESTING
   // In this mode the _only_ valid stream is the one returned by cudf::test::get_default_stream.
@@ -79,15 +79,15 @@ bool stream_is_invalid(cudaStream_t stream)
   // `thrust::device` and the default value of
   // `cudf::get_default_stream().value()` are actually the same. At present, the
   // former is `cudaStreamLegacy` while the latter is 0.
-  return (stream == cudaStreamDefault) || (stream == cudaStreamLegacy) ||
-         (stream == cudaStreamPerThread);
+  // TODO PORTING cudaStreamLegacy 
+  return (stream == hipStreamDefault) || (stream == hipStreamPerThread);
 #endif
 }
 
 /**
  * @brief Print a backtrace and raise an error if stream is a default stream.
  */
-void check_stream_and_error(cudaStream_t stream)
+void check_stream_and_error(hipStream_t stream)
 {
   if (stream_is_invalid(stream)) {
     // Exclude the current function from stacktrace.
@@ -130,9 +130,9 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
  * @parameter arguments The function arguments (names only, no types).
  */
 #define DEFINE_OVERLOAD(function, signature, arguments)     \
-  using function##_t = cudaError_t (*)(signature);          \
+  using function##_t = hipError_t (*)(signature);          \
                                                             \
-  cudaError_t function(signature)                           \
+  hipError_t function(signature)                           \
   {                                                         \
     check_stream_and_error(stream);                         \
     return ((function##_t)originals[#function])(arguments); \
@@ -166,117 +166,119 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
 
 // Event APIS:
 // https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html#group__CUDART__EVENT
-DEFINE_OVERLOAD(cudaEventRecord, ARG(cudaEvent_t event, cudaStream_t stream), ARG(event, stream));
+DEFINE_OVERLOAD(hipEventRecord, ARG(hipEvent_t event, hipStream_t stream), ARG(event, stream));
 
 DEFINE_OVERLOAD(cudaEventRecordWithFlags,
-                ARG(cudaEvent_t event, cudaStream_t stream, unsigned int flags),
+                ARG(hipEvent_t event, hipStream_t stream, unsigned int flags),
                 ARG(event, stream, flags));
 
 // Execution APIS:
 // https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html#group__CUDART__EXECUTION
-DEFINE_OVERLOAD(cudaLaunchKernel,
+DEFINE_OVERLOAD(hipLaunchKernel,
                 ARG(void const* func,
                     dim3 gridDim,
                     dim3 blockDim,
                     void** args,
                     size_t sharedMem,
-                    cudaStream_t stream),
+                    hipStream_t stream),
                 ARG(func, gridDim, blockDim, args, sharedMem, stream));
-DEFINE_OVERLOAD(cudaLaunchCooperativeKernel,
+DEFINE_OVERLOAD(hipLaunchCooperativeKernel,
                 ARG(void const* func,
                     dim3 gridDim,
                     dim3 blockDim,
                     void** args,
                     size_t sharedMem,
-                    cudaStream_t stream),
+                    hipStream_t stream),
                 ARG(func, gridDim, blockDim, args, sharedMem, stream));
-DEFINE_OVERLOAD(cudaLaunchHostFunc,
-                ARG(cudaStream_t stream, cudaHostFn_t fn, void* userData),
+DEFINE_OVERLOAD(hipLaunchHostFunc,
+                ARG(hipStream_t stream, hipHostFn_t fn, void* userData),
                 ARG(stream, fn, userData));
 
 // Memory transfer APIS:
 // https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY.html#group__CUDART__MEMORY
-DEFINE_OVERLOAD(cudaMemPrefetchAsync,
-                ARG(void const* devPtr, size_t count, int dstDevice, cudaStream_t stream),
+DEFINE_OVERLOAD(hipMemPrefetchAsync,
+                ARG(void const* devPtr, size_t count, int dstDevice, hipStream_t stream),
                 ARG(devPtr, count, dstDevice, stream));
-DEFINE_OVERLOAD(cudaMemcpy2DAsync,
+DEFINE_OVERLOAD(hipMemcpy2DAsync,
                 ARG(void* dst,
                     size_t dpitch,
                     void const* src,
                     size_t spitch,
                     size_t width,
                     size_t height,
-                    cudaMemcpyKind kind,
-                    cudaStream_t stream),
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
                 ARG(dst, dpitch, src, spitch, width, height, kind, stream));
-DEFINE_OVERLOAD(cudaMemcpy2DFromArrayAsync,
+DEFINE_OVERLOAD(hipMemcpy2DFromArrayAsync,
                 ARG(void* dst,
                     size_t dpitch,
-                    cudaArray_const_t src,
+                    hipArray_const_t src,
                     size_t wOffset,
                     size_t hOffset,
                     size_t width,
                     size_t height,
-                    cudaMemcpyKind kind,
-                    cudaStream_t stream),
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
                 ARG(dst, dpitch, src, wOffset, hOffset, width, height, kind, stream));
-DEFINE_OVERLOAD(cudaMemcpy2DToArrayAsync,
-                ARG(cudaArray_t dst,
+DEFINE_OVERLOAD(hipMemcpy2DToArrayAsync,
+                ARG(hipArray_t dst,
                     size_t wOffset,
                     size_t hOffset,
                     void const* src,
                     size_t spitch,
                     size_t width,
                     size_t height,
-                    cudaMemcpyKind kind,
-                    cudaStream_t stream),
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
                 ARG(dst, wOffset, hOffset, src, spitch, width, height, kind, stream));
-DEFINE_OVERLOAD(cudaMemcpy3DAsync,
-                ARG(cudaMemcpy3DParms const* p, cudaStream_t stream),
+DEFINE_OVERLOAD(hipMemcpy3DAsync,
+                ARG(hipMemcpy3DParms const* p, hipStream_t stream),
                 ARG(p, stream));
+#if 0 // TODO PORTING
 DEFINE_OVERLOAD(cudaMemcpy3DPeerAsync,
-                ARG(cudaMemcpy3DPeerParms const* p, cudaStream_t stream),
+                ARG(cudaMemcpy3DPeerParms const* p, hipStream_t stream),
                 ARG(p, stream));
+#endif
 DEFINE_OVERLOAD(
-  cudaMemcpyAsync,
-  ARG(void* dst, void const* src, size_t count, cudaMemcpyKind kind, cudaStream_t stream),
+  hipMemcpyAsync,
+  ARG(void* dst, void const* src, size_t count, hipMemcpyKind kind, hipStream_t stream),
   ARG(dst, src, count, kind, stream));
-DEFINE_OVERLOAD(cudaMemcpyFromSymbolAsync,
+DEFINE_OVERLOAD(hipMemcpyFromSymbolAsync,
                 ARG(void* dst,
                     void const* symbol,
                     size_t count,
                     size_t offset,
-                    cudaMemcpyKind kind,
-                    cudaStream_t stream),
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
                 ARG(dst, symbol, count, offset, kind, stream));
-DEFINE_OVERLOAD(cudaMemcpyToSymbolAsync,
+DEFINE_OVERLOAD(hipMemcpyToSymbolAsync,
                 ARG(void const* symbol,
                     void const* src,
                     size_t count,
                     size_t offset,
-                    cudaMemcpyKind kind,
-                    cudaStream_t stream),
+                    hipMemcpyKind kind,
+                    hipStream_t stream),
                 ARG(symbol, src, count, offset, kind, stream));
 DEFINE_OVERLOAD(
-  cudaMemset2DAsync,
-  ARG(void* devPtr, size_t pitch, int value, size_t width, size_t height, cudaStream_t stream),
+  hipMemset2DAsync,
+  ARG(void* devPtr, size_t pitch, int value, size_t width, size_t height, hipStream_t stream),
   ARG(devPtr, pitch, value, width, height, stream));
 DEFINE_OVERLOAD(
-  cudaMemset3DAsync,
-  ARG(cudaPitchedPtr pitchedDevPtr, int value, cudaExtent extent, cudaStream_t stream),
+  hipMemset3DAsync,
+  ARG(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, hipStream_t stream),
   ARG(pitchedDevPtr, value, extent, stream));
-DEFINE_OVERLOAD(cudaMemsetAsync,
-                ARG(void* devPtr, int value, size_t count, cudaStream_t stream),
+DEFINE_OVERLOAD(hipMemsetAsync,
+                ARG(void* devPtr, int value, size_t count, hipStream_t stream),
                 ARG(devPtr, value, count, stream));
 
 // Memory allocation APIS:
 // https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__MEMORY__POOLS.html#group__CUDART__MEMORY__POOLS
-DEFINE_OVERLOAD(cudaFreeAsync, ARG(void* devPtr, cudaStream_t stream), ARG(devPtr, stream));
-DEFINE_OVERLOAD(cudaMallocAsync,
-                ARG(void** devPtr, size_t size, cudaStream_t stream),
+DEFINE_OVERLOAD(hipFreeAsync, ARG(void* devPtr, hipStream_t stream), ARG(devPtr, stream));
+DEFINE_OVERLOAD(hipMallocAsync,
+                ARG(void** devPtr, size_t size, hipStream_t stream),
                 ARG(devPtr, size, stream));
-DEFINE_OVERLOAD(cudaMallocFromPoolAsync,
-                ARG(void** ptr, size_t size, cudaMemPool_t memPool, cudaStream_t stream),
+DEFINE_OVERLOAD(hipMallocFromPoolAsync,
+                ARG(void** ptr, size_t size, hipMemPool_t memPool, hipStream_t stream),
                 ARG(ptr, size, memPool, stream));
 
 /**

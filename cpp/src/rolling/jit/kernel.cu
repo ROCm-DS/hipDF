@@ -56,7 +56,9 @@ __global__ void gpu_rolling_new(cudf::size_type nrows,
 
   cudf::size_type warp_valid_count{0};
 
-  auto active_threads = __ballot_sync(0xffff'ffffu, i < nrows);
+  //auto active_threads = __ballot_sync(0xffff'ffffu, i < nrows);
+  //TODO(HIP): is this WAR for missing __ballot_sync correct?
+  auto active_threads = __ballot(i < nrows);
   while (i < nrows) {
     int64_t const preceding_window = get_window(preceding_window_begin, i);
     int64_t const following_window = get_window(following_window_begin, i);
@@ -80,7 +82,7 @@ __global__ void gpu_rolling_new(cudf::size_type nrows,
     bool const output_is_valid = (count >= min_periods);
 
     // set the mask
-    unsigned int const result_mask = __ballot_sync(active_threads, output_is_valid);
+    unsigned int const result_mask = __ballot(output_is_valid) & active_threads;
 
     // store the output value, one per thread
     if (output_is_valid) { out_col[i] = val; }
@@ -93,7 +95,8 @@ __global__ void gpu_rolling_new(cudf::size_type nrows,
 
     // process next element
     i += stride;
-    active_threads = __ballot_sync(active_threads, i < nrows);
+    //TODO(HIP): is this WAR for missing __ballot_sync correct?
+    active_threads = __ballot(i < nrows) & active_threads;
   }
 
   // TODO: likely faster to do a single_lane_block_reduce and a single

@@ -12,14 +12,20 @@
 # the License.
 # =============================================================================
 
-# This function finds cuCollections and performs any additional configuration.
-function(find_and_configure_cucollections)
-  include(${rapids-cmake-dir}/cpm/cuco.cmake)
-  if(BUILD_SHARED_LIBS)
-    rapids_cpm_cuco(BUILD_EXPORT_SET cudf-exports)
-  else()
-    rapids_cpm_cuco(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+# This function finds hipcomp and sets any additional necessary environment variables.
+function(find_and_configure_hipcomp)
+
+  include(${rapids-cmake-dir}/cpm/hipcomp.cmake)
+  rapids_cpm_hipcomp(
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+    USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_HIPCOMP}
+  )
+
+  # Per-thread default stream
+  if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
+    target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM)
   endif()
 endfunction()
 
-find_and_configure_cucollections()
+find_and_configure_hipcomp()

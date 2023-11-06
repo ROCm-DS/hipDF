@@ -16,7 +16,7 @@
 
 #include "reader_impl.hpp"
 
-#include <io/comp/nvcomp_adapter.hpp>
+#include <io/comp/hipcomp_adapter.hpp>
 #include <io/utilities/config_utils.hpp>
 #include <io/utilities/time_utils.cuh>
 
@@ -271,8 +271,8 @@ template <typename T = uint8_t>
         // Required by `gpuDecodePageData`.
         auto tmp_buffer = rmm::device_buffer(
           cudf::util::round_up_safe(read_buffer->size(), BUFFER_PADDING_MULTIPLE), stream);
-        CUDF_CUDA_TRY(cudaMemcpyAsync(
-          tmp_buffer.data(), read_buffer->data(), read_buffer->size(), cudaMemcpyDefault, stream));
+        CUDF_CUDA_TRY(hipMemcpyAsync(
+          tmp_buffer.data(), read_buffer->data(), read_buffer->size(), hipMemcpyDefault, stream));
         page_data[chunk] = datasource::buffer::create(std::move(tmp_buffer));
       }
       auto d_compdata = page_data[chunk]->data();
@@ -513,8 +513,8 @@ int decode_page_headers(cudf::detail::hostdevice_vector<gpu::ColumnChunkDesc>& c
         gpuinflate(d_comp_in, d_comp_out, d_comp_res_view, gzip_header_included::YES, stream);
         break;
       case parquet::SNAPPY:
-        if (nvcomp_integration::is_stable_enabled()) {
-          nvcomp::batched_decompress(nvcomp::compression_type::SNAPPY,
+        if (hipcomp_integration::is_stable_enabled()) {
+          hipcomp::batched_decompress(hipcomp::compression_type::SNAPPY,
                                      d_comp_in,
                                      d_comp_out,
                                      d_comp_res_view,
@@ -526,7 +526,7 @@ int decode_page_headers(cudf::detail::hostdevice_vector<gpu::ColumnChunkDesc>& c
         }
         break;
       case parquet::ZSTD:
-        nvcomp::batched_decompress(nvcomp::compression_type::ZSTD,
+        hipcomp::batched_decompress(hipcomp::compression_type::ZSTD,
                                    d_comp_in,
                                    d_comp_out,
                                    d_comp_res_view,
@@ -921,11 +921,11 @@ void print_cumulative_page_info(cudf::detail::hostdevice_vector<gpu::PageInfo>& 
 
   std::vector<int> schemas(pages.size());
   std::vector<int> h_page_index(pages.size());
-  CUDF_CUDA_TRY(cudaMemcpy(
-    h_page_index.data(), page_index.data(), sizeof(int) * pages.size(), cudaMemcpyDefault));
+  CUDF_CUDA_TRY(hipMemcpy(
+    h_page_index.data(), page_index.data(), sizeof(int) * pages.size(), hipMemcpyDefault));
   std::vector<cumulative_row_info> h_cinfo(pages.size());
-  CUDF_CUDA_TRY(cudaMemcpy(
-    h_cinfo.data(), c_info.data(), sizeof(cumulative_row_info) * pages.size(), cudaMemcpyDefault));
+  CUDF_CUDA_TRY(hipMemcpy(
+    h_cinfo.data(), c_info.data(), sizeof(cumulative_row_info) * pages.size(), hipMemcpyDefault));
   auto schema_iter = cudf::detail::make_counting_transform_iterator(
     0, [&](size_type i) { return pages[h_page_index[i]].src_col_schema; });
   thrust::copy(thrust::seq, schema_iter, schema_iter + pages.size(), schemas.begin());
@@ -1215,10 +1215,10 @@ std::vector<gpu::chunk_read_info> compute_splits(
                });
 
   // std::vector<cumulative_row_info> h_c_info_sorted(c_info_sorted.size());
-  // CUDF_CUDA_TRY(cudaMemcpy(h_c_info_sorted.data(),
+  // CUDF_CUDA_TRY(hipMemcpy(h_c_info_sorted.data(),
   //                          c_info_sorted.data(),
   //                          sizeof(cumulative_row_info) * c_info_sorted.size(),
-  //                          cudaMemcpyDefault));
+  //                          hipMemcpyDefault));
   // print_cumulative_row_info(h_c_info_sorted, "raw");
 
   // generate key offsets (offsets to the start of each partition of keys). worst case is 1 page per
@@ -1254,10 +1254,10 @@ std::vector<gpu::chunk_read_info> compute_splits(
 
   // bring back to the cpu
   std::vector<cumulative_row_info> h_aggregated_info(aggregated_info.size());
-  CUDF_CUDA_TRY(cudaMemcpyAsync(h_aggregated_info.data(),
+  CUDF_CUDA_TRY(hipMemcpyAsync(h_aggregated_info.data(),
                                 aggregated_info.data(),
                                 sizeof(cumulative_row_info) * c_info.size(),
-                                cudaMemcpyDefault,
+                                hipMemcpyDefault,
                                 stream.value()));
   stream.synchronize();
 
@@ -1874,10 +1874,10 @@ std::vector<size_t> reader::impl::calculate_page_string_offsets()
                         reduce_keys.begin(),
                         d_col_sizes.begin());
 
-  cudaMemcpyAsync(col_sizes.data(),
+  hipMemcpyAsync(col_sizes.data(),
                   d_col_sizes.data(),
                   sizeof(size_t) * col_sizes.size(),
-                  cudaMemcpyDeviceToHost,
+                  hipMemcpyDeviceToHost,
                   _stream);
   _stream.synchronize();
 

@@ -197,7 +197,7 @@ TEST_P(NonNumericFactoryTest, NonNumericThrow)
   EXPECT_THROW(construct(), cudf::logic_error);
 }
 
-INSTANTIATE_TEST_CASE_P(NonNumeric,
+INSTANTIATE_TEST_SUITE_P(NonNumeric,
                         NonNumericFactoryTest,
                         testing::ValuesIn(cudf::test::non_numeric_type_ids));
 
@@ -370,7 +370,7 @@ TEST_P(NonFixedWidthFactoryTest, NonFixedWidthThrow)
   EXPECT_THROW(construct(), cudf::logic_error);
 }
 
-INSTANTIATE_TEST_CASE_P(NonFixedWidth,
+INSTANTIATE_TEST_SUITE_P(NonFixedWidth,
                         NonFixedWidthFactoryTest,
                         testing::ValuesIn(cudf::test::non_fixed_width_type_ids));
 
