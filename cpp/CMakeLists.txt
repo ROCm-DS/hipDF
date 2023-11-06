@@ -235,7 +235,7 @@ if(CUDA_BACKEND)
 else()
   # TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
   # header conflicts during jitify preprocessing
-  #include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
+  include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
 endif()
 
 if(CUDA_BACKEND)
@@ -773,7 +773,7 @@ target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBH
 # Compile stringified JIT sources first
 # TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
 # header conflicts during jitify preprocessing
-# add_dependencies(hipdf jitify_preprocess_run)
+add_dependencies(hipdf jitify_preprocess_run)
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
