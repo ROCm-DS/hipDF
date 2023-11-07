@@ -78,13 +78,6 @@ namespace cudf {
 namespace detail {
 namespace {
 
-
-#include <hip/hip_cooperative_groups.h>
-__device__ inline lane_mask __ballot_sync(lane_mask mask, int predicate)
-{
-    return __ballot(predicate) & mask;
-}
-
 // From benchmark data, the fused kernel optimization appears to perform better
 // when there are more than a trivial number of columns, or when the null mask
 // can also be computed at the same time
@@ -154,7 +147,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
 {
   auto tidx         = cudf::detail::grid_1d::global_thread_id<block_size>();
   auto const stride = cudf::detail::grid_1d::grid_stride<block_size>();
-  auto active_mask  = __ballot_sync(0xFFFFFFFFFFFFFFFFu, tidx < number_of_mask_bits);
+  auto active_mask  = __ballot_sync(LANE_MASK_ALL, tidx < number_of_mask_bits);
 
   size_type warp_valid_count = 0;
 
@@ -173,7 +166,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
 
     if (threadIdx.x % detail::warp_size == 0) {
       dest_mask[word_index(mask_index)] = new_word;
-      warp_valid_count += __popcll(new_word);
+      warp_valid_count += __POPC(new_word);
     }
 
     tidx += stride;
@@ -235,7 +228,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
   size_type warp_valid_count = 0;
 
   unsigned active_mask;
-  if (Nullable) { active_mask = __ballot_sync(0xFFFF'FFFFu, output_index < output_size); }
+  if (Nullable) { active_mask = __ballot_sync(LANE_MASK_ALL, output_index < output_size); }
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
     auto const offset_it            = thrust::prev(thrust::upper_bound(
@@ -257,7 +250,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
         output_view.null_mask()[word_index(output_index)] = new_word;
       }
 
-      warp_valid_count += __popc(new_word);
+      warp_valid_count += __POPC(new_word);
     }
 
     output_index += stride;
