@@ -120,6 +120,119 @@ using valid_type        = uint8_t;   ///< Valid type in host memory
 using thread_index_type = int64_t;   ///< Thread index type in kernels
 using char_utf8         = uint32_t;  ///< UTF-8 characters are 1-4 bytes
 
+constexpr unsigned bitmask_size = sizeof(bitmask_type)*8;
+
+constexpr bitmask_type LANE_MASK_ONE = 0b1;
+constexpr bitmask_type LANE_MASK_TWO = 0b10;
+/**
+ * \return a sequence of 1s with length (t+1), followed by 0s.
+ *
+ * Returns the bit sequence \f$\{1\}_{0<=i<=t}, \{0\}_{t<i<n}\f$,
+ * where \f$n\$f is the the number of bits of the return type.
+ */
+constexpr bitmask_type LANE_MASK_ALL_UNTIL_INCL(unsigned t) { return (LANE_MASK_TWO << t) - 1; }
+/**
+ * \return a sequence of 1's with length t, followed by 0s.
+ *
+ * Returns the bit sequence \f$\{1\}_{0<=i<t}, \{0\}_{t<=i<n}\f$,
+ * where \f$n\$f is the the number of bits of the return type.
+ */
+constexpr bitmask_type LANE_MASK_ALL_UNTIL_EXCL(unsigned t) { return (LANE_MASK_ONE << t) - 1; }
+/**
+ * \return the full mask: all bits are set to 1.
+ */
+constexpr bitmask_type LANE_MASK_ALL = ~0;
+
+/**
+ * \brief Count Leading Zeros
+ * \return the number of consecutive bits of highest significance that contain zeros.
+ * \note Return value type matches that of the underlying device builtin.
+ */
+template <typename T>
+__device__ inline int __CLZ(T v);
+
+template <>
+__device__ inline int __CLZ<int>(int v) {
+  return __clz(v);
+}
+
+template <>
+__device__ inline int __CLZ<int64_t>(int64_t v) {
+  return __clzll(v);
+}
+
+template <>
+__device__ inline int __CLZ<uint32_t>(uint32_t v) {
+  return __clz(v);
+}
+
+template <>
+__device__ inline int __CLZ<uint64_t>(uint64_t v) {
+  return __clzll(v);
+}
+
+/**
+ * \brief Find First Set
+ * \return index of first set bit of lowest significance.
+ * \note Return value type matches that of the underlying device builtin.
+ * \note While `uint64_t` is defined as `unsigned long int` on x86_64,
+ *       the HIP `__ffsll` device function provides `__ffsll` with `unsigned long long int`
+ *       argument, which is also an 64-bit integer type on x86_64.
+ *       However, the compilers typically see both as different types.
+ *       We work with `uint64t` and `uint32t` here, so explicit instantiations
+ *       for both are added here.
+ */
+template <typename T>
+__device__ inline int __FFS(T v);
+
+template <>
+__device__ inline int __FFS<int32_t>(int32_t v) {
+  return __ffs(v);
+}
+
+template <>
+__device__ inline int __FFS<int64_t>(int64_t v) {
+  return __ffsll(static_cast<unsigned long long int>(v));
+}
+
+template <>
+__device__ inline int __FFS<uint32_t>(uint32_t v) {
+  return __ffs(v);
+}
+
+template <>
+__device__ inline int __FFS<uint64_t>(uint64_t v) {
+  return __ffsll(static_cast<unsigned long long int>(v));
+}
+
+/**
+ * \return Number of bits set to 1.
+ * \note Return value type matches that of the underlying device builtin.
+ */
+template <typename T>
+__device__ inline int __POPC(T v);
+
+
+template <>
+__device__ inline int __POPC<int32_t>(int32_t v) {
+  return __popc(v);
+}
+
+template <>
+__device__ inline int __POPC<int64_t>(int64_t v) {
+  return __popcll(v);
+}
+
+template <>
+__device__ inline int __POPC<uint32_t>(uint32_t v) {
+  return __popc(v);
+}
+
+template <>
+__device__ inline int __POPC<uint64_t>(uint64_t v) {
+  return __popcll(v);
+}
+
 /**
  * @brief Similar to `std::distance` but returns `cudf::size_type` and performs `static_cast`
  *
