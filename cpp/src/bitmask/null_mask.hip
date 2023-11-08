@@ -106,7 +106,7 @@ __global__ void set_null_mask_kernel(bitmask_type* __restrict__ destination,
 {
   auto x                            = destination + word_index(begin_bit);
   thread_index_type const last_word = word_index(end_bit) - word_index(begin_bit);
-  bitmask_type fill_value           = valid ? 0xffff'ffff : 0;
+  bitmask_type fill_value           = valid ? LANE_MASK_ALL : 0;
 
   auto const stride = cudf::detail::grid_1d::grid_stride();
 
@@ -271,7 +271,7 @@ __global__ void count_set_bits_kernel(bitmask_type const* bitmask,
 
   // First, just count the bits in all words
   while (thread_word_index <= last_word_index) {
-    thread_count += __popc(bitmask[thread_word_index]);
+    thread_count += __POPC(bitmask[thread_word_index]);
     thread_word_index += stride;
   }
 
@@ -292,7 +292,7 @@ __global__ void count_set_bits_kernel(bitmask_type const* bitmask,
       auto slack_mask   = (first) ? set_least_significant_bits(num_slack_bits)
                                   : set_most_significant_bits(num_slack_bits);
 
-      thread_count -= __popc(word & slack_mask);
+      thread_count -= __POPC(word & slack_mask);
     }
   }
 

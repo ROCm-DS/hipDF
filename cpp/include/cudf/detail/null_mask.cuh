@@ -98,7 +98,7 @@ __global__ void offset_bitmask_binop(Binop op,
     }
 
     destination[destination_word_index] = destination_word;
-    thread_count += __popc(destination_word);
+    thread_count += __POPC(destination_word);
   }
 
   using BlockReduce = hipcub::BlockReduce<size_type, block_size>;
@@ -233,7 +233,7 @@ __global__ void subtract_set_bits_range_boundaries_kernel(bitmask_type const* bi
     if (first_num_slack_bits > 0) {
       bitmask_type const word       = bitmask[word_index(first_bit_index)];
       bitmask_type const slack_mask = set_least_significant_bits(first_num_slack_bits);
-      delta -= __popc(word & slack_mask);
+      delta -= __POPC(word & slack_mask);
     }
 
     // Compute delta due to the following bits in the last word in the range.
@@ -243,7 +243,7 @@ __global__ void subtract_set_bits_range_boundaries_kernel(bitmask_type const* bi
     if (last_num_slack_bits > 0) {
       bitmask_type const word       = bitmask[word_index(last_bit_index)];
       bitmask_type const slack_mask = set_most_significant_bits(last_num_slack_bits);
-      delta -= __popc(word & slack_mask);
+      delta -= __POPC(word & slack_mask);
     }
 
     // Update the null count with the computed delta.
@@ -271,7 +271,7 @@ struct bit_to_word_index {
 };
 
 struct popc {
-  __host__ __device__ inline size_type operator()(bitmask_type word) const { return __popc(word); }
+  __host__ __device__ inline size_type operator()(bitmask_type word) const { return __POPC(word); }
 };
 
 // Count set/unset bits in a segmented null mask, using offset iterators accessible by the device.

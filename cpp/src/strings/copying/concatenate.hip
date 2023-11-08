@@ -152,7 +152,7 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
         output_mask[word_index(output_index)] = new_word;
       }
 
-      warp_valid_count += __popc(new_word);
+      warp_valid_count += __POPC(new_word);
     }
 
     output_index += blockDim.x * gridDim.x;

@@ -543,7 +543,7 @@ __global__ void __launch_bounds__(block_size)
     auto const mask_word =
       cudf::detail::get_mask_offset_word(column.pushdown_mask, 0, row, end_bit) &
       ((1 << mask_len) - 1);
-    count += __popc(mask_word);
+    count += __POPC(mask_word);
   }
 
   count = BlockReduce(temp_storage).Sum(count);
