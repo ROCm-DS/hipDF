@@ -148,7 +148,7 @@ CUDF_KERNEL void replace_kernel(cudf::column_device_view input,
   auto tid          = cudf::detail::grid_1d::global_thread_id();
   auto const stride = cudf::detail::grid_1d::grid_stride();
 
-  cudf::bitmask_type active_mask  = LANE_MASK_ALL;
+  cudf::bitmask_type active_mask  = cudf::LANE_MASK_ALL;
   active_mask          = __ballot_sync(active_mask, tid < nrows);
   auto const lane_id{threadIdx.x % cudf::detail::warp_size};
   uint32_t valid_sum{0};
