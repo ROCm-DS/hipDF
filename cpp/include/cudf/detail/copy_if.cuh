@@ -177,7 +177,7 @@ __launch_bounds__(block_size) __global__
 
         // compute the valid mask for this warp
         //Todo(HIP)
-        uint32_t valid_warp = hip_extensions::__ballot_sync(0xffff'ffffu, temp_valids[threadIdx.x]);
+        auto valid_warp = hip_extensions::__ballot_sync(LANE_MASK_ALL, temp_valids[threadIdx.x]);
 
         // Note the atomicOr's below assume that output_valid has been set to
         // all zero before the kernel
@@ -195,7 +195,7 @@ __launch_bounds__(block_size) __global__
         // if the block is full and not aligned then we have one more warp to cover
         if ((wid == 0) && (last_warp == num_warps)) {
           //Todo(HIP)
-          uint32_t valid_warp = hip_extensions::__ballot_sync(0xffff'ffffu, temp_valids[block_size + threadIdx.x]);
+          auto valid_warp = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, temp_valids[block_size + threadIdx.x]);
           if (lane == 0 && valid_warp != 0) {
             tmp_warp_valid_counts += __POPC(valid_warp);
             hip::atomic_ref<cudf::bitmask_type, hip::thread_scope_device> ref{
