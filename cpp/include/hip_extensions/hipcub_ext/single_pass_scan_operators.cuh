@@ -37,6 +37,9 @@
 
 #include "thread_load.cuh"
 
+using lane_mask = uint64_t;
+constexpr lane_mask LANE_MASK_ALL = ~lane_mask{0};
+
 /******************************************************************************
  * Prefix functor type for maintaining a running prefix while scanning a
  * region independent of other thread blocks
@@ -255,7 +258,7 @@ struct ScanTileState<T, true>
             TxnWord alias = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
             tile_descriptor = reinterpret_cast<TileDescriptor&>(alias);
 
-        } while (hipcub::WARP_ANY((tile_descriptor.status == SCAN_TILE_INVALID), 0xffffffff));
+        } while (hipcub::WARP_ANY((tile_descriptor.status == SCAN_TILE_INVALID), LANE_MASK_ALL));
 
         status = tile_descriptor.status;
         value = tile_descriptor.value;
@@ -522,7 +525,7 @@ struct TilePrefixCallbackOp
         exclusive_prefix = window_aggregate;
 
         // Keep sliding the window back until we come across a tile whose inclusive prefix is known
-        while (hipcub::WARP_ALL((predecessor_status != StatusWord(SCAN_TILE_INCLUSIVE)), 0xffffffff))
+        while (hipcub::WARP_ALL((predecessor_status != StatusWord(SCAN_TILE_INCLUSIVE)), LANE_MASK_ALL))
         {
             predecessor_idx -= HIPCUB_WARP_THREADS;
 

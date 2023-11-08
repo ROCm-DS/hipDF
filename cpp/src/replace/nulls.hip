@@ -68,7 +68,7 @@ __global__ void replace_nulls_strings(cudf::column_device_view input,
   auto i                = cudf::detail::grid_1d::global_thread_id();
   auto const stride     = cudf::detail::grid_1d::grid_stride();
 
-  uint32_t active_mask = 0xffff'ffff;
+  cudf::bitmask_type active_mask = cudf::LANE_MASK_ALL;
   active_mask          = hip_extensions::__ballot_sync(active_mask, i < nrows);
   auto const lane_id{threadIdx.x % cudf::detail::warp_size};
   uint32_t valid_sum{0};
@@ -92,7 +92,7 @@ __global__ void replace_nulls_strings(cudf::column_device_view input,
 
     if (phase == 0) {
       offsets[i]       = nonzero_output ? out.size_bytes() : 0;
-      uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
+      cudf::bitmask_type bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
       if (0 == lane_id) {
         output_valid[cudf::word_index(i)] = bitmask;
         valid_sum += cudf::__POPC(bitmask);
@@ -121,7 +121,7 @@ __global__ void replace_nulls(cudf::column_device_view input,
   auto i                = cudf::detail::grid_1d::global_thread_id();
   auto const stride     = cudf::detail::grid_1d::grid_stride();
 
-  uint32_t active_mask = 0xffff'ffff;
+  cudf::bitmask_type active_mask = cudf::LANE_MASK_ALL;
   active_mask          = hip_extensions::__ballot_sync(active_mask, i < nrows);
   auto const lane_id{threadIdx.x % cudf::detail::warp_size};
   uint32_t valid_sum{0};
@@ -138,7 +138,7 @@ __global__ void replace_nulls(cudf::column_device_view input,
 
     /* output valid counts calculations*/
     if (replacement_has_nulls) {
-      uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
+      cudf::bitmask_type bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
       if (0 == lane_id) {
         output.set_mask_word(cudf::word_index(i), bitmask);
         valid_sum += cudf::__POPC(bitmask);
