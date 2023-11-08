@@ -319,7 +319,8 @@ OPTIMIZE_OUTPUT_SLICE  = NO
 # Note see also the list of default file extension mappings.
 
 EXTENSION_MAPPING      = cu=C++ \
-                         cuh=C++
+                         cuh=C++ \
+                         hip=C++
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -903,7 +904,8 @@ FILE_PATTERNS          = *.cpp \
                          *.h \
                          *.c \
                          *.cu \
-                         *.cuh
+                         *.cuh \
+                         *.hip
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -934,9 +936,9 @@ EXCLUDE_SYMLINKS       = NO
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       = */nvtx/* \
-                         */detail/* \
-                         */cudf_test/*
+EXCLUDE_PATTERNS       = */nvtx/* 
+                         #*/detail/* \
+                         #*/cudf_test/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
