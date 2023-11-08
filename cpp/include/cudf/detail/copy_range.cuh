@@ -104,9 +104,9 @@ CUDF_KERNEL void copy_range_kernel(SourceValueIterator source_value_begin,
 
     if (has_validity) {  // update bitmask
       bool const valid      = in_range && *(source_validity_begin + source_idx);
-      int const active_mask = __ballot_sync(0xFFFF'FFFFu, in_range);
-      int const valid_mask  = __ballot_sync(0xFFFF'FFFFu, valid);
-      int const warp_mask   = active_mask & valid_mask;
+      cudf::bitmask_type const active_mask = __ballot_sync(cudf::LANE_MASK_ALL, in_range);
+      cudf::bitmask_type const valid_mask  = __ballot_sync(cudf::LANE_MASK_ALL, valid);
+      cudf::bitmask_type const warp_mask   = active_mask & valid_mask;
 
       cudf::bitmask_type old_mask = target.get_mask_word(mask_idx);
       if (lane_id == leader_lane) {

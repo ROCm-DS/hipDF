@@ -104,7 +104,7 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
     bool const output_is_valid = (count >= min_periods);
 
     // set the mask
-    unsigned int const result_mask = __ballot(output_is_valid) & active_threads;
+    bitmask_type const result_mask = __ballot(output_is_valid) & active_threads;
 
     // store the output value, one per thread
     if (output_is_valid) { out_col[i] = val; }

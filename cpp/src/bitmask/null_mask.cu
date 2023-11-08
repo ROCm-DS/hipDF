@@ -128,7 +128,7 @@ CUDF_KERNEL void set_null_mask_kernel(bitmask_type* __restrict__ destination,
 {
   auto x                            = destination + word_index(begin_bit);
   thread_index_type const last_word = word_index(end_bit) - word_index(begin_bit);
-  bitmask_type fill_value           = valid ? 0xffff'ffff : 0;
+  bitmask_type fill_value           = valid ? LANE_MASK_ALL : 0;
 
   auto const stride = cudf::detail::grid_1d::grid_stride();
 
