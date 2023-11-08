@@ -95,7 +95,7 @@ __global__ void replace_nulls_strings(cudf::column_device_view input,
       uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
       if (0 == lane_id) {
         output_valid[cudf::word_index(i)] = bitmask;
-        valid_sum += __popc(bitmask);
+        valid_sum += cudf::__POPC(bitmask);
       }
     } else if (phase == 1) {
       if (nonzero_output) std::memcpy(chars + offsets[i], out.data(), out.size_bytes());
@@ -141,7 +141,7 @@ __global__ void replace_nulls(cudf::column_device_view input,
       uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
       if (0 == lane_id) {
         output.set_mask_word(cudf::word_index(i), bitmask);
-        valid_sum += __popc(bitmask);
+        valid_sum += cudf::__POPC(bitmask);
       }
     }
 
