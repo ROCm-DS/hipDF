@@ -810,9 +810,9 @@ static __device__ void RleEncode(
       if (t < 32) {
         uint32_t c32 = ballot(t >= 4 || s->rpt_map[t] != 0xffff'ffffu);
         if (!t) {
-          uint32_t last_idx = __ffs(c32) - 1;
+          uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
-            last_idx * 32 + ((last_idx < 4) ? __ffs(~s->rpt_map[last_idx]) - 1 : 0);
+            last_idx * 32 + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
         }
       }
       __syncthreads();
@@ -849,7 +849,7 @@ static __device__ void RleEncode(
         uint32_t needed_mask = kRleRunMask[nbits - 1];
         mask                 = ballot((__funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
         if (!t) {
-          uint32_t rle_run_start = (mask != 0) ? min((__ffs(mask) - 1) * 8, maxvals) : maxvals;
+          uint32_t rle_run_start = (mask != 0) ? min((__FFS(mask) - 1) * 8, maxvals) : maxvals;
           uint32_t rpt_len       = 0;
           if (rle_run_start < maxvals) {
             uint32_t idx_cur = rle_run_start >> 5;
@@ -859,7 +859,7 @@ static __device__ void RleEncode(
               m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
               mask = ~__funnelshift_r(m0, m1, idx_ofs);
               if (mask != 0) {
-                rpt_len += __ffs(mask) - 1;
+                rpt_len += __FFS(mask) - 1;
                 break;
               }
               rpt_len += 32;

@@ -1050,7 +1050,7 @@ __launch_bounds__(block_size) __global__
     // only one thread writes the mask
     if (0 == threadIdx.x % cudf::detail::warp_size) {
       output.set_mask_word(cudf::word_index(i), result_mask);
-      warp_valid_count += __popc(result_mask);
+      warp_valid_count += __POPC(result_mask);
     }
 
     // process next element

@@ -940,7 +940,7 @@ __launch_bounds__(block_size) __global__
       // 0th lane of the warp writes the validity
       if (!(tid % cudf::detail::warp_size)) {
         out_validity.value()[cudf::word_index(tid)] = mask;
-        warp_valid_count += __popc(mask);
+        warp_valid_count += __POPC(mask);
       }
     }
 

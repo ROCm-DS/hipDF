@@ -80,7 +80,7 @@ __launch_bounds__(block_size) __global__
       // only one guy in the warp needs to update the mask and count
       if (lane_id == 0) {
         out.set_mask_word(warp_cur, warp_mask);
-        warp_valid_count += __popc(warp_mask);
+        warp_valid_count += __POPC(warp_mask);
       }
     }
 

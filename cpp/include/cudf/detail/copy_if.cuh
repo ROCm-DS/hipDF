@@ -158,7 +158,7 @@ __launch_bounds__(block_size) __global__
 
     if (has_validity) {
       // Since the valid bools are contiguous in shared memory now, we can use
-      // __popc to combine them into a single mask element.
+      // __POPC to combine them into a single mask element.
       // Then, most mask elements can be directly copied from shared to global
       // memory. Only the first and last 32-bit mask elements of each block must
       // use an atomicOr, because these are where other blocks may overlap.
@@ -182,7 +182,7 @@ __launch_bounds__(block_size) __global__
         // Note the atomicOr's below assume that output_valid has been set to
         // all zero before the kernel
         if (lane == 0 && valid_warp != 0) {
-          tmp_warp_valid_counts = __popc(valid_warp);
+          tmp_warp_valid_counts = __POPC(valid_warp);
           if (wid > 0 && wid < last_warp)
             output_valid[valid_index] = valid_warp;
           else {
@@ -197,7 +197,7 @@ __launch_bounds__(block_size) __global__
           //Todo(HIP)
           uint32_t valid_warp = hip_extensions::__ballot_sync(0xffff'ffffu, temp_valids[block_size + threadIdx.x]);
           if (lane == 0 && valid_warp != 0) {
-            tmp_warp_valid_counts += __popc(valid_warp);
+            tmp_warp_valid_counts += __POPC(valid_warp);
             hip::atomic_ref<cudf::bitmask_type, hip::thread_scope_device> ref{
               output_valid[valid_index + num_warps]};
             ref.fetch_or(valid_warp, hip::std::memory_order_relaxed);

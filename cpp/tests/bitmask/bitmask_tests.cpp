@@ -537,7 +537,7 @@ void cleanEndWord(rmm::device_buffer& mask, int begin_bit, int end_bit)
     cudf::bitmask_type end_mask = 0;
     CUDF_CUDA_TRY(
       hipMemcpy(&end_mask, ptr + number_of_mask_words - 1, sizeof(end_mask), hipMemcpyDefault));
-    end_mask = end_mask & ((1l << (number_of_bits % 64)) - 1);
+    end_mask = end_mask & ((1llu << (number_of_bits % 64)) - 1);
     CUDF_CUDA_TRY(
       hipMemcpy(ptr + number_of_mask_words - 1, &end_mask, sizeof(end_mask), hipMemcpyDefault));
   }

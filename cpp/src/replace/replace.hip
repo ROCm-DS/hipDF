@@ -158,7 +158,7 @@ __global__ void replace_strings_first_pass(cudf::column_device_view input,
     uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
     if (0 == lane_id) {
       output_valid[cudf::word_index(idx)] = bitmask;
-      valid_sum += __popc(bitmask);
+      valid_sum += cudf::__POPC(bitmask);
     }
 
     tid += stride;
@@ -284,7 +284,7 @@ __global__ void replace_kernel(cudf::column_device_view input,
       uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, output_is_valid);
       if (0 == lane_id) {
         output.set_mask_word(cudf::word_index(idx), bitmask);
-        valid_sum += __popc(bitmask);
+        valid_sum += cudf::__POPC(bitmask);
       }
     }
 
