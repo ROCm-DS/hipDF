@@ -43,15 +43,12 @@ TEST_F(ColumnDeviceViewTest, Sample)
   auto output_device_view =
     cudf::mutable_column_device_view::create(output->mutable_view(), stream);
 
-//TODO FIXME
-#if 0
   EXPECT_NO_THROW(thrust::copy(rmm::exec_policy(stream),
                                input_device_view->begin<T>(),
                                input_device_view->end<T>(),
                                output_device_view->begin<T>()));
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(input, output->view());
-#endif
 }
 
 TEST_F(ColumnDeviceViewTest, MismatchingType)
@@ -64,12 +61,9 @@ TEST_F(ColumnDeviceViewTest, MismatchingType)
   auto output_device_view =
     cudf::mutable_column_device_view::create(output->mutable_view(), stream);
 
-//TODO FIXME
-#if 0
   EXPECT_THROW(thrust::copy(rmm::exec_policy(stream),
                             input_device_view->begin<T>(),
                             input_device_view->end<T>(),
                             output_device_view->begin<int64_t>()),
                cudf::logic_error);
-#endif
 }

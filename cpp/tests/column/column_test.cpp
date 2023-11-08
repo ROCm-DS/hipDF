@@ -617,8 +617,6 @@ TYPED_TEST(ListsColumnTest, ListsSlicedZeroSliceLengthNonNested)
 }
 
 
-//TODO(HIP): this test is currently not passing due to mismatches in null counts
-// We need to revisit this later when bitmask and concatenate are validated
 TYPED_TEST(ListsColumnTest, ListsSlicedColumnViewConstructorWithNulls)
 {
   auto valids =
