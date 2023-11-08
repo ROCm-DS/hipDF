@@ -1384,7 +1384,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
             uint32_t bits = (rle8_read_bool32(s->vals.u32, startbit) << bitpos) & mask;
             atomicAnd(valid, ~mask);
             atomicOr(valid, bits);
-            null_count += __popc((~bits) & mask);
+            null_count += __POPC((~bits) & mask);
           }
           nbits -= n;
           startbit += n;
@@ -1394,14 +1394,14 @@ CUDF_KERNEL void __launch_bounds__(block_size)
         if (t * 32 + 32 <= nbits) {
           uint32_t bits = rle8_read_bool32(s->vals.u32, startbit + t * 32);
           valid[t]      = bits;
-          null_count += __popc(~bits);
+          null_count += __POPC(~bits);
         } else if (t * 32 < nbits) {
           uint32_t n    = nbits - t * 32;
           uint32_t mask = (1 << n) - 1;
           uint32_t bits = rle8_read_bool32(s->vals.u32, startbit + t * 32) & mask;
           atomicAnd(valid + t, ~mask);
           atomicOr(valid + t, bits);
-          null_count += __popc((~bits) & mask);
+          null_count += __POPC((~bits) & mask);
         }
         __syncthreads();
       }
@@ -1415,7 +1415,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
           uint32_t bits = (i + 32 <= skippedrows) ? s->vals.u32[i >> 5]
                                                   : (__byte_perm(s->vals.u32[i >> 5], 0, 0x0123) &
                                                      (0xffff'ffffu << (0x20 - skippedrows + i)));
-          skip_count += __popc(bits);
+          skip_count += __POPC(bits);
         }
         skip_count = warp_reduce(temp_storage.wr_storage[t / 32]).Sum(skip_count);
         if (t == 0) { s->chunk.skip_count += skip_count; }

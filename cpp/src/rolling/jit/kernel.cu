@@ -112,7 +112,7 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
     // only one thread writes the mask
     if (0 == cudf::intra_word_index(i)) {
       out_col_valid[cudf::word_index(i)] = result_mask;
-      warp_valid_count += __popc(result_mask);
+      warp_valid_count += __POPC(result_mask);
     }
 
     // process next element

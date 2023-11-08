@@ -485,9 +485,9 @@ inline __device__ void merge_char_context(uint4& ctx, uint32_t char_ctx, uint32_
  */
 inline __device__ packed_rowctx_t pack_rowmaps(uint4 ctx_map)
 {
-  return pack_row_contexts(make_row_context(__popc(ctx_map.x), (ctx_map.w >> 0) & 3),
-                           make_row_context(__popc(ctx_map.y), (ctx_map.w >> 2) & 3),
-                           make_row_context(__popc(ctx_map.z), (ctx_map.w >> 4) & 3));
+  return pack_row_contexts(make_row_context(__POPC(ctx_map.x), (ctx_map.w >> 0) & 3),
+                           make_row_context(__POPC(ctx_map.y), (ctx_map.w >> 2) & 3),
+                           make_row_context(__POPC(ctx_map.z), (ctx_map.w >> 4) & 3));
 }
 
 /*
@@ -760,7 +760,7 @@ CUDF_KERNEL void __launch_bounds__(rowofs_block_dim)
     uint32_t rowmap            = select_rowmap(ctx_map, ctx & 3);
     // Output row positions
     while (rowmap != 0) {
-      uint32_t pos = __ffs(rowmap);
+      uint32_t pos = __FFS(rowmap);
       block_pos += pos;
       if (row >= skip_rows && row - skip_rows < offsets_out.size()) {
         // Output byte offsets are relative to the base of the input buffer

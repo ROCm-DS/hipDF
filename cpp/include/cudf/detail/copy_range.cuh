@@ -112,7 +112,7 @@ CUDF_KERNEL void copy_range_kernel(SourceValueIterator source_value_begin,
       if (lane_id == leader_lane) {
         cudf::bitmask_type new_mask = (old_mask & ~active_mask) | warp_mask;
         target.set_mask_word(mask_idx, new_mask);
-        warp_null_change += __popc(active_mask & old_mask) - __popc(active_mask & new_mask);
+        warp_null_change += cudf::__POPC(active_mask & old_mask) - cudf::__POPC(active_mask & new_mask);
       }
     }
 

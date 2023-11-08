@@ -178,7 +178,7 @@ CUDF_KERNEL void fused_concatenate_string_offset_kernel(
         output_mask[word_index(output_index)] = new_word;
       }
 
-      warp_valid_count += __popc(new_word);
+      warp_valid_count += __POPC(new_word);
     }
 
     output_index += cudf::detail::grid_1d::grid_stride();

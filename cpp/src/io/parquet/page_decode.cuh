@@ -770,8 +770,8 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
     int const is_new_row               = start_depth == 0 ? 1 : 0;
     uint32_t const warp_row_count_mask = ballot(is_new_row);
     int32_t const thread_row_index =
-      input_row_count + ((__popc(warp_row_count_mask & ((1 << t) - 1)) + is_new_row) - 1);
-    input_row_count += __popc(warp_row_count_mask);
+      input_row_count + ((__POPC(warp_row_count_mask & ((1 << t) - 1)) + is_new_row) - 1);
+    input_row_count += __POPC(warp_row_count_mask);
     // is this thread within read row bounds?
     int const in_row_bounds = thread_row_index >= s->row_index_lower_bound &&
                                   thread_row_index < (s->first_row + s->num_rows)
@@ -782,9 +782,9 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
     uint32_t const warp_count_mask =
       ballot((0 >= start_depth && 0 <= end_depth) && in_row_bounds ? 1 : 0);
 
-    warp_value_count = __popc(warp_count_mask);
+    warp_value_count = __POPC(warp_count_mask);
     // Note : ((1 << t) - 1) implies "for all threads before me"
-    thread_value_count = __popc(warp_count_mask & ((1 << t) - 1));
+    thread_value_count = __POPC(warp_count_mask & ((1 << t) - 1));
 
     // walk from 0 to max_depth
     uint32_t next_thread_value_count, next_warp_value_count;
@@ -812,8 +812,8 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
           // __reduce_or_sync(), but until then we have to do a warp reduce.
           WarpReduceOr32(is_valid << thread_value_count);
 
-      thread_valid_count = __popc(warp_valid_mask & ((1 << thread_value_count) - 1));
-      warp_valid_count   = __popc(warp_valid_mask);
+      thread_valid_count = __POPC(warp_valid_mask & ((1 << thread_value_count) - 1));
+      warp_valid_count   = __POPC(warp_valid_mask);
 
       // if this is the value column emit an index for value decoding
       if (is_valid && s_idx == max_depth - 1) {
@@ -830,8 +830,8 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
       if (s_idx < max_depth - 1) {
         uint32_t const next_warp_count_mask =
           ballot((s_idx + 1 >= start_depth && s_idx + 1 <= end_depth && in_row_bounds) ? 1 : 0);
-        next_warp_value_count   = __popc(next_warp_count_mask);
-        next_thread_value_count = __popc(next_warp_count_mask & ((1 << t) - 1));
+        next_warp_value_count   = __POPC(next_warp_count_mask);
+        next_thread_value_count = __POPC(next_warp_count_mask & ((1 << t) - 1));
 
         // if we're -not- at a leaf column and we're within nesting/row bounds
         // and we have a valid data_out pointer, it implies this is a list column, so
@@ -855,7 +855,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
           ? thread_row_index >= s->first_row && thread_row_index < (s->first_row + s->num_rows)
           : in_row_bounds;
       int const first_thread_in_write_range =
-        !has_repetition ? __ffs(ballot(in_write_row_bounds)) - 1 : 0;
+        !has_repetition ? __FFS(ballot(in_write_row_bounds)) - 1 : 0;
 
       // # of bits to of the validity mask to write out
       int const warp_valid_mask_bit_count =
@@ -870,7 +870,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
                          warp_output_valid_mask,
                          warp_valid_mask_bit_count);
           nesting_info->valid_map_offset += warp_valid_mask_bit_count;
-          nesting_info->null_count += warp_valid_mask_bit_count - __popc(warp_output_valid_mask);
+          nesting_info->null_count += warp_valid_mask_bit_count - __POPC(warp_output_valid_mask);
         }
         nesting_info->valid_count += warp_valid_count;
         nesting_info->value_count += warp_value_count;

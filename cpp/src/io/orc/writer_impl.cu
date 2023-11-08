@@ -812,7 +812,7 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
           while (bits_to_borrow != 0) {
             auto const mask = cudf::detail::get_mask_offset_word(
               parent_column.pushdown_mask, 0, borrow_end, borrow_end + 32);
-            auto const valid_in_word = __popc(mask);
+            auto const valid_in_word = __POPC(mask);
 
             if (valid_in_word > bits_to_borrow) break;
             bits_to_borrow -= valid_in_word;

@@ -213,7 +213,7 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
     v.w -= value_shift;
     reinterpret_cast<uint4*>(dst)[pos / 16] = v;
     if (valid_count) {
-      thread_valid_count += (__popc(v.x) + __popc(v.y) + __popc(v.z) + __popc(v.w));
+      thread_valid_count += (__POPC(v.x) + __POPC(v.y) + __POPC(v.z) + __POPC(v.w));
     }
     pos += stride;
   }
@@ -250,7 +250,7 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
                                           : 0;
 
         uint32_t const val = (v >> bit_shift) | (next << (32 - bit_shift));
-        if (valid_count) { thread_valid_count += __popc(val); }
+        if (valid_count) { thread_valid_count += __POPC(val); }
         reinterpret_cast<uint32_t*>(dst)[idx] = val;
         v                                     = next;
         idx++;
@@ -260,7 +260,7 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
       while (remainder) {
         std::size_t const idx = num_bytes - remainder--;
         uint32_t const val    = reinterpret_cast<uint8_t const*>(src)[idx];
-        if (valid_count) { thread_valid_count += __popc(val); }
+        if (valid_count) { thread_valid_count += __POPC(val); }
         reinterpret_cast<uint8_t*>(dst)[idx] = val;
       }
     }
@@ -282,7 +282,7 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
         auto const slack_mask        = set_most_significant_bits(slack_bits);
         if (slack_mask > 0) {
           uint32_t const last_word = reinterpret_cast<uint32_t*>(dst + (num_bytes - 4))[0];
-          block_valid_count -= __popc(last_word & slack_mask);
+          block_valid_count -= __POPC(last_word & slack_mask);
         }
         *valid_count = block_valid_count;
       }

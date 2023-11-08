@@ -155,7 +155,7 @@ static inline __device__ __uint128_t zigzag(__int128_t v)
   return ((v ^ -s) * 2) + s;
 }
 
-static inline __device__ uint32_t CountLeadingBytes32(uint32_t v) { return __clz(v) >> 3; }
+static inline __device__ uint32_t CountLeadingBytes32(uint32_t v) { return __CLZ(v) >> 3; }
 static inline __device__ uint32_t CountLeadingBytes64(uint64_t v) { return __clzll(v) >> 3; }
 
 /**
@@ -224,16 +224,16 @@ static __device__ uint32_t ByteRLE(
         uint32_t next = s->u.byterle.rpt_map[(literal_run >> 5) + 1];
         uint32_t mask = rpt_map & __funnelshift_r(rpt_map, next, 1);
         if (mask) {
-          uint32_t literal_run_ofs = __ffs(mask) - 1;
+          uint32_t literal_run_ofs = __FFS(mask) - 1;
           literal_run += literal_run_ofs;
-          repeat_run = __ffs(~((rpt_map >> literal_run_ofs) >> 1));
+          repeat_run = __FFS(~((rpt_map >> literal_run_ofs) >> 1));
           if (repeat_run + literal_run_ofs == 32) {
             while (next == ~0) {
               uint32_t next_idx = ((literal_run + repeat_run) >> 5) + 1;
               next              = (next_idx < 512 / 32) ? s->u.byterle.rpt_map[next_idx] : 0;
               repeat_run += 32;
             }
-            repeat_run += __ffs(~next) - 1;
+            repeat_run += __FFS(~next) - 1;
           }
           repeat_run = min(repeat_run + 1, maxvals - min(literal_run, maxvals));
           if (repeat_run < 3) {
@@ -409,9 +409,9 @@ static __device__ uint32_t IntegerRLE(
       literal_run = delta_run = 0;
       while (literal_run < maxvals) {
         if (delta_map != 0) {
-          uint32_t literal_run_ofs = __ffs(delta_map) - 1;
+          uint32_t literal_run_ofs = __FFS(delta_map) - 1;
           literal_run += literal_run_ofs;
-          delta_run = __ffs(~((delta_map >> literal_run_ofs) >> 1));
+          delta_run = __FFS(~((delta_map >> literal_run_ofs) >> 1));
           if (literal_run_ofs + delta_run == 32) {
             for (;;) {
               uint32_t delta_idx = (literal_run + delta_run) >> 5;
@@ -419,7 +419,7 @@ static __device__ uint32_t IntegerRLE(
               if (delta_map != ~0) break;
               delta_run += 32;
             }
-            delta_run += __ffs(~delta_map) - 1;
+            delta_run += __FFS(~delta_map) - 1;
           }
           delta_run += 2;
           break;
@@ -686,7 +686,7 @@ static __device__ void encode_null_mask(orcenc_state_s* s,
     uint32_t offset     = t_nrows != 0 ? t * 8 : nrows;
     if (pushdown_mask != nullptr) {
       pd_byte    = get_mask_byte(pushdown_mask, 0) & ((1 << t_nrows) - 1);
-      pd_set_cnt = __popc(pd_byte);
+      pd_set_cnt = __POPC(pd_byte);
       // Scan the number of valid bits to get dst offset for each thread
       hipcub::BlockScan<uint32_t, block_size>(scan_storage).ExclusiveSum(pd_set_cnt, offset);
     }

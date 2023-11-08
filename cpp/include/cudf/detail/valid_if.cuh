@@ -83,7 +83,7 @@ CUDF_KERNEL void valid_if_kernel(
     bitmask_type ballot = __ballot_sync(active_mask, p(*(begin + i)));
     if (lane_id == leader_lane) {
       output[cudf::word_index(i)] = ballot;
-      warp_valid_count += __popcll(ballot); 
+      warp_valid_count += __POPC(ballot); 
     }
     i += stride;
     active_mask = __ballot_sync(active_mask, i < size); 
@@ -202,7 +202,7 @@ CUDF_KERNEL void valid_if_n_kernel(InputIterator1 begin1,
 
       if (thread_active && threadIdx.x % warp_size == 0) { mask[mask_idx] = warp_validity; }
 
-      warp_valid_count += __popcll(warp_validity);
+      warp_valid_count += __POPC(warp_validity);
       block_offset += blockDim.x * gridDim.x;
     }
 

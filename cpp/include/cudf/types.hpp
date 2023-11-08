@@ -233,6 +233,11 @@ __device__ inline int __POPC<uint64_t>(uint64_t v) {
   return __popcll(v);
 }
 
+template <> //: On x86_64, uint64_t == unsigned long int != unsigned long long int, both have 64 bit
+__device__ inline int __POPC<unsigned long long int>(unsigned long long int v) {
+  return __popcll(v);
+}
+
 /**
  * @brief Similar to `std::distance` but returns `cudf::size_type` and performs `static_cast`
  *

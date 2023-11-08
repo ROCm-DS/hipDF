@@ -298,7 +298,7 @@ CUDF_KERNEL void count_set_bits_kernel(bitmask_type const* bitmask,
 
   // First, just count the bits in all words
   while (thread_word_index <= last_word_index) {
-    thread_count += __popcll(bitmask[thread_word_index]);
+    thread_count += __POPC(bitmask[thread_word_index]);
     thread_word_index += stride;
   }
 
@@ -319,7 +319,7 @@ CUDF_KERNEL void count_set_bits_kernel(bitmask_type const* bitmask,
       auto slack_mask   = (first) ? set_least_significant_bits(num_slack_bits)
                                   : set_most_significant_bits(num_slack_bits);
 
-      thread_count -= __popcll(word & slack_mask);
+      thread_count -= __POPC(word & slack_mask);
     }
   }
 
