@@ -55,12 +55,12 @@ TEST_F(BitmaskUtilitiesTest, NumBitmaskWords)
 {
   EXPECT_EQ(0, cudf::num_bitmask_words(0));
   EXPECT_EQ(1, cudf::num_bitmask_words(1));
-  EXPECT_EQ(1, cudf::num_bitmask_words(63));
-  EXPECT_EQ(1, cudf::num_bitmask_words(64));
-  EXPECT_EQ(2, cudf::num_bitmask_words(65));
-  EXPECT_EQ(2, cudf::num_bitmask_words(127));
-  EXPECT_EQ(2, cudf::num_bitmask_words(128));
-  EXPECT_EQ(3, cudf::num_bitmask_words(129));
+  EXPECT_EQ(1, cudf::num_bitmask_words(cudf::bitmask_size_in_bits-1));
+  EXPECT_EQ(1, cudf::num_bitmask_words(cudf::bitmask_size_in_bits));
+  EXPECT_EQ(2, cudf::num_bitmask_words(cudf::bitmask_size_in_bits+1));
+  EXPECT_EQ(2, cudf::num_bitmask_words(2*cudf::bitmask_size_in_bits-1));
+  EXPECT_EQ(2, cudf::num_bitmask_words(2*cudf::bitmask_size_in_bits));
+  EXPECT_EQ(3, cudf::num_bitmask_words(2*cudf::bitmask_size_in_bits+1));
 }
 
 struct CountBitmaskTest : public cudf::test::BaseFixture {};
@@ -533,11 +533,11 @@ void cleanEndWord(rmm::device_buffer& mask, int begin_bit, int end_bit)
 
   auto number_of_mask_words = cudf::num_bitmask_words(static_cast<size_t>(end_bit - begin_bit));
   auto number_of_bits       = end_bit - begin_bit;
-  if (number_of_bits % 64 != 0) {
+  if (number_of_bits % cudf::bitmask_size_in_bits != 0) {
     cudf::bitmask_type end_mask = 0;
     CUDF_CUDA_TRY(
       hipMemcpy(&end_mask, ptr + number_of_mask_words - 1, sizeof(end_mask), hipMemcpyDefault));
-    end_mask = end_mask & ((1llu << (number_of_bits % 64)) - 1);
+    end_mask = end_mask & (cudf::LANE_MASK_ALL_UNTIL_EXCL(number_of_bits % cudf::bitmask_size_in_bits));
     CUDF_CUDA_TRY(
       hipMemcpy(ptr + number_of_mask_words - 1, &end_mask, sizeof(end_mask), hipMemcpyDefault));
   }

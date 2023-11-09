@@ -568,7 +568,7 @@ add_library(
   src/sort/stable_sort.hip
   src/stream_compaction/apply_boolean_mask.hip
   src/stream_compaction/distinct.hip
-  # src/stream_compaction/distinct_count.hip #TODO(HIP): There are hipCollection integration errors
+  src/stream_compaction/distinct_count.hip #TODO(HIP): There are hipCollection integration errors
   src/stream_compaction/distinct_reduce.hip
   src/stream_compaction/drop_nans.hip
   src/stream_compaction/drop_nulls.hip
