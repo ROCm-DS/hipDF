@@ -151,8 +151,8 @@ CUDF_KERNEL void fused_concatenate_string_offset_kernel(
   auto output_index          = cudf::detail::grid_1d::global_thread_id();
   size_type warp_valid_count = 0;
 
-  unsigned active_mask;
-  if (Nullable) { active_mask = __ballot_sync(0xFFFF'FFFFu, output_index < output_size); }
+  bitmask_type active_mask;
+  if (Nullable) { active_mask = __ballot_sync(LANE_MASK_ALL, output_index < output_size); }
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
     auto const offset_it            = thrust::prev(thrust::upper_bound(
