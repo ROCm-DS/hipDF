@@ -404,11 +404,11 @@ add_library(
   # src/io/comp/statistics.hip
   # src/io/comp/uncomp.cpp
   # src/io/comp/unsnap.hip
-  # src/io/csv/csv_gpu.hip
-  # src/io/csv/durations.hip
-  # src/io/csv/reader_impl.hip
-  # src/io/csv/writer_impl.hip
-  # src/io/functions.cpp
+  src/io/csv/csv_gpu.hip
+  src/io/csv/durations.hip
+  src/io/csv/reader_impl.hip
+  src/io/csv/writer_impl.hip
+  src/io/functions.cpp
   # src/io/json/byte_range_info.hip
   # src/io/json/json_column.hip
   # src/io/json/json_tree.hip # Todo(HIP): HipCollections
@@ -449,15 +449,15 @@ add_library(
   # src/io/text/bgzip_data_chunk_source.hip
   # src/io/text/bgzip_utils.cpp
   # # src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
-  # src/io/utilities/arrow_io_source.cpp
-  # src/io/utilities/column_buffer.cpp
-  # src/io/utilities/config_utils.cpp
-  # src/io/utilities/data_sink.cpp
-  # src/io/utilities/datasource.cpp
-  # src/io/utilities/file_io_utilities.cpp
-  # src/io/utilities/parsing_utils.hip
-  # src/io/utilities/row_selection.cpp
-  # src/io/utilities/trie.hip
+  src/io/utilities/arrow_io_source.cpp
+  src/io/utilities/column_buffer.cpp
+  src/io/utilities/config_utils.cpp
+  src/io/utilities/data_sink.cpp
+  src/io/utilities/datasource.cpp
+  src/io/utilities/file_io_utilities.cpp
+  src/io/utilities/parsing_utils.hip
+  src/io/utilities/row_selection.cpp
+  src/io/utilities/trie.hip
   src/jit/cache.cpp
   src/jit/parser.cpp
   src/jit/util.cpp
