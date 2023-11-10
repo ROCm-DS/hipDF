@@ -17,6 +17,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf_test/column_utilities.hpp>
@@ -114,7 +136,7 @@ void ASSERT_BINOP(cudf::column_view const& out,
     auto rhs_valid = rhs_h.second;
     auto out_valid = out_h.second;
 
-    uint32_t lhs_valid = (lhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
+    cudf::bitmask_type lhs_valid = (lhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
     ASSERT_EQ(out_valid.size(), rhs_valid.size());
     for (cudf::size_type i = 0; i < cudf::num_bitmask_words(out_data.size()); ++i) {
       EXPECT_EQ(out_valid[i], (lhs_valid & rhs_valid[i]));
@@ -162,7 +184,7 @@ void ASSERT_BINOP(cudf::column_view const& out,
     auto lhs_valid = lhs_h.second;
     auto out_valid = out_h.second;
 
-    uint32_t rhs_valid = (rhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
+    cudf::bitmask_type rhs_valid = (rhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
     ASSERT_EQ(out_valid.size(), lhs_valid.size());
     for (cudf::size_type i = 0; i < cudf::num_bitmask_words(out_data.size()); ++i) {
       EXPECT_EQ(out_valid[i], (rhs_valid & lhs_valid[i]));
