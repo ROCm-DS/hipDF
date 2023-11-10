@@ -100,7 +100,7 @@ void ASSERT_BINOP(cudf::column_view const& out,
     auto rhs_valid = rhs_h.second;
     auto out_valid = out_h.second;
 
-    uint32_t lhs_valid = (lhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
+    cudf::bitmask_type lhs_valid = (lhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
     ASSERT_EQ(out_valid.size(), rhs_valid.size());
     for (cudf::size_type i = 0; i < cudf::num_bitmask_words(out_data.size()); ++i) {
       EXPECT_EQ(out_valid[i], (lhs_valid & rhs_valid[i]));
@@ -148,7 +148,7 @@ void ASSERT_BINOP(cudf::column_view const& out,
     auto lhs_valid = lhs_h.second;
     auto out_valid = out_h.second;
 
-    uint32_t rhs_valid = (rhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
+    cudf::bitmask_type rhs_valid = (rhs.is_valid() ? std::numeric_limits<cudf::bitmask_type>::max() : 0);
     ASSERT_EQ(out_valid.size(), lhs_valid.size());
     for (cudf::size_type i = 0; i < cudf::num_bitmask_words(out_data.size()); ++i) {
       EXPECT_EQ(out_valid[i], (rhs_valid & lhs_valid[i]));
