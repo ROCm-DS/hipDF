@@ -302,14 +302,14 @@ ConfigureTest(UNARY_TEST unary/math_ops_test.cpp unary/unary_ops_test.cpp unary/
 
 # ##################################################################################################
 # * binary tests ----------------------------------------------------------------------------------
-#  ConfigureTest(
-#    BINARYOP_TEST
-  #  binaryop/binop-verify-input-test.cpp
-  #  binaryop/binop-null-test.cpp
-  #  binaryop/binop-compiled-test.cpp
-  #  binaryop/binop-compiled-fixed_point-test.cpp
+  ConfigureTest(
+    BINARYOP_TEST
+    binaryop/binop-verify-input-test.cpp
+    binaryop/binop-null-test.cpp
+    binaryop/binop-compiled-test.cpp
+    binaryop/binop-compiled-fixed_point-test.cpp
 #   binaryop/binop-generic-ptx-test.cpp
-#  )
+  )
 
 # # ##################################################################################################
 # # * unary transform tests -------------------------------------------------------------------------
