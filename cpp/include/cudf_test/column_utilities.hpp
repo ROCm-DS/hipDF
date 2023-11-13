@@ -96,7 +96,7 @@ bool expect_column_properties_equivalent(
  */
 bool expect_columns_equal(cudf::column_view const& lhs,
                           cudf::column_view const& rhs,
-                          debug_output_level verbosity = debug_output_level::FIRST_ERROR);
+                          debug_output_level verbosity = debug_output_level::ALL_ERRORS);
 
 /**
  * @brief Verifies the element-wise equivalence of two columns.

@@ -13,7 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#include <cudf_test/base_fixture.hpp>
+#include <cudf_test/column_utilities.hpp>
+#include <cudf_test/column_wrapper.hpp>
+#include <cudf_test/type_lists.hpp>
 #include <cudf/detail/copy_if.cuh>
 #include <cudf/detail/gather.hpp>
 #include <cudf/detail/indexalator.cuh>
@@ -156,11 +159,24 @@ std::unique_ptr<column> remove_keys(dictionary_column_view const& dictionary_col
   auto const keys_view = dictionary_column.keys();
   CUDF_EXPECTS(keys_view.type() == keys_to_remove.type(), "keys types must match");
 
+  printf("keys_to_remove size %d\n", keys_to_remove.size());
+  // cudf::test::fixed_width_column_wrapper<float> del_keys{4.25, -11.75, 5.0};
+  // CUDF_TEST_EXPECT_COLUMNS_EQUAL(keys_to_remove, del_keys);
+
   // locate keys to remove by searching the keys column
-  auto const matches = cudf::detail::contains(keys_to_remove, keys_view, stream, mr);
+  // auto const matches = cudf::detail::contains(keys_to_remove, keys_view, stream, mr);
+  auto const matches = cudf::detail::contains(keys_view, keys_to_remove, stream, mr);
+  //{4.25, 7.125, 0.5, -11.75}
+  /////
+  // cudf::test::fixed_width_column_wrapper<bool> expect{1, 1, 0};
+  cudf::test::fixed_width_column_wrapper<bool> expect{1, 1, 0};
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(*matches, expect);
+  /////
   auto d_matches     = matches->view().data<bool>();
   // call common utility method to keep the keys not matched to keys_to_remove
-  auto key_matcher = [d_matches] __device__(size_type idx) { return !d_matches[idx]; };
+  auto key_matcher = [d_matches] __device__(size_type idx) { 
+    printf("idx: %d !d_matches[idx] %d\n", idx, !d_matches[idx]);
+    return !d_matches[idx]; };
   return remove_keys_fn(dictionary_column, key_matcher, stream, mr);
 }
 
