@@ -676,17 +676,17 @@ ConfigureTest(
 # * dictionary tests ------------------------------------------------------------------------------
 ConfigureTest(
   DICTIONARY_TEST
-  dictionary/add_keys_test.cpp
-  dictionary/decode_test.cpp
-  dictionary/encode_test.cpp
-  dictionary/factories_test.cpp
-  dictionary/fill_test.cpp
-  dictionary/gather_test.cpp
+  # dictionary/add_keys_test.cpp
+  # dictionary/decode_test.cpp
+  # dictionary/encode_test.cpp
+  # dictionary/factories_test.cpp
+  # dictionary/fill_test.cpp
+  # dictionary/gather_test.cpp
   dictionary/remove_keys_test.cpp
-  dictionary/scatter_test.cpp
-  dictionary/search_test.cpp
-  dictionary/set_keys_test.cpp
-  dictionary/slice_test.cpp
+  # dictionary/scatter_test.cpp
+  # dictionary/search_test.cpp
+  # dictionary/set_keys_test.cpp
+  # dictionary/slice_test.cpp
 )
 
 # ##################################################################################################

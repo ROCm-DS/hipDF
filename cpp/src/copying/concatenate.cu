@@ -147,7 +147,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
 {
   auto tidx         = cudf::detail::grid_1d::global_thread_id<block_size>();
   auto const stride = cudf::detail::grid_1d::grid_stride<block_size>();
-  auto active_mask  = __ballot_sync(LANE_MASK_ALL, tidx < number_of_mask_bits);
+  auto active_mask  = __ballot_sync(cudf::LANE_MASK_ALL, tidx < number_of_mask_bits);
 
   size_type warp_valid_count = 0;
 
@@ -228,7 +228,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
   size_type warp_valid_count = 0;
 
   bitmask_type active_mask;
-  if (Nullable) { active_mask = __ballot_sync(LANE_MASK_ALL, output_index < output_size); }
+  if (Nullable) { active_mask = __ballot_sync(cudf::LANE_MASK_ALL, output_index < output_size); }
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
     auto const offset_it            = thrust::prev(thrust::upper_bound(
