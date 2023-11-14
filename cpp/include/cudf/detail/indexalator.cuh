@@ -177,6 +177,7 @@ struct output_indexalator : base_normalator<output_indexalator, cudf::size_type>
    * @brief Indirection operator returns this iterator instance in order
    * to capture the `operator=(Integer)` calls.
    */
+  //Todo(HIP): Some tests in dictionary fail if without __attribute__((optnone))
   __attribute__((optnone)) __device__ inline reference operator*() const { return *this; } //TODO(HIP/AMD): is optnone needed as a workaround?
 
   /**

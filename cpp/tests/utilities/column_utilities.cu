@@ -792,13 +792,13 @@ struct column_comparator {
   {
     // compare properties
     if (!cudf::type_dispatcher(lhs.type(),
-                               column_property_comparator<check_exact_equality>{},
-                               lhs,
-                               rhs,
-                               lhs_row_indices,
-                               rhs_row_indices,
-                               verbosity)) {
-      return false;
+    column_property_comparator<check_exact_equality>{},
+    lhs,
+    rhs,
+    lhs_row_indices,
+    rhs_row_indices,
+    verbosity)) {
+    return false;
     }
 
     // compare values

@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-// MIT License
-//
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/copy_if.cuh>
 #include <cudf/detail/gather.hpp>
@@ -184,24 +162,11 @@ std::unique_ptr<column> remove_keys(dictionary_column_view const& dictionary_col
                "keys types must match",
                cudf::data_type_error);
 
-  printf("keys_to_remove size %d\n", keys_to_remove.size());
-  // cudf::test::fixed_width_column_wrapper<float> del_keys{4.25, -11.75, 5.0};
-  // CUDF_TEST_EXPECT_COLUMNS_EQUAL(keys_to_remove, del_keys);
-
   // locate keys to remove by searching the keys column
-  // auto const matches = cudf::detail::contains(keys_to_remove, keys_view, stream, mr);
-  auto const matches = cudf::detail::contains(keys_view, keys_to_remove, stream, mr);
-  //{4.25, 7.125, 0.5, -11.75}
-  /////
-  // cudf::test::fixed_width_column_wrapper<bool> expect{1, 1, 0};
-  cudf::test::fixed_width_column_wrapper<bool> expect{1, 1, 0};
-  CUDF_TEST_EXPECT_COLUMNS_EQUAL(*matches, expect);
-  /////
+  auto const matches = cudf::detail::contains(keys_to_remove, keys_view, stream, mr);
   auto d_matches     = matches->view().data<bool>();
   // call common utility method to keep the keys not matched to keys_to_remove
-  auto key_matcher = [d_matches] __device__(size_type idx) { 
-    printf("idx: %d !d_matches[idx] %d\n", idx, !d_matches[idx]);
-    return !d_matches[idx]; };
+  auto key_matcher = [d_matches] __device__(size_type idx) { return !d_matches[idx]; };
   return remove_keys_fn(dictionary_column, key_matcher, stream, mr);
 }
 
