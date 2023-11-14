@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <cudf/detail/copy_if.cuh>
 #include <cudf/detail/gather.hpp>
 #include <cudf/detail/indexalator.cuh>
 #include <cudf/detail/nvtx/ranges.hpp>

@@ -142,7 +142,7 @@ struct dispatch_compute_indices {
              rmm::mr::device_memory_resource* mr)
   {
 // TODO FIXME
-#if 0
+// #if 0
     auto keys_view     = column_device_view::create(all_keys, stream);
     auto indices_view  = column_device_view::create(all_indices, stream);
     auto d_all_indices = *indices_view;
@@ -192,10 +192,11 @@ struct dispatch_compute_indices {
                       });
 #endif
     return result;
-#endif
-    std::enable_if_t<cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>> result{};
-    return result;
   }
+// #endif
+  //   std::enable_if_t<cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>> result{};
+  //   return result;
+  // }
 
   template <typename Element, typename... Args>
   std::enable_if_t<!cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>>
