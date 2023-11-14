@@ -349,16 +349,17 @@ TYPED_TEST(ConcatenateListElementsTypedTest, SlicedColumnsInputWithNulls)
   auto row0 = ListsCol{ListsCol{{null, 2, 3}, null_at(0)}, ListsCol{2, 3}};
   auto row1 = ListsCol{ListsCol{{3, null, null, 6}, nulls_at({1, 2})},
                        ListsCol{{5, 6, null}, null_at(2)},
-                       ListsCol{},
+                       {ListsCol{}}, //TODO: Workaround for HIP
                        ListsCol{{7, null}, null_at(1)}};
   auto row2 = ListsCol{ListsCol{7, 7, 7}, ListsCol{{7, 8, null, 0}, null_at(2)}, ListsCol{1}};
-  auto row3 = ListsCol{ListsCol{9, 10, 11}};
+  //TODO: Workaround for HIP
+  auto row3 = ListsCol{{ListsCol{9, 10, 11}}};
   //TODO: Workaround for HIP
   auto row4 = ListsCol{{ListsCol{}}};
   auto row5 = ListsCol{ListsCol{{12, null, 14, 15}, null_at(1)}, ListsCol{16}, ListsCol{17}};
   auto const col_original = build_lists_col(row0, row1, row2, row3, row4, row5);
 
-  {
+ {
     auto const col     = cudf::slice(col_original, {0, 3})[0];
     auto const results = cudf::lists::concatenate_list_elements(col);
     auto const expected =
