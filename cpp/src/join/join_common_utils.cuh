@@ -300,7 +300,7 @@ __device__ void flush_output_cache(unsigned int const activemask,
                                    size_type* join_output_r)
 {
   // count how many active threads participating here which could be less than warp_size
-  int num_threads               = __popc(activemask);
+  int num_threads               = __POPC(activemask);
   cudf::size_type output_offset = 0;
 
   if (0 == lane_id) { output_offset = atomicAdd(current_idx, current_idx_shared[warp_id]); }

@@ -80,15 +80,15 @@ __global__ void copy_range_kernel(SourceValueIterator source_value_begin,
 
     if (has_validity) {  // update bitmask
       bool const valid      = in_range && *(source_validity_begin + source_idx);
-      int const active_mask = hip_extensions::__ballot_sync(0xFFFF'FFFFu, in_range);
-      int const valid_mask  = hip_extensions::__ballot_sync(0xFFFF'FFFFu, valid);
-      int const warp_mask   = active_mask & valid_mask;
+      cudf::bitmask_type const active_mask = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, in_range);
+      cudf::bitmask_type const valid_mask  = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, valid);
+      cudf::bitmask_type const warp_mask   = active_mask & valid_mask;
 
       cudf::bitmask_type old_mask = target.get_mask_word(mask_idx);
       if (lane_id == leader_lane) {
         cudf::bitmask_type new_mask = (old_mask & ~active_mask) | warp_mask;
         target.set_mask_word(mask_idx, new_mask);
-        warp_null_change += __popc(active_mask & old_mask) - __popc(active_mask & new_mask);
+        warp_null_change += cudf::__POPC(active_mask & old_mask) - cudf::__POPC(active_mask & new_mask);
       }
     }
 

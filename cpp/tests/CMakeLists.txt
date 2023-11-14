@@ -302,14 +302,14 @@ ConfigureTest(UNARY_TEST unary/math_ops_test.cpp unary/unary_ops_test.cpp unary/
 
 # ##################################################################################################
 # * binary tests ----------------------------------------------------------------------------------
-#  ConfigureTest(
-#    BINARYOP_TEST
-  #  binaryop/binop-verify-input-test.cpp
-  #  binaryop/binop-null-test.cpp
-  #  binaryop/binop-compiled-test.cpp
-  #  binaryop/binop-compiled-fixed_point-test.cpp
+  ConfigureTest(
+    BINARYOP_TEST
+    binaryop/binop-verify-input-test.cpp
+    binaryop/binop-null-test.cpp
+    binaryop/binop-compiled-test.cpp
+    binaryop/binop-compiled-fixed_point-test.cpp
 #   binaryop/binop-generic-ptx-test.cpp
-#  )
+  )
 
 # # ##################################################################################################
 # # * unary transform tests -------------------------------------------------------------------------
@@ -487,7 +487,7 @@ ConfigureTest(
 ConfigureTest(
   STREAM_COMPACTION_TEST
   stream_compaction/apply_boolean_mask_tests.cpp
-  # stream_compaction/distinct_count_tests.cpp
+  stream_compaction/distinct_count_tests.cpp
   stream_compaction/distinct_tests.cpp
   stream_compaction/drop_nans_tests.cpp
   stream_compaction/drop_nulls_tests.cpp

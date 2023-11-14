@@ -82,7 +82,7 @@ __global__ void gpu_rolling_new(cudf::size_type nrows,
     bool const output_is_valid = (count >= min_periods);
 
     // set the mask
-    unsigned int const result_mask = __ballot(output_is_valid) & active_threads;
+    bitmask_type const result_mask = __ballot(output_is_valid) & active_threads;
 
     // store the output value, one per thread
     if (output_is_valid) { out_col[i] = val; }
@@ -90,7 +90,7 @@ __global__ void gpu_rolling_new(cudf::size_type nrows,
     // only one thread writes the mask
     if (0 == cudf::intra_word_index(i)) {
       out_col_valid[cudf::word_index(i)] = result_mask;
-      warp_valid_count += __popc(result_mask);
+      warp_valid_count += __POPC(result_mask);
     }
 
     // process next element

@@ -126,8 +126,8 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
   cudf::thread_index_type output_index = threadIdx.x + blockIdx.x * blockDim.x;
   size_type warp_valid_count           = 0;
 
-  unsigned active_mask;
-  if (Nullable) { active_mask = hip_extensions::__ballot_sync(0xFFFF'FFFFu, output_index < output_size); }
+  bitmask_type active_mask;
+  if (Nullable) { active_mask = hip_extensions::__ballot_sync(LANE_MASK_ALL, output_index < output_size); }
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
     auto const offset_it            = thrust::prev(thrust::upper_bound(
@@ -152,7 +152,7 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
         output_mask[word_index(output_index)] = new_word;
       }
 
-      warp_valid_count += __popc(new_word);
+      warp_valid_count += __POPC(new_word);
     }
 
     output_index += blockDim.x * gridDim.x;

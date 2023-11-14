@@ -119,7 +119,7 @@ class column_buffer_base {
 
   void set_null_mask(rmm::device_buffer&& mask) { _null_mask = std::move(mask); }
 
-  template <typename T = uint32_t>
+  template <typename T = bitmask_type>
   auto null_mask()
   {
     return static_cast<T*>(_null_mask.data());
