@@ -16,7 +16,7 @@
 
 // MIT License
 //
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -166,8 +166,6 @@ struct dispatch_compute_indices {
              rmm::cuda_stream_view stream,
              rmm::device_async_resource_ref mr)
   {
-// TODO FIXME
-// #if 0
     auto keys_view     = column_device_view::create(all_keys, stream);
     auto indices_view  = column_device_view::create(all_indices, stream);
     auto d_all_indices = *indices_view;
@@ -219,10 +217,6 @@ struct dispatch_compute_indices {
 #endif
     return result;
   }
-// #endif
-  //   std::enable_if_t<cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>> result{};
-  //   return result;
-  // }
 
   template <typename Element, typename... Args>
   std::enable_if_t<!cudf::is_relationally_comparable<Element, Element>(), std::unique_ptr<column>>
