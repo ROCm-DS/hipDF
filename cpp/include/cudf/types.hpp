@@ -85,7 +85,7 @@ using bitmask_type      = uint64_t;  ///< Bitmask type stored as 64-bit unsigned
 using valid_type        = uint8_t;   ///< Valid type in host memory
 using thread_index_type = int64_t;   ///< Thread index type in kernels
 
-constexpr unsigned bitmask_size = sizeof(bitmask_type)*8;
+constexpr unsigned bitmask_size_in_bits = sizeof(bitmask_type)*8;
 
 constexpr bitmask_type LANE_MASK_ONE = 0b1;
 constexpr bitmask_type LANE_MASK_TWO = 0b10;
@@ -195,6 +195,11 @@ __device__ inline int __POPC<uint32_t>(uint32_t v) {
 
 template <>
 __device__ inline int __POPC<uint64_t>(uint64_t v) {
+  return __popcll(v);
+}
+
+template <> //: On x86_64, uint64_t == unsigned long int != unsigned long long int, both have 64 bit
+__device__ inline int __POPC<unsigned long long int>(unsigned long long int v) {
   return __popcll(v);
 }
 

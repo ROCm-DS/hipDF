@@ -59,7 +59,7 @@ TEST_F(ValidIfTest, InvalidRange)
                                       rmm::mr::get_current_device_resource()),
                cudf::logic_error);
 }
-// This test has been modified to avoid using memset to zeors
+// Todo: This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, OddsValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, odds_valid{});
