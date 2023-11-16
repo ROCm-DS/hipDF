@@ -146,11 +146,11 @@ endfunction()
 ConfigureTest(
   COLUMN_TEST
   column/bit_cast_test.cpp
-  # column/column_device_view_test.hip
-  # column/column_test.cpp
-  # column/column_view_device_span_test.cpp
-  # column/column_view_shallow_test.cpp
-  # column/compound_test.hip
+  column/column_device_view_test.hip
+  column/column_test.cpp
+  column/column_view_device_span_test.cpp
+  column/column_view_shallow_test.cpp
+  column/compound_test.hip
 )
 
 # ##################################################################################################
