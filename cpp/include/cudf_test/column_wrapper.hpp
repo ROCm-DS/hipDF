@@ -757,13 +757,9 @@ class strings_column_wrapper : public detail::column_wrapper {
       chars, cudf::test::get_default_stream(), rmm::mr::get_current_device_resource());
     auto d_offsets = cudf::detail::make_device_uvector_sync(
       offsets, cudf::test::get_default_stream(), rmm::mr::get_current_device_resource());
- 
-    // TODO(HIP): this is a workaround for not being able to initialize the struct device_span properly
-    // with {}/default constructor. See https://github.com/AMD-AI/hipdf/issues/5
-    cudf::device_span<bitmask_type const> valid_mask(nullptr, 0);
 
     wrapped =
-      cudf::make_strings_column(d_chars, d_offsets, valid_mask, 0, cudf::test::get_default_stream());
+      cudf::make_strings_column(d_chars, d_offsets, {}, 0, cudf::test::get_default_stream());
   }
 
   /**
