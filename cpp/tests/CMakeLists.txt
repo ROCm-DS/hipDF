@@ -273,15 +273,15 @@ ConfigureTest(
 
 # ##################################################################################################
 # * replace tests ---------------------------------------------------------------------------------
-# ConfigureTest(REPLACE_TEST replace/replace_tests.cpp)
+ConfigureTest(REPLACE_TEST replace/replace_tests.cpp)
 
-# ConfigureTest(REPLACE_NULLS_TEST replace/replace_nulls_tests.cpp)
+ConfigureTest(REPLACE_NULLS_TEST replace/replace_nulls_tests.cpp)
 
-# ConfigureTest(REPLACE_NANS_TEST replace/replace_nans_tests.cpp)
+ConfigureTest(REPLACE_NANS_TEST replace/replace_nans_tests.cpp)
 
-# ConfigureTest(NORMALIZE_REPLACE_TEST replace/normalize_replace_tests.cpp)
+ConfigureTest(NORMALIZE_REPLACE_TEST replace/normalize_replace_tests.cpp)
 
-# ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
+ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
 
 # ##################################################################################################
 # * fixed_point tests -----------------------------------------------------------------------------
