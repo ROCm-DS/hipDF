@@ -247,7 +247,7 @@ ConfigureTest(
 # * quantiles tests -------------------------------------------------------------------------------
 ConfigureTest(
   QUANTILES_TEST 
-  # quantiles/percentile_approx_test.cpp 
+  quantiles/percentile_approx_test.cpp 
   quantiles/quantile_test.cpp
   quantiles/quantiles_test.cpp
   GPUS 1
@@ -293,7 +293,7 @@ ConfigureTest(UNARY_TEST unary/math_ops_test.cpp unary/unary_ops_test.cpp unary/
 
 # ##################################################################################################
 # * round tests -----------------------------------------------------------------------------------
-# ConfigureTest(ROUND_TEST round/round_tests.cpp)
+ConfigureTest(ROUND_TEST round/round_tests.cpp)
 
 # ##################################################################################################
 # * binary tests ----------------------------------------------------------------------------------
