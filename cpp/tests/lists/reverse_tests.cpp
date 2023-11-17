@@ -89,7 +89,8 @@ TYPED_TEST(ListsReverseTypedTest, SimpleInputNoNulls)
   }
 
   {
-    auto const expected = lists_col{lists_col{}};
+    //TODO: Workaround for HIP
+    auto const expected = lists_col{{lists_col{}}};
     auto const input    = cudf::slice(input_original, {2, 3})[0];
     auto const results  = cudf::lists::reverse(cudf::lists_column_view(input));
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, *results);
