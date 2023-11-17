@@ -156,7 +156,7 @@ ConfigureTest(
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
 ConfigureTest(SCALAR_TEST 
-  # scalar/scalar_test.cpp 
+  scalar/scalar_test.cpp 
   scalar/scalar_device_view_test.hip
 )
 
