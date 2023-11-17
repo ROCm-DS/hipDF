@@ -158,7 +158,7 @@ ConfigureTest(
 ConfigureTest(SCALAR_TEST 
   # scalar/scalar_test.cpp 
   scalar/scalar_device_view_test.hip
-)
+  )
 
 # ##################################################################################################
 # * timestamps tests ------------------------------------------------------------------------------
@@ -262,16 +262,16 @@ ConfigureTest(
 
 # ##################################################################################################
 # * reduction tests -------------------------------------------------------------------------------
-# ConfigureTest(
-#   REDUCTIONS_TEST
-#   reductions/collect_ops_tests.cpp
-#   reductions/rank_tests.cpp
-#   reductions/reduction_tests.cpp
-#   reductions/scan_tests.cpp
-#   reductions/segmented_reduction_tests.cpp
-#   reductions/list_rank_test.cpp
-#   reductions/tdigest_tests.hip
-# )
+ConfigureTest(
+  REDUCTIONS_TEST
+  reductions/collect_ops_tests.cpp
+  reductions/rank_tests.cpp
+  reductions/reduction_tests.cpp
+  reductions/scan_tests.cpp
+  reductions/segmented_reduction_tests.cpp
+  reductions/list_rank_test.cpp
+  reductions/tdigest_tests.hip
+)
 
 # ##################################################################################################
 # * replace tests ---------------------------------------------------------------------------------
