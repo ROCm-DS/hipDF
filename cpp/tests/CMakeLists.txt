@@ -478,7 +478,7 @@ ConfigureTest(
 # # * sorted-merge tests ----------------------------------------------------------------------------
  ConfigureTest(
    MERGE_TEST merge/merge_test.cpp /
-   #merge/merge_dictionary_test.cpp
+   merge/merge_dictionary_test.cpp
    merge/merge_string_test.cpp
  )
 
