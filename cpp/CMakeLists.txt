@@ -394,20 +394,20 @@ add_library(
   # src/io/avro/avro.cpp
   # src/io/avro/avro_gpu.hip
   # src/io/avro/reader_impl.hip
-  # src/io/comp/brotli_dict.cpp
-  # src/io/comp/cpu_unbz2.cpp
-  # src/io/comp/debrotli.hip
-  # src/io/comp/gpuinflate.hip
-  # src/io/comp/hipcomp_adapter.cpp
-  # src/io/comp/hipcomp_adapter.hip
-  # src/io/comp/snap.hip
-  # src/io/comp/statistics.hip
-  # src/io/comp/uncomp.cpp
-  # src/io/comp/unsnap.hip
-  src/io/csv/csv_gpu.hip
-  src/io/csv/durations.hip
-  src/io/csv/reader_impl.hip
-  src/io/csv/writer_impl.hip
+  src/io/comp/brotli_dict.cpp
+  src/io/comp/cpu_unbz2.cpp
+  src/io/comp/debrotli.hip
+  src/io/comp/gpuinflate.hip
+  src/io/comp/hipcomp_adapter.cpp
+  src/io/comp/hipcomp_adapter.hip
+  src/io/comp/snap.hip
+  src/io/comp/statistics.hip
+  src/io/comp/uncomp.cpp
+  src/io/comp/unsnap.hip
+  # src/io/csv/csv_gpu.hip
+  # src/io/csv/durations.hip
+  # src/io/csv/reader_impl.hip
+  # src/io/csv/writer_impl.hip
   src/io/functions.cpp
   # src/io/json/byte_range_info.hip
   # src/io/json/json_column.hip
