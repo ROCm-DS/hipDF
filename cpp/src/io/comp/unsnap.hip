@@ -632,7 +632,8 @@ __global__ void //__launch_bounds__(block_size)
                 device_span<device_span<uint8_t> const> outputs,
                 device_span<compression_result> results)
 {
-  extern __shared__ __align__(16) unsnap_state_s state_g[];
+  //extern __shared__ __align__(16) unsnap_state_s state_g[];
+  extern __shared__ unsnap_state_s state_g[];
   __shared__ hipcub::WarpReduce<uint32_t>::TempStorage temp_storage;
   int t             = threadIdx.x;
   unsnap_state_s* s = &state_g[0];

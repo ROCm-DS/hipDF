@@ -38,7 +38,8 @@ __global__ void __launch_bounds__(96) gpuDecodeDeltaBinary(
 {
   using cudf::detail::warp_size;
   __shared__ __align__(16) delta_binary_decoder db_state;
-  extern __shared__ __align__(16) page_state_s state_g[];
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
   __shared__ __align__(16) page_state_buffers_s<delta_rolling_buf_size, 0, 0> state_buffers;
 
   page_state_s* const s = &state_g[0];

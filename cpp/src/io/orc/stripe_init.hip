@@ -450,7 +450,8 @@ __global__ void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_gr
                                                                 uint32_t rowidx_stride,
                                                                 bool use_base_stride)
 {
-  extern __shared__ __align__(16) rowindex_state_s state_g[];
+  //extern __shared__ __align__(16) rowindex_state_s state_g[];
+  extern __shared__ rowindex_state_s state_g[];
   rowindex_state_s* const s = &state_g[0];
   uint32_t chunk_id         = blockIdx.y * num_columns + blockIdx.x;
   int t                     = threadIdx.x;
