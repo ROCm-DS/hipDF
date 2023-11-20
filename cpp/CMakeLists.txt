@@ -408,7 +408,7 @@ add_library(
   # src/io/csv/durations.hip
   # src/io/csv/reader_impl.hip
   # src/io/csv/writer_impl.hip
-  # src/io/functions.cpp
+  src/io/functions.cpp
   # src/io/json/byte_range_info.hip
   # src/io/json/json_column.hip
   # src/io/json/json_tree.hip # Todo(HIP): HipCollections
@@ -427,37 +427,37 @@ add_library(
   # src/io/orc/stripe_init.hip
   # src/datetime/timezone.cpp
   # # src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/compact_protocol_reader.cpp
-  # src/io/parquet/compact_protocol_writer.cpp
-  # # src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/chunk_dict.hip
-  # # src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/predicate_pushdown.cpp
-  # src/io/parquet/reader.cpp
-  # src/io/parquet/reader_impl.cpp
-  # src/io/parquet/reader_impl_helpers.cpp
-  # src/io/parquet/reader_impl_preprocess.hip
-  # # src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/compact_protocol_reader.cpp
+  src/io/parquet/compact_protocol_writer.cpp
+  src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/chunk_dict.hip
+  src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/predicate_pushdown.cpp
+  src/io/parquet/reader.cpp
+  src/io/parquet/reader_impl.cpp
+  src/io/parquet/reader_impl_helpers.cpp
+  src/io/parquet/reader_impl_preprocess.hip
+  src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
   # src/io/text/byte_range_info.cpp
   # src/io/text/data_chunk_source_factories.cpp
   # src/io/text/bgzip_data_chunk_source.hip
   # src/io/text/bgzip_utils.cpp
   # # src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
-  # src/io/utilities/arrow_io_source.cpp
-  # src/io/utilities/column_buffer.cpp
-  # src/io/utilities/config_utils.cpp
-  # src/io/utilities/data_sink.cpp
-  # src/io/utilities/datasource.cpp
-  # src/io/utilities/file_io_utilities.cpp
-  # src/io/utilities/parsing_utils.hip
-  # src/io/utilities/row_selection.cpp
-  # src/io/utilities/trie.hip
+  src/io/utilities/arrow_io_source.cpp
+  src/io/utilities/column_buffer.cpp
+  src/io/utilities/config_utils.cpp
+  src/io/utilities/data_sink.cpp
+  src/io/utilities/datasource.cpp
+  src/io/utilities/file_io_utilities.cpp
+  src/io/utilities/parsing_utils.hip
+  src/io/utilities/row_selection.cpp
+  src/io/utilities/trie.hip
   src/jit/cache.cpp
   src/jit/parser.cpp
   src/jit/util.cpp
