@@ -614,8 +614,7 @@ template <typename level_t>
 CUDF_KERNEL void __launch_bounds__(preprocess_block_size) gpuComputeStringPageBounds(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  //extern __shared__ __align__(16) page_state_s state_g[];
-  extern __shared__ page_state_s state_g[];
+  extern __shared__ __align__(16) page_state_s state_g[];
 
   page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
