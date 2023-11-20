@@ -72,7 +72,11 @@ namespace {
  */
 template <typename IntegerType>
 struct string_to_integer_check_fn {
-  __device__ bool operator()(thrust::pair<string_view, bool> const& p) const
+  // Todo(HIP): It seems that the compiler optimizes the operator overloading.
+  // Added __attribute__((optnone)) as a workaround for now.
+  // Related to internal issue 33 ?
+  __attribute__((optnone)) __device__ bool operator()(
+    thrust::pair<string_view, bool> const& p) const
   {
     if (!p.second || p.first.empty()) { return false; }
 
@@ -82,8 +86,9 @@ struct string_to_integer_check_fn {
     auto iter           = d_str + static_cast<int>((d_str[0] == '-' || d_str[0] == '+'));
     auto const iter_end = d_str + p.first.size_bytes();
     if (iter == iter_end) { return false; }
-    //Todo(HIP): error: constant expression evaluates to -1 which cannot be narrowed to type 'unsigned char' [-Wc++11-narrowing]
-    // auto const sign = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
+    // Todo(HIP): error: constant expression evaluates to -1 which cannot be narrowed to type
+    // 'unsigned char' [-Wc++11-narrowing]
+    //  auto const sign = d_str[0] == '-' ? IntegerType{-1} : IntegerType{1};
     auto const sign = d_str[0] == '-' ? -1 : 1;
     auto const bound_val =
       sign > 0 ? std::numeric_limits<IntegerType>::max() : std::numeric_limits<IntegerType>::min();
@@ -95,13 +100,14 @@ struct string_to_integer_check_fn {
       if (chr < '0' || chr > '9') { return false; }
 
       // Check for underflow and overflow:
-      auto const digit       = static_cast<IntegerType>(chr - '0');
-      // Todo(HIP): error: constant expression evaluates to 10 which cannot be narrowed to type 'bool' [-Wc++11-narrowing]
-      // auto const bound_check = (bound_val - sign * digit) / IntegerType{10} * sign;
+      auto const digit = static_cast<IntegerType>(chr - '0');
+      // Todo(HIP): error: constant expression evaluates to 10 which cannot be narrowed to type
+      // 'bool' [-Wc++11-narrowing] auto const bound_check = (bound_val - sign * digit) /
+      // IntegerType{10} * sign;
       auto const bound_check = (bound_val - sign * digit) / 10 * sign;
       if (value > bound_check) return false;
-      // Todo(HIP): error: constant expression evaluates to 10 which cannot be narrowed to type 'bool' [-Wc++11-narrowing]
-      // value = value * IntegerType{10} + digit;
+      // Todo(HIP): error: constant expression evaluates to 10 which cannot be narrowed to type
+      // 'bool' [-Wc++11-narrowing] value = value * IntegerType{10} + digit;
       value = value * 10 + digit;
     }
 

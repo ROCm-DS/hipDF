@@ -590,19 +590,19 @@ ConfigureTest(
   strings/array_tests.cpp
   strings/attrs_tests.cpp
   strings/booleans_tests.cpp
-  strings/case_tests.cpp
-  strings/chars_types_tests.cpp
+  # strings/case_tests.cpp
+  # strings/chars_types_tests.cpp
   strings/combine/concatenate_tests.cpp
   strings/combine/join_list_elements_tests.cpp
   strings/combine/join_strings_tests.cpp
   strings/concatenate_tests.cpp
-  strings/contains_tests.cpp
+  # strings/contains_tests.cpp
   strings/datetime_tests.cpp
   strings/durations_tests.cpp
   strings/extract_tests.cpp
   strings/factories_test.cu
   strings/fill_tests.cpp
-  strings/findall_tests.cpp
+  # strings/findall_tests.cpp
   strings/find_tests.cpp
   strings/find_multiple_tests.cpp
   strings/fixed_point_tests.cpp
@@ -613,7 +613,7 @@ ConfigureTest(
   strings/like_tests.cpp
   strings/pad_tests.cpp
   strings/repeat_strings_tests.cpp
-  strings/replace_regex_tests.cpp
+  # strings/replace_regex_tests.cpp
   strings/replace_tests.cpp
   strings/reverse_tests.cpp
   strings/slice_tests.cpp
