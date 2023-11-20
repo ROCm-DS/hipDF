@@ -393,21 +393,22 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
                              statistics_chunk const* chunks_in,
                              statistics_merge_group const* groups)
 {
-  __shared__ __align__(8) merge_state_s state;
+  //extern __shared__ __align__(8) merge_state_s state[];
+  extern __shared__ merge_state_s state[];
   __shared__ block_reduce_storage<block_size> storage;
 
-  cooperative_load(state.group, &groups[blockIdx.x]);
+  cooperative_load(state[0].group, &groups[blockIdx.x]);
   __syncthreads();
 
-  type_dispatcher(state.group.col_dtype,
+  type_dispatcher(state[0].group.col_dtype,
                   merge_group_statistics_functor<block_size, IO>(storage),
-                  state,
-                  chunks_in + state.group.start_chunk,
-                  state.group.num_chunks,
+                  state[0],
+                  chunks_in + state[0].group.start_chunk,
+                  state[0].group.num_chunks,
                   threadIdx.x);
   __syncthreads();
 
-  cooperative_load(chunks_out[blockIdx.x], &state.ck);
+  cooperative_load(chunks_out[blockIdx.x], &state[0].ck);
 }
 
 /**
@@ -429,7 +430,7 @@ void merge_group_statistics(statistics_chunk* chunks_out,
 {
   constexpr int block_size = 256;
   gpu_merge_group_statistics<block_size, IO>
-    <<<num_chunks, block_size, 0, stream.value()>>>(chunks_out, chunks_in, groups);
+    <<<num_chunks, block_size, sizeof(merge_state_s), stream.value()>>>(chunks_out, chunks_in, groups);
 }
 
 }  // namespace detail

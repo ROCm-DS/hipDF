@@ -552,7 +552,7 @@ add_library(
   src/io/comp/nvcomp_adapter.cu
   src/io/comp/snap.cu
   src/io/comp/uncomp.cpp
-  # src/io/comp/unsnap.cu # Todo(HIP): fix blocker issue: error: initialization of structs in shared memory
+  src/io/comp/unsnap.cu
   src/io/csv/csv_gpu.cu
   src/io/csv/durations.cu
   src/io/csv/reader_impl.cu
@@ -578,7 +578,7 @@ add_library(
   src/io/orc/stats_enc.cu
   #src/io/orc/stripe_data.cu # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
   src/io/orc/stripe_enc.cu
-  #src/io/orc/stripe_init.cu #  Todo(HIP): fix blocker issue: error: initialization of structs in shared memory
+  src/io/orc/stripe_init.cu
   src/datetime/timezone.cpp
   src/io/orc/writer_impl.cu
   src/io/parquet/arrow_schema_writer.cpp

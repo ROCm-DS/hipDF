@@ -355,9 +355,10 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size)
                       bool is_base_pass,
                       bool compute_string_sizes)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int page_idx          = blockIdx.x;
   int t                 = threadIdx.x;
   PageInfo* pp          = &pages[page_idx];
@@ -541,10 +542,10 @@ void ComputePageSizes(cudf::detail::hostdevice_span<PageInfo> pages,
   // If uses_custom_row_bounds is set to true, we have to do a second pass later that "trims"
   // the starting and ending read values to account for these bounds.
   if (level_type_size == 1) {
-    gpuComputePageSizes<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
+    gpuComputePageSizes<uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows, compute_string_sizes);
   } else {
-    gpuComputePageSizes<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
+    gpuComputePageSizes<uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows, compute_string_sizes);
   }
 }

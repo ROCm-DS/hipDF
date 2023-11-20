@@ -440,7 +440,7 @@ void __launch_bounds__(128) gpuDecodePageHeaders(ColumnChunkDesc* chunks,
 {
   using cudf::detail::warp_size;
   gpuParsePageHeader parse_page_header;
-  __shared__ byte_stream_s bs_g[4];
+  extern __shared__ byte_stream_s bs_g[];
 
   kernel_error::value_type error[4] = {0};
 
@@ -574,7 +574,7 @@ void __launch_bounds__(128) gpuDecodePageHeaders(ColumnChunkDesc* chunks,
 CUDF_KERNEL void __launch_bounds__(128)
   gpuBuildStringDictionaryIndex(ColumnChunkDesc* chunks, int32_t num_chunks)
 {
-  __shared__ ColumnChunkDesc chunk_g[4];
+  extern __shared__ ColumnChunkDesc chunk_g[];
 
   int lane_id               = threadIdx.x % 32;
   int chunk                 = (blockIdx.x * 4) + (threadIdx.x / 32);
@@ -628,7 +628,7 @@ void __host__ DecodePageHeaders(ColumnChunkDesc* chunks,
   dim3 dim_block(128, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
 
-  gpuDecodePageHeaders<<<dim_grid, dim_block, 0, stream.value()>>>(
+  gpuDecodePageHeaders<<<dim_grid, dim_block, sizeof(byte_stream_s) * 4, stream.value()>>>(
     chunks, chunk_pages, num_chunks, error_code);
 }
 
@@ -638,7 +638,7 @@ void __host__ BuildStringDictionaryIndex(ColumnChunkDesc* chunks,
 {
   dim3 dim_block(128, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
-  gpuBuildStringDictionaryIndex<<<dim_grid, dim_block, 0, stream.value()>>>(chunks, num_chunks);
+  gpuBuildStringDictionaryIndex<<<dim_grid, dim_block, sizeof(ColumnChunkDesc) * 4, stream.value()>>>(chunks, num_chunks);
 }
 
 }  // namespace cudf::io::parquet::detail

@@ -64,7 +64,7 @@
 #include <rmm/device_uvector.hpp>
 
 #include <hip/hip_cooperative_groups.h>
-#include <cooperative_groups/memcpy_async.h>
+//#include <cooperative_groups/memcpy_async.h>
 #include <cuda/std/climits>
 #include <cuda/std/limits>
 #include <cuda/std/optional>

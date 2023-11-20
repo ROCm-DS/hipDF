@@ -71,7 +71,7 @@ CUDF_KERNEL void __launch_bounds__(128, 8)
                                uint64_t compression_block_size,
                                uint32_t log2maxcr)
 {
-  __shared__ compressed_stream_s strm_g[4];
+  extern __shared__ compressed_stream_s strm_g[];
 
   compressed_stream_s* const s = &strm_g[threadIdx.x / 32];
   int strm_id                  = blockIdx.x * 4 + (threadIdx.x / 32);
@@ -169,7 +169,7 @@ CUDF_KERNEL void __launch_bounds__(128, 8)
 CUDF_KERNEL void __launch_bounds__(128, 8)
   gpuPostDecompressionReassemble(CompressedStreamInfo* strm_info, int32_t num_streams)
 {
-  __shared__ compressed_stream_s strm_g[4];
+  extern __shared__ compressed_stream_s strm_g[];
 
   compressed_stream_s* const s = &strm_g[threadIdx.x / 32];
   int strm_id                  = blockIdx.x * 4 + (threadIdx.x / 32);
@@ -478,8 +478,8 @@ CUDF_KERNEL void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_g
                                                                  size_type rowidx_stride,
                                                                  bool use_base_stride)
 {
-  __shared__ __align__(16) rowindex_state_s state_g;
-  rowindex_state_s* const s = &state_g;
+  _extern __shared__ __align__(16) rowindex_state_s state_g[];
+  rowindex_state_s* const s = &state_g[0];
   auto const col_idx        = blockIdx.x / num_stripes;
   auto const stripe_idx     = blockIdx.x % num_stripes;
   uint32_t chunk_id         = stripe_idx * num_columns + col_idx;
@@ -587,7 +587,7 @@ void __host__ ParseCompressedStripeData(CompressedStreamInfo* strm_info,
 {
   auto const num_blocks = (num_streams + 3) >> 2;  // 1 stream per warp, 4 warps per block
   if (num_blocks > 0) {
-    gpuParseCompressedStripeData<<<num_blocks, 128, 0, stream.value()>>>(
+    gpuParseCompressedStripeData<<<num_blocks, 128, sizeof(compressed_stream_s) * 4, stream.value()>>>(
       strm_info, num_streams, compression_block_size, log2maxcr);
   }
 }
@@ -598,7 +598,7 @@ void __host__ PostDecompressionReassemble(CompressedStreamInfo* strm_info,
 {
   auto const num_blocks = (num_streams + 3) >> 2;  // 1 stream per warp, 4 warps per block
   if (num_blocks > 0) {
-    gpuPostDecompressionReassemble<<<num_blocks, 128, 0, stream.value()>>>(strm_info, num_streams);
+    gpuPostDecompressionReassemble<<<num_blocks, 128, sizeof(compressed_stream_s) * 4, stream.value()>>>(strm_info, num_streams);
   }
 }
 
@@ -612,7 +612,7 @@ void __host__ ParseRowGroupIndex(RowGroup* row_groups,
                                  rmm::cuda_stream_view stream)
 {
   auto const num_blocks = num_columns * num_stripes;
-  gpuParseRowGroupIndex<<<num_blocks, 128, 0, stream.value()>>>(
+  gpuParseRowGroupIndex<<<num_blocks, 128, sizeof(rowindex_state_s), stream.value()>>>(
     row_groups, strm_info, chunks, num_columns, num_stripes, rowidx_stride, use_base_stride);
 }
 

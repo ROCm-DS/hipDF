@@ -614,9 +614,10 @@ template <typename level_t>
 CUDF_KERNEL void __launch_bounds__(preprocess_block_size) gpuComputeStringPageBounds(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
   PageInfo* const pp    = &pages[page_idx];
@@ -988,10 +989,10 @@ void ComputePageStringSizes(cudf::detail::hostdevice_span<PageInfo> pages,
   dim3 const dim_grid(pages.size(), 1);  // 1 threadblock per page
   if (level_type_size == 1) {
     gpuComputeStringPageBounds<uint8_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   } else {
     gpuComputeStringPageBounds<uint16_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   }
 
   // kernel mask may contain other kernels we don't need to count

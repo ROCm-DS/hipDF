@@ -686,7 +686,7 @@ static __device__ void encode_null_mask(orcenc_state_s* s,
     uint32_t offset     = t_nrows != 0 ? t * 8 : nrows;
     if (pushdown_mask != nullptr) {
       pd_byte    = get_mask_byte(pushdown_mask, 0) & ((1 << t_nrows) - 1);
-      pd_set_cnt = __POPC(pd_byte);
+      pd_set_cnt = __POPC((int32_t)pd_byte);
       // Scan the number of valid bits to get dst offset for each thread
       hipcub::BlockScan<uint32_t, block_size>(scan_storage).ExclusiveSum(pd_set_cnt, offset);
     }
@@ -704,9 +704,9 @@ static __device__ void encode_null_mask(orcenc_state_s* s,
         // skip bits where pushdown mask is not set
         if (not(pd_byte & (1 << bit_idx))) continue;
         if (mask_byte & (1 << bit_idx)) {
-          set_bit(reinterpret_cast<uint32_t*>(s->valid_buf), vbuf_bit_idx(dst_offset++));
+          set_bit(reinterpret_cast<bitmask_type*>(s->valid_buf), vbuf_bit_idx(dst_offset++));
         } else {
-          clear_bit(reinterpret_cast<uint32_t*>(s->valid_buf), vbuf_bit_idx(dst_offset++));
+          clear_bit(reinterpret_cast<bitmask_type*>(s->valid_buf), vbuf_bit_idx(dst_offset++));
         }
       }
     }

@@ -133,7 +133,7 @@ struct ColumnDesc {
   uint8_t const* streams[CI_NUM_STREAMS];  // ptr to data stream index
   uint32_t strm_id[CI_NUM_STREAMS];        // stream ids
   int64_t strm_len[CI_NUM_STREAMS];        // stream length
-  uint32_t* valid_map_base;                // base pointer of valid bit map for this column
+  cudf::bitmask_type* valid_map_base;                // base pointer of valid bit map for this column
   void* column_data_base;                  // base pointer of column data
   int64_t start_row;                       // starting row of the stripe
   int64_t num_rows;                        // number of rows in stripe

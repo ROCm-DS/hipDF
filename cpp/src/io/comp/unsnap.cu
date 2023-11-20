@@ -654,10 +654,11 @@ CUDF_KERNEL void __launch_bounds__(block_size)
                 device_span<device_span<uint8_t> const> outputs,
                 device_span<compression_result> results)
 {
-  __shared__ __align__(16) unsnap_state_s state_g;
+  //extern __shared__ __align__(16) unsnap_state_s state_g[];
+  extern __shared__ unsnap_state_s state_g[];
   __shared__ hipcub::WarpReduce<uint32_t>::TempStorage temp_storage;
   int t             = threadIdx.x;
-  unsnap_state_s* s = &state_g;
+  unsnap_state_s* s = &state_g[0];
   int strm_id       = blockIdx.x;
 
   if (t < batch_count) { s->q.batch_len[t] = 0; }
@@ -740,7 +741,7 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
   // __shared__ unsnap_state_s state_g;" with hipcc and std=c++17
   // unsnap_kernel<128><<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
 
-  unsnap_kernel<<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
+  unsnap_kernel<<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
 }
 
 }  // namespace cudf::io::detail
