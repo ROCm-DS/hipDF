@@ -427,23 +427,23 @@ add_library(
   # src/io/orc/stripe_init.hip
   # src/datetime/timezone.cpp
   # # src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/compact_protocol_reader.cpp
-  # src/io/parquet/compact_protocol_writer.cpp
-  # # src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/chunk_dict.hip
-  # # src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/predicate_pushdown.cpp
-  # src/io/parquet/reader.cpp
-  # src/io/parquet/reader_impl.cpp
-  # src/io/parquet/reader_impl_helpers.cpp
-  # src/io/parquet/reader_impl_preprocess.hip
-  # # src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/compact_protocol_reader.cpp
+  src/io/parquet/compact_protocol_writer.cpp
+  src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/chunk_dict.hip
+  src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/predicate_pushdown.cpp
+  src/io/parquet/reader.cpp
+  src/io/parquet/reader_impl.cpp
+  src/io/parquet/reader_impl_helpers.cpp
+  src/io/parquet/reader_impl_preprocess.hip
+  src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
   # src/io/text/byte_range_info.cpp
   # src/io/text/data_chunk_source_factories.cpp
   # src/io/text/bgzip_data_chunk_source.hip

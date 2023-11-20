@@ -348,7 +348,7 @@ __global__ void __launch_bounds__(128)
   __shared__ __align__(8) EncColumnChunk ck_g;
   __shared__ __align__(8) PageFragment frag_g;
   __shared__ __align__(8) EncPage page_g;
-  __shared__ __align__(8) statistics_merge_group pagestats_g;
+  extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
 
   uint32_t const t          = threadIdx.x;
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
@@ -378,10 +378,10 @@ __global__ void __launch_bounds__(128)
     uint32_t max_stats_len       = 0;
 
     if (!t) {
-      pagestats_g.col_dtype   = col_g.leaf_column->type();
-      pagestats_g.stats_dtype = col_g.stats_dtype;
-      pagestats_g.start_chunk = ck_g.first_fragment;
-      pagestats_g.num_chunks  = 0;
+      pagestats_g[0].col_dtype   = col_g.leaf_column->type();
+      pagestats_g[0].stats_dtype = col_g.stats_dtype;
+      pagestats_g[0].start_chunk = ck_g.first_fragment;
+      pagestats_g[0].num_chunks  = 0;
     }
     if (ck_g.use_dictionary) {
       if (!t) {
@@ -410,7 +410,7 @@ __global__ void __launch_bounds__(128)
       if (t == 0) {
         if (not pages.empty()) pages[ck_g.first_page] = page_g;
         if (not page_sizes.empty()) page_sizes[ck_g.first_page] = page_g.max_data_size;
-        if (page_grstats) page_grstats[ck_g.first_page] = pagestats_g;
+        if (page_grstats) page_grstats[ck_g.first_page] = pagestats_g[0];
       }
       num_pages = 1;
     }
@@ -516,8 +516,8 @@ __global__ void __launch_bounds__(128)
             CUDF_UNREACHABLE("page size exceeds maximum for i32");
           }
           page_g.max_data_size    = static_cast<uint32_t>(max_data_size);
-          pagestats_g.start_chunk = ck_g.first_fragment + page_start;
-          pagestats_g.num_chunks  = page_g.num_fragments;
+          pagestats_g[0].start_chunk = ck_g.first_fragment + page_start;
+          pagestats_g[0].num_chunks  = page_g.num_fragments;
           page_offset +=
             util::round_up_unsafe(page_g.max_hdr_size + page_g.max_data_size, page_align);
           if (not comp_page_sizes.empty()) {
@@ -534,7 +534,7 @@ __global__ void __launch_bounds__(128)
           if (not page_sizes.empty()) {
             page_sizes[ck_g.first_page + num_pages] = page_g.max_data_size;
           }
-          if (page_grstats) { page_grstats[ck_g.first_page + num_pages] = pagestats_g; }
+          if (page_grstats) { page_grstats[ck_g.first_page + num_pages] = pagestats_g[0]; }
         }
 
         num_pages++;
@@ -567,15 +567,15 @@ __global__ void __launch_bounds__(128)
       ck_g.page_headers_size  = page_headers_size;
       ck_g.max_page_data_size = max_page_data_size;
       if (not comp_page_sizes.empty()) { ck_g.compressed_size = comp_page_offset; }
-      pagestats_g.start_chunk = ck_g.first_page + ck_g.use_dictionary;  // Exclude dictionary
-      pagestats_g.num_chunks  = num_pages - ck_g.use_dictionary;
+      pagestats_g[0].start_chunk = ck_g.first_page + ck_g.use_dictionary;  // Exclude dictionary
+      pagestats_g[0].num_chunks  = num_pages - ck_g.use_dictionary;
     }
   }
   __syncthreads();
   if (t == 0) {
     if (not pages.empty()) ck_g.pages = &pages[ck_g.first_page];
     chunks[blockIdx.y][blockIdx.x] = ck_g;
-    if (chunk_grstats) chunk_grstats[blockIdx.y * num_columns + blockIdx.x] = pagestats_g;
+    if (chunk_grstats) chunk_grstats[blockIdx.y * num_columns + blockIdx.x] = pagestats_g[0];
   }
 }
 
@@ -2295,7 +2295,7 @@ void InitEncoderPages(device_2dspan<EncColumnChunk> chunks,
 {
   auto num_rowgroups = chunks.size().first;
   dim3 dim_grid(num_columns, num_rowgroups);  // 1 threadblock per rowgroup
-  gpuInitPages<<<dim_grid, 128, 0, stream.value()>>>(chunks,
+  gpuInitPages<<<dim_grid, 128, sizeof(statistics_merge_group), stream.value()>>>(chunks,
                                                      pages,
                                                      page_sizes,
                                                      comp_page_sizes,
