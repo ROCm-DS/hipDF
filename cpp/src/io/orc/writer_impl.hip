@@ -54,7 +54,7 @@
 #include <thrust/transform.h>
 
 #include <hip/hip_cooperative_groups.h>
-#include <cooperative_groups/memcpy_async.h>
+//#include <cooperative_groups/memcpy_async.h>
 
 #include <hip/std/climits>
 #include <hip/std/limits>
