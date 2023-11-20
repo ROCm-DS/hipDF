@@ -355,7 +355,8 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size)
                       bool is_base_pass,
                       bool compute_string_sizes)
 {
-  extern __shared__ __align__(16) page_state_s state_g[];
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
 
   page_state_s* const s = &state_g[0];
   int page_idx          = blockIdx.x;
