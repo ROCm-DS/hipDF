@@ -344,7 +344,8 @@ struct output_indexalator : base_indexalator<output_indexalator> {
    * @brief Indirection operator returns this iterator instance in order
    * to capture the `operator=(size_type)` calls.
    */
-  __device__ inline output_indexalator const& operator*() const { return *this; }
+  //Todo(HIP): Some tests in dictionary fail if without __attribute__((optnone))
+  __attribute__((optnone)) __device__ inline output_indexalator const& operator*() const { return *this; }
 
   /**
    * @brief Array subscript operator returns an iterator instance at the specified `idx` position.
