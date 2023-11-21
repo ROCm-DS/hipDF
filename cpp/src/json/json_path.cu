@@ -954,7 +954,7 @@ __launch_bounds__(block_size) CUDF_KERNEL
 
   size_type warp_valid_count{0};
 
-  auto active_threads = __ballot_sync(0xffff'ffffu, tid < col.size());
+  bitmask_type active_threads = __ballot_sync(LANE_MASK_ALL, tid < col.size());
   while (tid < col.size()) {
     bool is_valid         = false;
     string_view const str = col.element<string_view>(tid);
@@ -978,7 +978,7 @@ __launch_bounds__(block_size) CUDF_KERNEL
 
     // validity filled in only during the output step
     if (out_validity.has_value()) {
-      uint32_t mask = __ballot_sync(active_threads, is_valid);
+      bitmask_type mask = __ballot_sync(active_threads, is_valid);
       // 0th lane of the warp writes the validity
       if (!(tid % cudf::detail::warp_size)) {
         out_validity.value()[cudf::word_index(tid)] = mask;

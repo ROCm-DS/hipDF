@@ -683,14 +683,15 @@ struct check_datetime_format {
 
     auto const dateparts = check_string(d_str);
     if (!dateparts.has_value()) return false;
-    
-    //TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a ticket
+
+    // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a
+    // ticket
     auto const year  = dateparts.value().year;
     auto const month = static_cast<uint32_t>(dateparts.value().month);
     auto const day   = static_cast<uint32_t>(dateparts.value().day);
     return cuda::std::chrono::year_month_day(cuda::std::chrono::year{year},
-                                             cuda::std::chrono::month{month},
-                                             cuda::std::chrono::day{day})
+                                            cuda::std::chrono::month{month},
+                                            cuda::std::chrono::day{day})
       .ok();
   }
 };
@@ -793,7 +794,14 @@ struct datetime_formatter_fn {
    */
   __device__ int32_t modulo_time(int64_t time, int64_t base) const
   {
+// HIP: We need to distinguish between debug and release modes
+// The original code (i.e., ifdef part) works in release mode, but not in debug mode
+#ifdef NDEBUG
     return static_cast<int32_t>(((time % base) + base) % base);
+#else
+    volatile int64_t mod = (time % base);
+    return static_cast<int32_t>((mod + base) % base);
+#endif
   };
 
   /**
@@ -864,7 +872,7 @@ struct datetime_formatter_fn {
         case 'a':    // weekday abbreviated
         case 'A': {  // weekday full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          //TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
+          // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
           auto const day_of_week = cuda::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
           auto const day_idx =
             day_of_week + offset_weekdays + (item.value == 'a' ? days_in_week : 0);
@@ -875,7 +883,7 @@ struct datetime_formatter_fn {
         case 'b':    // month abbreviated
         case 'B': {  // month full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          //TODO(HIP): thrust::optional::value requires a patched version of rocthrust
+          // TODO(HIP): thrust::optional::value requires a patched version of rocthrust
           auto const month =  static_cast<uint32_t>(cuda::std::chrono::year_month_day(days.value()).month());
           auto const month_idx =
             month - 1 + offset_months + (item.value == 'b' ? months_in_year : 0);
@@ -1064,7 +1072,7 @@ struct datetime_formatter_fn {
           copy_value = day_of_week == 0 && item.value == 'u' ? 7 : day_of_week;
           break;
         }
-        // clang-format off
+          // clang-format off
         case 'U': {  // week of year: first week includes the first Sunday of the year
           copy_value = get_week_of_year(days, cuda::std::chrono::sys_days{
             cuda::std::chrono::Sunday[1]/cuda::std::chrono::January/ymd.year()});
