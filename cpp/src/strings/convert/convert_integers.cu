@@ -74,7 +74,7 @@ template <typename IntegerType>
 struct string_to_integer_check_fn {
   // Todo(HIP): It seems that the compiler optimizes the operator overloading.
   // Added __attribute__((optnone)) as a workaround for now.
-  // Related to internal issue 33 ?
+  // internal issue 50
   __attribute__((optnone)) __device__ bool operator()(
     thrust::pair<string_view, bool> const& p) const
   {
