@@ -167,7 +167,6 @@ character_cases_table_type const* get_character_cases_table()
  */
 special_case_mapping const* get_special_case_mapping_table()
 {
-  // printf("++++++++++++++\n");
   return d_special_case_mappings.find_or_initialize([&](void) {
     special_case_mapping* table = nullptr;
     CUDF_CUDA_TRY(cudaMemcpyToSymbol(HIP_SYMBOL(character_special_case_mappings),
