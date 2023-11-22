@@ -778,9 +778,6 @@ TYPED_TEST(Sort, WithListColumn)
           {{lcw{10}}},
           {lcw{}}};
 
-  //for(auto &s : cudf::test::to_strings(col))
-  //  std::cout<<s<<'\n';
-
   auto expect = cudf::test::fixed_width_column_wrapper<cudf::size_type>{8, 6, 5, 3, 0, 1, 2, 4, 7};
   auto result = cudf::sorted_order(cudf::table_view({col}));
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expect, *result);
@@ -819,9 +816,9 @@ TYPED_TEST(Sort, WithNullableListColumn)
     {{1, 2}, {3}, {4, 5}, {{0, 6, 0}, nulls_at({0})}},        // 4
     {{7, 8}, {}},                                             // 5
     lcw{lcw{}, lcw{}, lcw{}},                                 // 6
-    lcw{{lcw{}}},                                               // 7
-    {{lcw{10}}},                                                // 8
-    {lcw{}},                                                    // 9
+    lcw{{lcw{}}},                                             // 7
+    {{lcw{10}}},                                              // 8
+    {lcw{}},                                                  // 9
     {{1, 2}, {3}, {4, 5}, {{0, 6, 0}, nulls_at({0, 2})}},     // 10
     {{1, 2}, {3}, {4, 5}, {{0, 7}, nulls_at({0})}},           // 11
   };
