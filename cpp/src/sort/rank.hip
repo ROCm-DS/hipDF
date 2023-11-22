@@ -163,7 +163,7 @@ void rank_first(column_view sorted_order_view,
                 rmm::cuda_stream_view stream)
 {
   // stable sort order ranking (no ties)
-  thrust::scatter(rmm::exec_policy(stream),
+  thrust::scatter(/*rmm::exec_policy(stream)*/thrust::device,
                   thrust::make_counting_iterator<size_type>(1),
                   thrust::make_counting_iterator<size_type>(rank_mutable_view.size() + 1),
                   sorted_order_view.begin<size_type>(),
