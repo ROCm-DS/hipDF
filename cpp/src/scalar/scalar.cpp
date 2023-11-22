@@ -476,9 +476,25 @@ timestamp_scalar<T>::timestamp_scalar(timestamp_scalar<T> const& other,
 {
 }
 
+#define COPY_CTOR(TimestampType) \
+  template timestamp_scalar<TimestampType>::timestamp_scalar( \
+    timestamp_scalar<TimestampType> const& other, \
+    rmm::cuda_stream_view stream, \
+    rmm::mr::device_memory_resource* mr);
+
 #define TS_CTOR(TimestampType, DurationType)                  \
   template timestamp_scalar<TimestampType>::timestamp_scalar( \
     DurationType const&, bool, rmm::cuda_stream_view, rmm::mr::device_memory_resource*);
+
+
+/**
+ * @brief Explicit instantiations of the copy construtor.
+ */
+COPY_CTOR(timestamp_D)
+COPY_CTOR(timestamp_s)
+COPY_CTOR(timestamp_ms)
+COPY_CTOR(timestamp_us)
+COPY_CTOR(timestamp_ns)
 
 /**
  * @brief These are the valid combinations of duration types to timestamp types.

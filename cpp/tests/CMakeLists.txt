@@ -156,9 +156,9 @@ ConfigureTest(
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
 ConfigureTest(SCALAR_TEST 
-  # scalar/scalar_test.cpp 
+  scalar/scalar_test.cpp 
   scalar/scalar_device_view_test.hip
-)
+  )
 
 # ##################################################################################################
 # * timestamps tests ------------------------------------------------------------------------------
@@ -255,35 +255,35 @@ ConfigureTest(HASH_MAP_TEST hash_map/map_test.hip)
 # * quantiles tests -------------------------------------------------------------------------------
 ConfigureTest(
   QUANTILES_TEST 
-  # quantiles/percentile_approx_test.cpp 
+  quantiles/percentile_approx_test.cpp 
   quantiles/quantile_test.cpp
   quantiles/quantiles_test.cpp
 )
 
 # ##################################################################################################
 # * reduction tests -------------------------------------------------------------------------------
-# ConfigureTest(
-#   REDUCTIONS_TEST
-#   reductions/collect_ops_tests.cpp
-#   reductions/rank_tests.cpp
-#   reductions/reduction_tests.cpp
-#   reductions/scan_tests.cpp
-#   reductions/segmented_reduction_tests.cpp
-#   reductions/list_rank_test.cpp
-#   reductions/tdigest_tests.hip
-# )
+ConfigureTest(
+  REDUCTIONS_TEST
+  reductions/collect_ops_tests.cpp
+  reductions/rank_tests.cpp
+  reductions/reduction_tests.cpp
+  reductions/scan_tests.cpp
+  reductions/segmented_reduction_tests.cpp
+  reductions/list_rank_test.cpp
+  reductions/tdigest_tests.hip
+)
 
 # ##################################################################################################
 # * replace tests ---------------------------------------------------------------------------------
-# ConfigureTest(REPLACE_TEST replace/replace_tests.cpp)
+ConfigureTest(REPLACE_TEST replace/replace_tests.cpp)
 
-# ConfigureTest(REPLACE_NULLS_TEST replace/replace_nulls_tests.cpp)
+ConfigureTest(REPLACE_NULLS_TEST replace/replace_nulls_tests.cpp)
 
-# ConfigureTest(REPLACE_NANS_TEST replace/replace_nans_tests.cpp)
+ConfigureTest(REPLACE_NANS_TEST replace/replace_nans_tests.cpp)
 
-# ConfigureTest(NORMALIZE_REPLACE_TEST replace/normalize_replace_tests.cpp)
+ConfigureTest(NORMALIZE_REPLACE_TEST replace/normalize_replace_tests.cpp)
 
-# ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
+ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
 
 # ##################################################################################################
 # * fixed_point tests -----------------------------------------------------------------------------
@@ -298,7 +298,7 @@ ConfigureTest(UNARY_TEST unary/math_ops_test.cpp unary/unary_ops_test.cpp unary/
 
 # ##################################################################################################
 # * round tests -----------------------------------------------------------------------------------
-# ConfigureTest(ROUND_TEST round/round_tests.cpp)
+ConfigureTest(ROUND_TEST round/round_tests.cpp)
 
 # ##################################################################################################
 # * binary tests ----------------------------------------------------------------------------------
@@ -476,9 +476,11 @@ ConfigureTest(
 
 # # ##################################################################################################
 # # * sorted-merge tests ----------------------------------------------------------------------------
-# ConfigureTest(
-#   MERGE_TEST merge/merge_test.cpp merge/merge_dictionary_test.cpp merge/merge_string_test.cpp
-# )
+ ConfigureTest(
+   MERGE_TEST merge/merge_test.cpp /
+   merge/merge_dictionary_test.cpp
+   merge/merge_string_test.cpp
+ )
 
 # # ##################################################################################################
 # # * stream compaction tests -----------------------------------------------------------------------
@@ -525,10 +527,10 @@ ConfigureTest(
 
 # # ##################################################################################################
 # # * reshape test ----------------------------------------------------------------------------------
-# ConfigureTest(
-#   RESHAPE_TEST reshape/byte_cast_tests.cpp reshape/interleave_columns_tests.cpp
-#   reshape/tile_tests.cpp
-# )
+ConfigureTest(
+  RESHAPE_TEST reshape/byte_cast_tests.cpp reshape/interleave_columns_tests.cpp
+  reshape/tile_tests.cpp
+)
 
 # # ##################################################################################################
 # # * traits test -----------------------------------------------------------------------------------

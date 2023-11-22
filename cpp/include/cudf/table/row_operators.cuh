@@ -193,7 +193,7 @@ class element_equality_comparator {
    */
   template <typename Element,
             std::enable_if_t<cudf::is_equality_comparable<Element, Element>()>* = nullptr>
-  __host__ __device__ bool operator()(size_type lhs_element_index,
+  __device__ bool operator()(size_type lhs_element_index,
                              size_type rhs_element_index) const noexcept
   {
     if (nulls) {
@@ -213,7 +213,7 @@ class element_equality_comparator {
   // @cond
   template <typename Element,
             std::enable_if_t<not cudf::is_equality_comparable<Element, Element>()>* = nullptr>
-  __host__ __device__ bool operator()(size_type lhs_element_index, size_type rhs_element_index)
+  __device__ bool operator()(size_type lhs_element_index, size_type rhs_element_index)
   {
     CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
   }
@@ -258,7 +258,7 @@ class row_equality_comparator {
    * @param rhs_row_index The index of the second row to compare (in the rhs table)
    * @return true if both rows are equal, otherwise false
    */
-  __host__ __device__ bool operator()(size_type lhs_row_index, size_type rhs_row_index) const noexcept
+  __device__ bool operator()(size_type lhs_row_index, size_type rhs_row_index) const noexcept
   {
     auto equal_elements = [=](column_device_view l, column_device_view r) {
       return cudf::type_dispatcher(l.type(),
@@ -296,7 +296,7 @@ class element_relational_comparator {
    * @param has_nulls Indicates if either input column contains nulls.
    * @param null_precedence Indicates how null values are ordered with other values
    */
-  __host__ __device__ element_relational_comparator(Nullate has_nulls,
+   __device__ element_relational_comparator(Nullate has_nulls,
                                                     column_device_view lhs,
                                                     column_device_view rhs,
                                                     null_order null_precedence)
@@ -312,7 +312,7 @@ class element_relational_comparator {
    * @param lhs The column containing the first element
    * @param rhs The column containing the second element (may be the same as lhs)
    */
-  __host__ __device__ element_relational_comparator(Nullate has_nulls,
+  __device__ element_relational_comparator(Nullate has_nulls,
                                                     column_device_view lhs,
                                                     column_device_view rhs)
     : lhs{lhs}, rhs{rhs}, nulls{has_nulls}
@@ -329,7 +329,7 @@ class element_relational_comparator {
    */
   template <typename Element,
             std::enable_if_t<cudf::is_relationally_comparable<Element, Element>()>* = nullptr>
-  __host__ __device__ weak_ordering operator()(size_type lhs_element_index,
+  __device__ weak_ordering operator()(size_type lhs_element_index,
                                       size_type rhs_element_index) const noexcept
   {
     if (nulls) {
@@ -348,7 +348,7 @@ class element_relational_comparator {
   // @cond
   template <typename Element,
             std::enable_if_t<not cudf::is_relationally_comparable<Element, Element>()>* = nullptr>
-  __host__ __device__ weak_ordering operator()(size_type lhs_element_index, size_type rhs_element_index)
+  __device__ weak_ordering operator()(size_type lhs_element_index, size_type rhs_element_index)
   {
     CUDF_UNREACHABLE("Attempted to compare elements of uncomparable types.");
   }
@@ -421,7 +421,7 @@ class row_lexicographic_comparator {
    * @return `true` if row from the `lhs` table compares less than row in the
    * `rhs` table
    */
-  __host__ __device__ bool operator()(size_type lhs_index, size_type rhs_index) const noexcept
+  __device__ bool operator()(size_type lhs_index, size_type rhs_index) const noexcept
   {
     for (size_type i = 0; i < _lhs.num_columns(); ++i) {
       bool ascending = (_column_order == nullptr) or (_column_order[i] == order::ASCENDING);
@@ -468,7 +468,7 @@ class element_hasher {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(column_device_view::has_element_accessor<T>())>
-  __host__ __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
+  __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
   {
     if (has_nulls && col.is_null(row_index)) { return std::numeric_limits<hash_value_type>::max(); }
     return hash_function<T>{}(col.element<T>(row_index));
@@ -483,7 +483,7 @@ class element_hasher {
    * @return The hash value of the given element
    */
   template <typename T, CUDF_ENABLE_IF(not column_device_view::has_element_accessor<T>())>
-  __host__ __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
+  __device__ hash_value_type operator()(column_device_view col, size_type row_index) const
   {
     CUDF_UNREACHABLE("Unsupported type in hash.");
   }

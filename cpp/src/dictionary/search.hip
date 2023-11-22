@@ -79,7 +79,9 @@ struct find_index_fn {
     using ScalarType = cudf::scalar_type_t<Element>;
     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
     auto keys_view   = column_device_view::create(input.keys(), stream);
-    auto iter        = thrust::equal_range(rmm::exec_policy(cudf::get_default_stream()),
+    auto iter        = thrust::equal_range(
+                                    // Todo(HIP): Enabling this line triggers seg fault in some dictionary tests
+                                    // rmm::exec_policy(cudf::get_default_stream()), 
                                     keys_view->begin<Element>(),
                                     keys_view->end<Element>(),
                                     find_key);
@@ -124,7 +126,9 @@ struct find_insert_index_fn {
     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
     auto keys_view   = column_device_view::create(input.keys(), stream);
     auto iter        = thrust::lower_bound(
-      rmm::exec_policy(stream), keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
+      // Todo(HIP): Enabling this line triggers seg fault in some dictionary tests
+      // rmm::exec_policy(stream), 
+      keys_view->begin<Element>(), keys_view->end<Element>(), find_key);
     return type_dispatcher(input.indices().type(),
                            dispatch_scalar_index{},
                            thrust::distance(keys_view->begin<Element>(), iter),

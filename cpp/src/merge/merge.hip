@@ -201,7 +201,7 @@ index_vector generate_merged_indices(table_view const& left_table,
 
     auto ineq_op = detail::row_lexicographic_tagged_comparator<true>(
       *lhs_device_view, *rhs_device_view, d_column_order.data(), d_null_precedence.data());
-    thrust::merge(rmm::exec_policy(stream),
+    thrust::merge(thrust::device, //TODO(HIP): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests, see https://github.com/AMD-AI/hipdf/issues/30
                   left_begin,
                   left_begin + left_size,
                   right_begin,
@@ -211,7 +211,7 @@ index_vector generate_merged_indices(table_view const& left_table,
   } else {
     auto ineq_op = detail::row_lexicographic_tagged_comparator<false>(
       *lhs_device_view, *rhs_device_view, d_column_order.data());
-    thrust::merge(rmm::exec_policy(stream),
+    thrust::merge(thrust::device, //TODO(HIP): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests#, see https://github.com/AMD-AI/hipdf/issues/30
                   left_begin,
                   left_begin + left_size,
                   right_begin,
