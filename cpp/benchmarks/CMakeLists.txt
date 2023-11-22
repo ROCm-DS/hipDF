@@ -37,11 +37,14 @@
 find_package(Threads REQUIRED)
 
 add_library(cudf_datagen STATIC common/generate_input.cu)
-target_compile_features(cudf_datagen PUBLIC cxx_std_17 cuda_std_17)
+#TODO(HIP): add support for CUDA backend
+target_compile_features(cudf_datagen PUBLIC cxx_std_17 hip_std_17)
 
 target_compile_options(
   cudf_datagen PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-                      "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
+                      "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>"
+		                  -Wno-injected-class-name #Todo(HIP): clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
+		                  -Wno-absolute-value  #Todo(HIP): clang compiler will emit an error when std::abs is called on unsigned ints
 )
 
 target_link_libraries(
