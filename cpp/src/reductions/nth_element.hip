@@ -54,7 +54,11 @@ std::unique_ptr<cudf::scalar> nth_element(column_view const& col,
                            null_skipped_index.begin());
 
     auto n_pos = thrust::upper_bound(
-      rmm::exec_policy(stream), null_skipped_index.begin(), null_skipped_index.end(), n);
+      // rmm::exec_policy(stream), // Todo(HIP): This line causes a seg fault in 
+      // hipdf/cpp/tests/reductions/reduction_tests.cpp nthelement test.
+      // We should replace it once we have a fix in RMM
+      thrust::device,
+      null_skipped_index.begin(), null_skipped_index.end(), n);
     auto null_skipped_n = n_pos - null_skipped_index.begin();
     return cudf::detail::get_element(col, null_skipped_n, stream, mr);
   } else {
