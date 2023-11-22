@@ -113,6 +113,7 @@ std::unique_ptr<column> create_offsets_child_column(int64_t chars_bytes,
     stream,
     mr);
 }
+// Todo(HIP): internal issue 49
 // Todo(HIP): We disabled this namespace as it causes a runtime error:
 // :0:/long_pathname_so_that_rpms_can_package_the_debug_info/src/external/clr/hipamd/src/hip_global.cpp:56
 // : 212493713327 us: [pid:276317 tid:0x7fe0902b3a80] Cannot create GlobalVar Obj for symbol:
