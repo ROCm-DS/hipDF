@@ -76,7 +76,7 @@ __launch_bounds__(block_size) __global__
 
   if (outer_row_index < outer_num_rows) {
     // Figure out the number of elements for this key.
-    cg::thread_block_tile<1> this_thread = cg::this_thread();
+    cg::thread_block_tile<1> this_thread = cg::this_thread();  //TODO(HIP): this uses a custom cg::this_thread() implementation from the CG extensions (not officially in ROCm)
     // Figure out the number of elements for this key.
     auto query_pair = pair_func(outer_row_index);
     auto equality   = pair_expression_equality<has_nulls>{
