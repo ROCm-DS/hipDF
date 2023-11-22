@@ -150,7 +150,7 @@ void tie_break_ranks_transform(cudf::device_span<size_type const> dense_rank_sor
     [tied_rank = tie_sorted.begin(), transformer] __device__(auto dense_pos) {
       return transformer(tied_rank[dense_pos - 1]);
     });
-  thrust::scatter(rmm::exec_policy(stream),
+  thrust::scatter(/*rmm::exec_policy(stream)*/thrust::device,
                   sorted_tied_rank,
                   sorted_tied_rank + input_size,
                   sorted_order_view.begin<size_type>(),
