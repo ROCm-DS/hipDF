@@ -177,7 +177,7 @@ void rank_dense(cudf::device_span<size_type const> dense_rank_sorted,
                 rmm::cuda_stream_view stream)
 {
   // All equal values have same rank and rank always increases by 1 between groups
-  thrust::scatter(rmm::exec_policy(stream),
+  thrust::scatter(/*rmm::exec_policy(stream)*/thrust::device,
                   dense_rank_sorted.begin(),
                   dense_rank_sorted.end(),
                   sorted_order_view.begin<size_type>(),
