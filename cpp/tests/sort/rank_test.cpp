@@ -691,7 +691,7 @@ TYPED_TEST(RankListAndStruct, max_asc_keep)
   cudf::test::fixed_width_column_wrapper<cudf::size_type> col_rank{
     {2, 5, 8, 9, 8, 5, 2, -1, 6, -1, 5}, nulls_at({7, 9})};
   cudf::test::fixed_width_column_wrapper<cudf::size_type> struct_rank{{1, 2, -1, 6, -1, 6, 4, 3},
-                                                                      nulls_at({2, 4})};                                                                
+                                                                      nulls_at({2, 4})};
   this->run_all_tests(cudf::rank_method::MAX, asc_keep, col_rank, struct_rank);
 }
 
