@@ -15,11 +15,14 @@
 find_package(Threads REQUIRED)
 
 add_library(hipdf_datagen STATIC common/generate_input.hip)
-target_compile_features(hipdf_datagen PUBLIC cxx_std_17 cuda_std_17)
+#TODO(HIP): add support for CUDA backend
+target_compile_features(hipdf_datagen PUBLIC cxx_std_17 hip_std_17)
 
 target_compile_options(
-  hipdf_datagen PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-                      "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
+  hipdf_datagen PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>"
+                      "$<$<COMPILE_LANGUAGE:HIP>:${HIPDF_GPU_FLAGS}>"
+		                  -Wno-injected-class-name #Todo(HIP): clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
+		                  -Wno-absolute-value  #Todo(HIP): clang compiler will emit an error when std::abs is called on unsigned ints
 )
 
 target_link_libraries(
@@ -31,8 +34,8 @@ target_link_libraries(
 
 target_include_directories(
   hipdf_datagen
-  PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
-         "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
+  PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}>"
+         "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
 )
 
 # ##################################################################################################
@@ -59,7 +62,7 @@ function(ConfigureBench CMAKE_BENCH_NAME)
   add_executable(${CMAKE_BENCH_NAME} ${ARGN})
   set_target_properties(
     ${CMAKE_BENCH_NAME}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/benchmarks>"
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/benchmarks>"
                INSTALL_RPATH "\$ORIGIN/../../../lib"
                CXX_STANDARD 17
                CXX_STANDARD_REQUIRED ON
@@ -94,7 +97,7 @@ function(ConfigureNVBench CMAKE_BENCH_NAME)
   add_executable(${CMAKE_BENCH_NAME} ${ARGN} fixture/nvbench_main.cpp)
   set_target_properties(
     ${CMAKE_BENCH_NAME}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/benchmarks>"
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/benchmarks>"
                INSTALL_RPATH "\$ORIGIN/../../../lib"
   )
   target_link_libraries(

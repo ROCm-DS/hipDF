@@ -18,17 +18,18 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 #TODO(HIP): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf hipdf -v -g -n -h"
+VALIDARGS="clean libhipdf hipdf benchmarks -v -g -n -h"
 HELP="$0 [clean] [libhipdf] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
-   libhipdf                       - build the hipdf C++ code only
-   hipdf                          - build the hipdf Python package
+   libhipdf                      - build the hipdf C++ code only
+   benchmarks                    - build benchmarks
    -v                            - verbose build mode
    -g                            - build for debug
    -n                            - no install step (does not affect Python)
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
+   
 
    default action (no args) is to build and install 'libhipdf' then 'hipdf'
    then 'dask_hipdf' targets
