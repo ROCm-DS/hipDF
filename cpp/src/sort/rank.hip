@@ -348,7 +348,7 @@ std::unique_ptr<column> rank(column_view const& input,
       (null_handling == null_policy::EXCLUDE) ? input.size() - input.null_count() : input.size();
     auto drs            = dense_rank_sorted.data();
     bool const is_dense = (method == rank_method::DENSE);
-    thrust::transform(rmm::exec_policy(stream),
+    thrust::transform(/*rmm::exec_policy(stream)*/thrust::device,
                       rank_iter,
                       rank_iter + input.size(),
                       rank_iter,
