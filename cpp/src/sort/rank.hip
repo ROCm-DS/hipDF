@@ -99,7 +99,7 @@ rmm::device_uvector<size_type> sorted_dense_rank(column_view input_col,
     comparator_helper(device_comparator);
   }
 
-  thrust::inclusive_scan(rmm::exec_policy(stream),
+  thrust::inclusive_scan(/*rmm::exec_policy(stream)*/thrust::device,
                          dense_rank_sorted.begin(),
                          dense_rank_sorted.end(),
                          dense_rank_sorted.data());
