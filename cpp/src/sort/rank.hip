@@ -137,7 +137,7 @@ void tie_break_ranks_transform(cudf::device_span<size_type const> dense_rank_sor
   // algorithm: reduce_by_key(dense_rank, 1, n, reduction_tie_breaker)
   // reduction_tie_breaker = min, max, min_count
   rmm::device_uvector<TieType> tie_sorted(sorted_order_view.size(), stream);
-  thrust::reduce_by_key(rmm::exec_policy(stream),
+  thrust::reduce_by_key(/*rmm::exec_policy(stream)*/thrust::device,
                         dense_rank_sorted.begin(),
                         dense_rank_sorted.end(),
                         tie_iter,
