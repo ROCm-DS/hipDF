@@ -81,7 +81,7 @@ rmm::device_uvector<size_type> sorted_dense_rank(column_view input_col,
   rmm::device_uvector<size_type> dense_rank_sorted(input_size, stream);
 
   auto const comparator_helper = [&](auto const device_comparator) {
-    thrust::transform(rmm::exec_policy(stream),
+    thrust::transform(/*rmm::exec_policy(stream)*/thrust::device,
                       thrust::make_counting_iterator(0),
                       thrust::make_counting_iterator(input_size),
                       dense_rank_sorted.data(),
