@@ -552,7 +552,7 @@ class device_row_comparator {
       // child element that we're actually comparing.
       for (int l_dremel_index = l_start, r_dremel_index = r_start, element_index = 0;
            l_dremel_index < l_end and r_dremel_index < r_end;
-           ++l_dremel_index, ++r_dremel_index) {
+           ++l_dremel_index, ++r_dremel_index) {          
         auto const l_rep_level = l_rep_levels[l_dremel_index];
         auto const r_rep_level = r_rep_levels[r_dremel_index];
 
