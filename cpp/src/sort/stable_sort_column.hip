@@ -39,8 +39,9 @@ std::unique_ptr<column> sorted_order<true>(column_view const& input,
   auto sorted_indices = cudf::make_numeric_column(
     data_type(type_to_id<size_type>()), input.size(), mask_state::UNALLOCATED, stream, mr);
   mutable_column_view indices_view = sorted_indices->mutable_view();
+  //TODO: HIP Workaround for the exec policy
   thrust::sequence(
-    rmm::exec_policy(stream), indices_view.begin<size_type>(), indices_view.end<size_type>(), 0);
+    thrust::device/*rmm::exec_policy(stream)*/, indices_view.begin<size_type>(), indices_view.end<size_type>(), 0);
   cudf::type_dispatcher<dispatch_storage_type>(input.type(),
                                                column_sorted_order_fn<true>{},
                                                input,
