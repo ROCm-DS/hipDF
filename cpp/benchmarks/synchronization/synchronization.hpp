@@ -68,7 +68,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <driver_types.h>
+//#include <driver_types.h>
 
 class cuda_event_timer {
  public:
@@ -96,8 +96,8 @@ class cuda_event_timer {
   ~cuda_event_timer();
 
  private:
-  cudaEvent_t start;
-  cudaEvent_t stop;
+  hipEvent_t start;
+  hipEvent_t stop;
   rmm::cuda_stream_view stream;
   benchmark::State* p_state;
 };
