@@ -317,8 +317,8 @@ struct parse_datetime {
           bytes_read -= left;
           break;
         }
-        case 'u': [[fallthrough]];      // day of week: Mon(1)-Sat(6),Sun(7)
-        case 'w': {                     // day of week; Sun(0),Mon(1)-Sat(6)
+        case 'u': [[fallthrough]];  // day of week: Mon(1)-Sat(6),Sun(7)
+        case 'w': {                 // day of week; Sun(0),Mon(1)-Sat(6)
           auto const [weekday, left] = parse_int(ptr, item.length);
           timeparts.weekday          =  // 0 is mapped to 7 for chrono library
             static_cast<int8_t>((item.value == 'w' && weekday == 0) ? 7 : weekday);
@@ -661,14 +661,15 @@ struct check_datetime_format {
 
     auto const dateparts = check_string(d_str);
     if (!dateparts.has_value()) return false;
-    
-    //TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a ticket
+
+    // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a
+    // ticket
     auto const year  = dateparts.value().year;
     auto const month = static_cast<uint32_t>(dateparts.value().month);
     auto const day   = static_cast<uint32_t>(dateparts.value().day);
     return hip::std::chrono::year_month_day(hip::std::chrono::year{year},
-                                             hip::std::chrono::month{month},
-                                             hip::std::chrono::day{day})
+                                            hip::std::chrono::month{month},
+                                            hip::std::chrono::day{day})
       .ok();
   }
 };
@@ -768,7 +769,14 @@ struct datetime_formatter_fn {
    */
   __device__ int32_t modulo_time(int64_t time, int64_t base) const
   {
+// HIP: We need to distinguish between debug and release modes
+// The original code (i.e., ifdef part) works in release mode, but not in debug mode
+#ifdef NDEBUG
     return static_cast<int32_t>(((time % base) + base) % base);
+#else
+    volatile int64_t mod = (time % base);
+    return static_cast<int32_t>((mod + base) % base);
+#endif
   };
 
   /**
@@ -839,8 +847,9 @@ struct datetime_formatter_fn {
         case 'a':    // weekday abbreviated
         case 'A': {  // weekday full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          //TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
-          auto const day_of_week = hip::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
+          // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
+          auto const day_of_week =
+            hip::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
           auto const day_idx =
             day_of_week + offset_weekdays + (item.value == 'a' ? days_in_week : 0);
           if (day_idx < d_format_names.size())
@@ -850,8 +859,9 @@ struct datetime_formatter_fn {
         case 'b':    // month abbreviated
         case 'B': {  // month full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          //TODO(HIP): thrust::optional::value requires a patched version of rocthrust
-          auto const month =  static_cast<uint32_t>(hip::std::chrono::year_month_day(days.value()).month());
+          // TODO(HIP): thrust::optional::value requires a patched version of rocthrust
+          auto const month =
+            static_cast<uint32_t>(hip::std::chrono::year_month_day(days.value()).month());
           auto const month_idx =
             month - 1 + offset_months + (item.value == 'b' ? months_in_year : 0);
           if (month_idx < d_format_names.size())
@@ -926,11 +936,10 @@ struct datetime_formatter_fn {
   __device__ int8_t get_week_of_year(hip::std::chrono::sys_days const days,
                                      hip::std::chrono::sys_days const start) const
   {
-    return days < start
-             ? 0
-             : (hip::std::chrono::duration_cast<hip::std::chrono::weeks>(days - start) +
-                hip::std::chrono::weeks{1})
-                 .count();
+    return days < start ? 0
+                        : (hip::std::chrono::duration_cast<hip::std::chrono::weeks>(days - start) +
+                           hip::std::chrono::weeks{1})
+                            .count();
   }
 
   __device__ int32_t get_day_of_year(hip::std::chrono::year_month_day const& ymd) const
@@ -1001,7 +1010,7 @@ struct datetime_formatter_fn {
         case 'S':  // second
           copy_value = timeparts.second;
           break;
-        case 'f':                                 // sub-second
+        case 'f':  // sub-second
         {
           char subsecond_digits[] = "000000000";  // 9 max digits
           int const digits        = [] {
@@ -1034,12 +1043,12 @@ struct datetime_formatter_fn {
           break;
         case 'u':    // day of week ISO
         case 'w': {  // day of week non-ISO
-          auto const day_of_week = static_cast<int32_t>(
-            hip::std::chrono::year_month_weekday(days).weekday().c_encoding());
+          auto const day_of_week =
+            static_cast<int32_t>(hip::std::chrono::year_month_weekday(days).weekday().c_encoding());
           copy_value = day_of_week == 0 && item.value == 'u' ? 7 : day_of_week;
           break;
         }
-        // clang-format off
+          // clang-format off
         case 'U': {  // week of year: first week includes the first Sunday of the year
           copy_value = get_week_of_year(days, hip::std::chrono::sys_days{
             hip::std::chrono::Sunday[1]/hip::std::chrono::January/ymd.year()});
