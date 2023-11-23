@@ -171,36 +171,36 @@ ConfigureNVBench(COPYING_NVBENCH copying/concatenate.cpp)
 
 # # ##################################################################################################
 # # * gather benchmark ------------------------------------------------------------------------------
-# ConfigureBench(GATHER_BENCH copying/gather.cu)
+ConfigureBench(GATHER_BENCH copying/gather.cu)
 
 # # ##################################################################################################
 # # * scatter benchmark -----------------------------------------------------------------------------
-# ConfigureBench(SCATTER_BENCH copying/scatter.cu)
+ConfigureBench(SCATTER_BENCH copying/scatter.cu)
 
 # # ##################################################################################################
 # # * lists scatter benchmark -----------------------------------------------------------------------
-# ConfigureBench(SCATTER_LISTS_BENCH lists/copying/scatter_lists.cu)
+ConfigureBench(SCATTER_LISTS_BENCH lists/copying/scatter_lists.cu)
 
 # # ##################################################################################################
 # # * Other list-related operartions benchmark ------------------------------------------------------
-# ConfigureNVBench(SET_OPS_NVBENCH lists/set_operations.cpp)
+ConfigureNVBench(SET_OPS_NVBENCH lists/set_operations.cpp)
 
 # # ##################################################################################################
 # # * contiguous_split benchmark  -------------------------------------------------------------------
-# ConfigureBench(CONTIGUOUS_SPLIT_BENCH copying/contiguous_split.cu)
+ConfigureBench(CONTIGUOUS_SPLIT_BENCH copying/contiguous_split.cu)
 
 # # ##################################################################################################
 # # * shift benchmark -------------------------------------------------------------------------------
-# ConfigureBench(SHIFT_BENCH copying/shift.cu)
+ConfigureBench(SHIFT_BENCH copying/shift.cu)
 
 # # ##################################################################################################
 # # * copy-if-else benchmark
 # # -----------------------------------------------------------------------------
-# ConfigureBench(COPY_IF_ELSE_BENCH copying/copy_if_else.cpp)
+ConfigureBench(COPY_IF_ELSE_BENCH copying/copy_if_else.cpp)
 
 # # ##################################################################################################
 # # * transpose benchmark ---------------------------------------------------------------------------
-# ConfigureBench(TRANSPOSE_BENCH transpose/transpose.cpp)
+ConfigureBench(TRANSPOSE_BENCH transpose/transpose.cpp)
 
 # ##################################################################################################
 # * nds-h benchmark --------------------------------------------------------------------------------
