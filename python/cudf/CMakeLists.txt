@@ -17,17 +17,22 @@ cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
 set(cudf_version 23.10.00)
 
 include(../../fetch_rapids.cmake)
-include(rapids-cuda)
-rapids_cuda_init_architectures(cudf-python)
+include(rapids-hip)
+
+if(CUDA_BACKEND)
+  rapids_cuda_init_architectures(hipdf-python)
+else()
+  rapids_hip_init_architectures(hipdf-python)
+endif()
 
 project(
-  cudf-python
+  hipdf-python
   VERSION ${cudf_version}
   LANGUAGES # TODO: Building Python extension modules via the python_extension_module requires the C
             # language to be enabled here. The test project that is built in scikit-build to verify
             # various linking options for the python library is hardcoded to build with C, so until
             # that is fixed we need to keep C.
-            C CXX CUDA
+            C CXX HIP #: FIXME: CUDA required for PTX codegen in python/cudf/udf_cpp, which we disable for the time being
 )
 
 option(FIND_CUDF_CPP "Search for existing CUDF C++ installations before defaulting to local files"
@@ -58,7 +63,12 @@ if(FIND_CUDF_CPP)
     include(../../cpp/cmake/thirdparty/get_arrow.cmake)
   endif()
 
-  find_package(cudf ${cudf_version} REQUIRED)
+  find_package(hipdf ${cudf_version} REQUIRED)
+  #: aliasing to use most of prexisting build system
+  add_library(cudf ALIAS hipdf)
+  add_library(cudf::cudf ALIAS hipdf)
+  add_library(nvcomp::nvcomp ALIAS hipcomp)
+  set(cupdf_FOUND ${hipdf_FOUND})
 
   # an installed version of libcudf doesn't provide the dlpack headers so we need to download dlpack
   # for the interop.pyx
@@ -83,7 +93,7 @@ if(NOT cudf_FOUND)
     set(CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 
     # Statically link cudart if building wheels
-    set(CUDA_STATIC_RUNTIME ON)
+    set(CUDA_STATIC_RUNTIME OFF) #: No static linking with HIP, HIP must be installed
 
     # Need to set this so all the nvcomp targets are global, not only nvcomp::nvcomp
     # https://cmake.org/cmake/help/latest/variable/CMAKE_FIND_PACKAGE_TARGETS_GLOBAL.html#variable:CMAKE_FIND_PACKAGE_TARGETS_GLOBAL
@@ -94,6 +104,10 @@ if(NOT cudf_FOUND)
   endif()
 
   add_subdirectory(../../cpp cudf-cpp ${_exclude_from_all})
+  #: aliasing to use most of prexisting build system
+  add_library(cudf ALIAS hipdf)
+  add_library(cudf::cudf ALIAS hipdf)
+  add_library(nvcomp::nvcomp ALIAS hipcomp)
 
   if(CUDF_BUILD_WHEELS)
     include(cmake/Modules/WheelHelpers.cmake)
@@ -105,13 +119,13 @@ if(NOT cudf_FOUND)
   # library in the cudf directory as a single source of truth and modify the other rpaths
   # appropriately.
   set(cython_lib_dir cudf)
-  install(TARGETS cudf DESTINATION ${cython_lib_dir})
+  install(TARGETS hipdf DESTINATION ${cython_lib_dir}) #: cannot install ALIAS target
 endif()
 
 rapids_cython_init()
 
 add_subdirectory(cudf/_lib)
-add_subdirectory(udf_cpp)
+# add_subdirectory(udf_cpp) #: FIXME: Reenable UDFs when we know what to use as PTX equivalent
 
 include(cmake/Modules/ProtobufHelpers.cmake)
 codegen_protoc(cudf/utils/metadata/orc_column_statistics.proto)
