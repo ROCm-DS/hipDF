@@ -72,10 +72,17 @@ for a minimal build of libcudf without using conda are also listed below.
 Compilers:
 
 * `gcc` version 9.3+
-* `nvcc` version 11.5+
+* ROCm HIP SDK compilers version 5.6.0+
 * `cmake` version 3.26.4+
 
+### ROCM/GPU requirements
+
+* ROCm HIP SDK compilers version 5.6.0+
+* Officially supported architecture.
+
 CUDA/GPU:
+
+**NOTE(NVIDIA GPUs):** We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
 
 * CUDA 11.5+
 * NVIDIA driver 450.80.02+
@@ -105,7 +112,7 @@ Instructions for a minimal build environment without conda are included below.
 # create the conda environment (assuming in base `cudf` directory)
 # note: RAPIDS currently doesn't support `channel_priority: strict`;
 # use `channel_priority: flexible` instead
-conda env create --name cudf_dev --file conda/environments/all_cuda-118_arch-x86_64.yaml
+conda env create --name cudf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
 # activate the environment
 conda activate cudf_dev
 ```
@@ -126,6 +133,16 @@ conda activate cudf_dev
 
 ### Build cuDF from source
 
+> **Note** (Compiling for AMD GPUs): 
+>
+> When compiling for AMD GPUs, we always need to set the environment variable `CXX` before 
+> building to make the Cython build process use a HIP C++ compiler.
+> 
+> Example:
+> 
+> `$ export CXX=hipcc`
+> 
+
 - A `build.sh` script is provided in `$CUDF_HOME`. Running the script with no additional arguments
   will install the `libcudf`, `cudf` and `dask_cudf` libraries. By default, the libraries are
   installed to the `$CONDA_PREFIX` directory. To install into a different location, set the location
@@ -139,6 +156,7 @@ cd $CUDF_HOME
 # you want to build and install the libcudf C++ library only,
 # or include the cudf and/or dask_cudf Python libraries:
 
+export CXX="hipcc" # Cython CXX compiler, adjust according to your setup.
 ./build.sh  # libcudf, cudf and dask_cudf
 ./build.sh libcudf  # libcudf only
 ./build.sh libcudf cudf  # libcudf and cudf only
