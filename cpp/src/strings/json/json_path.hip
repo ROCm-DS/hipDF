@@ -912,7 +912,7 @@ __launch_bounds__(block_size) __global__
 
   size_type warp_valid_count{0};
 
-  auto active_threads = hip_extensions::__ballot_sync(0xffff'ffffu, tid < col.size());
+  bitmask_type active_threads = hip_extensions::__ballot_sync(LANE_MASK_ALL, tid < col.size());
   while (tid < col.size()) {
     bool is_valid         = false;
     string_view const str = col.element<string_view>(tid);
@@ -936,7 +936,7 @@ __launch_bounds__(block_size) __global__
 
     // validity filled in only during the output step
     if (out_validity.has_value()) {
-      uint32_t mask = hip_extensions::__ballot_sync(active_threads, is_valid);
+      bitmask_type mask = hip_extensions::__ballot_sync(active_threads, is_valid);
       // 0th lane of the warp writes the validity
       if (!(tid % cudf::detail::warp_size)) {
         out_validity.value()[cudf::word_index(tid)] = mask;
@@ -984,7 +984,7 @@ std::unique_ptr<cudf::column> get_json_object(cudf::strings_column_view const& c
       col.size(),
       rmm::device_buffer{0, stream, mr},  // no data
       cudf::detail::create_null_mask(col.size(), mask_state::ALL_NULL, stream, mr),
-      col.size());                        // null count
+      col.size());  // null count
   }
 
   constexpr int block_size = 512;
