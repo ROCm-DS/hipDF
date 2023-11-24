@@ -1,43 +1,30 @@
+<!---
+    MIT License
+
+    Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+-->
+
 # <div align="left"><img src="img/rapids_logo.png" width="90px"/>&nbsp;cuDF - GPU DataFrames</div>
 
-## 📢 cuDF can now be used as a no-code-change accelerator for pandas! To learn more, see [here](https://rapids.ai/cudf-pandas/)!
-
-cuDF (pronounced "KOO-dee-eff") is a GPU DataFrame library
-for loading, joining, aggregating, filtering, and otherwise
-manipulating data. cuDF leverages
-[libcudf](https://docs.rapids.ai/api/libcudf/stable/), a
-blazing-fast C++/CUDA dataframe library and the [Apache
-Arrow](https://arrow.apache.org/) columnar format to provide a
-GPU-accelerated pandas API.
-
-You can import `cudf` directly and use it like `pandas`:
-
-```python
-import cudf
-
-tips_df = cudf.read_csv("https://github.com/plotly/datasets/raw/master/tips.csv")
-tips_df["tip_percentage"] = tips_df["tip"] / tips_df["total_bill"] * 100
-
-# display average tip by dining party size
-print(tips_df.groupby("size").tip_percentage.mean())
-```
-
-Or, you can use cuDF as a no-code-change accelerator for pandas, using
-[`cudf.pandas`](https://docs.rapids.ai/api/cudf/stable/cudf_pandas).
-`cudf.pandas` supports 100% of the pandas API, utilizing cuDF for
-supported operations and falling back to pandas when needed:
-
-```python
-%load_ext cudf.pandas  # pandas operations now use the GPU!
-
-import pandas as pd
-
-tips_df = pd.read_csv("https://github.com/plotly/datasets/raw/master/tips.csv")
-tips_df["tip_percentage"] = tips_df["tip"] / tips_df["total_bill"] * 100
-
-# display average tip by dining party size
-print(tips_df.groupby("size").tip_percentage.mean())
-```
+**NOTE:** This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
 
 ## Resources
 
@@ -52,6 +39,13 @@ the most up-to-date information and commands for installing cuDF
 and other RAPIDS packages.
 
 ## Installation
+
+**NOTE(NVIDIA GPUs):** We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
+
+### ROCM/GPU requirements
+
+* ROCm HIP SDK compilers version 5.6.0+
+* Officially supported architecture.
 
 ### CUDA/GPU requirements
 
@@ -79,9 +73,12 @@ pip install --extra-index-url=https://pypi.nvidia.com cudf-cu12
 
 ### Conda
 
+**NOTE:** Currently, this option is not supported for AMD GPUs.
+
 cuDF can be installed with conda (via [miniforge](https://github.com/conda-forge/miniforge)) from the `rapidsai` channel:
 
 ```bash
+# NOTE: Conda installation not supported for hipDF for AMD GPUs.
 conda install -c rapidsai -c conda-forge -c nvidia \
     cudf=25.02 python=3.12 cuda-version=12.8
 ```

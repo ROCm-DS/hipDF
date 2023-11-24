@@ -1,3 +1,27 @@
+<!---
+    MIT License
+
+    Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+-->
+
 # Contributing to cuDF
 
 Contributions to cuDF fall into the following categories:
@@ -73,10 +97,17 @@ for a minimal build of libcudf without using conda are also listed below.
 Compilers:
 
 * `gcc` version 11.4+
-* `nvcc` version 11.8+
+* ROCm HIP SDK compilers version 5.6.0+
 * `cmake` version 3.29.6+
 
-CUDA/GPU Runtime:
+### ROCM/GPU requirements
+
+* ROCm HIP SDK compilers version 5.6.0+
+* Officially supported architecture.
+
+CUDA/GPU:
+
+**NOTE(NVIDIA GPUs):** We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
 
 * CUDA 11.4+
 * Volta architecture or better ([Compute Capability](https://docs.nvidia.com/deploy/cuda-compatibility/) >=7.0)
@@ -105,7 +136,7 @@ Instructions for a minimal build environment without conda are included below.
 # create the conda environment (assuming in base `cudf` directory)
 # note: RAPIDS currently doesn't support `channel_priority: strict`;
 # use `channel_priority: flexible` instead
-conda env create --name cudf_dev --file conda/environments/all_cuda-128_arch-x86_64.yaml
+conda env create --name cudf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
 # activate the environment
 conda activate cudf_dev
 ```
@@ -126,6 +157,16 @@ conda activate cudf_dev
 
 ### Build cuDF from source
 
+> **Note** (Compiling for AMD GPUs): 
+>
+> When compiling for AMD GPUs, we always need to set the environment variable `CXX` before 
+> building to make the Cython build process use a HIP C++ compiler.
+> 
+> Example:
+> 
+> `$ export CXX=hipcc`
+> 
+
 - A `build.sh` script is provided in `$CUDF_HOME`. Running the script with no additional arguments
   will install the `libcudf`, `cudf` and `dask_cudf` libraries. By default, the libraries are
   installed to the `$CONDA_PREFIX` directory. To install into a different location, set the location
@@ -139,6 +180,7 @@ cd $CUDF_HOME
 # you want to build and install the libcudf C++ library only,
 # or include the cudf and/or dask_cudf Python libraries:
 
+export CXX="hipcc" # Cython CXX compiler, adjust according to your setup.
 ./build.sh  # libcudf, cudf and dask_cudf
 ./build.sh libcudf  # libcudf only
 ./build.sh libcudf cudf  # libcudf and cudf only
