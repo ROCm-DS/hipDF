@@ -389,19 +389,19 @@ TEST_F(ListBinarySearch, ListWithNulls)
       lcw{-17},                 // 2
     };
 
-    auto const col2 = lcw{
+    auto const col2 = lcw({
       lcw{27},                  // 0
       lcw{{null}, null_at(0)},  // 1
       lcw{},                    // 2
-    };
+    });
 
-    auto const val1 = lcw{
+    auto const val1 = lcw({
       lcw{87},
-    };
+    });
 
-    auto const val2 = lcw{
+    auto const val2 = lcw({
       lcw{},
-    };
+    });
 
     cudf::table_view input{{col1, col2}};
     cudf::table_view values{{val1, val2}};
