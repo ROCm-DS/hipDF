@@ -23,7 +23,7 @@
 #include <cudf/utilities/default_stream.hpp>
 #include <cudf/utilities/error.hpp>
 
-#include <rmm/hip_stream.hpp>
+#include <rmm/cuda_stream.hpp>
 
 TEST(ExpectsTest, FalseCondition)
 {
@@ -70,7 +70,7 @@ TEST(StreamCheck, CatchFailedKernel)
   EXPECT_THROW(CUDF_CHECK_CUDA(stream.value()), cudf::cuda_error);
 }
 
-//TODO(HIP): should we use s_trap here?
+// TODO(HIP): should we use s_trap here?
 __global__ void kernel() { abort(); }
 
 TEST(DeathTest, CudaFatalError)
