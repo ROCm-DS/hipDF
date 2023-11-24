@@ -242,10 +242,10 @@ ConfigureTest(
 
 # ##################################################################################################
 # * partitioning tests ----------------------------------------------------------------------------
-# ConfigureTest(
-#   PARTITIONING_TEST partitioning/hash_partition_test.cpp partitioning/round_robin_test.cpp
-#   partitioning/partition_test.cpp
-# )
+ConfigureTest(
+  PARTITIONING_TEST partitioning/hash_partition_test.cpp partitioning/round_robin_test.cpp
+  partitioning/partition_test.cpp
+)
 
 # ##################################################################################################
 # * hash_map tests --------------------------------------------------------------------------------
