@@ -405,6 +405,7 @@ fi
 if buildAll || hasArg cudf; then
 
     cd ${REPODIR}/python/cudf
+    declare -x CXX=${CXX:-hipcc} #: scikit-build checks CXX on Linux
     SKBUILD_CMAKE_ARGS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX};-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR};-DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES};${EXTRA_CMAKE_ARGS}" \
         python ${PYTHON_ARGS_FOR_INSTALL} .
 fi
