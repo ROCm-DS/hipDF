@@ -476,8 +476,8 @@ struct RankListAndStruct : public cudf::test::BaseFixture {
     ]
     */
     auto list_col =
-      lists_col<T>{{{}, {1}, {2, 2}, {2, 3}, {2, 2}, {1}, {}, {} /*NULL*/, {2}, {} /*NULL*/, {1}},
-                   nulls_at({7, 9})};
+     lists_col<T>{{{}, {1}, {2, 2}, {2, 3}, {2, 2}, {1}, {}, {} /*NULL*/, {2}, {} /*NULL*/, {1}},
+                 nulls_at({7, 9})};
 
     // clang-format off
     /*

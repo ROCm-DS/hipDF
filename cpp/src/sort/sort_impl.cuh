@@ -62,7 +62,8 @@ std::unique_ptr<column> sorted_order(table_view input,
   std::unique_ptr<column> sorted_indices = cudf::make_numeric_column(
     data_type(type_to_id<size_type>()), input.num_rows(), mask_state::UNALLOCATED, stream, mr);
   mutable_column_view mutable_indices_view = sorted_indices->mutable_view();
-  thrust::sequence(rmm::exec_policy(stream),
+  //TODO: HIP Workaround of the exec policy
+  thrust::sequence(/*rmm::exec_policy(stream)*/thrust::device,
                    mutable_indices_view.begin<size_type>(),
                    mutable_indices_view.end<size_type>(),
                    0);
@@ -71,12 +72,14 @@ std::unique_ptr<column> sorted_order(table_view input,
     // Compiling `thrust::*sort*` APIs is expensive.
     // Thus, we should optimize that by using constexpr condition to only compile what we need.
     if constexpr (stable) {
-      thrust::stable_sort(rmm::exec_policy(stream),
+      //TODO: HIP Workaround of the exec policy
+      thrust::stable_sort(/*rmm::exec_policy(stream)*/thrust::device,
                           mutable_indices_view.begin<size_type>(),
                           mutable_indices_view.end<size_type>(),
                           comparator);
     } else {
-      thrust::sort(rmm::exec_policy(stream),
+      //TODO: HIP Workaround of the exec policy
+      thrust::sort(/*rmm::exec_policy(stream)*/thrust::device,
                    mutable_indices_view.begin<size_type>(),
                    mutable_indices_view.end<size_type>(),
                    comparator);
