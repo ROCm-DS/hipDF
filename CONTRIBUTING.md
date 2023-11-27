@@ -139,6 +139,10 @@ Instructions for a minimal build environment without conda are included below.
 conda env create --name cudf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
 # activate the environment
 conda activate cudf_dev
+#: only for AMD GPUs, install hip-python and hip-python-as-cuda:
+(cudf_dev) $ pip install -r conda/environments/rocm-requirements.txt
+#: only for AMD GPUs, install rmm wheel
+(cudf_dev) $ pip install <path/to/rmm.whl>
 ```
 
 - **Note**: the conda environment files are updated frequently, so the
