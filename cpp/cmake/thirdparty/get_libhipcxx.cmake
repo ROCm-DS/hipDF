@@ -20,7 +20,7 @@ function(find_and_configure_libhipcxx)
   set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_INCLUDEDIR}/lib")
 
   include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
-  rapids_cpm_libhipcxx(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
+  rapids_cpm_libhipcxx(BUILD_EXPORT_SET hipdf-exports INSTALL_EXPORT_SET hipdf-exports)
 
   if(libhipcxx_SOURCE_DIR)
     # Store where CMake can find our custom Thrust install
@@ -29,7 +29,7 @@ function(find_and_configure_libhipcxx)
       INSTALL
       libhipcxx
       [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libhipdf/lib/rapids/cmake/libhipcxx]=]
-      cudf-exports
+      hipdf-exports
     )
   endif()
 endfunction()

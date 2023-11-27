@@ -45,8 +45,8 @@ function(find_libarrow_in_python_wheel PYARROW_VERSION)
     Arrow NO_CONFIG
     VERSION "${PYARROW_VERSION}"
     LIBRARY_NAMES "${PYARROW_LIB}"
-    BUILD_EXPORT_SET cudf-exports
-    INSTALL_EXPORT_SET cudf-exports
+    BUILD_EXPORT_SET hipdf-exports
+    INSTALL_EXPORT_SET hipdf-exports
     HEADER_NAMES arrow/python/arrow_to_pandas.h
   )
 
@@ -67,8 +67,8 @@ function(find_libarrow_in_python_wheel PYARROW_VERSION)
                            "$<$<COMPILE_LANGUAGE:CUDA>:-Xcompiler=-D_GLIBCXX_USE_CXX11_ABI=0>"
   )
 
-  rapids_export_package(BUILD Arrow cudf-exports)
-  rapids_export_package(INSTALL Arrow cudf-exports)
+  rapids_export_package(BUILD Arrow hipdf-exports)
+  rapids_export_package(INSTALL Arrow hipdf-exports)
 
   list(POP_BACK CMAKE_PREFIX_PATH)
 endfunction()
@@ -378,19 +378,19 @@ function(find_and_configure_arrow VERSION BUILD_STATIC ENABLE_S3 ENABLE_ORC ENAB
     endif()
   endif()
   # We generate the arrow-configfiles when we built arrow locally, so always do `find_dependency`
-  rapids_export_package(BUILD Arrow cudf-exports)
-  rapids_export_package(INSTALL Arrow cudf-exports)
+  rapids_export_package(BUILD Arrow hipdf-exports)
+  rapids_export_package(INSTALL Arrow hipdf-exports)
 
   if(ENABLE_PARQUET)
-    rapids_export_package(BUILD Parquet cudf-exports)
-    rapids_export_package(BUILD ArrowDataset cudf-exports)
+    rapids_export_package(BUILD Parquet hipdf-exports)
+    rapids_export_package(BUILD ArrowDataset hipdf-exports)
   endif()
 
   include("${rapids-cmake-dir}/export/find_package_root.cmake")
-  rapids_export_find_package_root(BUILD Arrow [=[${CMAKE_CURRENT_LIST_DIR}]=] cudf-exports)
+  rapids_export_find_package_root(BUILD Arrow [=[${CMAKE_CURRENT_LIST_DIR}]=] hipdf-exports)
   if(ENABLE_PARQUET)
-    rapids_export_find_package_root(BUILD Parquet [=[${CMAKE_CURRENT_LIST_DIR}]=] cudf-exports)
-    rapids_export_find_package_root(BUILD ArrowDataset [=[${CMAKE_CURRENT_LIST_DIR}]=] cudf-exports)
+    rapids_export_find_package_root(BUILD Parquet [=[${CMAKE_CURRENT_LIST_DIR}]=] hipdf-exports)
+    rapids_export_find_package_root(BUILD ArrowDataset [=[${CMAKE_CURRENT_LIST_DIR}]=] hipdf-exports)
   endif()
 
   set(ARROW_LIBRARIES
