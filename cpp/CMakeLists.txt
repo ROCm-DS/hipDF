@@ -1007,6 +1007,9 @@ following IMPORTED GLOBAL  targets:
     ]=]
 )
 
+if(CUDA_BACKEND) #: HIP/AMD: disable thrust target creation, missing indent below by intent
+set(common_code_string "")
+else(CUDA_BACKEND)
 set(common_code_string
     [=[
 if(NOT TARGET hipdf::Thrust)
@@ -1014,6 +1017,7 @@ if(NOT TARGET hipdf::Thrust)
 endif()
 ]=]
 )
+endif(CUDA_BACKEND)
 
 if(HIPDF_ENABLE_ARROW_PARQUET)
   string(
