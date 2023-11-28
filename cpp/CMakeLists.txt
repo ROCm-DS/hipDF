@@ -734,6 +734,10 @@ if(HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
     hipdf PUBLIC HIPDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
   )
+  #: TODO assumes CXX compiler is HIPCC or AMD clang++.
+  target_compile_options(hipdf PUBLIC
+    "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP,CXX>:-fgpu-default-stream=per-thread>>"
+  )
 endif()
 
 # Disable NVTX if necessary
