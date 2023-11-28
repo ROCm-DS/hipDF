@@ -706,10 +706,17 @@ target_include_directories(
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(hipdf PRIVATE "JITIFY_PRINT_LOG=0")
 
-if(ENABLE_CUDA)
+if(CUDA_BACKEND)
   target_compile_definitions(hipdf PRIVATE "RMM_USE_CUDA")
 else()
   target_compile_definitions(hipdf PRIVATE "RMM_USE_HIP")
+
+  #: Specify offload arch for CXX compiler too (hipcc/AMD clang++).
+  #: TODO assumes that the CXX Compiler is hipcc/AMD clang++.
+  set(_offload_arch_arg "--offload-arch=${AMDGPU_TARGETS}")
+  string(REPLACE ";"  "," offload_arch_arg "${_offload_arch_arg}")
+  target_compile_options(hipcomp PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
+  target_compile_options(hipdf PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
 endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of hipdf we are building so it can compute a cal-ver cache
@@ -725,7 +732,11 @@ endif()
 # Per-thread default stream
 if(HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
-    hipdf PUBLIC GPU_API_PER_THREAD_DEFAULT_STREAM HIPDF_USE_PER_THREAD_DEFAULT_STREAM
+    hipdf PUBLIC HIPDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
+  )
+  #: TODO assumes CXX compiler is HIPCC or AMD clang++.
+  target_compile_options(hipdf PUBLIC
+    "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP,CXX>:-fgpu-default-stream=per-thread>>"
   )
 endif()
 
@@ -906,7 +917,7 @@ if(HIPDF_BUILD_TESTS)
   include(CTest)
 
   # ctest cuda memcheck
-  if(ENABLE_CUDA)
+  if(CUDA_BACKEND)
     find_program(CUDA_SANITIZER compute-sanitizer)
     set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
     set(MEMORYCHECK_TYPE CudaSanitizer)
@@ -1018,7 +1029,7 @@ if(HIPDF_ENABLE_ARROW_PARQUET)
   )
 endif()
 
-if(ENABLE_CUDA)
+if(CUDA_BACKEND)
   string(
     APPEND
     install_code_string
