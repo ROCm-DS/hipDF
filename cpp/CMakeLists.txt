@@ -890,7 +890,7 @@ target_include_directories(
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(cudf PRIVATE "JITIFY_PRINT_LOG=0")
 
-if(ENABLE_CUDA)
+if(CUDA_BACKEND)
   target_compile_definitions(cudf PRIVATE "RMM_USE_CUDA")
 else()
   target_compile_definitions(cudf PRIVATE "RMM_USE_HIP")
@@ -1145,7 +1145,7 @@ if(CUDF_BUILD_TESTS)
   include(CTest)
 
   # ctest cuda memcheck
-  if(ENABLE_CUDA)
+  if(CUDA_BACKEND)
     find_program(CUDA_SANITIZER compute-sanitizer)
     set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
     set(MEMORYCHECK_TYPE CudaSanitizer)
