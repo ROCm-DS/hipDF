@@ -309,12 +309,15 @@ __global__ void __launch_bounds__(block_size)
 }
 
 // blockDim {128,1,1}
-__global__ void __launch_bounds__(128)
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitFragmentStats(device_span<statistics_group> groups,
                        device_span<PageFragment const> fragments)
 {
-  uint32_t const lane_id = threadIdx.x & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
+  int idx = thread_idx_shrink(threadIdx.x);
+  uint32_t const lane_id = idx & WARP_MASK;
+  uint32_t const frag_id = blockIdx.x * 4 + (idx / 32);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
@@ -329,7 +332,7 @@ __global__ void __launch_bounds__(128)
 }
 
 // blockDim {128,1,1}
-__global__ void __launch_bounds__(128)
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitPages(device_2dspan<EncColumnChunk> chunks,
                device_span<gpu::EncPage> pages,
                device_span<size_type> page_sizes,
@@ -343,6 +346,8 @@ __global__ void __launch_bounds__(128)
                uint32_t page_align,
                bool write_v2_headers)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   // TODO: All writing seems to be done by thread 0. Could be replaced by thrust foreach
   __shared__ __align__(8) parquet_column_device_view col_g;
   __shared__ __align__(8) EncColumnChunk ck_g;
@@ -351,7 +356,7 @@ __global__ void __launch_bounds__(128)
   //extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
   extern __shared__ statistics_merge_group pagestats_g[];
 
-  uint32_t const t          = threadIdx.x;
+  uint32_t const t          = thread_idx_shrink(threadIdx.x);
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
 
   if (t == 0) {
@@ -1000,13 +1005,15 @@ __device__ auto julian_days_with_time(int64_t v)
 
 // blockDim(128, 1, 1)
 template <int block_size>
-__global__ void __launch_bounds__(128, 8)
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   gpuEncodePages(device_span<gpu::EncPage> pages,
                  device_span<device_span<uint8_t const>> comp_in,
                  device_span<device_span<uint8_t>> comp_out,
                  device_span<compression_result> comp_results,
                  bool write_v2_headers)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   __shared__ __align__(8) page_enc_state_s state_g;
   using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   using block_scan   = hipcub::BlockScan<uint32_t, block_size>;
@@ -1016,7 +1023,7 @@ __global__ void __launch_bounds__(128, 8)
   } temp_storage;
 
   page_enc_state_s* const s = &state_g;
-  auto const t              = threadIdx.x;
+  auto const t              = thread_idx_shrink(threadIdx.x);
 
   if (t == 0) {
     state_g = page_enc_state_s{};
@@ -2276,8 +2283,8 @@ void InitFragmentStatistics(device_span<statistics_group> groups,
                             rmm::cuda_stream_view stream)
 {
   int const num_fragments = fragments.size();
-  int const dim = util::div_rounding_up_safe(num_fragments, 128 / cudf::detail::warp_size);
-  gpuInitFragmentStats<<<dim, 128, 0, stream.value()>>>(groups, fragments);
+  int const dim = util::div_rounding_up_safe(num_fragments, 128 / 32);
+  gpuInitFragmentStats<<<dim, 4 * cudf::detail::warp_size, 0, stream.value()>>>(groups, fragments);
 }
 
 void InitEncoderPages(device_2dspan<EncColumnChunk> chunks,
@@ -2296,7 +2303,7 @@ void InitEncoderPages(device_2dspan<EncColumnChunk> chunks,
 {
   auto num_rowgroups = chunks.size().first;
   dim3 dim_grid(num_columns, num_rowgroups);  // 1 threadblock per rowgroup
-  gpuInitPages<<<dim_grid, 128, sizeof(statistics_merge_group), stream.value()>>>(chunks,
+  gpuInitPages<<<dim_grid, 4 * cudf::detail::warp_size, sizeof(statistics_merge_group), stream.value()>>>(chunks,
                                                      pages,
                                                      page_sizes,
                                                      comp_page_sizes,
@@ -2320,7 +2327,7 @@ void EncodePages(device_span<gpu::EncPage> pages,
   auto num_pages = pages.size();
   // A page is part of one column. This is launching 1 block per page. 1 block will exclusively
   // deal with one datatype.
-  gpuEncodePages<128><<<num_pages, 128, 0, stream.value()>>>(
+  gpuEncodePages<4 * cudf::detail::warp_size><<<num_pages, 4 * cudf::detail::warp_size, 0, stream.value()>>>(
     pages, comp_in, comp_out, comp_results, write_v2_headers);
 }
 

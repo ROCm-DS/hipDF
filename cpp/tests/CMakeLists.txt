@@ -332,37 +332,37 @@ ConfigureTest(
 # # ##################################################################################################
 # # * io tests --------------------------------------------------------------------------------------
 ConfigureTest(DECOMPRESSION_TEST io/comp/decomp_test.cpp)
-# ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
+ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
 ConfigureTest(
   CSV_TEST io/csv_test.cpp
 )
-# ConfigureTest(
-#   FILE_IO_TEST io/file_io_test.cpp
-# )
-# ConfigureTest(
-#   ORC_TEST io/orc_test.cpp
-# )
+ ConfigureTest(
+  FILE_IO_TEST io/file_io_test.cpp
+)
+# #ConfigureTest(
+# #  ORC_TEST io/orc_test.cpp
+# #)
 ConfigureTest(
   PARQUET_TEST 
   io/parquet_test.cpp 
   io/parquet_chunked_reader_test.cpp
 )
-# ConfigureTest(
-#   JSON_TEST io/json_test.cpp io/json_chunked_reader.cpp
-# )
+ConfigureTest(
+  JSON_TEST io/json_test.cpp io/json_chunked_reader.cpp
+)
 ConfigureTest(JSON_WRITER_TEST io/json_writer.cpp)
-# ConfigureTest(JSON_TYPE_CAST_TEST io/json_type_cast_test.hip)
+ConfigureTest(JSON_TYPE_CAST_TEST io/json_type_cast_test.hip)
 ConfigureTest(NESTED_JSON_TEST io/nested_json_test.cpp io/json_tree.cpp)
-# ConfigureTest(ARROW_IO_SOURCE_TEST io/arrow_io_source_test.cpp)
-# ConfigureTest(MULTIBYTE_SPLIT_TEST io/text/multibyte_split_test.cpp)
-# ConfigureTest(
-#   DATA_CHUNK_SOURCE_TEST io/text/data_chunk_source_test.cpp
-# )
-#  target_link_libraries(DATA_CHUNK_SOURCE_TEST PRIVATE ZLIB::ZLIB)
+ConfigureTest(ARROW_IO_SOURCE_TEST io/arrow_io_source_test.cpp)
+# #ConfigureTest(MULTIBYTE_SPLIT_TEST io/text/multibyte_split_test.cpp)
+# #ConfigureTest(
+# #  DATA_CHUNK_SOURCE_TEST io/text/data_chunk_source_test.cpp
+# #)
+# #target_link_libraries(DATA_CHUNK_SOURCE_TEST PRIVATE ZLIB::ZLIB)
 ConfigureTest(LOGICAL_STACK_TEST io/fst/logical_stack_test.hip)
 ConfigureTest(FST_TEST io/fst/fst_test.hip)
-# ConfigureTest(TYPE_INFERENCE_TEST io/type_inference_test.hip)
+ConfigureTest(TYPE_INFERENCE_TEST io/type_inference_test.hip)
 # if(CUDF_ENABLE_ARROW_S3)
 #   target_compile_definitions(ARROW_IO_SOURCE_TEST PRIVATE "S3_ENABLED")
 # endif()
