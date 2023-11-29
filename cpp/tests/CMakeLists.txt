@@ -476,9 +476,9 @@ ConfigureTest(
 
 # # ##################################################################################################
 # # * sorted-merge tests ----------------------------------------------------------------------------
- ConfigureTest(
-   MERGE_TEST merge/merge_test.cpp /
-   merge/merge_dictionary_test.cpp
+ConfigureTest(
+   MERGE_TEST merge/merge_test.cpp 
+   merge/merge_dictionary_test.cpp 
    merge/merge_string_test.cpp
  )
 
@@ -579,7 +579,7 @@ ConfigureTest(
   strings/replace_tests.cpp
   strings/reverse_tests.cpp
   strings/slice_tests.cpp
-  # strings/split_tests.cpp
+  strings/split_tests.cpp
   strings/strip_tests.cpp
   strings/translate_tests.cpp
   strings/urls_tests.cpp

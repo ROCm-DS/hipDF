@@ -16,7 +16,7 @@
 
 #include <cudf/detail/utilities/stacktrace.hpp>
 
-#include <rmm/hip_stream.hpp>
+#include <rmm/cuda_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
 #include <hip/hip_runtime.h>
@@ -79,7 +79,7 @@ bool stream_is_invalid(hipStream_t stream)
   // `thrust::device` and the default value of
   // `cudf::get_default_stream().value()` are actually the same. At present, the
   // former is `cudaStreamLegacy` while the latter is 0.
-  // TODO PORTING cudaStreamLegacy 
+  // TODO PORTING cudaStreamLegacy
   return (stream == hipStreamDefault) || (stream == hipStreamPerThread);
 #endif
 }
@@ -130,9 +130,9 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
  * @parameter arguments The function arguments (names only, no types).
  */
 #define DEFINE_OVERLOAD(function, signature, arguments)     \
-  using function##_t = hipError_t (*)(signature);          \
+  using function##_t = hipError_t (*)(signature);           \
                                                             \
-  hipError_t function(signature)                           \
+  hipError_t function(signature)                            \
   {                                                         \
     check_stream_and_error(stream);                         \
     return ((function##_t)originals[#function])(arguments); \
@@ -234,7 +234,7 @@ DEFINE_OVERLOAD(hipMemcpy2DToArrayAsync,
 DEFINE_OVERLOAD(hipMemcpy3DAsync,
                 ARG(hipMemcpy3DParms const* p, hipStream_t stream),
                 ARG(p, stream));
-#if 0 // TODO PORTING
+#if 0  // TODO PORTING
 DEFINE_OVERLOAD(cudaMemcpy3DPeerAsync,
                 ARG(cudaMemcpy3DPeerParms const* p, hipStream_t stream),
                 ARG(p, stream));
@@ -263,10 +263,9 @@ DEFINE_OVERLOAD(
   hipMemset2DAsync,
   ARG(void* devPtr, size_t pitch, int value, size_t width, size_t height, hipStream_t stream),
   ARG(devPtr, pitch, value, width, height, stream));
-DEFINE_OVERLOAD(
-  hipMemset3DAsync,
-  ARG(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, hipStream_t stream),
-  ARG(pitchedDevPtr, value, extent, stream));
+DEFINE_OVERLOAD(hipMemset3DAsync,
+                ARG(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, hipStream_t stream),
+                ARG(pitchedDevPtr, value, extent, stream));
 DEFINE_OVERLOAD(hipMemsetAsync,
                 ARG(void* devPtr, int value, size_t count, hipStream_t stream),
                 ARG(devPtr, value, count, stream));

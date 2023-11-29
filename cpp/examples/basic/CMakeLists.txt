@@ -19,9 +19,9 @@ file(
 )
 include(${CMAKE_BINARY_DIR}/cmake/get_cpm.cmake)
 
-set(CUDF_TAG feat/enabling_example)
+set(CUDF_TAG dev)
 CPMFindPackage(
-  NAME cudf GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/hipdf
+  NAME cudf GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/hipdf	
   GIT_TAG ${CUDF_TAG}
   GIT_SHALLOW
     TRUE
