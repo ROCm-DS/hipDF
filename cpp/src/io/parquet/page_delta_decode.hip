@@ -33,18 +33,21 @@ namespace {
 // with V2 page headers; see https://www.mail-archive.com/dev@parquet.apache.org/msg11826.html).
 // this kernel only needs 96 threads (3 warps)(for now).
 template <typename level_t>
-__global__ void __launch_bounds__(96) gpuDecodeDeltaBinary(
+__global__ void __launch_bounds__(cudf::detail::warp_size * 3) gpuDecodeDeltaBinary(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   using cudf::detail::warp_size;
   __shared__ __align__(16) delta_binary_decoder db_state;
-  __shared__ __align__(16) page_state_s state_g;
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
   __shared__ __align__(16) page_state_buffers_s<delta_rolling_buf_size, 0, 0> state_buffers;
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int const page_idx    = blockIdx.x;
-  int const t           = threadIdx.x;
+  int const t           = cudf::thread_idx_shrink(threadIdx.x);
   int const lane_id     = t % warp_size;
   auto* const db        = &db_state;
   [[maybe_unused]] null_count_back_copier _{s, t};
@@ -162,15 +165,15 @@ void __host__ DecodeDeltaBinary(cudf::detail::hostdevice_vector<PageInfo>& pages
 {
   CUDF_EXPECTS(pages.size() > 0, "There is no page to decode");
 
-  dim3 dim_block(96, 1);
+  dim3 dim_block(cudf::detail::warp_size * 3, 1);
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
     gpuDecodeDeltaBinary<uint8_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   } else {
     gpuDecodeDeltaBinary<uint16_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   }
 }
 

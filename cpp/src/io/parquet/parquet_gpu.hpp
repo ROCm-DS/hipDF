@@ -26,6 +26,7 @@
 #include <cudf/io/datasource.hpp>
 #include <cudf/types.hpp>
 #include <cudf/utilities/span.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_scalar.hpp>
@@ -34,6 +35,13 @@
 #include <hip/hip_runtime.h>
 
 #include <vector>
+
+namespace cudf {
+    /* map id in each wavefront [0, 32) to cuda */
+    inline __device__ uint32_t thread_idx_shrink(uint32_t id) {
+        return id - (id / cudf::detail::warp_size) * (cudf::detail::warp_size - 32);
+    }
+}
 
 namespace cudf::io::parquet {
 
