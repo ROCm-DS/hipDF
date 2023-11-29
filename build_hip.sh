@@ -355,7 +355,9 @@ if buildAll || hasArg hipdf; then
     declare -x CXX=${CXX:-hipcc} #: scikit-build checks CXX on Linux
     SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR} -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} ${EXTRA_CMAKE_ARGS}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
-        python -m pip install --no-build-isolation --no-deps .
+        python setup.py bdist_wheel
+        # python -m pip install --no-build-isolation --no-deps . #: TODO: HIP/AMD: results in a cmake Cache issue, the binary wheel is preferred in any case
+	echo "cuDF package wheel (install via pip): $(ls ${REPODIR}/python/cudf/dist/*whl)"
 fi
 
 
