@@ -31,8 +31,8 @@ namespace gpu {
 
 namespace {
 
-constexpr int decode_block_size = 128;
-constexpr int rolling_buf_size  = decode_block_size * 2;
+constexpr int decode_block_size = 256;
+constexpr int rolling_buf_size  = decode_block_size;
 
 /**
  * @brief Output a string descriptor
@@ -436,6 +436,8 @@ template <int lvl_buf_size, typename level_t>
 __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   //extern __shared__ __align__(16) page_state_s state_g[];
   extern __shared__ page_state_s state_g[];
   __shared__ __align__(16)
@@ -445,7 +447,7 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int page_idx          = blockIdx.x;
-  int t                 = threadIdx.x;
+  int t                 = cudf::thread_idx_shrink(threadIdx.x);
   int out_thread0;
   [[maybe_unused]] null_count_back_copier _{s, t};
 
