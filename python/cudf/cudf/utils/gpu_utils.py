@@ -1,5 +1,27 @@
 # Copyright (c) 2020-2024, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 
 def validate_setup():
     import os
@@ -33,19 +55,19 @@ def validate_setup():
         cudaError_t.cudaErrorInsufficientDriver,
         cudaError_t.cudaErrorInvalidDeviceFunction,
         cudaError_t.cudaErrorInvalidDevice,
-        cudaError_t.cudaErrorStartupFailure,
+        #: cudaError_t.cudaErrorStartupFailure, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorInvalidKernelImage,
         cudaError_t.cudaErrorAlreadyAcquired,
         cudaError_t.cudaErrorOperatingSystem,
-        cudaError_t.cudaErrorNotPermitted,
+        #: cudaError_t.cudaErrorNotPermitted, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorNotSupported,
-        cudaError_t.cudaErrorSystemNotReady,
-        cudaError_t.cudaErrorSystemDriverMismatch,
-        cudaError_t.cudaErrorCompatNotSupportedOnDevice,
+        #: cudaError_t.cudaErrorSystemNotReady, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        #: cudaError_t.cudaErrorSystemDriverMismatch, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        #: cudaError_t.cudaErrorCompatNotSupportedOnDevice, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorDeviceUninitialized,
-        cudaError_t.cudaErrorTimeout,
+        #: cudaError_t.cudaErrorTimeout, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorUnknown,
-        cudaError_t.cudaErrorApiFailureBase,
+        #: cudaError_t.cudaErrorApiFailureBase, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
     }
 
     try:
