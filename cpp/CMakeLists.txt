@@ -970,7 +970,7 @@ if(TARGET hipdftestutil)
   set(_components_export_string COMPONENTS testing COMPONENTS_EXPORT_SET hipdf-testing-exports)
 endif()
 
-install(DIRECTORY ${HIPDF_SOURCE_DIR}/include/hipdf ${HIPDF_SOURCE_DIR}/include/hipdf_test
+install(DIRECTORY ${HIPDF_SOURCE_DIR}/include/cudf ${HIPDF_SOURCE_DIR}/include/cudf_test
                   ${HIPDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
