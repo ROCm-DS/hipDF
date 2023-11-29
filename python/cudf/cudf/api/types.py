@@ -50,10 +50,12 @@ def is_numeric_dtype(obj):
     else:
         if isinstance(
             obj,
-            (cudf.Decimal128Dtype, cudf.Decimal64Dtype, cudf.Decimal32Dtype),
+            (cudf.Decimal64Dtype, cudf.Decimal32Dtype),
+            #: (cudf.Decimal128Dtype, cudf.Decimal64Dtype, cudf.Decimal32Dtype),  #: TODO: HIP/AMD enable this dtype
         ) or isinstance(
             getattr(obj, "dtype", None),
-            (cudf.Decimal128Dtype, cudf.Decimal64Dtype, cudf.Decimal32Dtype),
+            (cudf.Decimal64Dtype, cudf.Decimal32Dtype),
+            #: (cudf.Decimal128Dtype, cudf.Decimal64Dtype, cudf.Decimal32Dtype),  #: TODO: HIP/AMD enable this dtype
         ):
             return True
         if isinstance(obj, _BaseDtype) or isinstance(
