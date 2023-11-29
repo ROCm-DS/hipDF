@@ -53,8 +53,8 @@ namespace cg = cooperative_groups;
 
 namespace {
 
-constexpr int decode_block_size = 128;
-constexpr int rolling_buf_size  = decode_block_size * 2;
+constexpr int decode_block_size = 256;
+constexpr int rolling_buf_size  = decode_block_size;
 
 /**
  * @brief Kernel for computing the BYTE_STREAM_SPLIT column data stored in the pages
@@ -249,6 +249,8 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                     size_t num_rows,
                     kernel_error::pointer error_code)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   //extern __shared__ __align__(16) page_state_s state_g[];
   extern __shared__ page_state_s state_g[];
   __shared__ __align__(16)
@@ -258,7 +260,7 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int page_idx          = blockIdx.x;
-  int t                 = threadIdx.x;
+  int t                 = cudf::thread_idx_shrink(threadIdx.x);
   int out_thread0;
   [[maybe_unused]] null_count_back_copier _{s, t};
 

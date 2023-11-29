@@ -328,13 +328,15 @@ struct delta_byte_array_decoder {
 // with V2 page headers; see https://www.mail-archive.com/dev@parquet.apache.org/msg11826.html).
 // this kernel only needs 96 threads (3 warps)(for now).
 template <typename level_t>
-CUDF_KERNEL void __launch_bounds__(96)
+CUDF_KERNEL void __launch_bounds__(cudf::detail::warp_size * 3)
   gpuDecodeDeltaBinary(PageInfo* pages,
                        device_span<ColumnChunkDesc const> chunks,
                        size_t min_row,
                        size_t num_rows,
                        kernel_error::pointer error_code)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   using cudf::detail::warp_size;
   __shared__ __align__(16) delta_binary_decoder db_state;
   //extern __shared__ __align__(16) page_state_s state_g[];
@@ -344,7 +346,7 @@ CUDF_KERNEL void __launch_bounds__(96)
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int const page_idx    = blockIdx.x;
-  int const t           = threadIdx.x;
+  int const t           = cudf::thread_idx_shrink(threadIdx.x);
   int const lane_id     = t % warp_size;
   auto* const db        = &db_state;
   [[maybe_unused]] null_count_back_copier _{s, t};
@@ -799,7 +801,7 @@ void DecodeDeltaBinary(cudf::detail::hostdevice_span<PageInfo> pages,
 {
   CUDF_EXPECTS(pages.size() > 0, "There is no page to decode");
 
-  dim3 dim_block(96, 1);
+  dim3 dim_block(cudf::detail::warp_size * 3, 1);
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {

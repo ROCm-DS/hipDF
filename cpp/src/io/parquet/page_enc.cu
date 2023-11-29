@@ -510,12 +510,15 @@ CUDF_KERNEL void __launch_bounds__(block_size)
 }
 
 // blockDim {128,1,1}
-CUDF_KERNEL void __launch_bounds__(128)
+CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitFragmentStats(device_span<statistics_group> groups,
                        device_span<PageFragment const> fragments)
 {
-  uint32_t const lane_id = threadIdx.x & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
+  int idx = thread_idx_shrink(threadIdx.x);
+  uint32_t const lane_id = idx & WARP_MASK;
+  uint32_t const frag_id = blockIdx.x * 4 + (idx / 32);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
@@ -617,7 +620,7 @@ __device__ size_t delta_data_len(Type physical_type,
 }
 
 // blockDim {128,1,1}
-CUDF_KERNEL void __launch_bounds__(128)
+CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitPages(device_2dspan<EncColumnChunk> chunks,
                device_span<EncPage> pages,
                device_span<size_type> page_sizes,
@@ -631,6 +634,8 @@ CUDF_KERNEL void __launch_bounds__(128)
                uint32_t page_align,
                bool write_v2_headers)
 {
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
   // TODO: All writing seems to be done by thread 0. Could be replaced by thrust foreach
   __shared__ __align__(8) parquet_column_device_view col_g;
   __shared__ __align__(8) EncColumnChunk ck_g;
@@ -639,7 +644,7 @@ CUDF_KERNEL void __launch_bounds__(128)
   //extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
   extern __shared__ statistics_merge_group pagestats_g[];
 
-  uint32_t const t          = threadIdx.x;
+  uint32_t const t          = thread_idx_shrink(threadIdx.x);
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
 
   // Max page header size excluding statistics

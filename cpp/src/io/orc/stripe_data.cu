@@ -1371,7 +1371,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
         int64_t dst_pos   = max(dst_row, (int64_t)0);
         uint32_t startbit = -static_cast<int32_t>(min(dst_row, (int64_t)0));
         uint32_t nbits    = nrows - min(startbit, nrows);
-        uint32_t* valid   = s->chunk.valid_map_base + (dst_pos >> 5);
+        cudf::bitmask_type* valid   = s->chunk.valid_map_base + (dst_pos >> 5);
         uint32_t bitpos   = static_cast<uint32_t>(dst_pos) & 0x1f;
         if ((size_t)(dst_pos + nbits) > max_num_rows) {
           nbits = static_cast<uint32_t>(max_num_rows - min((size_t)dst_pos, max_num_rows));
