@@ -34,7 +34,7 @@ from . import (
     stream_compaction,
     string_casting,
     strings,
-    strings_udf,
+    #: strings_udf, #: TODO HIP/AMD reenable
     text,
     timezone,
     transpose,
