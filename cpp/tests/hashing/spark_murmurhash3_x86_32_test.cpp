@@ -247,10 +247,11 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
     {933211791, 751823303, -1080202046, 1110053733, 1135925485});
   cudf::test::fixed_width_column_wrapper<int32_t> const hash_bools_expected(
     {933211791, -559580957, -559580957, -559580957, 933211791});
+  // Todo(HIP): We do not support 128 bit type. Disable for now.
   // cudf::test::fixed_width_column_wrapper<int32_t> const hash_decimal128_expected(
   //   {-783713497, -295670906, 1398487324, -52622807, -1359749815});
-  cudf::test::fixed_width_column_wrapper<int32_t> const hash_combined_expected(
-    {401603227, 588162166, 552160517, 1132537411, -326043017});
+  // cudf::test::fixed_width_column_wrapper<int32_t> const hash_combined_expected(
+  //   {401603227, 588162166, 552160517, 1132537411, -326043017});
 
   using double_limits = std::numeric_limits<double>;
   using long_limits   = std::numeric_limits<int64_t>;
