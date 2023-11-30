@@ -143,6 +143,8 @@ conda activate cudf_dev
 (cudf_dev) $ pip install -r conda/environments/rocm-requirements.txt
 #: only for AMD GPUs, install rmm wheel
 (cudf_dev) $ pip install <path/to/rmm.whl>
+#: only for AMD GPUs, install cupy wheel
+(cudf_dev) $ pip install <path/to/cupy.whl>
 ```
 
 - **Note**: the conda environment files are updated frequently, so the
@@ -163,7 +165,8 @@ conda activate cudf_dev
 
 > **Note** (Compiling for AMD GPUs): 
 >
-> When compiling for AMD GPUs, we always need to set the environment variable `CXX` before 
+> When compiling for AMD GPUs and not using the `build.sh` script,
+> we always need to set the environment variable `CXX` before
 > building to make the Cython build process use a HIP C++ compiler.
 > 
 > Example:
@@ -184,7 +187,6 @@ cd $CUDF_HOME
 # you want to build and install the libcudf C++ library only,
 # or include the cudf and/or dask_cudf Python libraries:
 
-export CXX="hipcc" # Cython CXX compiler, adjust according to your setup.
 ./build.sh  # libcudf, cudf and dask_cudf
 ./build.sh libcudf  # libcudf only
 ./build.sh libcudf cudf  # libcudf and cudf only
