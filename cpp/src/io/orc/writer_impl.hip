@@ -54,7 +54,7 @@
 #include <thrust/transform.h>
 
 #include <hip/hip_cooperative_groups.h>
-#include <cooperative_groups/memcpy_async.h>
+//#include <cooperative_groups/memcpy_async.h>
 
 #include <hip/std/climits>
 #include <hip/std/limits>
@@ -155,7 +155,7 @@ constexpr orc::TypeKind to_orc_type(cudf::type_id id, bool list_column_as_map)
     case cudf::type_id::STRING: return TypeKind::STRING;
     case cudf::type_id::DECIMAL32:
     case cudf::type_id::DECIMAL64:
-    case cudf::type_id::DECIMAL128: return TypeKind::DECIMAL;
+    //case cudf::type_id::DECIMAL128: return TypeKind::DECIMAL; //TODO
     case cudf::type_id::LIST: return list_column_as_map ? TypeKind::MAP : TypeKind::LIST;
     case cudf::type_id::STRUCT: return TypeKind::STRUCT;
     default: return TypeKind::INVALID_TYPE_KIND;
@@ -185,7 +185,7 @@ constexpr auto orc_precision(cudf::type_id decimal_id)
   switch (decimal_id) {
     case cudf::type_id::DECIMAL32: return hip::std::numeric_limits<decimal32::rep>::digits10;
     case cudf::type_id::DECIMAL64: return hip::std::numeric_limits<decimal64::rep>::digits10;
-    case cudf::type_id::DECIMAL128: return hip::std::numeric_limits<decimal128::rep>::digits10;
+    //case cudf::type_id::DECIMAL128: return hip::std::numeric_limits<decimal128::rep>::digits10; //TODO
     default: return 0;
   }
 }

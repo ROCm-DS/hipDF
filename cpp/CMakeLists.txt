@@ -391,64 +391,64 @@ add_library(
   src/interop/from_arrow.hip
   src/interop/to_arrow.hip
   src/interop/detail/arrow_allocator.cpp
-  # src/io/avro/avro.cpp
-  # src/io/avro/avro_gpu.hip
-  # src/io/avro/reader_impl.hip
-  # src/io/comp/brotli_dict.cpp
-  # src/io/comp/cpu_unbz2.cpp
-  # src/io/comp/debrotli.hip
-  # src/io/comp/gpuinflate.hip
-  # src/io/comp/hipcomp_adapter.cpp
-  # src/io/comp/hipcomp_adapter.hip
-  # src/io/comp/snap.hip
-  # src/io/comp/statistics.hip
-  # src/io/comp/uncomp.cpp
-  # src/io/comp/unsnap.hip
+  src/io/avro/avro.cpp
+  src/io/avro/avro_gpu.hip
+  src/io/avro/reader_impl.hip
+  src/io/comp/brotli_dict.cpp
+  src/io/comp/cpu_unbz2.cpp
+  src/io/comp/debrotli.hip
+  src/io/comp/gpuinflate.hip
+  src/io/comp/hipcomp_adapter.cpp
+  src/io/comp/hipcomp_adapter.hip
+  src/io/comp/snap.hip
+  src/io/comp/statistics.hip
+  src/io/comp/uncomp.cpp
+  src/io/comp/unsnap.hip
   src/io/csv/csv_gpu.hip
   src/io/csv/durations.hip
   src/io/csv/reader_impl.hip
   src/io/csv/writer_impl.hip
   src/io/functions.cpp
-  # src/io/json/byte_range_info.hip
-  # src/io/json/json_column.hip
-  # src/io/json/json_tree.hip # Todo(HIP): HipCollections
-  # src/io/json/nested_json_gpu.hip
-  # src/io/json/read_json.hip
-  # src/io/json/legacy/json_gpu.hip
-  # src/io/json/legacy/reader_impl.hip
-  # src/io/json/write_json.hip
-  # src/io/orc/aggregate_orc_metadata.cpp
-  # src/io/orc/dict_enc.hip
-  # src/io/orc/orc.cpp
-  # src/io/orc/reader_impl.hip
-  # src/io/orc/stats_enc.hip
+  src/io/json/byte_range_info.hip
+  src/io/json/json_column.hip
+  src/io/json/json_tree.hip # Todo(HIP): HipCollections
+  src/io/json/nested_json_gpu.hip
+  src/io/json/read_json.hip
+  src/io/json/legacy/json_gpu.hip
+  src/io/json/legacy/reader_impl.hip
+  src/io/json/write_json.hip
+  src/io/orc/aggregate_orc_metadata.cpp
+  src/io/orc/dict_enc.hip
+  src/io/orc/orc.cpp
+  src/io/orc/reader_impl.hip
+  src/io/orc/stats_enc.hip
   # #src/io/orc/stripe_data.hip # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
-  # src/io/orc/stripe_enc.hip
-  # src/io/orc/stripe_init.hip
-  # src/datetime/timezone.cpp
-  # # src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/compact_protocol_reader.cpp
-  # src/io/parquet/compact_protocol_writer.cpp
-  # # src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/chunk_dict.hip
-  # # src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/parquet/predicate_pushdown.cpp
-  # src/io/parquet/reader.cpp
-  # src/io/parquet/reader_impl.cpp
-  # src/io/parquet/reader_impl_helpers.cpp
-  # src/io/parquet/reader_impl_preprocess.hip
-  # # src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # # src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  # src/io/text/byte_range_info.cpp
-  # src/io/text/data_chunk_source_factories.cpp
-  # src/io/text/bgzip_data_chunk_source.hip
-  # src/io/text/bgzip_utils.cpp
-  # # src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
+  src/io/orc/stripe_enc.hip
+  src/io/orc/stripe_init.hip
+  src/datetime/timezone.cpp
+  # #src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/compact_protocol_reader.cpp
+  src/io/parquet/compact_protocol_writer.cpp
+  src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/chunk_dict.hip
+  src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/predicate_pushdown.cpp
+  src/io/parquet/reader.cpp
+  src/io/parquet/reader_impl.cpp
+  src/io/parquet/reader_impl_helpers.cpp
+  src/io/parquet/reader_impl_preprocess.hip
+  src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/text/byte_range_info.cpp
+  src/io/text/data_chunk_source_factories.cpp
+  src/io/text/bgzip_data_chunk_source.hip
+  src/io/text/bgzip_utils.cpp
+  # #src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
   src/io/utilities/arrow_io_source.cpp
   src/io/utilities/column_buffer.cpp
   src/io/utilities/config_utils.cpp
@@ -706,10 +706,17 @@ target_include_directories(
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(hipdf PRIVATE "JITIFY_PRINT_LOG=0")
 
-if(ENABLE_CUDA)
+if(CUDA_BACKEND)
   target_compile_definitions(hipdf PRIVATE "RMM_USE_CUDA")
 else()
   target_compile_definitions(hipdf PRIVATE "RMM_USE_HIP")
+
+  #: Specify offload arch for CXX compiler too (hipcc/AMD clang++).
+  #: TODO assumes that the CXX Compiler is hipcc/AMD clang++.
+  set(_offload_arch_arg "--offload-arch=${AMDGPU_TARGETS}")
+  string(REPLACE ";"  "," offload_arch_arg "${_offload_arch_arg}")
+  target_compile_options(hipcomp PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
+  target_compile_options(hipdf PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
 endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of hipdf we are building so it can compute a cal-ver cache
@@ -725,7 +732,11 @@ endif()
 # Per-thread default stream
 if(HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
-    hipdf PUBLIC GPU_API_PER_THREAD_DEFAULT_STREAM HIPDF_USE_PER_THREAD_DEFAULT_STREAM
+    hipdf PUBLIC HIPDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
+  )
+  #: TODO assumes CXX compiler is HIPCC or AMD clang++.
+  target_compile_options(hipdf PUBLIC
+    "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP,CXX>:-fgpu-default-stream=per-thread>>"
   )
 endif()
 
@@ -906,7 +917,7 @@ if(HIPDF_BUILD_TESTS)
   include(CTest)
 
   # ctest cuda memcheck
-  if(ENABLE_CUDA)
+  if(CUDA_BACKEND)
     find_program(CUDA_SANITIZER compute-sanitizer)
     set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
     set(MEMORYCHECK_TYPE CudaSanitizer)
@@ -1018,7 +1029,7 @@ if(HIPDF_ENABLE_ARROW_PARQUET)
   )
 endif()
 
-if(ENABLE_CUDA)
+if(CUDA_BACKEND)
   string(
     APPEND
     install_code_string

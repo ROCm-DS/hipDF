@@ -562,7 +562,7 @@ struct orc_column_meta {
  * @brief Stores column's validity map and null count
  */
 struct column_validity_info {
-  uint32_t* valid_map_base;
+  bitmask_type* valid_map_base;
   uint32_t null_count;
 };
 

@@ -29,8 +29,9 @@ namespace gpu {
 namespace {
 
 constexpr int preprocess_block_size = 512;
+constexpr int block_shrink = cudf::detail::warp_size == 64 ? 2 : 1;
 constexpr int decode_block_size     = 128;
-constexpr int rolling_buf_size      = decode_block_size * 2;
+constexpr int rolling_buf_size      = decode_block_size * (2 / block_shrink);
 constexpr int preproc_buf_size      = LEVEL_DECODE_BUF_SIZE;
 
 /**
@@ -471,9 +472,10 @@ template <typename level_t>
 __global__ void __launch_bounds__(preprocess_block_size) gpuComputePageStringSizes(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
   PageInfo* const pp    = &pages[page_idx];
@@ -586,16 +588,19 @@ __global__ void __launch_bounds__(preprocess_block_size) gpuComputePageStringSiz
  * @tparam level_t Type used to store decoded repetition and definition levels
  */
 template <typename level_t>
-__global__ void __launch_bounds__(decode_block_size) gpuDecodeStringPageData(
+__global__ void __launch_bounds__(decode_block_size * block_shrink) gpuDecodeStringPageData(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
+
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
   __shared__ __align__(4) size_type last_offset;
   __shared__ __align__(16)
     page_state_buffers_s<rolling_buf_size, rolling_buf_size, rolling_buf_size>
       state_buffers;
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[8];
   auto* const sb        = &state_buffers;
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
@@ -764,10 +769,10 @@ void ComputePageStringSizes(cudf::detail::hostdevice_vector<PageInfo>& pages,
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
   if (level_type_size == 1) {
     gpuComputePageStringSizes<uint8_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   } else {
     gpuComputePageStringSizes<uint16_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   }
 }
 
@@ -783,15 +788,15 @@ void __host__ DecodeStringPageData(cudf::detail::hostdevice_vector<PageInfo>& pa
 {
   CUDF_EXPECTS(pages.size() > 0, "There is no page to decode");
 
-  dim3 dim_block(decode_block_size, 1);
+  dim3 dim_block(decode_block_size * block_shrink, 1);
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
     gpuDecodeStringPageData<uint8_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   } else {
     gpuDecodeStringPageData<uint16_t>
-      <<<dim_grid, dim_block, 0, stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
   }
 }
 

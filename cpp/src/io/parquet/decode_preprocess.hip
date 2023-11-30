@@ -96,8 +96,8 @@ static __device__ void gpuUpdatePageSizes(page_state_s* s,
   // max nesting depth of the column
   int const max_depth = s->col.max_nesting_depth;
 
-  constexpr int num_warps      = preprocess_block_size / 32;
-  constexpr int max_batch_size = num_warps * 32;
+  constexpr int num_warps      = preprocess_block_size / cudf::detail::warp_size;
+  constexpr int max_batch_size = num_warps * cudf::detail::warp_size;
 
   using block_reduce = hipcub::BlockReduce<int, preprocess_block_size>;
   using block_scan   = hipcub::BlockScan<int, preprocess_block_size>;
@@ -219,9 +219,10 @@ __global__ void __launch_bounds__(preprocess_block_size)
                       bool is_base_pass,
                       bool compute_string_sizes)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  //extern __shared__ __align__(16) page_state_s state_g[];
+  extern __shared__ page_state_s state_g[];
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int page_idx          = blockIdx.x;
   int t                 = threadIdx.x;
   PageInfo* pp          = &pages[page_idx];
@@ -351,7 +352,7 @@ __global__ void __launch_bounds__(preprocess_block_size)
   // retrieve total string size.
   // TODO: make this block-based instead of just 1 warp
   if (compute_string_sizes) {
-    if (t < 32) { s->page.str_bytes = gpuDecodeTotalPageStringSize(s, t); }
+    if (t < cudf::detail::warp_size) { s->page.str_bytes = gpuDecodeTotalPageStringSize(s, t); }
   }
 
   // update output results:
@@ -404,10 +405,10 @@ void ComputePageSizes(cudf::detail::hostdevice_vector<PageInfo>& pages,
   // If uses_custom_row_bounds is set to true, we have to do a second pass later that "trims"
   // the starting and ending read values to account for these bounds.
   if (level_type_size == 1) {
-    gpuComputePageSizes<uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
+    gpuComputePageSizes<uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows, compute_string_sizes);
   } else {
-    gpuComputePageSizes<uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
+    gpuComputePageSizes<uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, compute_num_rows, compute_string_sizes);
   }
 }

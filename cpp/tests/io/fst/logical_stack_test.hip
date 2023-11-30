@@ -18,11 +18,10 @@
 
 #include <cudf/types.hpp>
 #include <io/utilities/hostdevice_vector.hpp>
-#include <src/io/fst/logical_stack.cuh>
-//Todo(HIP): cuda_stream.hpp -> hip_stream.hpp
-#include <rmm/hip_stream.hpp>
+#include <rmm/cuda_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
+#include <src/io/fst/logical_stack.cuh>
 
 #include <cstdlib>
 #include <iostream>
@@ -204,16 +203,16 @@ TEST_F(LogicalStackTest, GroundTruth)
   cudf::device_span<SymbolOffsetT> d_stack_op_idx_span{d_stack_op_indexes};
 
   CUDF_CUDA_TRY(hipMemcpyAsync(d_stack_ops.data(),
-                                stack_symbols.data(),
-                                stack_symbols.size() * sizeof(SymbolT),
-                                hipMemcpyDefault,
-                                stream.value()));
+                               stack_symbols.data(),
+                               stack_symbols.size() * sizeof(SymbolT),
+                               hipMemcpyDefault,
+                               stream.value()));
 
   CUDF_CUDA_TRY(hipMemcpyAsync(d_stack_op_indexes.data(),
-                                stack_op_indexes.data(),
-                                stack_op_indexes.size() * sizeof(SymbolOffsetT),
-                                hipMemcpyDefault,
-                                stream.value()));
+                               stack_op_indexes.data(),
+                               stack_op_indexes.size() * sizeof(SymbolOffsetT),
+                               hipMemcpyDefault,
+                               stream.value()));
 
   // Run algorithm
   fst::sparse_stack_op_to_top_of_stack<StackLevelT>(d_stack_ops.data(),

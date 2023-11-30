@@ -21,7 +21,7 @@ function(find_and_configure_rmm)
   rapids_cpm_find(
     rmm 1.0.0
     GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/rmm
-    GIT_TAG dev
+    GIT_TAG rocm/develop-23.12
   )
 
 endfunction()
