@@ -107,7 +107,7 @@ foreach(target IN LISTS targets_using_arrow_headers)
 endforeach()
 
 add_subdirectory(cpp)
-#add_subdirectory(io) #: FIXME reenable when libcudf cudf/io is avail
+add_subdirectory(io)
 add_subdirectory(nvtext)
 add_subdirectory(pylibcudf)
 add_subdirectory(strings)
