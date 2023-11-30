@@ -339,13 +339,15 @@ TYPED_TEST(HashPartitionFixedWidth, HasNulls)
   run_fixed_width_test<TypeParam>(10, 1000, 10, cudf::hash_id::HASH_IDENTITY, true);
 }
 
+// Todo(HIP): This test seems to use 128bit which we do not support currently. Enable it again once
+// we have the support
 TEST_F(HashPartition, FixedPointColumnsToHash)
 {
   fixed_width_column_wrapper<int32_t> to_hash({1});
   cudf::test::fixed_point_column_wrapper<int64_t> first_col({7}, numeric::scale_type{-1});
-  cudf::test::fixed_point_column_wrapper<__int128_t> second_col({77}, numeric::scale_type{0});
+  // cudf::test::fixed_point_column_wrapper<__int128_t> second_col({77}, numeric::scale_type{0});
 
-  auto input = cudf::table_view({to_hash, first_col, second_col});
+  auto input = cudf::table_view({to_hash, first_col /*, second_col*/});
 
   auto columns_to_hash = std::vector<cudf::size_type>({0});
 
@@ -357,7 +359,7 @@ TEST_F(HashPartition, FixedPointColumnsToHash)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(0).view(), input.column(0));
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(1).view(), input.column(1));
-  CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(2).view(), input.column(2));
+  // CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(2).view(), input.column(2));
 }
 
 TEST_F(HashPartition, ListWithNulls)
