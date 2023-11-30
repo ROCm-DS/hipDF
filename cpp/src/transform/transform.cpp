@@ -23,7 +23,9 @@
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
+#if 0 //: TODO: HIP/AMD: 'jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp' file not found
 #include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
+#endif //: TODO: HIP/AMD: 'jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp' file not found
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
@@ -55,6 +57,7 @@ void unary_operation(mutable_column_view output,
            : cudf::jit::parse_single_function_cuda(udf,  //
                                                    "GENERIC_UNARY_OP");
 
+  #if 0 //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'transform_jit_kernel_cu_jit'
   cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
     .get_kernel(
       kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})  //
@@ -62,6 +65,7 @@ void unary_operation(mutable_column_view output,
     ->launch(output.size(),                                                                 //
              cudf::jit::get_data_ptr(output),
              cudf::jit::get_data_ptr(input));
+  #endif //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'transform_jit_kernel_cu_jit'
 }
 
 }  // namespace jit

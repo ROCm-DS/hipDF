@@ -49,7 +49,9 @@
 #include <jit/parser.hpp>
 #include <jit/util.hpp>
 
+#if 0 //: TODO: HIP/AMD: 'jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp' file not found
 #include <jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp>
+#endif //: TODO: HIP/AMD: 'jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp' file not found
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_scalar.hpp>
@@ -1021,7 +1023,7 @@ __launch_bounds__(block_size) __global__
 
   size_type warp_valid_count{0};
 
-  auto active_threads = __ballot_sync(0xffff'ffffu, i < input.size());
+  auto active_threads = hip_extensions::__ballot_sync(0xffff'ffffu, i < input.size());
   while (i < input.size()) {
     // to prevent overflow issues when computing bounds use int64_t
     int64_t const preceding_window = preceding_window_begin[i];
@@ -1045,7 +1047,7 @@ __launch_bounds__(block_size) __global__
       input, default_outputs, output, start_index, end_index, i);
 
     // set the mask
-    cudf::bitmask_type const result_mask{__ballot_sync(active_threads, output_is_valid)};
+    cudf::bitmask_type const result_mask{hip_extensions::__ballot_sync(active_threads, output_is_valid)};
 
     // only one thread writes the mask
     if (0 == threadIdx.x % cudf::detail::warp_size) {
@@ -1055,7 +1057,7 @@ __launch_bounds__(block_size) __global__
 
     // process next element
     i += stride;
-    active_threads = __ballot_sync(active_threads, i < input.size());
+    active_threads = hip_extensions::__ballot_sync(active_threads, i < input.size());
   }
 
   // sum the valid counts across the whole block
@@ -1270,6 +1272,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
+  #if 0 //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'rolling_jit_kernel_cu_jit'
   cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
     .get_kernel(
       kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})  //
@@ -1283,6 +1286,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
              preceding_window,
              following_window,
              min_periods);
+  #endif //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'rolling_jit_kernel_cu_jit'
 
   output->set_null_count(output->size() - device_valid_count.value(stream));
 
