@@ -576,7 +576,7 @@ add_library(
   src/io/orc/reader_impl_decode.cu
   src/io/orc/reader_impl_helpers.cpp
   src/io/orc/stats_enc.cu
-  #src/io/orc/stripe_data.cu # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
+  src/io/orc/stripe_data.cu
   src/io/orc/stripe_enc.cu
   src/io/orc/stripe_init.cu
   src/datetime/timezone.cpp
