@@ -159,8 +159,8 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
   // Note that Spark >= 3.2 normalizes the float/double value of -0. to +0. and both values hash
   // to the same result. This is normalized in the calling code (Spark RAPIDS plugin) for Spark
   // >= 3.2. However, the reference values for -0. below must be obtained with Spark < 3.2 and
-  // libcudf will continue to implement the Spark < 3.2 behavior until Spark >= 3.2 is required
-  // and the workaround in the calling code is removed. This also affects the combined hash values.
+  // libcudf will continue to implement the Spark < 3.2 behavior until Spark >= 3.2 is required and
+  // the workaround in the calling code is removed. This also affects the combined hash values.
 
   /*
   import org.apache.spark.sql.functions._
