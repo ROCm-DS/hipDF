@@ -30,7 +30,11 @@ import numba
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-from nvtx import annotate
+#: from nvtx import annotate #: TODO: HIP/AMD use roctx
+def annotate(*args,**kwargs):
+    def inner(func):
+        return func
+    return inner
 from packaging.version import Version
 from pandas._config import get_option
 from pandas.core.dtypes.common import is_float, is_integer

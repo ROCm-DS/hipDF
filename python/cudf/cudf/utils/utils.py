@@ -10,7 +10,11 @@ from functools import partial
 from typing import FrozenSet, Set, Union
 
 import numpy as np
-from nvtx import annotate
+#: from nvtx import annotate #: TODO: HIP/AMD use roctx
+def annotate(*args,**kwargs):
+    def inner(func):
+        return func
+    return inner
 
 import rmm
 
