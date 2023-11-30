@@ -245,6 +245,14 @@ __device__ cooperative_groups::thread_block this_thread_block()
   return cooperative_groups::this_thread_block();
 }
 
+/**
+ * @brief Wrapper for return a HIP cooperative group for the active thread.
+ * @return The cooperative group that represents the active thread.
+ */
+__device__ thread_block_tile<1> this_thread() {
+  return tiled_partition<1>(this_thread_block());
+}
+
 }  // namespace hip_cooperative_groups_ext
 
 }  // namespace hip_extensions
