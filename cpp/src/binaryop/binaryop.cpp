@@ -17,28 +17,6 @@
  * limitations under the License.
  */
 
-// MIT License
-//
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 #include "compiled/binary_ops.hpp"
 #include "jit/cache.hpp"
 #include "jit/parser.hpp"
@@ -155,23 +133,23 @@ bool is_same_scale_necessary(binary_operator op)
   return op != binary_operator::MUL && op != binary_operator::DIV;
 }
 
-// namespace jit {
-// void binary_operation(mutable_column_view& out,
-//                       column_view const& lhs,
-//                       column_view const& rhs,
-//                       std::string const& ptx,
-//                       rmm::cuda_stream_view stream)
-// {
-//   std::string const output_type_name = cudf::type_to_name(out.type());
+namespace jit {
+void binary_operation(mutable_column_view& out,
+                      column_view const& lhs,
+                      column_view const& rhs,
+                      std::string const& ptx,
+                      rmm::cuda_stream_view stream)
+{
+  std::string const output_type_name = cudf::type_to_name(out.type());
 
-//   std::string cuda_source =
-//     cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
+  std::string cuda_source =
+    cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
 
-//   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
-//                               .instantiate(output_type_name,  // list of template arguments
-//                                            cudf::type_to_name(lhs.type()),
-//                                            cudf::type_to_name(rhs.type()),
-//                                            std::string("cudf::binops::jit::UserDefinedOp"));
+  std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
+                              .instantiate(output_type_name,  // list of template arguments
+                                           cudf::type_to_name(lhs.type()),
+                                           cudf::type_to_name(rhs.type()),
+                                           std::string("cudf::binops::jit::UserDefinedOp"));
 
   cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
     .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})
@@ -383,24 +361,24 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
            type.id() != type_id::INT8;  // Numba PTX doesn't support int8
   };
 
-//   CUDF_EXPECTS(is_type_supported_ptx(lhs.type()), "Invalid/Unsupported lhs datatype");
-//   CUDF_EXPECTS(is_type_supported_ptx(rhs.type()), "Invalid/Unsupported rhs datatype");
-//   CUDF_EXPECTS(is_type_supported_ptx(output_type), "Invalid/Unsupported output datatype");
+  CUDF_EXPECTS(is_type_supported_ptx(lhs.type()), "Invalid/Unsupported lhs datatype");
+  CUDF_EXPECTS(is_type_supported_ptx(rhs.type()), "Invalid/Unsupported rhs datatype");
+  CUDF_EXPECTS(is_type_supported_ptx(output_type), "Invalid/Unsupported output datatype");
 
-//   CUDF_EXPECTS((lhs.size() == rhs.size()), "Column sizes don't match");
+  CUDF_EXPECTS((lhs.size() == rhs.size()), "Column sizes don't match");
 
   auto [new_mask, null_count] = cudf::detail::bitmask_and(table_view({lhs, rhs}), stream, mr);
   auto out =
     make_fixed_width_column(output_type, lhs.size(), std::move(new_mask), null_count, stream, mr);
 
-//   // Check for 0 sized data
-//   if (lhs.is_empty() or rhs.is_empty()) return out;
+  // Check for 0 sized data
+  if (lhs.is_empty() or rhs.is_empty()) return out;
 
-//   auto out_view = out->mutable_view();
-//   binops::jit::binary_operation(out_view, lhs, rhs, ptx, stream);
-//   out->set_null_count(cudf::detail::null_count(out_view.null_mask(), 0, out->size(), stream));
-//   return out;
-// }
+  auto out_view = out->mutable_view();
+  binops::jit::binary_operation(out_view, lhs, rhs, ptx, stream);
+  out->set_null_count(cudf::detail::null_count(out_view.null_mask(), 0, out->size(), stream));
+  return out;
+}
 }  // namespace detail
 
 int32_t binary_operation_fixed_point_scale(binary_operator op,
