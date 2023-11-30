@@ -28,7 +28,7 @@ from cudf.core.column_accessor import ColumnAccessor
 from cudf.core.join._join_helpers import _match_join_keys
 from cudf.core.mixins import Reducible, Scannable
 from cudf.core.multiindex import MultiIndex
-from cudf.core.udf.groupby_utils import _can_be_jitted, jit_groupby_apply
+#: from cudf.core.udf.groupby_utils import _can_be_jitted, jit_groupby_apply #: TODO: HIP/AMD: reenable when udf available
 from cudf.utils.utils import GetAttrGetItemMixin, _cudf_nvtx_annotate
 
 

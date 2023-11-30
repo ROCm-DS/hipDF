@@ -17,10 +17,10 @@ from numba.types import CPointer, Poison, Record, Tuple, boolean, int64, void
 
 import rmm
 
-from cudf._lib.strings_udf import (
-    column_from_udf_string_array,
-    column_to_string_view_array,
-)
+#: from cudf._lib.strings_udf import ( #: TODO: HIP/AMD: reenable when udf is enabled
+#:     column_from_udf_string_array,
+#:     column_to_string_view_array,
+#: )
 from cudf.api.types import is_scalar
 from cudf.core.column.column import as_column
 from cudf.core.dtypes import dtype
