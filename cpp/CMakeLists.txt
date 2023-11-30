@@ -422,11 +422,11 @@ add_library(
   src/io/orc/orc.cpp
   src/io/orc/reader_impl.hip
   src/io/orc/stats_enc.hip
-  # #src/io/orc/stripe_data.hip # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
+  src/io/orc/stripe_data.hip # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
   src/io/orc/stripe_enc.hip
   src/io/orc/stripe_init.hip
   src/datetime/timezone.cpp
-  # #src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
   src/io/parquet/compact_protocol_reader.cpp
   src/io/parquet/compact_protocol_writer.cpp
   src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
@@ -448,7 +448,7 @@ add_library(
   src/io/text/data_chunk_source_factories.cpp
   src/io/text/bgzip_data_chunk_source.hip
   src/io/text/bgzip_utils.cpp
-  # #src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
+  src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
   src/io/utilities/arrow_io_source.cpp
   src/io/utilities/column_buffer.cpp
   src/io/utilities/config_utils.cpp
@@ -461,18 +461,18 @@ add_library(
   src/jit/cache.cpp
   src/jit/parser.cpp
   src/jit/util.cpp
-  # src/join/conditional_join.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
+  src/join/conditional_join.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
   src/join/cross_join.hip
   src/join/hash_join.hip
   src/join/join.hip
-  # src/join/join_utils.hip # Todo(HIP): Thrust issue: binding reference of type 'int' ...
+  src/join/join_utils.hip # Todo(HIP): Thrust issue: binding reference of type 'int' ...
   src/join/mixed_join.hip
-  # src/join/mixed_join_kernel.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
-  # src/join/mixed_join_kernel_nulls.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
+  src/join/mixed_join_kernel.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
+  src/join/mixed_join_kernel_nulls.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
   src/join/mixed_join_kernels_semi.hip
   src/join/mixed_join_semi.hip
-  # src/join/mixed_join_size_kernel.hip # Todo(HIP): error: no member named 'this_thread' in namespace 'hip_extensions::hip_cooperative_groups_ext'
-  # src/join/mixed_join_size_kernel_nulls.hip # Todo(HIP): error: no member named 'this_thread' in namespace 'hip_extensions::hip_cooperative_groups_ext'
+  src/join/mixed_join_size_kernel.hip # Todo(HIP): error: no member named 'this_thread' in namespace 'hip_extensions::hip_cooperative_groups_ext'
+  src/join/mixed_join_size_kernel_nulls.hip # Todo(HIP): error: no member named 'this_thread' in namespace 'hip_extensions::hip_cooperative_groups_ext'
   src/join/mixed_join_size_kernels_semi.hip
   src/join/semi_join.hip
   src/lists/contains.hip
@@ -544,13 +544,13 @@ add_library(
   src/reshape/byte_cast.hip
   src/reshape/interleave_columns.hip
   src/reshape/tile.hip
-  # src/rolling/detail/optimized_unbounded_window.cpp # Todo(HIP): JIT
-  # src/rolling/detail/rolling_collect_list.hip
-  # src/rolling/detail/rolling_fixed_window.hip
-  # src/rolling/detail/rolling_variable_window.hip
-  # src/rolling/grouped_rolling.hip
-  # src/rolling/range_window_bounds.cpp
-  # src/rolling/rolling.hip
+  src/rolling/detail/optimized_unbounded_window.cpp # Todo(HIP): JIT
+  src/rolling/detail/rolling_collect_list.hip
+  src/rolling/detail/rolling_fixed_window.hip
+  src/rolling/detail/rolling_variable_window.hip
+  src/rolling/grouped_rolling.hip
+  src/rolling/range_window_bounds.cpp
+  src/rolling/rolling.hip
   src/round/round.hip
   src/scalar/scalar.cpp
   src/scalar/scalar_factories.cpp
@@ -662,7 +662,7 @@ add_library(
   src/transform/nans_to_nulls.hip
   src/transform/one_hot_encode.hip
   src/transform/row_bit_count.hip
-  # src/transform/transform.cpp # Todo(HIP): JIT
+  src/transform/transform.cpp # Todo(HIP): JIT
   src/transpose/transpose.hip
   src/unary/cast_ops.hip
   src/unary/math_ops.hip
