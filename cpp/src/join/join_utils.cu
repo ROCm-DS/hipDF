@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "join_common_utils.cuh"
 
 #include <cudf/utilities/memory_resource.hpp>
@@ -136,6 +158,7 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
     size_type end_counter   = static_cast<size_type>(right_table_row_count);
 
     // Create list of indices that have been marked as invalid
+    #if 0 //: TODO: HIP/AMD: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
                                               thrust::make_counting_iterator(begin_counter),
                                               thrust::make_counting_iterator(end_counter),
@@ -143,6 +166,9 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
                                               right_indices_complement->begin(),
                                               thrust::identity{}) -
                               right_indices_complement->begin();
+    #else  //: TODO: HIP/AMD: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
+    size_type indices_count = 0;
+    #endif //: TODO: HIP/AMD: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
     right_indices_complement->resize(indices_count, stream);
   }
 

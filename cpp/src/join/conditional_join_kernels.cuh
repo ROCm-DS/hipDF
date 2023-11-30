@@ -337,7 +337,9 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
         found_match = true;
       }
 
+      #if 0 //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
       __syncwarp(activemask);
+      #endif //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
 
       // flush output cache if next iteration does not fit
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
@@ -353,10 +355,14 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
                                                          join_shared_r,
                                                          join_output_l,
                                                          join_output_r);
+        #if 0 //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
         __syncwarp(flush_mask);
+        #endif //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
+      #if 0 //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
       __syncwarp(activemask);
+      #endif //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
     }
 
     // Left, left anti, and full joins all require saving left columns that
@@ -377,7 +383,9 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
                         join_shared_r[warp_id]);
     }
 
+    #if 0 //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
     __syncwarp(activemask);
+    #endif //: TODO: HIP/AMD: no equivalent for AMD GPUs due to missing IFP
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;

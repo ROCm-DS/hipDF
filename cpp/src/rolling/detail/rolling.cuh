@@ -1302,6 +1302,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
+  #if 0 //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'rolling_jit_kernel_cu_jit'
   cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
     .get_kernel(
       kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})  //
@@ -1315,6 +1316,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
              preceding_window,
              following_window,
              min_periods);
+  #endif //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'rolling_jit_kernel_cu_jit'
 
   output->set_null_count(output->size() - device_valid_count.value(stream));
 
