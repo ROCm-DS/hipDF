@@ -204,16 +204,16 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
           true, BigDecimal("-0.00000000001")),
       Row(Row(0x12345678, "ghij", Row(Float.PositiveInfinity, 0x123456789abcdefL)),
           "All work and no play makes Jack a dull boy", Double.MinValue,
-          DateTimeUtils.toJavaTimestamp(Long.MinValue/1000000),
-          BigDecimal("-99999999999.9999999"), Long.MinValue, Float.MinValue,
-          DateTimeUtils.toJavaDate(Int.MinValue/100), BigDecimal("-999999.999"), Int.MinValue,
-          Short.MinValue, Byte.MinValue, true, BigDecimal("-9999999999999999.99999999999")),
-      Row(Row(-0x76543210, "klmno", Row(Float.NegativeInfinity, -0x123456789abcdefL)),
-          "!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\ud720\ud721", Double.MaxValue,
           DateTimeUtils.toJavaTimestamp(Long.MinValue/1000000), BigDecimal("-99999999999.9999999"),
           Long.MinValue, Float.MinValue, DateTimeUtils.toJavaDate(Int.MinValue/100),
           BigDecimal("-999999.999"), Int.MinValue, Short.MinValue, Byte.MinValue, true,
           BigDecimal("-9999999999999999.99999999999")),
+      Row(Row(-0x76543210, "klmno", Row(Float.NegativeInfinity, -0x123456789abcdefL)),
+          "!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\ud720\ud721", Double.MaxValue,
+          DateTimeUtils.toJavaTimestamp(Long.MaxValue/1000000), BigDecimal("99999999999.9999999"),
+          Long.MaxValue, Float.MaxValue, DateTimeUtils.toJavaDate(Int.MaxValue/100),
+          BigDecimal("999999.999"), Int.MaxValue, Short.MaxValue, Byte.MaxValue, false,
+          BigDecimal("99999999999999999999999999.99999999999")))
 
   val df = spark.createDataFrame(sc.parallelize(data), schema)
   df.columns.foreach(c => println(s"$c => ${df.select(hash(col(c))).collect.mkString(",")}"))
