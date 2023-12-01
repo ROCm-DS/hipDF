@@ -114,8 +114,8 @@ struct dst_buf_info {
   int bit_shift;           // # of bits to shift right by (for validity buffers)
   size_type valid_count;   // validity count for this block of work
 
-  int src_buf_index;       // source buffer index
-  int dst_buf_index;       // destination buffer index
+  int src_buf_index;  // source buffer index
+  int dst_buf_index;  // destination buffer index
 };
 
 /**
@@ -148,17 +148,17 @@ struct dst_buf_info {
  * @param valid_count Optional pointer to a value to store count of set bits
  */
 template <int block_size>
-__device__ void copy_buffer(uint8_t* __restrict__ dst,
-                            uint8_t const* __restrict__ src,
-                            int t,
-                            std::size_t num_elements,
-                            std::size_t element_size,
-                            std::size_t src_element_index,
-                            uint32_t stride,
-                            int value_shift,
-                            int bit_shift,
-                            std::size_t num_rows,
-                            size_type* valid_count)
+__attribute__((optnone)) __device__ void copy_buffer(uint8_t* __restrict__ dst,
+                                                     uint8_t const* __restrict__ src,
+                                                     int t,
+                                                     std::size_t num_elements,
+                                                     std::size_t element_size,
+                                                     std::size_t src_element_index,
+                                                     uint32_t stride,
+                                                     int value_shift,
+                                                     int bit_shift,
+                                                     std::size_t num_rows,
+                                                     size_type* valid_count)
 {
   src += (src_element_index * element_size);
 
@@ -166,6 +166,8 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
 
   // handle misalignment. read 16 bytes in 4 byte reads. write in a single 16 byte store.
   std::size_t const num_bytes = num_elements * element_size;
+  // printf("---------num_bytes %zu \n", num_bytes);
+
   // how many bytes we're misaligned from 4-byte alignment
   uint32_t const ofs = reinterpret_cast<uintptr_t>(src) % 4;
   std::size_t pos    = t * 16;
@@ -187,6 +189,7 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
     reinterpret_cast<uint4*>(dst)[pos / 16] = v;
     if (valid_count) {
       thread_valid_count += (__POPC(v.x) + __POPC(v.y) + __POPC(v.z) + __POPC(v.w));
+      // printf("thread_valid_count %d\n", thread_valid_count);
     }
     pos += stride;
   }
@@ -223,7 +226,10 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
                                           : 0;
 
         uint32_t const val = (v >> bit_shift) | (next << (32 - bit_shift));
-        if (valid_count) { thread_valid_count += __POPC(val); }
+        if (valid_count) {
+          thread_valid_count += __POPC(val);
+          // printf("----thread_valid_count %d\n", thread_valid_count);
+        }
         reinterpret_cast<uint32_t*>(dst)[idx] = val;
         v                                     = next;
         idx++;
@@ -233,7 +239,10 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
       while (remainder) {
         std::size_t const idx = num_bytes - remainder--;
         uint32_t const val    = reinterpret_cast<uint8_t const*>(src)[idx];
-        if (valid_count) { thread_valid_count += __POPC(val); }
+        if (valid_count) {
+          // printf("1-------thread_valid_count %d\n", val);
+          thread_valid_count += __POPC(val);
+        }
         reinterpret_cast<uint8_t*>(dst)[idx] = val;
       }
     }
@@ -252,8 +261,10 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
         // considered during the copy step.
         std::size_t const max_row    = (num_bytes * 8);
         std::size_t const slack_bits = max_row > num_rows ? max_row - num_rows : 0;
-        auto const slack_mask        = set_most_significant_bits(slack_bits);
-        if (slack_mask > 0) {
+        auto const slack_mask        = set_most_significant_bits_32(slack_bits);
+        // Todo(HIP): It is possible that set_most_significant_bits_32 returns an overflown value.
+        // In this case, we should behave as if slack_mask == 0.
+        if (slack_mask > 0 && slack_mask != UINT32_MAX) {
           uint32_t const last_word = reinterpret_cast<uint32_t*>(dst + (num_bytes - 4))[0];
           block_valid_count -= __POPC(last_word & slack_mask);
         }
@@ -286,6 +297,10 @@ __global__ void copy_partitions(IndexToDstBuf index_to_buffer,
   auto const src_buf_index = buf_info[buf_index].src_buf_index;
 
   // copy, shifting offsets and validity bits as needed
+  // printf("before thread %d block %d buf_info[buf_index].valid_count %d\n",
+  //        (int)threadIdx.x,
+  //        (int)blockIdx.x,
+  //        buf_info[buf_index].valid_count);
   copy_buffer<block_size>(
     index_to_buffer(buf_index) + buf_info[buf_index].dst_offset,
     src_bufs[src_buf_index],
@@ -297,7 +312,11 @@ __global__ void copy_partitions(IndexToDstBuf index_to_buffer,
     buf_info[buf_index].value_shift,
     buf_info[buf_index].bit_shift,
     buf_info[buf_index].num_rows,
-    buf_info[buf_index].valid_count > 0 ? &buf_info[buf_index].valid_count : nullptr);
+    buf_info[buf_index].valid_count > 0 ? &(buf_info[buf_index].valid_count) : nullptr);
+  // printf("after thread %d block %d buf_info[buf_index].valid_count %d\n",
+  //        (int)threadIdx.x,
+  //        (int)blockIdx.x,
+  //        buf_info[buf_index].valid_count);
 }
 
 // The block of functions below are all related:
@@ -701,6 +720,9 @@ std::tuple<size_type, int64_t, int64_t, size_type> build_output_column_metadata(
 
       // use_src_null_count is used for the chunked contig split case, where we have
       // no splits: the null_count is just the source column's null_count
+      // printf(
+      //   "current_info->num_elements %d, current_info->num_rows %d, current_info->valid_count
+      //   %d\n", current_info->num_elements, current_info->num_rows, current_info->valid_count);
       size_type const null_count = use_src_null_count
                                      ? src.null_count()
                                      : (current_info->num_elements == 0
@@ -852,10 +874,10 @@ struct dst_offset_output_iterator {
 
   __host__ __device__ dst_offset_output_iterator operator+(int i) { return {c + i}; }
 
-  __host__ __device__ void operator++ () { c++; }
+  __host__ __device__ void operator++() { c++; }
 
-  reference __device__ operator[] (int i) { return dereference(c + i); }
-  reference __device__ operator* () { return dereference(c); }
+  reference __device__ operator[](int i) { return dereference(c + i); }
+  reference __device__ operator*() { return dereference(c); }
 
  private:
   reference __device__ dereference(dst_buf_info* c) { return c->dst_offset; }
@@ -873,21 +895,23 @@ struct dst_valid_count_output_iterator {
   using reference         = size_type&;
   using iterator_category = thrust::output_device_iterator_tag;
 
-  dst_valid_count_output_iterator __host__ __device__ operator+ (int i)
+  __host__ __device__ dst_valid_count_output_iterator operator+(int i)
   {
+    // printf("operator+ i %d\n", i);
     return dst_valid_count_output_iterator{c + i};
   }
 
-  //TODO(HIP): this is a WAR for rocthrust/rocprim expecting an implementation of the - operator
-  dst_valid_count_output_iterator __host__ __device__ operator- (int i)
+  // TODO(HIP): this is a WAR for rocthrust/rocprim expecting an implementation of the - operator
+  __host__ __device__ dst_valid_count_output_iterator operator-(int i)
   {
+    // printf("operator- i %d\n", i);
     return dst_valid_count_output_iterator{c - i};
   }
 
-  void __host__ __device__ operator++ () { c++; }
+  void __host__ __device__ operator++() { c++; }
 
-  reference __device__ operator[] (int i) { return dereference(c + i); }
-  reference __device__ operator* () { return dereference(c); }
+  reference __device__ operator[](int i) { return dereference(c + i); }
+  reference __device__ operator*() { return dereference(c); }
 
  private:
   reference __device__ dereference(dst_buf_info* c) { return c->valid_count; }
@@ -1043,10 +1067,10 @@ struct packed_partition_buf_size_and_dst_buf_info {
   {
     // DtoH buf sizes and col info back to the host
     CUDF_CUDA_TRY(hipMemcpyAsync(h_buf_sizes,
-                                  d_buf_sizes,
-                                  buf_sizes_size + dst_buf_info_size,
-                                  hipMemcpyDefault,
-                                  stream.value()));
+                                 d_buf_sizes,
+                                 buf_sizes_size + dst_buf_info_size,
+                                 hipMemcpyDefault,
+                                 stream.value()));
   }
 
   rmm::cuda_stream_view const stream;
@@ -1093,10 +1117,10 @@ struct packed_src_and_dst_pointers {
   void copy_to_device()
   {
     CUDF_CUDA_TRY(hipMemcpyAsync(d_src_and_dst_buffers.data(),
-                                  h_src_and_dst_buffers.data(),
-                                  src_bufs_size + dst_bufs_size,
-                                  hipMemcpyDefault,
-                                  stream.value()));
+                                 h_src_and_dst_buffers.data(),
+                                 src_bufs_size + dst_bufs_size,
+                                 hipMemcpyDefault,
+                                 stream.value()));
   }
 
   rmm::cuda_stream_view const stream;
@@ -1390,7 +1414,7 @@ struct chunk_iteration_state {
   std::size_t starting_batch;  ///< Starting batch index for the current iteration
   std::vector<std::size_t> const h_num_buffs_per_iteration;  ///< The count of batches per iteration
   std::vector<std::size_t> const
-    h_size_of_buffs_per_iteration;                           ///< The size in bytes per iteration
+    h_size_of_buffs_per_iteration;  ///< The size in bytes per iteration
 };
 
 std::unique_ptr<chunk_iteration_state> chunk_iteration_state::create(
@@ -1499,10 +1523,10 @@ std::unique_ptr<chunk_iteration_state> chunk_iteration_state::create(
                              offsets.begin());
 
       CUDF_CUDA_TRY(hipMemcpyAsync(h_offsets.data(),
-                                    offsets.data(),
-                                    sizeof(std::size_t) * offsets.size(),
-                                    hipMemcpyDefault,
-                                    stream.value()));
+                                   offsets.data(),
+                                   sizeof(std::size_t) * offsets.size(),
+                                   hipMemcpyDefault,
+                                   stream.value()));
 
       // the next part is working on the CPU, so we want to synchronize here
       stream.synchronize();
@@ -1783,30 +1807,47 @@ struct contiguous_split_state {
     auto d_orig_dst_buf_info = partition_buf_size_and_dst_buf_info->d_dst_buf_info;
     auto h_orig_dst_buf_info = partition_buf_size_and_dst_buf_info->h_dst_buf_info;
 
+    // printf("\n");
+    // for (auto a : chunk_iter_state->d_batched_dst_buf_info) {
+    //   printf("d_batched_dst_buf_info valid_count %d \n", a.valid_count);
+    // }
+    // printf("\n");
+
     // postprocess valid_counts: apply the valid counts computed by copy_data for each
     // batch back to the original dst_buf_infos
     auto const keys = cudf::detail::make_counting_transform_iterator(
       0, out_to_in_index_function{chunk_iter_state->d_batch_offsets.begin(), (int)num_bufs});
 
-    auto values = thrust::make_transform_iterator(
-      chunk_iter_state->d_batched_dst_buf_info.begin(),
-      [] __device__(dst_buf_info const& info) { return info.valid_count; });
+    auto values = thrust::make_transform_iterator(chunk_iter_state->d_batched_dst_buf_info.begin(),
+                                                  [] __device__(dst_buf_info const& info) {
+                                                    // printf("info.valid_count %d\n",
+                                                    // info.valid_count);
 
-     thrust::reduce_by_key(rmm::exec_policy(stream, temp_mr),
-                           keys,
+                                                    return info.valid_count;
+                                                  });
+
+    thrust::reduce_by_key(rmm::exec_policy(stream, temp_mr),
+                          keys,
                           keys + num_batches_total,
-                           values,
-                           thrust::make_discard_iterator(),
-                           dst_valid_count_output_iterator{d_orig_dst_buf_info});
+                          values,
+                          thrust::make_discard_iterator(),
+                          dst_valid_count_output_iterator{d_orig_dst_buf_info});
+
+    // printf("\n");
+    // for (auto a : values) {
+    //   printf("values %d \n", a);
+    // }
+    // printf("\n");
 
     CUDF_CUDA_TRY(hipMemcpyAsync(h_orig_dst_buf_info,
-                                  d_orig_dst_buf_info,
-                                  partition_buf_size_and_dst_buf_info->dst_buf_info_size,
-                                  hipMemcpyDefault,
-                                  stream.value()));
+                                 d_orig_dst_buf_info,
+                                 partition_buf_size_and_dst_buf_info->dst_buf_info_size,
+                                 hipMemcpyDefault,
+                                 stream.value()));
 
     stream.synchronize();
 
+    // printf("d_orig_dst_buf_info->valid_count %d\n", d_orig_dst_buf_info->valid_count);
     // not necessary for the non-chunked case, but it makes it so further calls to has_next
     // return false, just in case
     chunk_iter_state->advance_iteration();
@@ -1995,7 +2036,7 @@ struct contiguous_split_state {
   // This can be 1 if `contiguous_split` is just packing and not splitting
   std::size_t const num_partitions;  ///< The number of partitions to produce
 
-  size_type const num_src_bufs;      ///< Number of source buffers including children
+  size_type const num_src_bufs;  ///< Number of source buffers including children
 
   std::size_t const num_bufs;  ///< Number of source buffers including children * number of splits
 
