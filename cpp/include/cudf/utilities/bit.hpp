@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/types.hpp>
@@ -174,10 +196,32 @@ constexpr CUDF_HOST_DEVICE inline bitmask_type set_most_significant_bits(size_ty
 {
   constexpr size_type word_size{detail::size_in_bits<bitmask_type>()};
   constexpr_assert(0 <= n && n < word_size);
+  // Todo(HIP): warning: shift count >= width of type
+  // Check the returned value to not exceed UINT32_MAX.
   return ~((bitmask_type{1} << (word_size - n)) - 1);
 }
 
-#ifdef __CUDACC__
+// HIP: This method is the 32 bit version of set_most_significant_bits which is defined at line 171.
+// This method is only used in hipdf/cpp/src/copying/contiguous_split.hip in copy_buffer method.
+// We added this implementation to avoid overwritting copy_buffer.
+/**
+ * @brief Returns a bitmask word with the `n` most significant bits set.
+ *
+ * Behavior is undefined if `n < 0` or if `n >= size_in_bits<bitmask_type>()`
+ *
+ * @param n The number of most significant bits to set
+ * @return A bitmask word with `n` most significant bits set
+ */
+constexpr CUDF_HOST_DEVICE inline uint32_t set_most_significant_bits_32(size_type n)
+{
+  constexpr size_type word_size{detail::size_in_bits<uint32_t>()};
+  constexpr_assert(0 <= n && n < word_size);
+  // Todo(HIP): warning: shift count >= width of type
+  // To fix the issue, we should check if the returned value does not exceed UINT32_MAX.
+  return ~((uint32_t{1} << (word_size - n)) - 1);
+}
+
+#ifdef __HIPCC__
 
 /**
  * @brief Sets the specified bit to `1`

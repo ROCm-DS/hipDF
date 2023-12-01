@@ -175,7 +175,7 @@ struct dst_buf_info {
  * @param valid_count Optional pointer to a value to store count of set bits
  */
 template <int block_size>
-__device__ void copy_buffer(uint8_t* __restrict__ dst,
+__attribute__((optnone)) __device__ void copy_buffer(uint8_t* __restrict__ dst,
                             uint8_t const* __restrict__ src,
                             int t,
                             std::size_t num_elements,
@@ -279,8 +279,10 @@ __device__ void copy_buffer(uint8_t* __restrict__ dst,
         // considered during the copy step.
         std::size_t const max_row    = (num_bytes * 8);
         std::size_t const slack_bits = max_row > num_rows ? max_row - num_rows : 0;
-        auto const slack_mask        = set_most_significant_bits(slack_bits);
-        if (slack_mask > 0) {
+        auto const slack_mask        = set_most_significant_bits_32(slack_bits);
+        // Todo(HIP): It is possible that set_most_significant_bits_32 returns an overflown value.
+        // In this case, we should behave as if slack_mask == 0.
+        if (slack_mask > 0 && slack_mask != UINT32_MAX) {
           uint32_t const last_word = reinterpret_cast<uint32_t*>(dst + (num_bytes - 4))[0];
           block_valid_count -= __POPC(last_word & slack_mask);
         }
