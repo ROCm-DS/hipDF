@@ -232,6 +232,7 @@ ConfigureNVBench(
 
 # # ##################################################################################################
 # # * iterator benchmark ----------------------------------------------------------------------------
+# TODO(HIP): fix compiler/hipcub error 
 # ConfigureBench(ITERATOR_BENCH iterator/iterator.cu)
 
 # ##################################################################################################
@@ -241,11 +242,11 @@ ConfigureNVBench(SEARCH_NVBENCH search/contains_scalar.cpp search/contains_table
 
 # # ##################################################################################################
 # # * sort benchmark --------------------------------------------------------------------------------
-# ConfigureBench(SORT_BENCH sort/rank.cpp sort/sort.cpp sort/sort_strings.cpp)
-# ConfigureNVBench(
-#   SORT_NVBENCH sort/rank_lists.cpp sort/rank_structs.cpp sort/segmented_sort.cpp
-#   sort/sort_lists.cpp sort/sort_structs.cpp
-# )
+ConfigureBench(SORT_BENCH sort/rank.cpp sort/sort.cpp sort/sort_strings.cpp)
+ConfigureNVBench(
+  SORT_NVBENCH sort/rank_lists.cpp sort/rank_structs.cpp sort/segmented_sort.cpp
+   sort/sort_lists.cpp sort/sort_structs.cpp
+)
 
 # ##################################################################################################
 # * structs benchmark
@@ -288,14 +289,14 @@ ConfigureNVBench(REPLACE_NVBENCH replace/nulls.cpp)
 
 # # ##################################################################################################
 # # * filling benchmark -----------------------------------------------------------------------------
-# ConfigureBench(FILL_BENCH filling/repeat.cpp)
+ConfigureBench(FILL_BENCH filling/repeat.cpp)
 
 # # ##################################################################################################
 # # * groupby benchmark -----------------------------------------------------------------------------
-# ConfigureBench(
-#   GROUPBY_BENCH groupby/group_sum.cpp groupby/group_nth.cpp groupby/group_shift.cpp
-#   groupby/group_struct_values.cpp groupby/group_no_requests.cpp groupby/group_scan.cpp
-# )
+ConfigureBench(
+  GROUPBY_BENCH groupby/group_sum.cpp groupby/group_nth.cpp groupby/group_shift.cpp
+   groupby/group_struct_values.cpp groupby/group_no_requests.cpp groupby/group_scan.cpp
+)
 
 ConfigureNVBench(
   GROUPBY_NVBENCH
@@ -309,8 +310,8 @@ ConfigureNVBench(
 
 # # ##################################################################################################
 # # * hashing benchmark -----------------------------------------------------------------------------
-# ConfigureBench(HASHING_BENCH hashing/partition.cpp)
-# ConfigureNVBench(HASHING_NVBENCH hashing/hash.cpp)
+ConfigureBench(HASHING_BENCH hashing/partition.cpp)
+ConfigureNVBench(HASHING_NVBENCH hashing/hash.cpp)
 
 # ##################################################################################################
 # * interop benchmark ------------------------------------------------------------------------------
@@ -327,7 +328,7 @@ ConfigureNVBench(
 
 # # ##################################################################################################
 # # * null_mask benchmark ---------------------------------------------------------------------------
-# ConfigureBench(NULLMASK_BENCH null_mask/set_null_mask.cpp)
+ConfigureBench(NULLMASK_BENCH null_mask/set_null_mask.cpp)
 
 # # ##################################################################################################
 # # * parquet writer benchmark ----------------------------------------------------------------------
@@ -365,7 +366,7 @@ ConfigureNVBench(CSV_READER_NVBENCH io/csv/csv_reader_input.cpp io/csv/csv_reade
 
 # # ##################################################################################################
 # # * csv writer benchmark --------------------------------------------------------------------------
-# ConfigureNVBench(CSV_WRITER_NVBENCH io/csv/csv_writer.cpp)
+ConfigureNVBench(CSV_WRITER_NVBENCH io/csv/csv_writer.cpp)
 
 # ##################################################################################################
 # * ast benchmark ---------------------------------------------------------------------------------
