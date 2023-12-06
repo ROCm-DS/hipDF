@@ -1790,7 +1790,6 @@ struct contiguous_split_state {
     auto const keys = cudf::detail::make_counting_transform_iterator(
       0, out_to_in_index_function{chunk_iter_state->d_batch_offsets.begin(), (int)num_bufs});
 
-
     auto values = thrust::make_transform_iterator(
       chunk_iter_state->d_batched_dst_buf_info.begin(),
       [] __device__(dst_buf_info const& info) { return info.valid_count; });
