@@ -5003,7 +5003,7 @@ class DataFrame(IndexedFrame, GetAttrGetItemMixin):
         ``range(cuda.threadIdx.x, in1.size, cuda.blockDim.x)``, the *kernel*
         function can be used with any *tpb* in an efficient manner.
 
-        >>> from numba import cuda
+        >>> from numba import roc as cuda #: HIP/AMD modification
         >>> @cuda.jit
         ... def kernel(in1, in2, in3, out1):
         ...      for i in range(cuda.threadIdx.x, in1.size, cuda.blockDim.x):
