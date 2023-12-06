@@ -171,6 +171,7 @@ ConfigureNVBench(
 
 # # ##################################################################################################
 # # * iterator benchmark ----------------------------------------------------------------------------
+# TODO(HIP): fix compiler/hipcub error 
 # ConfigureBench(ITERATOR_BENCH iterator/iterator.hip)
 
 # # ##################################################################################################
@@ -180,11 +181,11 @@ ConfigureNVBench(SEARCH_NVBENCH search/contains.cpp)
 
 # # ##################################################################################################
 # # * sort benchmark --------------------------------------------------------------------------------
-# ConfigureBench(SORT_BENCH sort/rank.cpp sort/sort.cpp sort/sort_strings.cpp)
-# ConfigureNVBench(
-#   SORT_NVBENCH sort/rank_lists.cpp sort/rank_structs.cpp sort/segmented_sort.cpp
-#   sort/sort_lists.cpp sort/sort_structs.cpp
-# )
+ConfigureBench(SORT_BENCH sort/rank.cpp sort/sort.cpp sort/sort_strings.cpp)
+ConfigureNVBench(
+  SORT_NVBENCH sort/rank_lists.cpp sort/rank_structs.cpp sort/segmented_sort.cpp
+   sort/sort_lists.cpp sort/sort_structs.cpp
+)
 
 # # ##################################################################################################
 # # * quantiles benchmark
@@ -197,46 +198,46 @@ ConfigureBench(TYPE_DISPATCHER_BENCH type_dispatcher/type_dispatcher.hip)
 
 # # ##################################################################################################
 # # * reduction benchmark ---------------------------------------------------------------------------
-# ConfigureBench(
-#  REDUCTION_BENCH reduction/anyall.cpp reduction/dictionary.cpp reduction/minmax.cpp
-#   reduction/reduce.cpp reduction/scan.cpp
-# )
-# ConfigureNVBench(
-#   REDUCTION_NVBENCH reduction/rank.cpp reduction/scan_structs.cpp reduction/segmented_reduce.cpp
-# )
+ConfigureBench(
+ REDUCTION_BENCH reduction/anyall.cpp reduction/dictionary.cpp reduction/minmax.cpp
+  reduction/reduce.cpp reduction/scan.cpp
+)
+ConfigureNVBench(
+  REDUCTION_NVBENCH reduction/rank.cpp reduction/scan_structs.cpp reduction/segmented_reduce.cpp
+)
 
 # # ##################################################################################################
 # # * reduction benchmark ---------------------------------------------------------------------------
-# ConfigureBench(REPLACE_BENCH replace/clamp.cpp replace/nans.cpp)
+ConfigureBench(REPLACE_BENCH replace/clamp.cpp replace/nans.cpp)
 
 # # ##################################################################################################
 # # * filling benchmark -----------------------------------------------------------------------------
-# ConfigureBench(FILL_BENCH filling/repeat.cpp)
+ConfigureBench(FILL_BENCH filling/repeat.cpp)
 
 # # ##################################################################################################
 # # * groupby benchmark -----------------------------------------------------------------------------
-# ConfigureBench(
-#   GROUPBY_BENCH groupby/group_sum.cpp groupby/group_nth.cpp groupby/group_shift.cpp
-#   groupby/group_struct_values.cpp groupby/group_no_requests.cpp groupby/group_scan.cpp
-# )
+ConfigureBench(
+  GROUPBY_BENCH groupby/group_sum.cpp groupby/group_nth.cpp groupby/group_shift.cpp
+   groupby/group_struct_values.cpp groupby/group_no_requests.cpp groupby/group_scan.cpp
+)
 
-# ConfigureNVBench(
-#   GROUPBY_NVBENCH groupby/group_max.cpp groupby/group_nunique.cpp groupby/group_rank.cpp
-#   groupby/group_struct_keys.cpp
-# )
+ConfigureNVBench(
+  GROUPBY_NVBENCH groupby/group_max.cpp groupby/group_nunique.cpp groupby/group_rank.cpp
+  groupby/group_struct_keys.cpp
+)
 
 # # ##################################################################################################
 # # * hashing benchmark -----------------------------------------------------------------------------
-# ConfigureBench(HASHING_BENCH hashing/partition.cpp)
-# ConfigureNVBench(HASHING_NVBENCH hashing/hash.cpp)
+ConfigureBench(HASHING_BENCH hashing/partition.cpp)
+ConfigureNVBench(HASHING_NVBENCH hashing/hash.cpp)
 
 # # ##################################################################################################
 # # * merge benchmark -------------------------------------------------------------------------------
-# ConfigureBench(MERGE_BENCH merge/merge.cpp)
+ConfigureBench(MERGE_BENCH merge/merge.cpp)
 
 # # ##################################################################################################
 # # * null_mask benchmark ---------------------------------------------------------------------------
-# ConfigureBench(NULLMASK_BENCH null_mask/set_null_mask.cpp)
+ConfigureBench(NULLMASK_BENCH null_mask/set_null_mask.cpp)
 
 # # ##################################################################################################
 # # * parquet writer benchmark ----------------------------------------------------------------------
@@ -264,15 +265,15 @@ ConfigureBench(TYPE_DISPATCHER_BENCH type_dispatcher/type_dispatcher.hip)
 
 # # ##################################################################################################
 # # * csv writer benchmark --------------------------------------------------------------------------
-# ConfigureNVBench(CSV_WRITER_NVBENCH io/csv/csv_writer.cpp)
+ConfigureNVBench(CSV_WRITER_NVBENCH io/csv/csv_writer.cpp)
 
 # # ##################################################################################################
 # # * ast benchmark ---------------------------------------------------------------------------------
-# ConfigureBench(AST_BENCH ast/transform.cpp)
+ConfigureBench(AST_BENCH ast/transform.cpp)
 
 # # ##################################################################################################
 # # * binaryop benchmark ----------------------------------------------------------------------------
-# ConfigureBench(BINARYOP_BENCH binaryop/binaryop.cpp binaryop/compiled_binaryop.cpp)
+ConfigureBench(BINARYOP_BENCH binaryop/binaryop.cpp binaryop/compiled_binaryop.cpp)
 
 # # ##################################################################################################
 # # * nvtext benchmark -------------------------------------------------------------------
@@ -285,40 +286,40 @@ ConfigureBench(TYPE_DISPATCHER_BENCH type_dispatcher/type_dispatcher.hip)
 
 # # ##################################################################################################
 # # * strings benchmark -------------------------------------------------------------------
-# ConfigureBench(
-#   STRINGS_BENCH
-#   string/combine.cpp
-#   string/convert_datetime.cpp
-#   string/convert_durations.cpp
-#   string/convert_fixed_point.cpp
-#   string/convert_numerics.cpp
-#   string/copy.hip
-#   string/factory.hip
-#   string/filter.cpp
-#   string/find.cpp
-#   string/repeat_strings.cpp
-#   string/replace.cpp
-#   string/slice.cpp
-#   string/translate.cpp
-#   string/url_decode.hip
-# )
+ConfigureBench(
+   STRINGS_BENCH
+   string/combine.cpp
+   string/convert_datetime.cpp
+   string/convert_durations.cpp
+   string/convert_fixed_point.cpp
+   string/convert_numerics.cpp
+   string/copy.hip
+   string/factory.hip
+   string/filter.cpp
+   string/find.cpp
+   string/repeat_strings.cpp
+   string/replace.cpp
+   string/slice.cpp
+   string/translate.cpp
+   string/url_decode.hip
+ )
 
-# ConfigureNVBench(
-#   STRINGS_NVBENCH
-#   string/case.cpp
-#   string/char_types.cpp
-#   string/contains.cpp
-#   string/count.cpp
-#   string/extract.cpp
-#   string/gather.cpp
-#   string/join_strings.cpp
-#   string/lengths.cpp
-#   string/like.cpp
-#   string/replace_re.cpp
-#   string/reverse.cpp
-#   string/split.cpp
-#   string/split_re.cpp
-# )
+ ConfigureNVBench(
+   STRINGS_NVBENCH
+   string/case.cpp
+   string/char_types.cpp
+   string/contains.cpp
+   string/count.cpp
+   string/extract.cpp
+   string/gather.cpp
+   string/join_strings.cpp
+   string/lengths.cpp
+   string/like.cpp
+   string/replace_re.cpp
+   string/reverse.cpp
+   string/split.cpp
+   string/split_re.cpp
+ )
 
 # # ##################################################################################################
 # # * json benchmark -------------------------------------------------------------------
