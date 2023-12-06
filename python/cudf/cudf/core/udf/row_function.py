@@ -2,7 +2,7 @@
 import math
 
 import numpy as np
-from numba import cuda
+from numba import roc as cuda #: HIP/AMD modification
 from numba.np import numpy_support
 
 from cudf.core.udf.api import Masked, pack_return

@@ -2,7 +2,7 @@
 from typing import Any, Dict
 
 import numba
-from numba import cuda, types
+from numba import roc as cuda, types #: HIP/AMD modification
 from numba.core.extending import (
     make_attribute_wrapper,
     models,

@@ -3,7 +3,7 @@
 import operator
 from functools import partial
 
-from numba import cuda, types
+from numba import roc as cuda, types #: HIP/AMD modification
 from numba.core import cgutils
 from numba.core.datamodel import default_manager
 from numba.core.typing import signature as nb_signature

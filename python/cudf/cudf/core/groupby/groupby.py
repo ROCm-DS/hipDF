@@ -1476,7 +1476,7 @@ class GroupBy(Serializable, Reducible, Scannable):
         .. code-block:: python
 
             from cudf import DataFrame
-            from numba import cuda
+            from numba import roc as cuda #: HIP/AMD modification
             import numpy as np
 
             df = DataFrame()
@@ -1518,7 +1518,7 @@ class GroupBy(Serializable, Reducible, Scannable):
 
             import cudf
             import numpy as np
-            from numba import cuda
+            from numba import roc as cuda #: HIP/AMD modification
             import pandas as pd
             from random import randint
 
