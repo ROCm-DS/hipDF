@@ -17,8 +17,8 @@
 #pragma once
 
 #include <cassert>
-#include <cudf/types.hpp>
 #include <hip/std/climits>
+#include <cudf/types.hpp>
 
 /**
  * @file bit.hpp
