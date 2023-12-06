@@ -299,7 +299,7 @@ __global__ void copy_partitions(IndexToDstBuf index_to_buffer,
     buf_info[buf_index].value_shift,
     buf_info[buf_index].bit_shift,
     buf_info[buf_index].num_rows,
-    buf_info[buf_index].valid_count > 0 ? &(buf_info[buf_index].valid_count) : nullptr);
+    buf_info[buf_index].valid_count > 0 ? &buf_info[buf_index].valid_count : nullptr);
 }
 
 // The block of functions below are all related:
@@ -883,7 +883,6 @@ struct dst_valid_count_output_iterator {
   //TODO(HIP): this is a WAR for rocthrust/rocprim expecting an implementation of the - operator
   dst_valid_count_output_iterator __host__ __device__ operator- (int i)
   {
-    // printf("operator- i %d\n", i);
     return dst_valid_count_output_iterator{c - i};
   }
 
@@ -1392,7 +1391,8 @@ struct chunk_iteration_state {
  private:
   std::size_t starting_batch;  ///< Starting batch index for the current iteration
   std::vector<std::size_t> const h_num_buffs_per_iteration;  ///< The count of batches per iteration
-  std::vector<std::size_t> const h_size_of_buffs_per_iteration; ///< The size in bytes per iteration
+  std::vector<std::size_t> const
+    h_size_of_buffs_per_iteration;                           ///< The size in bytes per iteration
 };
 
 std::unique_ptr<chunk_iteration_state> chunk_iteration_state::create(
@@ -1790,15 +1790,17 @@ struct contiguous_split_state {
     auto const keys = cudf::detail::make_counting_transform_iterator(
       0, out_to_in_index_function{chunk_iter_state->d_batch_offsets.begin(), (int)num_bufs});
 
-    auto values = thrust::make_transform_iterator(chunk_iter_state->d_batched_dst_buf_info.begin(),
-                                                  [] __device__(dst_buf_info const& info) { return info.valid_count; });
 
-    thrust::reduce_by_key(rmm::exec_policy(stream, temp_mr),
-                          keys,
+    auto values = thrust::make_transform_iterator(
+      chunk_iter_state->d_batched_dst_buf_info.begin(),
+      [] __device__(dst_buf_info const& info) { return info.valid_count; });
+
+     thrust::reduce_by_key(rmm::exec_policy(stream, temp_mr),
+                           keys,
                           keys + num_batches_total,
-                          values,
-                          thrust::make_discard_iterator(),
-                          dst_valid_count_output_iterator{d_orig_dst_buf_info});
+                           values,
+                           thrust::make_discard_iterator(),
+                           dst_valid_count_output_iterator{d_orig_dst_buf_info});
 
     CUDF_CUDA_TRY(hipMemcpyAsync(h_orig_dst_buf_info,
                                   d_orig_dst_buf_info,
