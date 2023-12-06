@@ -158,7 +158,6 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
     size_type end_counter   = static_cast<size_type>(right_table_row_count);
 
     // Create list of indices that have been marked as invalid
-    #if 0 //: TODO: HIP/AMD: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
     size_type indices_count = thrust::copy_if(rmm::exec_policy(stream),
                                               thrust::make_counting_iterator(begin_counter),
                                               thrust::make_counting_iterator(end_counter),
@@ -166,9 +165,6 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
                                               right_indices_complement->begin(),
                                               thrust::identity<int>{}) -       //WAR for /opt/rocm/include/thrust/iterator/transform_iterator.h:315:14: error: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
                               right_indices_complement->begin();
-    #else  //: TODO: HIP/AMD: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
-    size_type indices_count = 0;
-    #endif //: TODO: HIP/AMD: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
     right_indices_complement->resize(indices_count, stream);
   }
 
