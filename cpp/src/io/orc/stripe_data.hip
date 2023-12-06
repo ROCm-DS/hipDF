@@ -1037,6 +1037,7 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
     }
     __syncthreads();
     uint32_t num_vals_to_read = scratch->num_vals;
+#if 0 //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
     if (t >= num_vals_read and t < num_vals_to_read) {
       auto const pos = static_cast<int>(vals.i64[2 * t]);
       __int128_t v   = decode_varint128(bs, pos);
@@ -1061,6 +1062,7 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
         vals.i128[t] = scaled_value;
       }
     }
+#endif //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
     // There is nothing to read, so break
     if (num_vals_read == num_vals_to_read) break;
 
