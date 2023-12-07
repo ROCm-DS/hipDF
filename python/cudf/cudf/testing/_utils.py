@@ -380,14 +380,14 @@ def sv_to_udf_str(sv):
     pass
 
 
-@cuda_decl_registry.register_global(sv_to_udf_str)
+#: @cuda_decl_registry.register_global(sv_to_udf_str) #: TODO: HIP/AMD: enable when numba roc compiler enabled
 class StringViewToUDFStringDecl(AbstractTemplate):
     def generic(self, args, kws):
         if isinstance(args[0], StringView) and len(args) == 1:
             return nb_signature(udf_string, string_view)
 
 
-@cuda_lower(sv_to_udf_str, string_view)
+#: @cuda_lower(sv_to_udf_str, string_view) #: TODO: HIP/AMD: enable when numba roc compiler enabled
 def sv_to_udf_str_testing_lowering(context, builder, sig, args):
     return cast_string_view_to_udf_string(
         context, builder, sig.args[0], sig.return_type, args[0]
