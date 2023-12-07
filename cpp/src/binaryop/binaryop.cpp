@@ -442,7 +442,7 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
 #if 0 //: TODO: HIP/AMD: add together with jitify support (udf)
   CUDF_FUNC_RANGE();
   return detail::binary_operation(lhs, rhs, ptx, output_type, cudf::get_default_stream(), mr);
-#endif 0 //: TODO: HIP/AMD: add together with jitify support (udf)
+#endif //: TODO: HIP/AMD: add together with jitify support (udf)
   return nullptr;
 }
 
