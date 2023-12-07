@@ -22,7 +22,7 @@ from cudf._lib.null_mask import bitmask_allocation_size_bytes
 from cudf.api.types import is_scalar
 from cudf.core.column.timedelta import _unit_to_nanoseconds_conversion
 #: from cudf.core.udf.strings_lowering import cast_string_view_to_udf_string #: TODO HIP/AMD reenable, uses udfs
-from cudf.core.udf.strings_typing import StringView, string_view, udf_string
+#: from cudf.core.udf.strings_typing import StringView, string_view, udf_string #: TODO HIP/AMD reenable, uses udfs
 from cudf.utils import dtypes as dtypeutils
 
 supported_numpy_dtypes = [
