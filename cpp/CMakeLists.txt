@@ -677,6 +677,19 @@ add_library(
   src/utilities/type_dispatcher.cpp
 )
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  message(VERBOSE "HIPDF: Building with debugging flags")
+
+  # Todo(HIP): The following files do not complete build in acceptable time (or the build is hanging)
+  # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround.
+  set_source_files_properties(src/join/conditional_join.hip
+                              src/join/mixed_join_kernel_nulls.hip
+                              src/join/mixed_join_size_kernel_nulls.hip
+                              src/join/mixed_join_size_kernel.hip
+                              src/join/mixed_join_size_kernels_semi.hip
+                              PROPERTIES COMPILE_FLAGS "-DNDEBUG")
+endif()
+
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
 # in how conda builds glibc
 set_source_files_properties(
