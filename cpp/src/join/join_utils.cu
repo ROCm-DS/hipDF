@@ -163,7 +163,7 @@ get_left_join_indices_complement(std::unique_ptr<rmm::device_uvector<size_type>>
                                               thrust::make_counting_iterator(end_counter),
                                               invalid_index_map->begin(),
                                               right_indices_complement->begin(),
-                                              thrust::identity<int>{}) -       //WAR for /opt/rocm/include/thrust/iterator/transform_iterator.h:315:14: error: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
+                                              thrust::identity<int>{}) -       //: TODO: HIP/AMD: WAR for /opt/rocm/include/thrust/iterator/transform_iterator.h:315:14: error: binding reference of type 'int' to value of type 'const int' drops 'const' qualifier
                               right_indices_complement->begin();
     right_indices_complement->resize(indices_count, stream);
   }
