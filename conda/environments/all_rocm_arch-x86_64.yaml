@@ -55,9 +55,9 @@ dependencies:
 - fastavro>=0.22.9
 - fmt>=9.1.0,<10
 - fsspec>=0.6.0
-#: - gcc_linux-64=11.* #: linker issues if uses other rt libs than hipcc
-#:- gmock>=1.13.0 #: Interferes with the gmock installed via the cpp/CMakeLists.txt (via rapids-cmake cpm)
-#:- gtest>=1.13.0 #: Interferes with the gtest installed via the cpp/CMakeLists.txt (via rapids-cmake cpm)
+- gcc_linux-64=11.* #: linker issues if uses other rt libs than hipcc
+- gmock>=1.13.0 #: Interferes with the gmock installed via the cpp/CMakeLists.txt (via rapids-cmake cpm)
+- gtest>=1.13.0 #: Interferes with the gtest installed via the cpp/CMakeLists.txt (via rapids-cmake cpm)
 - hypothesis
 - identify>=2.5.20
 - ipython
