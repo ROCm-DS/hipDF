@@ -4,6 +4,6 @@ from . import (
     groupby_typing,
     masked_lowering,
     masked_typing,
-    strings_lowering,
+    #: strings_lowering, #: TODO HIP/AMD reenable, uses udfs
     strings_typing,
 )

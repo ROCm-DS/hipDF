@@ -18,11 +18,12 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 #TODO(HIP): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf -v -g -n -h"
+VALIDARGS="clean libhipdf hipdf -v -g -n -h"
 HELP="$0 [clean] [libhipdf] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
    libhipdf                       - build the hipdf C++ code only
+   hipdf                          - build the hipdf Python package
    -v                            - verbose build mode
    -g                            - build for debug
    -n                            - no install step (does not affect Python)
@@ -350,10 +351,13 @@ fi
 # Build and install the hipdf Python package
 if buildAll || hasArg hipdf; then
 
-    cd ${REPODIR}/python/hipdf
+    cd ${REPODIR}/python/cudf
+    declare -x CXX=${CXX:-hipcc} #: scikit-build checks CXX on Linux
     SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR} -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} ${EXTRA_CMAKE_ARGS}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
-        python -m pip install --no-build-isolation --no-deps .
+        python setup.py bdist_wheel
+        # python -m pip install --no-build-isolation --no-deps . #: TODO: HIP/AMD: results in a cmake Cache issue, the binary wheel is preferred in any case
+	echo "cuDF package wheel (install via pip): $(ls ${REPODIR}/python/cudf/dist/*whl)"
 fi
 
 

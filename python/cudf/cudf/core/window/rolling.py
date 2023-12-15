@@ -450,7 +450,7 @@ class Rolling(GetAttrGetItemMixin, Reducible):
                 min_periods = window
         else:
             if isinstance(
-                window, (numba.cuda.devicearray.DeviceNDArray, BaseIndexer)
+                window, (numba.roc.devicearray.DeviceNDArray, BaseIndexer) #: HIP/AMD modification
             ):
                 # window is a device_array of window sizes or BaseIndexer
                 self.window = window

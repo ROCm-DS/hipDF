@@ -15,7 +15,7 @@ from typing import (
 
 import cupy as cp
 import numpy as np
-from numba.cuda import as_cuda_array
+from numba.roc import as_cuda_array #: HIP/AMD modification
 
 import rmm
 

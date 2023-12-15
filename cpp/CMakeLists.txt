@@ -970,7 +970,7 @@ if(TARGET hipdftestutil)
   set(_components_export_string COMPONENTS testing COMPONENTS_EXPORT_SET hipdf-testing-exports)
 endif()
 
-install(DIRECTORY ${HIPDF_SOURCE_DIR}/include/hipdf ${HIPDF_SOURCE_DIR}/include/hipdf_test
+install(DIRECTORY ${HIPDF_SOURCE_DIR}/include/cudf ${HIPDF_SOURCE_DIR}/include/cudf_test
                   ${HIPDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
@@ -1007,6 +1007,7 @@ following IMPORTED GLOBAL  targets:
     ]=]
 )
 
+if(CUDA_BACKEND) #: HIP/AMD: disable thrust target creation, missing indent below by intent
 set(common_code_string
     [=[
 if(NOT TARGET hipdf::Thrust)
@@ -1014,6 +1015,9 @@ if(NOT TARGET hipdf::Thrust)
 endif()
 ]=]
 )
+else(CUDA_BACKEND)
+set(common_code_string "")
+endif(CUDA_BACKEND)
 
 if(HIPDF_ENABLE_ARROW_PARQUET)
   string(

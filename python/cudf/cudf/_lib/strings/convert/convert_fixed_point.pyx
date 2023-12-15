@@ -64,8 +64,8 @@ def to_decimal(Column input_col, object out_type):
         c_out_type = data_type(type_id.DECIMAL32, -scale)
     elif isinstance(out_type, cudf.Decimal64Dtype):
         c_out_type = data_type(type_id.DECIMAL64, -scale)
-    elif isinstance(out_type, cudf.Decimal128Dtype):
-        c_out_type = data_type(type_id.DECIMAL128, -scale)
+    #: elif isinstance(out_type, cudf.Decimal128Dtype): #: TODO: HIP/AMD enable this dtype
+    #:     c_out_type = data_type(type_id.DECIMAL128, -scale)
     else:
         raise TypeError("should be a decimal dtype")
     with nogil:

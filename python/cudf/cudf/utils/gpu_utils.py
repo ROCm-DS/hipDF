@@ -33,19 +33,19 @@ def validate_setup():
         cudaError_t.cudaErrorInsufficientDriver,
         cudaError_t.cudaErrorInvalidDeviceFunction,
         cudaError_t.cudaErrorInvalidDevice,
-        cudaError_t.cudaErrorStartupFailure,
+        #: cudaError_t.cudaErrorStartupFailure, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorInvalidKernelImage,
         cudaError_t.cudaErrorAlreadyAcquired,
         cudaError_t.cudaErrorOperatingSystem,
-        cudaError_t.cudaErrorNotPermitted,
+        #: cudaError_t.cudaErrorNotPermitted, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorNotSupported,
-        cudaError_t.cudaErrorSystemNotReady,
-        cudaError_t.cudaErrorSystemDriverMismatch,
-        cudaError_t.cudaErrorCompatNotSupportedOnDevice,
+        #: cudaError_t.cudaErrorSystemNotReady, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        #: cudaError_t.cudaErrorSystemDriverMismatch, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        #: cudaError_t.cudaErrorCompatNotSupportedOnDevice, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorDeviceUninitialized,
-        cudaError_t.cudaErrorTimeout,
+        #: cudaError_t.cudaErrorTimeout, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
         cudaError_t.cudaErrorUnknown,
-        cudaError_t.cudaErrorApiFailureBase,
+        #: cudaError_t.cudaErrorApiFailureBase, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
     }
 
     try:

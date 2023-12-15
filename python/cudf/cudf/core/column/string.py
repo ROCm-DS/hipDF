@@ -20,7 +20,7 @@ import cupy
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-from numba import cuda
+from numba import roc as cuda #: HIP/AMD modification
 
 import cudf
 import cudf.api.types

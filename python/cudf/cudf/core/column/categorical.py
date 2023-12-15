@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Mapping, Optional, Sequence, Tuple, cast
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-from numba import cuda
+from numba import roc as cuda #: HIP/AMD modification
 from typing_extensions import Self
 
 import cudf

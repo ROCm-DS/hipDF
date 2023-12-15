@@ -30,7 +30,11 @@ import numba
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-from nvtx import annotate
+#: from nvtx import annotate #: TODO: HIP/AMD use roctx
+def annotate(*args,**kwargs):
+    def inner(func):
+        return func
+    return inner
 from packaging.version import Version
 from pandas._config import get_option
 from pandas.core.dtypes.common import is_float, is_integer
@@ -84,7 +88,7 @@ from cudf.core.missing import NA
 from cudf.core.multiindex import MultiIndex
 from cudf.core.resample import DataFrameResampler
 from cudf.core.series import Series
-from cudf.core.udf.row_function import _get_row_kernel
+#from cudf.core.udf.row_function import _get_row_kernel #: TODO HIP/AMD reenable, uses udfs
 from cudf.utils import applyutils, docutils, ioutils, queryutils
 from cudf.utils.docutils import copy_docstring
 from cudf.utils.dtypes import (
@@ -4543,7 +4547,7 @@ class DataFrame(IndexedFrame, Serializable, GetAttrGetItemMixin):
         ``range(cuda.threadIdx.x, in1.size, cuda.blockDim.x)``, the *kernel*
         function can be used with any *tpb* in an efficient manner.
 
-        >>> from numba import cuda
+        >>> from numba import roc as cuda #: HIP/AMD modification
         >>> @cuda.jit
         ... def kernel(in1, in2, in3, out1):
         ...      for i in range(cuda.threadIdx.x, in1.size, cuda.blockDim.x):

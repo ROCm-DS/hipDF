@@ -68,7 +68,7 @@ class TypeId(IntEnum):
     STRING = <underlying_type_t_type_id> libcudf_types.type_id.STRING
     DECIMAL32 = <underlying_type_t_type_id> libcudf_types.type_id.DECIMAL32
     DECIMAL64 = <underlying_type_t_type_id> libcudf_types.type_id.DECIMAL64
-    DECIMAL128 = <underlying_type_t_type_id> libcudf_types.type_id.DECIMAL128
+    #: DECIMAL128 = <underlying_type_t_type_id> libcudf_types.type_id.DECIMAL128 #: TODO: HIP/AMD enable this dtype
     STRUCT = <underlying_type_t_type_id> libcudf_types.type_id.STRUCT
 
 
@@ -225,11 +225,11 @@ cdef dtype_from_column_view(column_view cv):
             precision=cudf.Decimal32Dtype.MAX_PRECISION,
             scale=-cv.type().scale()
         )
-    elif tid == libcudf_types.type_id.DECIMAL128:
-        return cudf.Decimal128Dtype(
-            precision=cudf.Decimal128Dtype.MAX_PRECISION,
-            scale=-cv.type().scale()
-        )
+    # elif tid == libcudf_types.type_id.DECIMAL128: #: TODO: HIP/AMD enable this dtype
+    #     return cudf.Decimal128Dtype(
+    #         precision=cudf.Decimal128Dtype.MAX_PRECISION,
+    #         scale=-cv.type().scale()
+    #     )
     else:
         return LIBCUDF_TO_SUPPORTED_NUMPY_TYPES[
             <underlying_type_t_type_id>(tid)
@@ -241,8 +241,8 @@ cdef libcudf_types.data_type dtype_to_data_type(dtype) except *:
         tid = libcudf_types.type_id.LIST
     elif cudf.api.types.is_struct_dtype(dtype):
         tid = libcudf_types.type_id.STRUCT
-    elif cudf.api.types.is_decimal128_dtype(dtype):
-        tid = libcudf_types.type_id.DECIMAL128
+    #: elif cudf.api.types.is_decimal128_dtype(dtype): #: TODO: HIP/AMD enable this dtype
+    #:     tid = libcudf_types.type_id.DECIMAL128
     elif cudf.api.types.is_decimal64_dtype(dtype):
         tid = libcudf_types.type_id.DECIMAL64
     elif cudf.api.types.is_decimal32_dtype(dtype):
@@ -264,7 +264,8 @@ cpdef dtype_to_pylibcudf_type(dtype):
         return pylibcudf.DataType(pylibcudf.TypeId.STRUCT)
     elif cudf.api.types.is_decimal_dtype(dtype):
         if cudf.api.types.is_decimal128_dtype(dtype):
-            tid = pylibcudf.TypeId.DECIMAL128
+            #: tid = pylibcudf.TypeId.DECIMAL128  #: TODO: HIP/AMD enable this dtype
+            pass
         elif cudf.api.types.is_decimal64_dtype(dtype):
             tid = pylibcudf.TypeId.DECIMAL64
         else:
@@ -276,7 +277,7 @@ cpdef dtype_to_pylibcudf_type(dtype):
 
 cdef bool is_decimal_type_id(libcudf_types.type_id tid) except *:
     return tid in (
-        libcudf_types.type_id.DECIMAL128,
+        #: libcudf_types.type_id.DECIMAL128, #: TODO: HIP/AMD enable this dtype
         libcudf_types.type_id.DECIMAL64,
         libcudf_types.type_id.DECIMAL32,
     )
@@ -322,11 +323,11 @@ def dtype_from_pylibcudf_column(col):
             precision=cudf.Decimal32Dtype.MAX_PRECISION,
             scale=-type_.scale()
         )
-    elif tid == pylibcudf.TypeId.DECIMAL128:
-        return cudf.Decimal128Dtype(
-            precision=cudf.Decimal128Dtype.MAX_PRECISION,
-            scale=-type_.scale()
-        )
+    #: elif tid == pylibcudf.TypeId.DECIMAL128: #: TODO: HIP/AMD enable this dtype
+    #:     return cudf.Decimal128Dtype(
+    #:         precision=cudf.Decimal128Dtype.MAX_PRECISION,
+    #:         scale=-type_.scale()
+    #:     )
     else:
         return PYLIBCUDF_TO_SUPPORTED_NUMPY_TYPES[
             <underlying_type_t_type_id>(tid)

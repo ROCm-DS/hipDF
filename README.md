@@ -1,6 +1,6 @@
 # <div align="left"><img src="img/rapids_logo.png" width="90px"/>&nbsp;cuDF - GPU DataFrames</div>
 
-**NOTE:** For the latest stable [README.md](https://github.com/rapidsai/cudf/blob/main/README.md) ensure you are on the `main` branch.
+**NOTE:** This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
 
 ## Resources
 
@@ -52,6 +52,12 @@ Please see the [Demo Docker Repository](https://hub.docker.com/r/rapidsai/rapids
 
 ## Installation
 
+**NOTE(NVIDIA GPUs):** We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
+
+### ROCM/GPU requirements
+
+* ROCm HIP SDK compilers version 5.6.0+
+* Officially supported architecture.
 
 ### CUDA/GPU requirements
 
@@ -61,9 +67,12 @@ Please see the [Demo Docker Repository](https://hub.docker.com/r/rapidsai/rapids
 
 ### Conda
 
+**NOTE:** Currently, this option is not supported for AMD GPUs.
+
 cuDF can be installed with conda (via [miniconda](https://conda.io/miniconda.html) or the full [Anaconda distribution](https://www.anaconda.com/download)) from the `rapidsai` channel:
 
 ```bash
+# NOTE: Conda installation not supported for hipDF for AMD GPUs.
 conda install -c rapidsai -c conda-forge -c nvidia \
     cudf=23.10 python=3.10 cuda-version=11.8
 ```

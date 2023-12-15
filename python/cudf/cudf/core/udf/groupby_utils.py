@@ -3,7 +3,7 @@
 
 import cupy as cp
 import numpy as np
-from numba import cuda, types
+from numba import roc as cuda, types #: HIP/AMD modification
 from numba.core.errors import TypingError
 from numba.cuda.cudadrv.devices import get_context
 from numba.np import numpy_support

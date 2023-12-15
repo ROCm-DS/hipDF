@@ -17,8 +17,8 @@ function(find_and_configure_hipcomp)
 
   include(${rapids-cmake-dir}/cpm/hipcomp.cmake)
   rapids_cpm_hipcomp(
-    BUILD_EXPORT_SET cudf-exports
-    INSTALL_EXPORT_SET cudf-exports
+    BUILD_EXPORT_SET hipdf-exports
+    INSTALL_EXPORT_SET hipdf-exports
     USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_HIPCOMP}
   )
 

@@ -28,7 +28,7 @@ from cudf.core.column_accessor import ColumnAccessor
 from cudf.core.join._join_helpers import _match_join_keys
 from cudf.core.mixins import Reducible, Scannable
 from cudf.core.multiindex import MultiIndex
-from cudf.core.udf.groupby_utils import _can_be_jitted, jit_groupby_apply
+#: from cudf.core.udf.groupby_utils import _can_be_jitted, jit_groupby_apply #: TODO: HIP/AMD: reenable when udf available
 from cudf.utils.utils import GetAttrGetItemMixin, _cudf_nvtx_annotate
 
 
@@ -1476,7 +1476,7 @@ class GroupBy(Serializable, Reducible, Scannable):
         .. code-block:: python
 
             from cudf import DataFrame
-            from numba import cuda
+            from numba import roc as cuda #: HIP/AMD modification
             import numpy as np
 
             df = DataFrame()
@@ -1518,7 +1518,7 @@ class GroupBy(Serializable, Reducible, Scannable):
 
             import cudf
             import numpy as np
-            from numba import cuda
+            from numba import roc as cuda #: HIP/AMD modification
             import pandas as pd
             from random import randint
 
