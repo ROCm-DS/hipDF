@@ -85,7 +85,7 @@ struct scan_tile_state_view {
     tile_status[offset].store(scan_tile_status::inclusive);
   }
 
-  //#if 0 //: TODO: HIP/AMD: we use hipcub_extensions here to fix the hipcub error "no viable conversion from 'int' to 'cudf::io::text::detail::multistate'"
+  //: TODO: HIP/AMD: we use hipcub_extensions here to fix the hipcub error "no viable conversion from 'int' to 'cudf::io::text::detail::multistate'"
   __device__ inline T get_prefix(cudf::size_type tile_idx, scan_tile_status& status)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
@@ -93,13 +93,18 @@ struct scan_tile_state_view {
     while ((status = tile_status[offset].load(hip::memory_order_relaxed)) ==
            scan_tile_status::invalid) {}
 
+    //: TODO: HIP/AMD: This threadfence is necessary, as the subsequent ThreadLoad
+    // otherwise appears re-ordered before the loading of the atomic flag in line 68,
+    // thus resulting in the return of an invalid prefix. 
+    // See: internal issue 71
+    __threadfence();
+
     if (status == scan_tile_status::partial) {
       return hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(tile_partial + offset);
     } else {
       return hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(tile_inclusive + offset);
     }
   }
-  //#endif //: TODO: HIP/AMD: we use hipcub_extensions here to fix the hipcub error "no viable conversion from 'int' to 'cudf::io::text::detail::multistate'"
 };
 
 template <typename T>
