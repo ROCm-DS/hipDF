@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "rolling_test.hpp"
 
 #include <cudf_test/base_fixture.hpp>
@@ -1347,15 +1369,17 @@ TEST_F(RollingTestUdf, DynamicWindow)
   cudf::test::fixed_width_column_wrapper<int32_t> following(follow, follow + size);
   std::unique_ptr<cudf::column> output;
 
+   // TODO(HIP/AMD): We need __host__ here to fix a template instantiation compiler error from rocthrust.
   auto start =
-    cudf::detail::make_counting_transform_iterator(0, [size] __device__(cudf::size_type row) {
+    cudf::detail::make_counting_transform_iterator(0, [size] __host__ __device__(cudf::size_type row) {
       return std::accumulate(thrust::make_counting_iterator(std::max(0, row - (row % 2 + 2) + 1)),
                              thrust::make_counting_iterator(std::min(size, row + (row % 2) + 1)),
                              0);
     });
 
+  // TODO(HIP/AMD): We need __host__ here to fix a template instantiation compiler error from rocthrust.
   auto valid = cudf::detail::make_counting_transform_iterator(
-    0, [] __device__(cudf::size_type row) { return row != 0; });
+    0, [] __host__ __device__(cudf::size_type row) { return row != 0; });
 
   cudf::test::fixed_width_column_wrapper<int64_t> expected{start, start + size, valid};
 
