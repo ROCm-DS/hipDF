@@ -337,8 +337,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
         found_match = true;
       }
 
-      __syncwarp();
-      // __syncwarp(activemask);
+      __syncwarp(activemask);
       //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
 
       // flush output cache if next iteration does not fit
@@ -355,12 +354,12 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
                                                          join_shared_r,
                                                          join_output_l,
                                                          join_output_r);
-        __syncwarp();
-        //__syncwarp(flush_mask);    //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+        __syncwarp(flush_mask);
+        //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
-      __syncwarp();
-      //__syncwarp(activemask);  //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+      __syncwarp(activemask);
+      //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
     }
 
     // Left, left anti, and full joins all require saving left columns that
@@ -381,8 +380,8 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
                         join_shared_r[warp_id]);
     }
 
-    __syncwarp();
-    //__syncwarp(activemask);  //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+    __syncwarp(activemask);
+    //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
