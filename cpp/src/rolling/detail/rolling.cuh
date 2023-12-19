@@ -49,9 +49,7 @@
 #include <jit/parser.hpp>
 #include <jit/util.hpp>
 
-#if 0 //: TODO(HIP/AMD): 'jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp' file not found
-#include <jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp>
-#endif //: TODO(HIP/AMD): 'jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp' file not found
+#include <jit_preprocessed_files/rolling/jit/kernel.hip.jit.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_scalar.hpp>
@@ -1272,8 +1270,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
-  #if 0 //: TODO(HIP/AMD): knock-on: use of undeclared identifier 'rolling_jit_kernel_cu_jit'
-  cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+  cudf::jit::get_program_cache(*rolling_jit_kernel_hip_jit)
     .get_kernel(
       kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})  //
     ->configure_1d_max_occupancy(0, 0, 0, stream.value())                                 //
@@ -1286,8 +1283,6 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
              preceding_window,
              following_window,
              min_periods);
-  #endif //: TODO(HIP/AMD): knock-on: use of undeclared identifier 'rolling_jit_kernel_cu_jit'
-
   output->set_null_count(output->size() - device_valid_count.value(stream));
 
   // check the stream for debugging

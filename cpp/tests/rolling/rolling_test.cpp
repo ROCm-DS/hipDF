@@ -1359,15 +1359,17 @@ TEST_F(RollingTestUdf, DynamicWindow)
   cudf::test::fixed_width_column_wrapper<int32_t> following(follow, follow + size);
   std::unique_ptr<cudf::column> output;
 
+   // TODO(HIP/AMD): We need __host__ here to fix a template instantiation compiler error from rocthrust.
   auto start =
-    cudf::detail::make_counting_transform_iterator(0, [size] __device__(cudf::size_type row) {
+    cudf::detail::make_counting_transform_iterator(0, [size] __host__ __device__(cudf::size_type row) {
       return std::accumulate(thrust::make_counting_iterator(std::max(0, row - (row % 2 + 2) + 1)),
                              thrust::make_counting_iterator(std::min(size, row + (row % 2) + 1)),
                              0);
     });
 
+  // TODO(HIP/AMD): We need __host__ here to fix a template instantiation compiler error from rocthrust.
   auto valid = cudf::detail::make_counting_transform_iterator(
-    0, [] __device__(cudf::size_type row) { return row != 0; });
+    0, [] __host__ __device__(cudf::size_type row) { return row != 0; });
 
   cudf::test::fixed_width_column_wrapper<int64_t> expected{start, start + size, valid};
 
