@@ -211,8 +211,7 @@ __global__ void conditional_join(table_device_view left_table,
         found_match = true;
       }
 
-      hip_extensions::__syncwarp();
-      // __syncwarp(activemask);
+      hip_extensions::__syncwarp(activemask);
       //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
 
       // flush output cache if next iteration does not fit
@@ -229,12 +228,12 @@ __global__ void conditional_join(table_device_view left_table,
                                                          join_shared_r,
                                                          join_output_l,
                                                          join_output_r);
-        hip_extensions::__syncwarp();
-        //__syncwarp(flush_mask);    //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+        hip_extensions::__syncwarp(flush_mask);
+        //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
-      hip_extensions::__syncwarp();
-      //__syncwarp(activemask);  //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+      hip_extensions::__syncwarp(activemask);
+      //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
     }
 
     // Left, left anti, and full joins all require saving left columns that
@@ -255,8 +254,8 @@ __global__ void conditional_join(table_device_view left_table,
                         join_shared_r[warp_id]);
     }
 
-    hip_extensions::__syncwarp();
-    //__syncwarp(activemask);  //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+    hip_extensions::__syncwarp(activemask);
+    //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
