@@ -244,9 +244,8 @@ __device__ inline int __POPC<uint64_t>(uint64_t v) {
   return __popcll(v);
 }
 
-
 //With hiprtc/jitify, uint64_t == unsigned long long int, so this would give a re-definition error.
-//TODO/FIMEX(HIP): use type_traits to not provide template specialization when uint64_t == unsigned long long int 
+//TODO/FIXME(HIP): use type_traits to not provide template specialization when uint64_t == unsigned long long int 
 #ifndef __HIPCC_RTC__
  template <> //: On x86_64, uint64_t == unsigned long int != unsigned long long int, both have 64 bit
  __device__ inline int __POPC<unsigned long long int>(unsigned long long int v) {
