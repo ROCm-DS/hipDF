@@ -211,8 +211,10 @@ __global__ void conditional_join(table_device_view left_table,
         found_match = true;
       }
 
-      hip_extensions::__syncwarp(activemask);
       //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+      // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
+      // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly.
+      hip_extensions::__syncwarp(activemask);
 
       // flush output cache if next iteration does not fit
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
@@ -228,12 +230,16 @@ __global__ void conditional_join(table_device_view left_table,
                                                          join_shared_r,
                                                          join_output_l,
                                                          join_output_r);
-        hip_extensions::__syncwarp(flush_mask);
         //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+        // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
+        // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
+        hip_extensions::__syncwarp(flush_mask);
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
-      hip_extensions::__syncwarp(activemask);
       //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+      // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
+      // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
+      hip_extensions::__syncwarp(activemask);
     }
 
     // Left, left anti, and full joins all require saving left columns that
@@ -254,8 +260,10 @@ __global__ void conditional_join(table_device_view left_table,
                         join_shared_r[warp_id]);
     }
 
-    hip_extensions::__syncwarp(activemask);
     //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+    // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
+    // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
+    hip_extensions::__syncwarp(activemask);
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
