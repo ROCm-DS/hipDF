@@ -461,18 +461,18 @@ add_library(
   src/jit/cache.cpp
   src/jit/parser.cpp
   src/jit/util.cpp
-  src/join/conditional_join.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
+  src/join/conditional_join.hip 
   src/join/cross_join.hip
   src/join/hash_join.hip
   src/join/join.hip
-  src/join/join_utils.hip # Todo(HIP): Thrust issue: binding reference of type 'int' ...
+  src/join/join_utils.hip 
   src/join/mixed_join.hip
-  src/join/mixed_join_kernel.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
-  src/join/mixed_join_kernel_nulls.hip # Todo(HIP): requires extension of warp primitives: __syncwarp receives an argument
+  src/join/mixed_join_kernel.hip
+  src/join/mixed_join_kernel_nulls.hip 
   src/join/mixed_join_kernels_semi.hip
   src/join/mixed_join_semi.hip
-  src/join/mixed_join_size_kernel.hip # Todo(HIP): error: no member named 'this_thread' in namespace 'hip_extensions::hip_cooperative_groups_ext'
-  src/join/mixed_join_size_kernel_nulls.hip # Todo(HIP): error: no member named 'this_thread' in namespace 'hip_extensions::hip_cooperative_groups_ext'
+  src/join/mixed_join_size_kernel.hip 
+  src/join/mixed_join_size_kernel_nulls.hip 
   src/join/mixed_join_size_kernels_semi.hip
   src/join/semi_join.hip
   src/lists/contains.hip
@@ -676,6 +676,19 @@ add_library(
   src/utilities/type_checks.cpp
   src/utilities/type_dispatcher.cpp
 )
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  message(VERBOSE "HIPDF: Building with debugging flags")
+
+  # Todo(HIP): The following files do not complete build in acceptable time (or the build is hanging)
+  # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround.
+  set_source_files_properties(src/join/conditional_join.hip
+                              src/join/mixed_join_kernel_nulls.hip
+                              src/join/mixed_join_size_kernel_nulls.hip
+                              src/join/mixed_join_size_kernel.hip
+                              src/join/mixed_join_size_kernels_semi.hip
+                              PROPERTIES COMPILE_FLAGS "-DNDEBUG")
+endif()
 
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
 # in how conda builds glibc

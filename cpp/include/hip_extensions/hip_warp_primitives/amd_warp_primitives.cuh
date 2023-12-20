@@ -81,6 +81,19 @@ __device__ inline void __syncwarp()
   __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
 }
 
+/*
+* TODO: HIP/AMD: Due to a lack of IFP on AMD GPUs, the active mask is
+* ignored here, but it is convenient for porting to have this overload
+* available.
+*/
+__device__ inline void __syncwarp(lane_mask active_mask)
+{
+  /* sync/barrier all threads in a warp */
+  __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
+  __builtin_amdgcn_wave_barrier();
+  __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
+}
+
 __device__ inline int __all_sync(lane_mask mask, int predicate)
 {
   /* calling thread must be set in the mask */
