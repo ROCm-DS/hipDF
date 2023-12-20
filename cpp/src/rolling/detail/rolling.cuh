@@ -1057,7 +1057,7 @@ __launch_bounds__(block_size) CUDF_KERNEL
   size_type warp_valid_count{0};
 
   auto const num_rows = input.size();
-  auto active_threads = __ballot_sync(0xffff'ffffu, i < num_rows);
+  auto active_threads = __ballot_sync(cudf::LANE_MASK_ALL, i < num_rows);
   while (i < num_rows) {
     // The caller is required to provide window bounds that will
     // result in indexing that is in-bounds for the column. Therefore all
