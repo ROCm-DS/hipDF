@@ -1296,8 +1296,8 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
 
   std::string kernel_name =
     jitify2::reflection::Template("cudf::rolling::jit::gpu_rolling_new")  //
-      .instantiate(cudf::type_to_name(input.type()),  // list of template arguments
-                   cudf::type_to_name(output->type()),
+      .instantiate(cudf::type_to_jitsafe_name(input.type()),  // list of template arguments
+                   cudf::type_to_jitsafe_name(output->type()),
                    udf_agg._operator_name,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());

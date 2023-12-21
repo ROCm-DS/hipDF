@@ -654,5 +654,21 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) double_type_dispatcher
  */
 std::string type_to_name(data_type type);
 
+/**
+ * @brief Return a jitsafe name for a given type that can be used to
+ * instantiate a JIT-compiled template kernel.
+ * 
+ * @note HIPRTC/comgr internally keeps track of variables such as "int64_t"
+ * as "long long" and "int32_t" as "int". Hence, if name expressions that use
+ *  strings like "int32_t" or "int64_t" are passed to hipRTC/comgr for a template
+ * instantiation, the demangled names  (that contain e.g.,  "int" or "long long") 
+ * cannot be found, leading to errors in the JIT-compilation process. This will be resolved with
+ *  SWDEV-379212.
+ *
+ * @param type The `data_type`
+ * @return Jitsafe name of the type
+ */
+std::string type_to_jitsafe_name(data_type type);
+
 /** @} */  // end of group
 }  // namespace CUDF_EXPORT cudf
