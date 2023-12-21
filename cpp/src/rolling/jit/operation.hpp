@@ -22,7 +22,7 @@
 
 struct rolling_udf_ptx {
   template <typename OutType, typename InType>
-  static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
+  __device__ static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
   {
     OutType ret;
     rolling_udf(&ret, 0, 0, 0, 0, &in_col[start], count, sizeof(InType));
@@ -32,7 +32,7 @@ struct rolling_udf_ptx {
 
 struct rolling_udf_cuda {
   template <typename OutType, typename InType>
-  static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
+  __device__ static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
   {
     OutType ret;
     rolling_udf(&ret, in_col, start, count);
