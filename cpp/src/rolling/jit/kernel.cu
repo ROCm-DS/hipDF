@@ -47,13 +47,13 @@ namespace rolling {
 namespace jit {
 
 template <typename WindowType>
-cudf::size_type __device__ get_window(WindowType window, cudf::thread_index_type index)
+__device__  cudf::size_type get_window(WindowType window, cudf::thread_index_type index)
 {
   return window[index];
 }
 
 template <>
-cudf::size_type __device__ get_window(cudf::size_type window, cudf::thread_index_type index)
+__device__  cudf::size_type get_window(cudf::size_type window, cudf::thread_index_type index)
 {
   return window;
 }
@@ -77,6 +77,7 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
   cudf::thread_index_type const stride = blockDim.x * gridDim.x;
 
   cudf::size_type warp_valid_count{0};
+
 
   //auto active_threads = __ballot_sync(0xffff'ffffu, i < nrows);
   //TODO(HIP/AMD): is this WAR for missing __ballot_sync correct?
