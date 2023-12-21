@@ -20,4 +20,23 @@ namespace cudf {
 
 std::string type_to_name(data_type type) { return type_dispatcher(type, type_to_name_impl{}); }
 
+std::string type_to_jitsafe_name(data_type type) {
+    std::string result = type_to_name(type);
+
+#ifdef __HIP_PLATFORM_AMD__ 
+    //TODO: HIP/AMD: make substitutions here to account for the way in which hiprtc/comgr internally calls/keeps track of 
+    // the mapping between mangled/demangled names.
+    // Please see https://ontrack-internal.amd.com/browse/SWDEV-379212 and the doxygen documentation of this function
+    // for more details.
+    if(result == "int32_t") {
+      result = "int";
+    }
+    else if(result == "int64_t") {
+      result = "long long";
+    }
+    //TODO: HIP/AMD: Are there any other substitutions that need to be made?
+#endif
+    return result;
+}
+
 }  // namespace cudf
