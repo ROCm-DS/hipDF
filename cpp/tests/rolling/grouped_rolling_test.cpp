@@ -215,7 +215,7 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                    following_window,
                    min_periods,
                    *cuda_udf_agg);
-
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
       auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
         cudf::udf_type::PTX, ptx_func, cudf::data_type{cudf::type_id::INT64});
       run_test_col(keys,
@@ -225,6 +225,7 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                    following_window,
                    min_periods,
                    *ptx_udf_agg);
+#endif //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
     }
   }
 

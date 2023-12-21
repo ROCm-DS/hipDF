@@ -1193,6 +1193,7 @@ TEST_F(RollingTestStrings, StringsUnsupportedOperators)
   EXPECT_THROW(
     cudf::rolling_window(input, 2, 2, 0, *cudf::make_mean_aggregation<cudf::rolling_aggregation>()),
     cudf::logic_error);
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   EXPECT_THROW(cudf::rolling_window(input,
                                     2,
                                     2,
@@ -1200,6 +1201,7 @@ TEST_F(RollingTestStrings, StringsUnsupportedOperators)
                                     *cudf::make_udf_aggregation<cudf::rolling_aggregation>(
                                       cudf::udf_type::PTX, std::string{}, cudf::data_type{})),
                cudf::logic_error);
+#endif //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   EXPECT_THROW(cudf::rolling_window(input,
                                     2,
                                     2,
@@ -1236,6 +1238,7 @@ struct RollingTestUdf : public cudf::test::BaseFixture {
       }
     )***"};
 
+#if 0 //: TODO: HIP/AMD: Add HIP "equivalent" of PTX (LLVM IR?) here. 
   const std::string ptx_func{
     R"***(
     //
@@ -1301,6 +1304,7 @@ struct RollingTestUdf : public cudf::test::BaseFixture {
     ret;
     }
     )***"};
+#endif //: TODO: HIP/AMD: Add HIP "equivalent" of PTX (LLVM IR?) here. 
 };
 
 TEST_F(RollingTestUdf, StaticWindow)
@@ -1332,6 +1336,7 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
     cudf::udf_type::PTX, this->ptx_func, cudf::data_type{cudf::type_id::INT64});
@@ -1339,6 +1344,7 @@ TEST_F(RollingTestUdf, StaticWindow)
   output = cudf::rolling_window(input, 2, 2, 4, *ptx_udf_agg);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
+#endif //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
 }
 
 TEST_F(RollingTestUdf, DynamicWindow)
@@ -1381,6 +1387,7 @@ TEST_F(RollingTestUdf, DynamicWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   // Test PTX UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
     cudf::udf_type::PTX, this->ptx_func, cudf::data_type{cudf::type_id::INT64});
@@ -1388,6 +1395,7 @@ TEST_F(RollingTestUdf, DynamicWindow)
   output = cudf::rolling_window(input, preceding, following, 2, *ptx_udf_agg);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
+#endif //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
 }
 
 template <typename T>
