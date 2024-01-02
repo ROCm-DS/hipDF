@@ -1294,6 +1294,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   auto output_view = output->mutable_view();
   cudf::detail::device_scalar<size_type> device_valid_count{0, stream};
 
+  //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
   std::string kernel_name =
     jitify2::reflection::Template("cudf::rolling::jit::gpu_rolling_new")  //
       .instantiate(cudf::type_to_jitsafe_name(input.type()),  // list of template arguments
