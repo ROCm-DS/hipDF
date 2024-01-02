@@ -69,12 +69,16 @@ void unary_operation(mutable_column_view output,
                    cudf::type_to_jitsafe_name(input.type()));
 
   std::string cuda_source =
-    is_ptx ?  CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n")
-                                                  //: TODO(HIP/AMD): Add equivalent of PTX.
-                                                  /*cudf::jit::parse_single_function_ptx(udf,  //
-                                                  "GENERIC_UNARY_OP",
-                                                  cudf::type_to_name(output_type),
-                                                  {0})*/
+    is_ptx ? 
+#ifdef __HIP_PLATFORM_AMD__    
+     //: TODO(HIP/AMD): Add equivalent of PTX.
+     CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n")
+#else
+     cudf::jit::parse_single_function_ptx(udf,  //
+                                          "GENERIC_UNARY_OP",
+                                          cudf::type_to_name(output_type),
+                                          {0})
+#endif
            : cudf::jit::parse_single_function_cuda(udf,  //
                                                    "GENERIC_UNARY_OP");
 

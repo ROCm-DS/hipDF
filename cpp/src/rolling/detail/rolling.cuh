@@ -1277,10 +1277,15 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   std::string cuda_source;
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
+#ifdef __HIP_PLATFORM_AMD__
+      //: TODO(HIP/AMD): Add equivalent of PTX.
+      CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n");
+#else
       cuda_source += cudf::jit::parse_single_function_ptx(udf_agg._source,
                                                           udf_agg._function_name,
                                                           cudf::type_to_name(udf_agg._output_type),
                                                           {0, 5});  // args 0 and 5 are pointers.
+#endif                                                      
       break;
     case aggregation::Kind::CUDA:
       cuda_source += cudf::jit::parse_single_function_cuda(udf_agg._source, udf_agg._function_name);
