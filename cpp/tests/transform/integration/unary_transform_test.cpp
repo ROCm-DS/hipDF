@@ -101,7 +101,9 @@ __device__ inline void    fdsf   (
   auto data_init = [](cudf::size_type row) { return row % 3; };
 
   test_udf<dtype>(cuda, op, data_init, 500, false);
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   test_udf<dtype>(ptx, op, data_init, 500, true);
+#endif //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
 }
 
 TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
@@ -136,7 +138,9 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
   auto data_init = [](cudf::size_type row) { return row % 78; };
 
   test_udf<dtype>(cuda, op, data_init, 500, false);
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   test_udf<dtype>(ptx, op, data_init, 500, true);
+#endif
 }
 
 TEST_F(UnaryOperationIntegrationTest, Transform_INT8_INT8)
@@ -191,7 +195,9 @@ __device__ inline void f(
   auto data_init = [](cudf::size_type row) { return 'a' + (row % 26); };
 
   test_udf<dtype>(cuda, op, data_init, 500, false);
+#if 0 //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
   test_udf<dtype>(ptx, op, data_init, 500, true);
+#endif //: TODO: HIP/AMD: Add test for HIP "equivalent" of PTX (LLVM IR?) here. 
 }
 
 TEST_F(UnaryOperationIntegrationTest, Transform_Datetime)
