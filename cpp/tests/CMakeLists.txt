@@ -309,20 +309,20 @@ ConfigureTest(ROUND_TEST round/round_tests.cpp)
     binaryop/binop-null-test.cpp
     binaryop/binop-compiled-test.cpp
     binaryop/binop-compiled-fixed_point-test.cpp
-#   binaryop/binop-generic-ptx-test.cpp
+    #binaryop/binop-generic-ptx-test.cpp
   )
 
 # # ##################################################################################################
 # # * unary transform tests -------------------------------------------------------------------------
-#ConfigureTest(
-#   TRANSFORM_TEST
-#   transform/integration/unary_transform_test.cpp
-#   transform/nans_to_null_test.cpp
-#   transform/mask_to_bools_test.cpp
-#   transform/bools_to_mask_test.cpp
-#   transform/row_bit_count_test.hip
-#   transform/one_hot_encode_tests.cpp
-# )
+ConfigureTest(
+  TRANSFORM_TEST
+  transform/integration/unary_transform_test.cpp
+  transform/nans_to_null_test.cpp
+  transform/mask_to_bools_test.cpp
+  transform/bools_to_mask_test.cpp
+  transform/row_bit_count_test.hip
+  transform/one_hot_encode_tests.cpp
+)
 
 # # ##################################################################################################
 # # * interop tests -------------------------------------------------------------------------
