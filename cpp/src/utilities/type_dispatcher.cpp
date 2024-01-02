@@ -56,6 +56,12 @@ std::string type_to_jitsafe_name(data_type type) {
     else if(result == "int64_t") {
       result = "long long";
     }
+    else if(result == "int8_t") {
+      result = "signed char";
+    }
+    else if(result == "cudf::timestamp_us") {
+      result = "cuda::std::__4::chrono::time_point<cuda::std::__4::chrono::system_clock, cuda::std::__4::chrono::duration<long long, cuda::std::__4::ratio<1ll, 1000000ll> > >";
+    }
     //TODO: HIP/AMD: Are there any other substitutions that need to be made?
 #endif
     return result;
