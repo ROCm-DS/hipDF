@@ -65,29 +65,29 @@ void unary_operation(mutable_column_view output,
 {
   std::string const kernel_name =
     jitify2::reflection::Template("cudf::transformation::jit::kernel")  //
-      .instantiate(cudf::type_to_name(output.type()),  // list of template arguments
-                   cudf::type_to_name(input.type()));
+      .instantiate(cudf::type_to_jitsafe_name(output.type()),  // list of template arguments
+                   cudf::type_to_jitsafe_name(input.type()));
 
   std::string cuda_source =
-    is_ptx ? cudf::jit::parse_single_function_ptx(udf,  //
+    is_ptx ?  CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n")
+                                                  //: TODO(HIP/AMD): Add equivalent of PTX.
+                                                  /*cudf::jit::parse_single_function_ptx(udf,  //
                                                   "GENERIC_UNARY_OP",
                                                   cudf::type_to_name(output_type),
-                                                  {0})
+                                                  {0})*/
            : cudf::jit::parse_single_function_cuda(udf,  //
                                                    "GENERIC_UNARY_OP");
 
-  #if 0 //: TODO(HIP/AMD): knock-on: use of undeclared identifier 'transform_jit_kernel_cu_jit'
   cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
     .get_kernel(
-      kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})  //
-    ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                             //
+      kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {"--offload-arch=gfx."})  //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.
+    ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                                   //
     ->launch(output.size(),                                                                 //
              cudf::jit::get_data_ptr(output),
              cudf::jit::get_data_ptr(input));
-  #endif //: TODO(HIP/AMD): knock-on: use of undeclared identifier 'transform_jit_kernel_cu_jit'
 }
-}  // namespace
 
+}  // namespace
 }  // namespace jit
 }  // namespace transformation
 
