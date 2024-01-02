@@ -57,9 +57,7 @@ struct dispatch_nan_to_null {
       return std::pair(std::make_unique<rmm::device_buffer>(std::move(mask.first)), mask.second);
     } else {
       auto pred = [input_device_view] __device__(cudf::size_type idx) {
-        printf("nans_to_nulls.hip: Calling unsupported device lambda. See issue https://github.com/AMD-AI/hipdf/issues/1 and https://ontrack-internal.amd.com/browse/SWDEV-427162. The result will be incorrect.\n");
-        return false; //not(std::isnan(input_device_view.element<T>(idx)));
-                      //FIXME(HIP): original code doesn't compile, see https://github.com/AMD-AI/hipdf/issues/1
+      return not(std::isnan(input_device_view.element<T>(idx)));
       };
 
       auto mask = detail::valid_if(thrust::make_counting_iterator<cudf::size_type>(0),
