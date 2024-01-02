@@ -591,7 +591,7 @@ struct sum_functor {
   cudf::size_type const* s1;
   cudf::size_type const* s2;
 
-  cudf::size_type operator() __device__(int i) { return s0[i] + s1[i] + s2[i]; }
+  __device__ cudf::size_type operator() (int i) { return s0[i] + s1[i] + s2[i]; }
 };
 
 TEST_F(RowBitCount, Table)
