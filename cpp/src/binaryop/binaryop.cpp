@@ -18,7 +18,7 @@
  */
 
 #include "compiled/binary_ops.hpp"
-//#include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
+#include <jit_preprocessed_files/binaryop/jit/kernel.hip.jit.hpp>
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
@@ -138,30 +138,32 @@ void binary_operation(mutable_column_view& out,
                       std::string const& ptx,
                       rmm::cuda_stream_view stream)
 {
-#if 0 //: TODO(HIP/AMD): add together with jitify support (udf)
+
+#ifdef __HIP_PLATFORM_AMD__
+  //: TODO(HIP/AMD): Add equivalent of PTX. Fail immediately here.
+  CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n");
+#endif
+
   std::string const output_type_name = cudf::type_to_name(out.type());
 
+  //: TODO(HIP/AMD): PTX is not supported on AMD GPUs, we need another representation
   std::string cuda_source =
     cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
 
+  //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
                               .instantiate(output_type_name,  // list of template arguments
-                                           cudf::type_to_name(lhs.type()),
-                                           cudf::type_to_name(rhs.type()),
+                                           cudf::type_to_jitsafe_name(lhs.type()),
+                                           cudf::type_to_jitsafe_name(rhs.type()),
                                            std::string("cudf::binops::jit::UserDefinedOp"));
 
-  cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-    .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})
+  cudf::jit::get_program_cache(*binaryop_jit_kernel_hip_jit)
+    .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {"--offload-arch=gfx."}) //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.
     ->configure_1d_max_occupancy(0, 0, 0, stream.value())
     ->launch(out.size(),
              cudf::jit::get_data_ptr(out),
              cudf::jit::get_data_ptr(lhs),
              cudf::jit::get_data_ptr(rhs));
-#endif //: TODO(HIP/AMD): add together with jitify support (udf)
-}
-}  // namespace jit
-
-// Compiled Binary operation
 namespace compiled {
 
 template <typename Lhs, typename Rhs>
@@ -355,7 +357,12 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
                                          rmm::cuda_stream_view stream,
                                          rmm::mr::device_memory_resource* mr)
 {
-#if 0 //: TODO(HIP/AMD): add together with jitify support (udf)
+
+#ifdef __HIP_PLATFORM_AMD__
+      //: TODO(HIP/AMD): Add equivalent of PTX.
+      CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n");
+#endif
+
   // Check for datatype
   auto is_type_supported_ptx = [](data_type type) -> bool {
     return is_fixed_width(type) and not is_fixed_point(type) and
@@ -379,8 +386,6 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
   binops::jit::binary_operation(out_view, lhs, rhs, ptx, stream);
   out->set_null_count(cudf::detail::null_count(out_view.null_mask(), 0, out->size(), stream));
   return out;
-#endif //: TODO(HIP/AMD): add together with jitify support (udf)
-  return nullptr;
 }
 }  // namespace detail
 
@@ -439,11 +444,8 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
                                          data_type output_type,
                                          rmm::mr::device_memory_resource* mr)
 {
-#if 0 //: TODO(HIP/AMD): add together with jitify support (udf)
   CUDF_FUNC_RANGE();
   return detail::binary_operation(lhs, rhs, ptx, output_type, cudf::get_default_stream(), mr);
-#endif //: TODO(HIP/AMD): add together with jitify support (udf)
-  return nullptr;
 }
 
 }  // namespace cudf
