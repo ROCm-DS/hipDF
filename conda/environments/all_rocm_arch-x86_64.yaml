@@ -78,7 +78,7 @@ dependencies:
 - ninja
 - notebook
 - numba>=0.57 #: TODO ROCm version of Numba as its own conda package?
-- numpy>=1.21
+- numpy>=1.21,<=1.25
 - numpydoc
 #: - nvcc_linux-64=11.8 #: TODO: ROCm HIP SDK as its own conda package?
 #: - nvcomp==2.6.1 #: provide as local package
