@@ -33,11 +33,8 @@ RUN . /opt/conda/etc/profile.d/conda.sh &&  conda activate rmm_dev \
    && ./build.sh rmm  
 
 #build cupy from source
-ADD ./cupy /build/cupy
-#RUN git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/AMD-AI/cupy.git && cd cupy \
-#   && git checkout cuda_array_interface_dev \
-#RUN git clone https://github.com/ROCmSoftwarePlatform/cupy.git && i
-RUN cd cupy \
+RUN git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/AMD-AI/cupy.git && cd cupy \
+   && git checkout cuda_array_interface_dev_rocm_6.0 \
    && git submodule update --init
 COPY cupy_dev.yaml /build/
 RUN conda env create -n cupy_dev -f cupy_dev.yaml
