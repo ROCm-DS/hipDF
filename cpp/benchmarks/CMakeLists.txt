@@ -15,15 +15,24 @@
 find_package(Threads REQUIRED)
 
 add_library(hipdf_datagen STATIC common/generate_input.hip)
-#TODO(HIP): add support for CUDA backend
+
+if(CUDA_BACKEND)
+target_compile_features(hipdf_datagen PUBLIC cxx_std_17 cuda_std_17)
+else()
 target_compile_features(hipdf_datagen PUBLIC cxx_std_17 hip_std_17)
+endif()
 
 target_compile_options(
   hipdf_datagen PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>"
                       "$<$<COMPILE_LANGUAGE:HIP>:${HIPDF_GPU_FLAGS}>"
-		                  -Wno-injected-class-name #Todo(HIP): clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
-		                  -Wno-absolute-value  #Todo(HIP): clang compiler will emit an error when std::abs is called on unsigned ints
 )
+
+if(NOT CUDA_BACKEND)
+target_compile_options(
+  hipdf_datagen PUBLIC -Wno-injected-class-name #TODO: HIP/AMD: clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
+		      -Wno-absolute-value  #TODO: HIP/AMD: clang compiler will emit an error when std::abs is called on unsigned ints
+)
+endif()
 
 target_link_libraries(
   hipdf_datagen
