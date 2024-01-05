@@ -22,6 +22,7 @@ VALIDARGS="clean libhipdf hipdf benchmarks -v -g -n -h"
 HELP="$0 [clean] [libhipdf] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
+   hipdf                         - build the hipdf Python package			   
    libhipdf                      - build the hipdf C++ code only
    benchmarks                    - build benchmarks
    -v                            - verbose build mode
