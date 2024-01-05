@@ -403,7 +403,7 @@ add_library(
   src/io/comp/snap.hip
   src/io/comp/statistics.hip
   src/io/comp/uncomp.cpp
-  src/io/comp/unsnap.hip 
+  src/io/comp/unsnap.hip
   src/io/csv/csv_gpu.hip
   src/io/csv/durations.hip
   src/io/csv/reader_impl.hip
@@ -424,7 +424,7 @@ add_library(
   src/io/orc/stats_enc.hip
   src/io/orc/stripe_data.hip # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
   src/io/orc/stripe_enc.hip
-  src/io/orc/stripe_init.hip 
+  src/io/orc/stripe_init.hip
   src/datetime/timezone.cpp
   src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
   src/io/parquet/compact_protocol_reader.cpp

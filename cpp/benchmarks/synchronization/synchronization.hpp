@@ -68,7 +68,11 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-//#include <driver_types.h>
+//: TODO(HIP/AMD): This header is not available with HIP AMD backend
+//: but it is also not used in that case.
+#ifdef __HIP_PLATFORM_NVIDIA__
+#include <driver_types.h>
+#endif
 
 class cuda_event_timer {
  public:
