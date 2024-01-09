@@ -36,7 +36,7 @@ inline __device__ T shuffle_xor(T var, uint32_t delta)
 
 inline __device__ void syncwarp() { hip_extensions::__syncwarp(); }
 
-inline __device__ uint32_t ballot(int pred) { return hip_extensions::__ballot_sync(LANE_MASK_ALL, pred); }
+inline __device__ lane_mask ballot(int pred) { return hip_extensions::__ballot_sync(LANE_MASK_ALL, pred); }
 
 // Warp reduction helpers
 template <typename T>
