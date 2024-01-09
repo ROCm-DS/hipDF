@@ -205,6 +205,11 @@ __device__ inline int __FFS<uint64_t>(uint64_t v) {
   return __ffsll(static_cast<unsigned long long int>(v));
 }
 
+template <>
+__device__ inline int __FFS<unsigned long long int>(unsigned long long int v) {
+  return __ffsll(v);
+}
+
 /**
  * \return Number of bits set to 1.
  * \note Return value type matches that of the underlying device builtin.

@@ -345,7 +345,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
       batch_len      = 0;
       b = reinterpret_cast<volatile unsnap_batch_s*>(shuffle(reinterpret_cast<uintptr_t>(b)));
       if (!(short_sym_mask & 1)) {
-        batch_len = shuffle((t == 0) ? (short_sym_mask) ? __ffs(short_sym_mask) - 1 : 32 : 0);
+        batch_len = shuffle((t == 0) ? (short_sym_mask) ? __FFS(short_sym_mask) - 1 : 32 : 0);
         if (batch_len != 0) {
           uint32_t blen = 0;
           int32_t ofs   = 0;
@@ -361,7 +361,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
           blen           = WarpReducePos32(blen, t);
           bytes_left     = shuffle(bytes_left);
           dst_pos        = shuffle(dst_pos);
-          short_sym_mask = __ffs(ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen)));
+          short_sym_mask = __FFS(ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen)));
           if (short_sym_mask != 0) { batch_len = min(batch_len, short_sym_mask - 1); }
           if (batch_len != 0) {
             blen = shuffle(blen, batch_len - 1);
@@ -391,7 +391,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
           b0          = byte_access(s, cur_t);
           is_long_sym = ((b0 & 3) ? ((b0 & 3) == 3) : (b0 > 3 * 4)) || (cur_t >= cur + 32) ||
                         (batch_len + t >= batch_size);
-          batch_add = __ffs(ballot(is_long_sym)) - 1;
+          batch_add = __FFS(ballot(is_long_sym)) - 1;
           if (batch_add != 0) {
             uint32_t blen = 0;
             int32_t ofs   = 0;
@@ -407,7 +407,7 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
             blen           = WarpReducePos32(blen, t);
             bytes_left     = shuffle(bytes_left);
             dst_pos        = shuffle(dst_pos);
-            short_sym_mask = __ffs(ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen)));
+            short_sym_mask = __FFS(ballot(blen > bytes_left || ofs > (int32_t)(dst_pos + blen)));
             if (short_sym_mask != 0) { batch_add = min(batch_add, short_sym_mask - 1); }
             if (batch_add != 0) {
               blen = shuffle(blen, batch_add - 1);
