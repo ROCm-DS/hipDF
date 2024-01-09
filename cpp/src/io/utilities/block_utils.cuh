@@ -25,18 +25,18 @@ namespace io {
 template <typename T>
 inline __device__ T shuffle(T var, int lane = 0)
 {
-  return hip_extensions::__shfl_sync(~0, var, lane);
+  return hip_extensions::__shfl_sync(LANE_MASK_ALL, var, lane);
 }
 
 template <typename T>
 inline __device__ T shuffle_xor(T var, uint32_t delta)
 {
-  return hip_extensions::__shfl_xor_sync(~0, var, delta);
+  return hip_extensions::__shfl_xor_sync(LANE_MASK_ALL, var, delta);
 }
 
 inline __device__ void syncwarp() { hip_extensions::__syncwarp(); }
 
-inline __device__ uint32_t ballot(int pred) { return hip_extensions::__ballot_sync(~0, pred); }
+inline __device__ uint32_t ballot(int pred) { return hip_extensions::__ballot_sync(LANE_MASK_ALL, pred); }
 
 // Warp reduction helpers
 template <typename T>
