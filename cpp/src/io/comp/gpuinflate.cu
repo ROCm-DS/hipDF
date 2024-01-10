@@ -1117,7 +1117,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
       if (t < batch_count) { state->x.batch_len[t] = 0; }
       __syncthreads();
       // decode data until end-of-block code
-      if (t < 1 * 32) {
+      if (t < 1 * WAVEFRONT_SIZE) {
         // WARP0: decode variable-length symbols
         if (!t) {
           // Thread0: decode symbols (single threaded)
@@ -1126,14 +1126,14 @@ CUDF_KERNEL void __launch_bounds__(block_size)
           state->pref.run = 0;
 #endif
         }
-      } else if (t < 2 * 32) {
+      } else if (t < 2 * WAVEFRONT_SIZE) {
         // WARP1: perform LZ77 using length and distance codes from WARP0
-        process_symbols(state, t & 0x1f);
+        process_symbols(state, t & (WAVEFRONT_SIZE-1));
       }
 #if ENABLE_PREFETCH
-      else if (t < 3 * 32) {
+      else if (t < 3 * WAVEFRONT_SIZE) {
         // WARP2: Prefetcher: prefetch data for WARP0
-        prefetch_warp(state, t & 0x1f);
+        prefetch_warp(state, t & (WAVEFRONT_SIZE-1));
       }
 #endif
       // else WARP3: idle
