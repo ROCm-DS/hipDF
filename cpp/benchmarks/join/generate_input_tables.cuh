@@ -1,3 +1,4 @@
+#include "hip/hip_runtime.h"
 /*
  * Copyright (c) 2019-2023, NVIDIA CORPORATION.
  *
@@ -26,33 +27,33 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/sequence.h>
 
-#include <curand.h>
-#include <curand_kernel.h>
+#include <hiprand/hiprand.h>
+#include <hiprand/hiprand_kernel.h>
 
 #include <cassert>
 
-__global__ static void init_curand(curandState* state, int const nstates)
+__global__ static void init_curand(hiprandState* state, int const nstates)
 {
   int ithread = threadIdx.x + blockIdx.x * blockDim.x;
 
-  if (ithread < nstates) { curand_init(1234ULL, ithread, 0, state + ithread); }
+  if (ithread < nstates) { hiprand_init(1234ULL, ithread, 0, state + ithread); }
 }
 
 template <typename key_type, typename size_type>
 __global__ static void init_build_tbl(key_type* const build_tbl,
                                       size_type const build_tbl_size,
                                       int const multiplicity,
-                                      curandState* state,
+                                      hiprandState* state,
                                       int const num_states)
 {
   auto const start_idx = blockIdx.x * blockDim.x + threadIdx.x;
   auto const stride    = blockDim.x * gridDim.x;
   assert(start_idx < num_states);
 
-  curandState localState = state[start_idx];
+  hiprandState localState = state[start_idx];
 
   for (size_type idx = start_idx; idx < build_tbl_size; idx += stride) {
-    double const x = curand_uniform_double(&localState);
+    double const x = hiprand_uniform_double(&localState);
 
     build_tbl[idx] = static_cast<key_type>(x * (build_tbl_size / multiplicity));
   }
@@ -67,28 +68,28 @@ __global__ void init_probe_tbl(key_type* const probe_tbl,
                                key_type const rand_max,
                                double const selectivity,
                                int const multiplicity,
-                               curandState* state,
+                               hiprandState* state,
                                int const num_states)
 {
   auto const start_idx = blockIdx.x * blockDim.x + threadIdx.x;
   auto const stride    = blockDim.x * gridDim.x;
   assert(start_idx < num_states);
 
-  curandState localState = state[start_idx];
+  hiprandState localState = state[start_idx];
 
   for (size_type idx = start_idx; idx < probe_tbl_size; idx += stride) {
     key_type val;
-    double x = curand_uniform_double(&localState);
+    double x = hiprand_uniform_double(&localState);
 
     if (x <= selectivity) {
       // x <= selectivity means this key in the probe table should be present in the build table, so
       // we pick a key from [0, build_tbl_size / multiplicity]
-      x   = curand_uniform_double(&localState);
+      x   = hiprand_uniform_double(&localState);
       val = static_cast<key_type>(x * (build_tbl_size / multiplicity));
     } else {
       // This key in the probe table should not be present in the build table, so we pick a key from
       // [build_tbl_size, rand_max].
-      x   = curand_uniform_double(&localState);
+      x   = hiprand_uniform_double(&localState);
       val = static_cast<key_type>(x * (rand_max - build_tbl_size) + build_tbl_size);
     }
     probe_tbl[idx] = val;
@@ -137,24 +138,24 @@ void generate_input_tables(key_type* const build_tbl,
 
   constexpr int block_size = 128;
 
-  // Maximize exposed parallelism while minimizing storage for curand state
+  // Maximize exposed parallelism while minimizing storage for hiprand state
   int num_blocks_init_build_tbl{-1};
-  CUDF_CUDA_TRY(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+  CUDF_CUDA_TRY(hipOccupancyMaxActiveBlocksPerMultiprocessor(
     &num_blocks_init_build_tbl, init_build_tbl<key_type, size_type>, block_size, 0));
 
   int num_blocks_init_probe_tbl{-1};
-  CUDF_CUDA_TRY(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
+  CUDF_CUDA_TRY(hipOccupancyMaxActiveBlocksPerMultiprocessor(
     &num_blocks_init_probe_tbl, init_probe_tbl<key_type, size_type>, block_size, 0));
 
   int dev_id{-1};
-  CUDF_CUDA_TRY(cudaGetDevice(&dev_id));
+  CUDF_CUDA_TRY(hipGetDevice(&dev_id));
 
   int num_sms{-1};
-  CUDF_CUDA_TRY(cudaDeviceGetAttribute(&num_sms, cudaDevAttrMultiProcessorCount, dev_id));
+  CUDF_CUDA_TRY(hipDeviceGetAttribute(&num_sms, hipDeviceAttributeMultiprocessorCount, dev_id));
 
   int const num_states =
     num_sms * std::max(num_blocks_init_build_tbl, num_blocks_init_probe_tbl) * block_size;
-  rmm::device_uvector<curandState> devStates(num_states, cudf::get_default_stream());
+  rmm::device_uvector<hiprandState> devStates(num_states, cudf::get_default_stream());
 
   init_curand<<<(num_states - 1) / block_size + 1, block_size>>>(devStates.data(), num_states);
 

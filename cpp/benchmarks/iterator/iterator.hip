@@ -26,7 +26,7 @@
 
 #include <rmm/device_uvector.hpp>
 
-#include <cub/device/device_reduce.cuh>
+#include <hipcub/hipcub.hpp>
 
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -52,14 +52,14 @@ inline auto reduce_by_cub(OutputIterator result, InputIterator d_in, int num_ite
 {
   size_t temp_storage_bytes = 0;
 
-  hipcub::DeviceReduce::Reduce(
+  (void) hipcub::DeviceReduce::Reduce(
     nullptr, temp_storage_bytes, d_in, result, num_items, cudf::DeviceSum{}, init);
 
   // Allocate temporary storage
   rmm::device_buffer d_temp_storage(temp_storage_bytes, cudf::get_default_stream());
 
   // Run reduction
-  hipcub::DeviceReduce::Reduce(
+  (void) hipcub::DeviceReduce::Reduce(
     d_temp_storage.data(), temp_storage_bytes, d_in, result, num_items, cudf::DeviceSum{}, init);
 
   return temp_storage_bytes;
@@ -162,13 +162,6 @@ void BM_iterator(benchmark::State& state)
                           sizeof(TypeParam));
 }
 
-// operator+ defined for pair iterator reduction
-template <typename T>
-__device__ thrust::pair<T, bool> operator+(thrust::pair<T, bool> lhs, thrust::pair<T, bool> rhs)
-{
-  return thrust::pair<T, bool>{lhs.first * lhs.second + rhs.first * rhs.second,
-                               lhs.second + rhs.second};
-}
 // -----------------------------------------------------------------------------
 template <typename T, bool has_null>
 void pair_iterator_bench_cub(cudf::column_view& col,
