@@ -1230,7 +1230,12 @@ void gpuinflate(device_span<device_span<uint8_t const> const> inputs,
                 gzip_header_included parse_hdr,
                 rmm::cuda_stream_view stream)
 {
-  constexpr int block_size = 128;  // Threads per block
+  // AMD/HIP: The algorithm needs four warps/wavefronts to decompress the data in a pipeline-like style:
+  // Wavefront0/warp0: decodes symbols
+  // Wavefront1/warp1: processes the decoded symbols and write them into the output stream
+  // Wavefront2/warp2: prefetch data for warp0
+  // Wavefront3/warp3: copy uncompressed data
+  constexpr int block_size = WAVEFRONT_SIZE * 4;  // Threads per block
   if (inputs.size() > 0) {
     inflate_kernel<block_size>
       <<<inputs.size(), block_size, 0, stream.value()>>>(inputs, outputs, results, parse_hdr);
