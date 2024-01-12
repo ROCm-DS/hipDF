@@ -552,7 +552,10 @@ class concurrent_unordered_map {
       init_hashtbl<<<((m_capacity - 1) / block_size) + 1, block_size, 0, stream.value()>>>(
         m_hashtbl_values, m_capacity, m_unused_key, m_unused_element);
     }
-
+    // https://github.com/AMD-AI/hipdf/issues/76
+    // Todo(HIP): Adding following line fixes the error in release mode: CUDA error encountered at: 
+    // hipdf/cpp/src/hash/concurrent_unordered_map.cuh:562: 1 hipErrorInvalidValue invalid argument
+    CUDF_CUDA_TRY(hipStreamSynchronize(stream)); 
     CUDF_CHECK_CUDA(stream.value());
   }
 };
