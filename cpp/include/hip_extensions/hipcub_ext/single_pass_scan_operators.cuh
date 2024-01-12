@@ -277,7 +277,10 @@ struct ScanTileState<T, true>
         TileDescriptor tile_descriptor;
         do
         {
-            __threadfence_block(); // prevent hoisting loads from loop
+            // Todo(HIP): We changed it from threadfence_block to threadfence 
+            // because it created a runtime issue
+            // Might be related to internal issue 71
+            __threadfence(); // prevent hoisting loads from loop
             TxnWord alias = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
             tile_descriptor = reinterpret_cast<TileDescriptor&>(alias);
 

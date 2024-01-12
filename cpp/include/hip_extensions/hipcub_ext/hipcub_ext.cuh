@@ -30,24 +30,11 @@
     #define HIPCUB_QUOTIENT_CEILING(x, y) (((x) + (y) - 1) / (y))
 #endif
 
-#ifndef HIPCUB_IS_DEVICE_CODE
-    #if defined(_NVHPC_CUDA)
-        #define HIPCUB_IS_DEVICE_CODE __builtin_is_device_code()
-        #define HIPCUB_IS_HOST_CODE (!__builtin_is_device_code())
-        #define HIPCUB_INCLUDE_DEVICE_CODE 1
-        #define HIPCUB_INCLUDE_HOST_CODE 1
-    #elif HIPCUB_ARCH > 0
-        #define HIPCUB_IS_DEVICE_CODE 1
-        #define HIPCUB_IS_HOST_CODE 0
-        #define HIPCUB_INCLUDE_DEVICE_CODE 1
-        #define HIPCUB_INCLUDE_HOST_CODE 0
-    #else
-        #define HIPCUB_IS_DEVICE_CODE 0
-        #define HIPCUB_IS_HOST_CODE 1
-        #define HIPCUB_INCLUDE_DEVICE_CODE 0
-        #define HIPCUB_INCLUDE_HOST_CODE 1
-    #endif
-#endif
+
+#define HIPCUB_IS_DEVICE_CODE 0
+#define HIPCUB_IS_HOST_CODE 1
+#define HIPCUB_INCLUDE_DEVICE_CODE 0
+#define HIPCUB_INCLUDE_HOST_CODE 1
 
 /// Maximum number of devices supported.
 #ifndef HIPCUB_MAX_DEVICES
@@ -59,13 +46,8 @@
 #endif
 
 /// Whether or not the source targeted by the active compiler pass is allowed to  invoke device kernels or methods from the CUDA runtime API.
-#ifndef HIPCUB_RUNTIME_FUNCTION
-    #if !defined(__HIP_DEVICE_COMPILE__)
-        #define HIPCUB_RUNTIME_ENABLED
-        #define HIPCUB_RUNTIME_FUNCTION __host__ __device__
-    #else
-        #define HIPCUB_RUNTIME_FUNCTION __host__
-    #endif
+#if !defined(__HIP_DEVICE_COMPILE__)
+    #define HIPCUB_RUNTIME_ENABLED
 #endif
 
 namespace hipcub_extensions {

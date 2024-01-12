@@ -386,7 +386,7 @@ HIPCUB_RUNTIME_FUNCTION inline hipError_t PtxVersionUncached(int& ptx_version)
 
             result = hipFuncGetAttributes(&empty_kernel_attrs,
                                            reinterpret_cast<void*>(empty_kernel));
-            HipcubDebug(result);
+            (void)HipcubDebug(result);
 
             ptx_version = empty_kernel_attrs.ptxVersion * 10;
         #endif
@@ -577,7 +577,7 @@ HIPCUB_RUNTIME_FUNCTION inline hipError_t SyncStream(hipStream_t stream)
             #if defined(HIPCUB_RUNTIME_ENABLED) // Device code with the CUDA runtime.
                 (void)stream;
                 // Device can't yet sync on a specific stream
-                result = HipcubDebug(hipcub::detail::device_synchronize());
+                result = HipcubDebug(hipcub_extensions::detail::device_synchronize());
             #else // Device code without the CUDA runtime.
                 (void)stream;
                 // CUDA API calls are not supported from this device.
