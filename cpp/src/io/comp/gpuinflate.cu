@@ -100,7 +100,12 @@ struct lut_arr {
 
 /// 4 batches of 32 symbols
 constexpr int log2_batch_count = 2;  // 1..5
-constexpr int log2_batch_size  = 5;
+#ifdef __HIP_PLATFORM_AMD__
+//: results in BATCH_SIZE 64
+constexpr int log2_batch_size  =  6; 
+#else
+constexpr int log2_batch_size  =  5; 
+#endif
 constexpr int batch_count      = (1 << log2_batch_count);
 constexpr int batch_size       = (1 << log2_batch_size);
 
@@ -811,7 +816,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
 
     auto const symt     = (t < batch_len) ? b[t] : 256;
     auto const lit_mask = ballot(symt >= 256);
-    auto pos            = static_cast<uint8_t>(min((__ffs(lit_mask) - 1) & 0xff, 32)); //TODO(HIP): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
+    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, WARP_SIZE)); //TODO(HIP): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
 
     if (t == 0) { s->x.batch_len[batch] = 0; }
 
@@ -834,8 +839,8 @@ __device__ void process_symbols(inflate_state_s* s, int t)
       batch_len--;
       // Process subsequent literals, if any
       if (!((lit_mask >> pos) & 1)) {
-        len    = min((__ffs(lit_mask >> pos) - 1) & 0xff, batch_len);
-        symbol = shuffle(symt, (pos + t) & 0x1f);
+        len    = min((__FFS(lit_mask >> pos) - 1) & 0xff, batch_len);
+        symbol = shuffle(symt, (pos + t) & (WARP_SIZE-1));
         if (t < len && out + t < outend) { out[t] = symbol; }
         out += len;
         pos += len;
