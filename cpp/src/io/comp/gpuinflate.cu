@@ -123,7 +123,13 @@ struct xwarp_s {
 #define ENABLE_PREFETCH 1
 
 #if ENABLE_PREFETCH
+#ifdef __HIP_PLATFORM_AMD__
+// TODO(HIP/AMD): fine-tune these parameters, need a size of 10 here so that 
+// with WARP_SIZE=64, enough bytes are getting prefetched for WARP0 (decode_symbols)
+constexpr int log2_prefetch_size = 10;  // Must be at least LOG2_BATCH_SIZE+3
+#else
 constexpr int log2_prefetch_size = 9;  // Must be at least LOG2_BATCH_SIZE+3
+#endif
 constexpr int prefetch_size      = (1 << log2_prefetch_size);
 
 /// @brief Prefetcher state
@@ -978,11 +984,11 @@ __device__ void prefetch_warp(volatile inflate_state_s* s, int t)
   while (shuffle((t == 0) ? s->pref.run : 0)) {
     auto cur_lo = (int32_t)(size_t)cur_p;
     int do_pref =
-      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - 32 * 4 - 4) : 0);
+      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - WARP_SIZE * 4 - 4) : 0);
     if (do_pref) {
       uint8_t const* p             = cur_p + 4 * t;
       *prefetch_addr32(s->pref, p) = (p < end) ? *reinterpret_cast<uint32_t const*>(p) : 0;
-      cur_p += 4 * 32;
+      cur_p += 4 * WARP_SIZE;
       __threadfence_block();
       __syncwarp();
       if (!t) {
