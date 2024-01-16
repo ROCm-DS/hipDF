@@ -54,7 +54,11 @@ namespace detail {
 /**
  * @brief Size of a warp in a HIP kernel.
  */
+#if defined(__HIP_PLATFORM_AMD__)
 static constexpr size_type warp_size{64};
+#else
+static constexpr size_type warp_size{32};
+#endif
 
 /**
  * @brief A kernel grid configuration construction gadget for simple

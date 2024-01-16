@@ -120,12 +120,6 @@ using valid_type        = uint8_t;   ///< Valid type in host memory
 using thread_index_type = int64_t;   ///< Thread index type in kernels
 using char_utf8         = uint32_t;  ///< UTF-8 characters are 1-4 bytes
 
-#if defined(__HIP_PLATFORM_AMD__)
-constexpr int32_t WARP_SIZE = 64;
-#else
-constexpr int32_t WARP_SIZE = 32;
-#endif
-
 constexpr unsigned bitmask_size_in_bits = sizeof(bitmask_type)*8;
 
 constexpr bitmask_type LANE_MASK_ONE = 0b1;
