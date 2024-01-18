@@ -23,6 +23,7 @@
 #include <cudf/utilities/error.hpp>
 #include <io/comp/io_uncomp.hpp>
 
+//: TODO(HIP/AMD): Uses custom optional header to workaround for issue https://github.com/AMD-AI/hipdf/issues/79
 #include <thrust/optional.h>
 
 #include <algorithm>
