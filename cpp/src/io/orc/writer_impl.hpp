@@ -76,7 +76,7 @@ using cudf::detail::hostdevice_2dvector;
  */
 struct orc_table_view {
   std::vector<orc_column_view> columns;
-  //: rmm::device_uvector<orc_column_device_view> d_columns; //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
+  rmm::device_uvector<orc_column_device_view> d_columns; //: TODO(HIP/AMD): Using a workaround for issue internal issue 79 here.
   std::vector<uint32_t> string_column_indices;
   rmm::device_uvector<uint32_t> d_string_column_indices;
 
