@@ -925,8 +925,7 @@ class Dfa {
   {
     std::size_t temp_storage_bytes = 0;
     rmm::device_buffer temp_storage{};
-    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-    auto dummy = DeviceTransduce(nullptr,
+    (void)DeviceTransduce(nullptr,
                     temp_storage_bytes,
                     this->get_device_view(),
                     d_chars_it,
@@ -940,8 +939,7 @@ class Dfa {
     if (temp_storage.size() < temp_storage_bytes) {
       temp_storage.resize(temp_storage_bytes, stream);
     }
-    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-    auto dummy1 = DeviceTransduce(temp_storage.data(),
+    (void)DeviceTransduce(temp_storage.data(),
                     temp_storage_bytes,
                     this->get_device_view(),
                     d_chars_it,

@@ -1,4 +1,3 @@
-#include <cudf/cuda_runtime.h>
 /*
  * Copyright (c) 2022-2024, NVIDIA CORPORATION.
  *
@@ -45,8 +44,8 @@
 #include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/utilities/error.hpp>
 
-#include <hipcub/hipcub.hpp>
-#include <hipcub/block/block_reduce.hpp>
+#include <hipcub/hipcub.hpp> //TODO(HIP/AMD): are these headers needed?
+#include <hipcub/block/block_reduce.hpp> //TODO(HIP/AMD): are these headers needed?
 
 #include <cstddef>
 

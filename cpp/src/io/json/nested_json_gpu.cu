@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/fst/logical_stack.cuh"
 #include "io/fst/lookup_tables.cuh"
 #include "io/utilities/parsing_utils.cuh"
@@ -625,8 +647,16 @@ struct PdaSymbolToSymbolGroupId {
       symbol == delimiter
         ? static_cast<int32_t>(newline)
         : (symbol == newline ? static_cast<int32_t>(whitespace) : static_cast<int32_t>(symbol));
-    PdaSymbolGroupIdT symbol_gid =
-      tos_sg_to_pda_sgid[min(symbol_position, pda_sgid_lookup_size - 1)];
+    // HIP: It is possible that for some characters (e.g., ʒ), the cast to int32_t is negative.
+    // In CUDA, For such cases, the negative index into array tos_sg_to_pda_sgid return always 0 (luck?).
+    // We need this check and set symbol_grid to 0 for such cases.
+    PdaSymbolGroupIdT symbol_gid;
+    if(min(static_cast<int32_t>(symbol_position), pda_sgid_lookup_size - 1) < 0)
+      symbol_gid = 0;
+    else{
+      symbol_gid =
+        tos_sg_to_pda_sgid[min(static_cast<int32_t>(symbol_position), pda_sgid_lookup_size - 1)];
+    }
     return stack_idx * static_cast<PdaSymbolGroupIdT>(symbol_group_id::NUM_PDA_INPUT_SGS) +
            symbol_gid;
   }

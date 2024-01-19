@@ -314,14 +314,16 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
                                  statistics_group const* groups,
                                  bool const int96_timestamps)
 {
-  __shared__ __align__(8) stats_state_s state;
+  // HIP workaround for the init of shared variables.
+  // __shared__ __align__(8) stats_state_s state;
+  extern __shared__ stats_state_s state[];
   __shared__ block_reduce_storage<block_size> storage;
 
   // Load state members
-  cooperative_load(state.group, &groups[blockIdx.x]);
-  cooperative_load(state.ck);
+  cooperative_load(state[0].group, &groups[blockIdx.x]);
+  cooperative_load(state[0].ck);
   __syncthreads();
-  cooperative_load(state.col, state.group.col);
+  cooperative_load(state[0].col, state[0].group.col);
   __syncthreads();
 
   // Calculate statistics
@@ -329,30 +331,30 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
     // Do not convert ns to us for int64 timestamps
     if (not int96_timestamps) {
       type_dispatcher(
-        state.col.leaf_column->type(),
+        state[0].col.leaf_column->type(),
         calculate_group_statistics_functor<block_size, IO, detail::is_int96_timestamp::NO>(storage),
-        state,
+        state[0],
         threadIdx.x);
     }
     // Temporarily disable stats writing for int96 timestamps
     // TODO: https://github.com/rapidsai/cudf/issues/10438
     else {
       type_dispatcher(
-        state.col.leaf_column->type(),
+        state[0].col.leaf_column->type(),
         calculate_group_statistics_functor<block_size, IO, detail::is_int96_timestamp::YES>(
           storage),
-        state,
+        state[0],
         threadIdx.x);
     }
   } else {
-    type_dispatcher(state.col.leaf_column->type(),
+    type_dispatcher(state[0].col.leaf_column->type(),
                     calculate_group_statistics_functor<block_size, IO>(storage),
-                    state,
+                    state[0],
                     threadIdx.x);
   }
   __syncthreads();
 
-  cooperative_load(chunks[blockIdx.x], &state.ck);
+  cooperative_load(chunks[blockIdx.x], &state[0].ck);
 }
 
 namespace detail {
@@ -375,7 +377,7 @@ void calculate_group_statistics(statistics_chunk* chunks,
 {
   constexpr int block_size = 256;
   gpu_calculate_group_statistics<block_size, IO>
-    <<<num_chunks, block_size, 0, stream.value()>>>(chunks, groups, int96_timestamps);
+    <<<num_chunks, block_size, sizeof(stats_state_s), stream.value()>>>(chunks, groups, int96_timestamps);
 }
 
 /**

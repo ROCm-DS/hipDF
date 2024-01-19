@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/utilities/parsing_utils.cuh"
 #include "io/utilities/string_parsing.hpp"
 
@@ -35,7 +57,7 @@
 #include <rmm/device_buffer.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
 #include <thrust/copy.h>
 #include <thrust/functional.h>
@@ -443,7 +465,7 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
     if constexpr (is_warp) {
       size_type istring;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
-      return __shfl_sync(0xffffffff, istring, 0);
+      return __shfl_sync(LANE_MASK_ALL, istring, 0);
     } else {
       // Ensure lane 0 doesn't update istring before all threads have read the previous iteration's
       // istring value
@@ -571,17 +593,17 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
       state_table scanned;
       // inclusive scan of escaping backslashes
       if constexpr (is_warp) {
-        using SlashScan = cub::WarpScan<state_table>;
+        using SlashScan = hipcub::WarpScan<state_table>;
         __shared__ typename SlashScan::TempStorage temp_slash[num_warps];
         SlashScan(temp_slash[warp_id]).InclusiveScan(curr, scanned, composite_op);
         is_escaping_backslash = scanned.get(init_state);
-        init_state            = __shfl_sync(~0u, is_escaping_backslash, BLOCK_SIZE - 1);
+        init_state            = __shfl_sync(LANE_MASK_ALL, is_escaping_backslash, BLOCK_SIZE - 1);
         __syncwarp();
         is_slash.shift(warp_id);
         is_slash.set_bits(warp_id, is_escaping_backslash);
         is_prev_escaping_backslash = is_slash.get_bit(warp_id, lane - 1);
       } else {
-        using SlashScan = cub::BlockScan<state_table, BLOCK_SIZE>;
+        using SlashScan = hipcub::BlockScan<state_table, BLOCK_SIZE>;
         __shared__ typename SlashScan::TempStorage temp_slash;
         SlashScan(temp_slash).InclusiveScan(curr, scanned, composite_op);
         is_escaping_backslash = scanned.get(init_state);
@@ -608,12 +630,12 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
       }
       // Make sure all threads have no errors before continuing
       if constexpr (is_warp) {
-        error = __any_sync(~0u, error);
+        error = __any_sync(LANE_MASK_ALL, error);
       } else {
-        using ErrorReduce = cub::BlockReduce<bool, BLOCK_SIZE>;
+        using ErrorReduce = hipcub::BlockReduce<bool, BLOCK_SIZE>;
         __shared__ typename ErrorReduce::TempStorage temp_storage_error;
         __shared__ bool error_reduced;
-        error_reduced = ErrorReduce(temp_storage_error).Sum(error);  // TODO use cub::LogicalOR.
+        error_reduced = ErrorReduce(temp_storage_error).Sum(error);  // TODO use hipcub::LogicalOR.
         // only valid in thread0, so shared memory is used for broadcast.
         __syncthreads();
         error = error_reduced;
@@ -704,11 +726,11 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
         // compute offset to write output for each thread
         size_type offset;
         if constexpr (is_warp) {
-          using OffsetScan = cub::WarpScan<size_type>;
+          using OffsetScan = hipcub::WarpScan<size_type>;
           __shared__ typename OffsetScan::TempStorage temp_storage[num_warps];
           OffsetScan(temp_storage[warp_id]).ExclusiveSum(this_num_out, offset);
         } else {
-          using OffsetScan = cub::BlockScan<size_type, BLOCK_SIZE>;
+          using OffsetScan = hipcub::BlockScan<size_type, BLOCK_SIZE>;
           __shared__ typename OffsetScan::TempStorage temp_storage;
           OffsetScan(temp_storage).ExclusiveSum(this_num_out, offset);
           __syncthreads();
@@ -725,7 +747,7 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
         }
         offset += this_num_out;
         if constexpr (is_warp) {
-          last_offset = __shfl_sync(0xffffffff, offset, BLOCK_SIZE - 1);
+          last_offset = __shfl_sync(LANE_MASK_ALL, offset, BLOCK_SIZE - 1);
         } else {
           __syncthreads();
           if (threadIdx.x == BLOCK_SIZE - 1) last_offset = offset;
