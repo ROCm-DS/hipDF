@@ -362,6 +362,7 @@ add_library(
   src/groupby/sort/group_collect.hip
   src/groupby/sort/group_correlation.hip
   src/groupby/sort/group_count.hip
+  # src/groupby/sort/group_histogram.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
   src/groupby/sort/group_m2.hip
   src/groupby/sort/group_max.hip
   src/groupby/sort/group_min.hip
@@ -452,11 +453,13 @@ add_library(
   src/io/utilities/arrow_io_source.cpp
   src/io/utilities/column_buffer.cpp
   src/io/utilities/config_utils.cpp
+  src/io/utilities/data_casting.hip
   src/io/utilities/data_sink.cpp
   src/io/utilities/datasource.cpp
   src/io/utilities/file_io_utilities.cpp
   src/io/utilities/parsing_utils.hip
   src/io/utilities/row_selection.cpp
+  src/io/utilities/type_inference.hip
   src/io/utilities/trie.hip
   src/jit/cache.cpp
   src/jit/parser.cpp
@@ -508,6 +511,7 @@ add_library(
   src/reductions/all.hip
   src/reductions/any.hip
   src/reductions/collect_ops.hip
+  # src/reductions/histogram.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
   src/reductions/max.hip
   src/reductions/mean.hip
   src/reductions/min.hip
@@ -655,6 +659,7 @@ add_library(
   src/text/subword/subword_tokenize.hip
   src/text/subword/wordpiece_tokenizer.hip
   src/text/tokenize.hip
+  # src/text/vocabulary_tokenize.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
   src/transform/bools_to_mask.hip
   src/transform/compute_column.hip
   src/transform/encode.hip
@@ -672,6 +677,7 @@ add_library(
   src/utilities/linked_column.cpp
   src/utilities/logger.cpp
   src/utilities/stacktrace.cpp
+  # src/utilities/stream_pool.cpp # Todo(HIP): Should be enabled for upgrade to branch-23.10
   src/utilities/traits.cpp
   src/utilities/type_checks.cpp
   src/utilities/type_dispatcher.cpp
