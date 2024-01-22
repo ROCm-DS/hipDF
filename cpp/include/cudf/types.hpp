@@ -114,6 +114,12 @@ class mutable_table_view;
  * @file
  */
 
+#ifdef __HIP_PLATFORM_AMD__  
+  constexpr bool HIP_PLATFORM_AMD = true;
+#else
+  constexpr bool HIP_PLATFORM_AMD = false;
+#endif
+
 using size_type         = int32_t;   ///< Row index type for columns and tables
 using bitmask_type      = uint64_t;  ///< Bitmask type stored as 64-bit unsigned integer
 using valid_type        = uint8_t;   ///< Valid type in host memory
