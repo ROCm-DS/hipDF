@@ -162,11 +162,21 @@ void binary_operation(mutable_column_view& out,
                       std::string const& ptx,
                       rmm::cuda_stream_view stream)
 {
-  std::string const output_type_name = cudf::type_to_name(out.type());
+  std::string const output_type_name = cudf::type_to_jitsafe_name(out.type());
+  std::string cuda_source;
 
-  //: TODO(HIP/AMD): PTX is not supported on AMD GPUs, we need another representation
-  std::string cuda_source =
-    cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
+  if(HIP_PLATFORM_AMD) {
+    cuda_source = "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
+                + output_type_name +"*"
+                + ","
+                + cudf::type_to_jitsafe_name(lhs.type())
+                + ","
+                + cudf::type_to_jitsafe_name(rhs.type())
+                + ");"; 
+  }
+  else {
+    cuda_source = cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
+  }
 
   //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
@@ -175,13 +185,22 @@ void binary_operation(mutable_column_view& out,
                                            cudf::type_to_jitsafe_name(rhs.type()),
                                            std::string("cudf::binops::jit::UserDefinedOp"));
 
-  cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-    .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {"--offload-arch=gfx."}) //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.
-    ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
-    ->launch(out.size(),
-             cudf::jit::get_data_ptr(out),
-             cudf::jit::get_data_ptr(lhs),
-             cudf::jit::get_data_ptr(rhs));
+  std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+  jitify2::Kernel kernel; 
+  // CAUTION: We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
+  // need to use preprocessor here, as jitify2 API extension is not available with CUDA
+#if defined(__HIP_PLATFORM_AMD__) 
+    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
+      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &ptx); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    
+#else
+    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
+      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    
+#endif
+    kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
+      ->launch(out.size(),
+              cudf::jit::get_data_ptr(out),
+              cudf::jit::get_data_ptr(lhs),
+              cudf::jit::get_data_ptr(rhs));
 }
 }  // namespace jit
 
