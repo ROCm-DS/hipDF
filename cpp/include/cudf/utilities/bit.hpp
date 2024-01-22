@@ -221,7 +221,7 @@ constexpr CUDF_HOST_DEVICE inline uint32_t set_most_significant_bits_32(size_typ
   return ~((uint32_t{1} << (word_size - n)) - 1);
 }
 
-#ifdef __HIPCC__
+#if defined(__HIPCC__) || defined(__CUDACC__) 
 
 /**
  * @brief Sets the specified bit to `1`
