@@ -309,7 +309,7 @@ ConfigureTest(ROUND_TEST round/round_tests.cpp)
     binaryop/binop-null-test.cpp
     binaryop/binop-compiled-test.cpp
     binaryop/binop-compiled-fixed_point-test.cpp
-    #binaryop/binop-generic-ptx-test.cpp
+    binaryop/binop-generic-ptx-test.cpp
   )
 
 # # ##################################################################################################
