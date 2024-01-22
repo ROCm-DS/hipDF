@@ -111,7 +111,9 @@ struct orcenc_state_s {
   encoder_chunk_streams stream;
   EncChunk chunk;
   uint32_t strm_pos[CI_NUM_STREAMS];
-  uint8_t valid_buf[512];  // valid map bits
+  //: HIP/AMD: need alignment here, as atomicAnd/atomicOr is executed on this buffer and 
+  // atomics on unaligned data cause crashes 
+  alignas(8) uint8_t valid_buf[512];  // valid map bits
   union {
     byterle_enc_state_s byterle;
     intrle_enc_state_s intrle;
