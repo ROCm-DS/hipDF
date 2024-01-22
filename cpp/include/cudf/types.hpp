@@ -122,6 +122,12 @@ using char_utf8         = uint32_t;  ///< UTF-8 characters are 1-4 bytes
 
 constexpr unsigned bitmask_size_in_bits = sizeof(bitmask_type)*8;
 
+#ifdef __HIP_PLATFORM_AMD__
+constexpr unsigned LOG2_WARPSIZE = 6;  ///< Logarithm to base 2 of wavefront size 64
+#else
+constexpr unsigned LOG2_WARPSIZE = 5;  ///< Logarithm to base 2 of warp size 32
+#endif
+
 constexpr bitmask_type LANE_MASK_ONE = 0b1;
 constexpr bitmask_type LANE_MASK_TWO = 0b10;
 /**
