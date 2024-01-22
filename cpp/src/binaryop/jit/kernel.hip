@@ -34,7 +34,7 @@ namespace jit {
 
 struct UserDefinedOp {
   template <typename TypeOut, typename TypeLhs, typename TypeRhs>
-  static TypeOut operate(TypeLhs x, TypeRhs y)
+  __device__ static TypeOut operate(TypeLhs x, TypeRhs y)
   {
     TypeOut output;
     using TypeCommon = typename hip::std::common_type<TypeOut, TypeLhs, TypeRhs>::type;
