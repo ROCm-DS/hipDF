@@ -17,10 +17,33 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <tests/binaryop/assert-binops.h>
 #include <tests/binaryop/binop-fixture.hpp>
 #include <tests/binaryop/util/runtime_support.h>
 
+#include <cudf/types.hpp>
 #include <cudf/binaryop.hpp>
 
 struct BinaryOperationGenericPTXTest : public BinaryOperationTest {
@@ -33,6 +56,71 @@ struct BinaryOperationGenericPTXTest : public BinaryOperationTest {
 
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_FP32_FP32_FP32)
 {
+  // c = a*a*a + b 
+  char const* amd_llvm_ir = 
+    R"'''(
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_pure_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: cold noreturn nounwind
+declare void @llvm.trap() #1
+
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_deleted_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: convergent mustprogress nounwind
+define hidden void @GENERIC_BINARY_OP(ptr %0, float %1, float %2) #2 {
+  %4 = alloca ptr, align 8, addrspace(5)
+  %5 = alloca float, align 4, addrspace(5)
+  %6 = alloca float, align 4, addrspace(5)
+  %7 = addrspacecast ptr addrspace(5) %4 to ptr
+  %8 = addrspacecast ptr addrspace(5) %5 to ptr
+  %9 = addrspacecast ptr addrspace(5) %6 to ptr
+  store ptr %0, ptr %7, align 8, !tbaa !7
+  store float %1, ptr %8, align 4, !tbaa !11
+  store float %2, ptr %9, align 4, !tbaa !11
+  %10 = load float, ptr %8, align 4, !tbaa !11
+  %11 = load float, ptr %8, align 4, !tbaa !11
+  %12 = fmul contract float %10, %11
+  %13 = load float, ptr %8, align 4, !tbaa !11
+  %14 = fmul contract float %12, %13
+  %15 = load float, ptr %9, align 4, !tbaa !11
+  %16 = fadd contract float %14, %15
+  %17 = load ptr, ptr %7, align 8, !tbaa !7
+  store float %16, ptr %17, align 4, !tbaa !11
+  ret void
+}
+
+attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind }
+attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+
+!llvm.module.flags = !{!0, !1, !2, !3, !4}
+!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+
+!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!3 = !{i32 1, !"wchar_size", i32 4}
+!4 = !{i32 8, !"PIC Level", i32 2}
+!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
+!6 = !{i32 2, i32 0}
+!7 = !{!8, !8, i64 0}
+!8 = !{!"any pointer", !9, i64 0}
+!9 = !{!"omnipotent char", !10, i64 0}
+!10 = !{!"Simple C++ TBAA"}
+!11 = !{!12, !12, i64 0}
+!12 = !{!"float", !9, i64 0}
+	)'''";
+
+
   // c = a*a*a + b
   char const* ptx =
     R"***(
@@ -84,7 +172,7 @@ TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_FP32_FP32_FP32)
   auto lhs = make_random_wrapped_column<TypeLhs>(500);
   auto rhs = make_random_wrapped_column<TypeRhs>(500);
 
-  auto out = cudf::binary_operation(lhs, rhs, ptx, cudf::data_type(cudf::type_to_id<TypeOut>()));
+  auto out = cudf::binary_operation(lhs, rhs, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, cudf::data_type(cudf::type_to_id<TypeOut>()));
 
   // pow has a max ULP error of 2 per CUDA programming guide
   ASSERT_BINOP<TypeOut, TypeLhs, TypeRhs>(*out, lhs, rhs, CADD, NearEqualComparator<TypeOut>{2});
@@ -92,6 +180,67 @@ TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_FP32_FP32_FP32)
 
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT32)
 {
+  // c = a*a*a + b 
+  char const* amd_llvm_ir = 
+    R"'''(
+; Function Attrs: cold noreturn nounwind
+declare void @llvm.trap() #1
+
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_deleted_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: convergent mustprogress nounwind
+define hidden void @GENERIC_BINARY_OP(ptr %0, i32 %1, i32 %2) #2 {
+  %4 = alloca ptr, align 8, addrspace(5)
+  %5 = alloca i32, align 4, addrspace(5)
+  %6 = alloca i32, align 4, addrspace(5)
+  %7 = addrspacecast ptr addrspace(5) %4 to ptr
+  %8 = addrspacecast ptr addrspace(5) %5 to ptr
+  %9 = addrspacecast ptr addrspace(5) %6 to ptr
+  store ptr %0, ptr %7, align 8, !tbaa !7
+  store i32 %1, ptr %8, align 4, !tbaa !11
+  store i32 %2, ptr %9, align 4, !tbaa !11
+  %10 = load i32, ptr %8, align 4, !tbaa !11
+  %11 = load i32, ptr %8, align 4, !tbaa !11
+  %12 = mul nsw i32 %10, %11
+  %13 = load i32, ptr %8, align 4, !tbaa !11
+  %14 = mul nsw i32 %12, %13
+  %15 = load i32, ptr %9, align 4, !tbaa !11
+  %16 = add nsw i32 %14, %15
+  %17 = sext i32 %16 to i64
+  %18 = load ptr, ptr %7, align 8, !tbaa !7
+  store i64 %17, ptr %18, align 8, !tbaa !13
+  ret void
+}
+
+attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind }
+attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+
+!llvm.module.flags = !{!0, !1, !2, !3, !4}
+!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+
+!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!3 = !{i32 1, !"wchar_size", i32 4}
+!4 = !{i32 8, !"PIC Level", i32 2}
+!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
+!6 = !{i32 2, i32 0}
+!7 = !{!8, !8, i64 0}
+!8 = !{!"any pointer", !9, i64 0}
+!9 = !{!"omnipotent char", !10, i64 0}
+!10 = !{!"Simple C++ TBAA"}
+!11 = !{!12, !12, i64 0}
+!12 = !{!"int", !9, i64 0}
+!13 = !{!14, !14, i64 0}
+!14 = !{!"long", !9, i64 0}
+    )'''";
+
   // c = a*a*a + b
   char const* ptx =
     R"***(
@@ -144,13 +293,82 @@ TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT32)
   auto lhs = make_random_wrapped_column<TypeLhs>(500);
   auto rhs = make_random_wrapped_column<TypeRhs>(500);
 
-  auto out = cudf::binary_operation(lhs, rhs, ptx, cudf::data_type(cudf::type_to_id<TypeOut>()));
+  auto out = cudf::binary_operation(lhs, rhs, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, cudf::data_type(cudf::type_to_id<TypeOut>()));
 
   ASSERT_BINOP<TypeOut, TypeLhs, TypeRhs>(*out, lhs, rhs, CADD);
 }
 
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT64)
 {
+  // c = a*a*a + b*b
+  char const* amd_llvm_ir = 
+    R"'''(
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_pure_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: cold noreturn nounwind
+declare void @llvm.trap() #1
+
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_deleted_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: convergent mustprogress nounwind
+define hidden void @GENERIC_BINARY_OP(ptr %0, i32 %1, i64 %2) #2 {
+  %4 = alloca ptr, align 8, addrspace(5)
+  %5 = alloca i32, align 4, addrspace(5)
+  %6 = alloca i64, align 8, addrspace(5)
+  %7 = addrspacecast ptr addrspace(5) %4 to ptr
+  %8 = addrspacecast ptr addrspace(5) %5 to ptr
+  %9 = addrspacecast ptr addrspace(5) %6 to ptr
+  store ptr %0, ptr %7, align 8, !tbaa !7
+  store i32 %1, ptr %8, align 4, !tbaa !11
+  store i64 %2, ptr %9, align 8, !tbaa !13
+  %10 = load i32, ptr %8, align 4, !tbaa !11
+  %11 = load i32, ptr %8, align 4, !tbaa !11
+  %12 = mul nsw i32 %10, %11
+  %13 = load i32, ptr %8, align 4, !tbaa !11
+  %14 = mul nsw i32 %12, %13
+  %15 = sext i32 %14 to i64
+  %16 = load i64, ptr %9, align 8, !tbaa !13
+  %17 = load i64, ptr %9, align 8, !tbaa !13
+  %18 = mul nsw i64 %16, %17
+  %19 = add nsw i64 %15, %18
+  %20 = load ptr, ptr %7, align 8, !tbaa !7
+  store i64 %19, ptr %20, align 8, !tbaa !13
+  ret void
+}
+
+attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind }
+attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+
+!llvm.module.flags = !{!0, !1, !2, !3, !4}
+!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+
+!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!3 = !{i32 1, !"wchar_size", i32 4}
+!4 = !{i32 8, !"PIC Level", i32 2}
+!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
+!6 = !{i32 2, i32 0}
+!7 = !{!8, !8, i64 0}
+!8 = !{!"any pointer", !9, i64 0}
+!9 = !{!"omnipotent char", !10, i64 0}
+!10 = !{!"Simple C++ TBAA"}
+!11 = !{!12, !12, i64 0}
+!12 = !{!"int", !9, i64 0}
+!13 = !{!14, !14, i64 0}
+!14 = !{!"long", !9, i64 0}
+	)'''";
+
   // c = a*a*a + b*b
   char const* ptx =
     R"***(
@@ -205,7 +423,7 @@ TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT64)
   auto lhs = make_random_wrapped_column<TypeLhs>(500);
   auto rhs = make_random_wrapped_column<TypeRhs>(500);
 
-  auto out = cudf::binary_operation(lhs, rhs, ptx, cudf::data_type(cudf::type_to_id<TypeOut>()));
+  auto out = cudf::binary_operation(lhs, rhs, cudf::HIP_PLATFORM_AMD ? amd_llvm_ir : ptx, cudf::data_type(cudf::type_to_id<TypeOut>()));
 
   ASSERT_BINOP<TypeOut, TypeLhs, TypeRhs>(*out, lhs, rhs, CADD);
 }
