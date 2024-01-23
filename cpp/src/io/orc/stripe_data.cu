@@ -39,6 +39,7 @@
 #include "io/utilities/block_utils.cuh"
 #include "orc_gpu.hpp"
 
+#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/io/orc_types.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
@@ -904,8 +905,8 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
   __syncthreads();
   // Process the runs, 1 warp per run
   auto const numruns = rle->num_runs;
-  auto const r       = t >> 5;
-  auto const tr      = t & 0x1f;
+  auto const r       = t >> LOG2_WARPSIZE;
+  auto const tr      = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
   for (uint32_t run = r; run < numruns; run += num_warps) {
     uint32_t base, pos, w, n;
     int mode;
@@ -977,7 +978,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
     n    = shuffle(n);
     w    = shuffle(w);
     __syncwarp();  // Not required, included to fix the racecheck warning
-    for (uint32_t i = tr; i < n; i += 32) {
+    for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
       if constexpr (sizeof(T) <= 4) {
         if (mode == 0) {
           vals[base + i] = rle->baseval.u32[r];
@@ -1051,7 +1052,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
       T baseval;
       for (uint32_t i = 1; i < n; i <<= 1) {
         __syncwarp();
-        for (uint32_t j = tr; j < n; j += 32) {
+        for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
           if (j & i) vals[base + j] += vals[base + ((j & ~i) | (i - 1))];
         }
       }
@@ -1059,7 +1060,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         baseval = rle->baseval.u32[r];
       else
         baseval = rle->baseval.u64[r];
-      for (uint32_t j = tr; j < n; j += 32) {
+      for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
         vals[base + j] += baseval;
       }
     }
