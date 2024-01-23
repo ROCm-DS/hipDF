@@ -57,13 +57,6 @@ namespace cudf {
 //! Utility functions
 namespace util {
 
-// HIP: Added this macro to throw exception on the device code.
-// Used in round_up_safe.
-#define CUDF_THROW_ON_DEVICE(msg)             \
-  do {                                    \
-    assert(false && "Exception: " msg); \
-  } while (0)
-
 /**
  * @brief Rounds `number_to_round` up to the next multiple of modulus
  *

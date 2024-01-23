@@ -191,21 +191,21 @@ std::pair<rmm::device_uvector<KeyType>, rmm::device_uvector<IndexType>> stable_s
   hipcub::DoubleBuffer<IndexType> order_buffer(order_buffer1.data(), order_buffer2.data());
   hipcub::DoubleBuffer<KeyType> keys_buffer(keys_buffer1.data(), keys_buffer2.data());
   size_t temp_storage_bytes = 0;
-  hipcub::DeviceRadixSort::SortPairs(
-    nullptr, temp_storage_bytes, keys_buffer, order_buffer, keys.size());
+  CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(
+    nullptr, temp_storage_bytes, keys_buffer, order_buffer, keys.size()));
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
   thrust::copy(rmm::exec_policy(stream), keys.begin(), keys.end(), keys_buffer1.begin());
   thrust::sequence(rmm::exec_policy(stream), order_buffer1.begin(), order_buffer1.end());
 
-  hipcub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceRadixSort::SortPairs(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   keys_buffer,
                                   order_buffer,
                                   keys.size(),
                                   0,
                                   sizeof(KeyType) * 8,
-                                  stream.value());
+                                  stream.value()));
 
   return std::pair{keys_buffer.Current() == keys_buffer1.data() ? std::move(keys_buffer1)
                                                                 : std::move(keys_buffer2),

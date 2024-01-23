@@ -30,12 +30,17 @@
     #define HIPCUB_QUOTIENT_CEILING(x, y) (((x) + (y) - 1) / (y))
 #endif
 
-
-#define HIPCUB_IS_DEVICE_CODE 0
-#define HIPCUB_IS_HOST_CODE 1
-#define HIPCUB_INCLUDE_DEVICE_CODE 0
-#define HIPCUB_INCLUDE_HOST_CODE 1
-
+#if defined(__HIP_DEVICE_COMPILE__)
+    #define HIPCUB_IS_DEVICE_CODE 1
+    #define HIPCUB_IS_HOST_CODE 0
+    #define HIPCUB_INCLUDE_DEVICE_CODE 1
+    #define HIPCUB_INCLUDE_HOST_CODE 0
+#else
+    #define HIPCUB_IS_DEVICE_CODE 0
+    #define HIPCUB_IS_HOST_CODE 1
+    #define HIPCUB_INCLUDE_DEVICE_CODE 0
+    #define HIPCUB_INCLUDE_HOST_CODE 1
+#endif
 /// Maximum number of devices supported.
 #ifndef HIPCUB_MAX_DEVICES
     #define HIPCUB_MAX_DEVICES 128

@@ -925,7 +925,7 @@ class Dfa {
   {
     std::size_t temp_storage_bytes = 0;
     rmm::device_buffer temp_storage{};
-    (void)DeviceTransduce(nullptr,
+    CUDF_CUDA_TRY(DeviceTransduce(nullptr,
                     temp_storage_bytes,
                     this->get_device_view(),
                     d_chars_it,
@@ -934,12 +934,12 @@ class Dfa {
                     d_out_idx_it,
                     d_num_transduced_out_it,
                     seed_state,
-                    stream);
+                    stream));
 
     if (temp_storage.size() < temp_storage_bytes) {
       temp_storage.resize(temp_storage_bytes, stream);
     }
-    (void)DeviceTransduce(temp_storage.data(),
+    CUDF_CUDA_TRY(DeviceTransduce(temp_storage.data(),
                     temp_storage_bytes,
                     this->get_device_view(),
                     d_chars_it,
@@ -948,7 +948,7 @@ class Dfa {
                     d_out_idx_it,
                     d_num_transduced_out_it,
                     seed_state,
-                    stream);
+                    stream));
   }
 
  private:

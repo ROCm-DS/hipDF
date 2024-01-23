@@ -386,7 +386,7 @@ HIPCUB_RUNTIME_FUNCTION inline hipError_t PtxVersionUncached(int& ptx_version)
 
             result = hipFuncGetAttributes(&empty_kernel_attrs,
                                            reinterpret_cast<void*>(empty_kernel));
-            (void)HipcubDebug(result);
+            CUDF_CUDA_TRY(HipcubDebug(result));
 
             ptx_version = empty_kernel_attrs.ptxVersion * 10;
         #endif
