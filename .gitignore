@@ -1,5 +1,3 @@
 cpp/build
 cpp/examples/basic/build/
-cpp/examples/hip/meteoNet_daily_percip/build/
-cpp/examples/hip/meteoNet_merged_daily_percip/build/
 python/cudf/_skbuild/
