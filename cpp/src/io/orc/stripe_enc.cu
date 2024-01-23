@@ -96,7 +96,7 @@ struct intrle_enc_state_s {
 
 struct strdata_enc_state_s {
   uint32_t char_count;
-  uint32_t lengths_red[(512 / 32)];
+  uint32_t lengths_red[(512 / cudf::detail::warp_size)];
   char const* str_data[512];
 };
 
@@ -611,30 +611,31 @@ static __device__ void StoreStringData(uint8_t* dst,
 {
   // Start with summing up all the lengths
   uint32_t pos = len;
-  uint32_t wt  = t & 0x1f;
-  for (uint32_t n = 1; n < 32; n <<= 1) {
+  uint32_t wt  = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
+  for (uint64_t n = 1; n < cudf::detail::warp_size; n <<= 1) {
     uint32_t tmp = shuffle(pos, (wt & ~n) | (n - 1));
     pos += (wt & n) ? tmp : 0;
   }
-  if (wt == 0x1f) { strenc->lengths_red[t >> 5] = pos; }
+  if (wt == LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)) { strenc->lengths_red[t >> LOG2_WARPSIZE] = pos; }
   dst += pos - len;
   __syncthreads();
-  if (t < 32) {
-    uint32_t wlen = (wt < 16) ? strenc->lengths_red[wt] : 0;
+  constexpr int nwarps = (512 / cudf::detail::warp_size);
+  if (t < 2 * nwarps) {
+    uint32_t wlen = (wt < nwarps) ? strenc->lengths_red[wt] : 0;
     uint32_t wpos = wlen;
-    for (uint32_t n = 1; n < 16; n <<= 1) {
+    for (uint32_t n = 1; n < nwarps; n <<= 1) {
       uint32_t tmp = shuffle(wpos, (wt & ~n) | (n - 1));
       wpos += (wt & n) ? tmp : 0;
     }
-    if (wt < 16) { strenc->lengths_red[wt] = wpos - wlen; }
-    if (wt == 0xf) {
+    if (wt < nwarps) { strenc->lengths_red[wt] = wpos - wlen; }
+    if (wt == nwarps-1) {
       strenc->char_count = wpos;  // Update stream position
     }
   }
   __syncthreads();
   // TBD: Might be more efficient to loop over 4 strings and copy 8 consecutive character at a time
   // rather than have each thread to a memcpy
-  if (len > 0) { memcpy(dst + strenc->lengths_red[t >> 5], strenc->str_data[t], len); }
+  if (len > 0) { memcpy(dst + strenc->lengths_red[t >> LOG2_WARPSIZE], strenc->str_data[t], len); }
 }
 
 /**
