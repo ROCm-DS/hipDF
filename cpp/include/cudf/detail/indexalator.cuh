@@ -332,7 +332,12 @@ struct output_indexalator : base_indexalator<output_indexalator> {
   friend struct indexalator_factory;
   friend struct base_indexalator<output_indexalator>;  // for CRTP
 
-  using reference = output_indexalator const&;         // required for output iterators
+  using reference = output_indexalator const;          // required for output iterators
+                                                       // HIP: we use a value type for 
+                                                       // this proxy-returning iterator
+                                                       // to fix invalid results/UB arising
+                                                       // with some implementations of thrust::scatter
+                                                       // see: https://ontrack-internal.amd.com/browse/SWDEV-433015
 
   output_indexalator()                                     = default;
   output_indexalator(output_indexalator const&)            = default;
@@ -344,8 +349,7 @@ struct output_indexalator : base_indexalator<output_indexalator> {
    * @brief Indirection operator returns this iterator instance in order
    * to capture the `operator=(size_type)` calls.
    */
-  //Todo(HIP): Some tests in dictionary fail if without __attribute__((optnone))
-  __attribute__((optnone)) __device__ inline output_indexalator const& operator*() const { return *this; }
+  __device__ inline output_indexalator const& operator*() const { return *this; }
 
   /**
    * @brief Array subscript operator returns an iterator instance at the specified `idx` position.
