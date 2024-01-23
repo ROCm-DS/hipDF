@@ -54,8 +54,6 @@ Mark Adler    madler@alumni.caltech.edu
 
 #include <rmm/cuda_stream_view.hpp>
 
-
-
 namespace cudf {
 namespace io {
 
