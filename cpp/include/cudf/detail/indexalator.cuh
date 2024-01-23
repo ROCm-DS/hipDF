@@ -165,7 +165,12 @@ struct input_indexalator : base_normalator<input_indexalator, cudf::size_type> {
 struct output_indexalator : base_normalator<output_indexalator, cudf::size_type> {
   friend struct base_normalator<output_indexalator, cudf::size_type>;  // for CRTP
 
-  using reference = output_indexalator const&;  // required for output iterators
+  using reference = output_indexalator const&;         // TODO(HIP/AMD): value type required for output iterators (?)
+                                                       // HIP: we may need to use a value type for 
+                                                       // this proxy-returning iterator
+                                                       // to fix invalid results/UB arising
+                                                       // with some implementations of thrust::scatter
+                                                       // see: SWDEV-433015
 
   output_indexalator()                                     = default;
   output_indexalator(output_indexalator const&)            = default;
@@ -177,8 +182,7 @@ struct output_indexalator : base_normalator<output_indexalator, cudf::size_type>
    * @brief Indirection operator returns this iterator instance in order
    * to capture the `operator=(Integer)` calls.
    */
-  //Todo(HIP): Some tests in dictionary fail if without __attribute__((optnone))
-  __attribute__((optnone)) __device__ inline reference operator*() const { return *this; } //TODO(HIP/AMD): is optnone needed as a workaround?
+  __device__ inline reference operator*() const { return *this; }
 
   /**
    * @brief Array subscript operator returns an iterator instance at the specified `idx` position.
