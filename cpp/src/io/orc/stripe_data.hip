@@ -943,8 +943,8 @@ static __device__ uint32_t Byte_RLE(orc_bytestream_s* bs,
   }
   __syncthreads();
   numruns = rle->num_runs;
-  r       = t >> 5;
-  tr      = t & 0x1f;
+  r       = t >> LOG2_WARPSIZE;
+  tr      = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
   for (int run = r; run < numruns; run += num_warps) {
     uint32_t pos = rle->runs_pos[run];
     uint32_t loc = rle->runs_loc[run];
@@ -957,7 +957,7 @@ static __device__ uint32_t Byte_RLE(orc_bytestream_s* bs,
       literal_mask = ~0;
       n            = 0x100 - n;
     }
-    for (uint32_t i = tr; i < n; i += 32) {
+    for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
       vals[loc + i] = bytestream_readbyte(bs, pos + (i & literal_mask));
     }
   }
