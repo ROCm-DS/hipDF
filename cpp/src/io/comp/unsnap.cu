@@ -45,9 +45,21 @@
 #include <hipcub/hipcub.hpp>
 
 namespace cudf::io::detail {
-constexpr int32_t batch_size    = (1 << 5);
-constexpr int32_t batch_count   = (1 << 2);
-constexpr int32_t prefetch_size = (1 << 9);  // 512B, in 32B chunks
+constexpr int log2_batch_count = 2;  // 1..5
+#ifdef __HIP_PLATFORM_AMD__
+// TODO(HIP/AMD): fine-tune these parameters, need a size of 10 here so that 
+// with warp_size=64, enough bytes are getting prefetched for WARP0 (decode_symbols)
+constexpr int log2_prefetch_size = 10;  // Must be at least LOG2_BATCH_SIZE+3
+/// 4 batches of 32 symbols
+constexpr int log2_batch_size  =  6; 
+#else
+constexpr int log2_prefetch_size = 9;  // Must be at least LOG2_BATCH_SIZE+3
+constexpr int log2_batch_size  =  5; 
+#endif
+
+constexpr int32_t batch_size    = (1 << log2_batch_size);
+constexpr int32_t batch_count   = (1 << log2_batch_count);
+constexpr int32_t prefetch_size = (1 << log2_prefetch_size);  // 512B, in 32B chunks
 
 void __device__ busy_wait(size_t cycles)
 {
