@@ -136,10 +136,11 @@ THRUST_NAMESPACE_END
   std::is_trivially_copy_constructible<T>::value
 #endif
 
-#if defined(__GLIBCXX__) && __has_feature(is_trivially_assignable)
-#define THRUST_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) \
-  __is_trivially_assignable(T, T const&)
-#else
+//: TODO(HIP/AMD): Workaround for issue internal issue 79
+#if defined(__GLIBCXX__) //&& __has_feature(is_trivially_assignable)
+// #define THRUST_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) \
+//   __is_trivially_assignable(T, T const&)
+// #else
 #define THRUST_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) \
   std::is_trivially_copy_assignable<T>::value
 #endif
@@ -152,10 +153,11 @@ THRUST_NAMESPACE_END
   std::is_trivially_move_constructible<T>::value
 #endif
 
-#if defined(__GLIBCXX__) && __has_feature(is_trivially_assignable)
-#define THRUST_OPTIONAL_IS_TRIVIALLY_MOVE_ASSIGNABLE(T) \
-  __is_trivially_assignable(T, T&&)
-#else
+//: TODO(HIP/AMD): Workaround for issue internal issue 79
+#if defined(__GLIBCXX__) //&& __has_feature(is_trivially_assignable)
+//#define THRUST_OPTIONAL_IS_TRIVIALLY_MOVE_ASSIGNABLE(T) \
+//  __is_trivially_assignable(T, T&&)
+//#else
 #define THRUST_OPTIONAL_IS_TRIVIALLY_MOVE_ASSIGNABLE(T) \
   std::is_trivially_move_assignable<T>::value
 #endif
