@@ -59,8 +59,8 @@ constexpr int bytestream_buffer_size = 512 * 8 * 2;
 constexpr int bytestream_buffer_mask = (bytestream_buffer_size - 1) >> 2;
 
 // TODO: Should be more efficient with 512 threads per block and circular queue for values
-constexpr int num_warps  = 32;
-constexpr int block_size = 32 * num_warps;
+constexpr int block_size = 1024; //: TODO(HIP/AMD): Here we fix the blocksize like on CUDA. Larger block sizes would consume too much LDS.
+constexpr int num_warps  = block_size / cudf::detail::warp_size; 
 // Add some margin to look ahead to future rows in case there are many zeroes
 constexpr int row_decoder_buffer_size = block_size + 128;
 inline __device__ uint8_t is_rlev1(uint8_t encoding_mode) { return encoding_mode < DIRECT_V2; }
@@ -1306,7 +1306,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   using warp_reduce  = hipcub::WarpReduce<uint32_t>;
   using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ union {
-    typename warp_reduce::TempStorage wr_storage[block_size / 32];
+    typename warp_reduce::TempStorage wr_storage[block_size / cudf::detail::warp_size];
     typename block_reduce::TempStorage bk_storage;
   } temp_storage;
 
