@@ -450,11 +450,8 @@ inline __device__ int decode_base128_varint(volatile orc_bytestream_s* bs, int p
 inline __device__ __int128_t decode_varint128(volatile orc_bytestream_s* bs, int pos)
 {
   auto byte                  = bytestream_readbyte(bs, pos++);
-  // Todo(HIP): fatal error: error in backend: unsupported libcall legalization
-  // converted type of sign_mask and value to auto (__int128_t -> auto)
-  // https://github.com/AMD-AI/hipdf/issues/3 
-  auto const sign_mask = -(int32_t)(byte & 1);
-  auto value           = (byte >> 1) & 0x3f;
+  __int128_t const sign_mask = -(int32_t)(byte & 1);
+  __int128_t value           = (byte >> 1) & 0x3f;
   uint32_t bitpos            = 6;
   while (byte & 0x80 && bitpos < 128) {
     byte = bytestream_readbyte(bs, pos++);
@@ -1038,7 +1035,7 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
     }
     __syncthreads();
     uint32_t num_vals_to_read = scratch->num_vals;
-#if 0 //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+
     if (t >= num_vals_read and t < num_vals_to_read) {
       auto const pos = static_cast<int>(vals.i64[2 * t]);
       __int128_t v   = decode_varint128(bs, pos);
@@ -1052,7 +1049,10 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
           return (v * kPow5i[abs_scale]) << abs_scale;
         } else {
           auto const abs_scale = min(-scale, 27);
+#if 0 //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
           return (v / kPow5i[abs_scale]) >> abs_scale;
+#endif //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+          printf("Error: Trying to decode a decimal using int128_t division, which is not supported with hipclang yet. See https://ontrack-internal.amd.com/browse/SWDEV-426193\n");
         }
       }();
       if (dtype_id == type_id::DECIMAL32) {
@@ -1063,7 +1063,6 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
         vals.i128[t] = scaled_value;
       }
     }
-#endif //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
     // There is nothing to read, so break
     if (num_vals_read == num_vals_to_read) break;
 
