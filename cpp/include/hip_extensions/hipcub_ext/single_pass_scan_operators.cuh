@@ -279,6 +279,12 @@ struct ScanTileState<T, true>
         {
             // Todo(HIP): We changed it from threadfence_block to threadfence 
             // because it created a runtime issue: FST_TEST hangs in TEST_F(FstTest, GroundTruth).
+            // Finite-State Transducer (FST) is a key component of nested JSON parser. 
+            // Parallel FST algorithm is described here: https://eliasstehle.com/media/parparaw_vldb_2020.pdf
+            // It looks highly that blocks of threads cooperatively work together to parse a json input.
+            // Hipcub APIs are used to collect info from all threads in all blocks.
+            // If the result produced by one thread in a block is not seen by another thread in a different block,
+            // then the computed hipcub operation is not correct and threads may result in a busy waiting state.
             // Might be related to internal issue 71
             __threadfence(); // prevent hoisting loads from loop
             TxnWord alias = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
