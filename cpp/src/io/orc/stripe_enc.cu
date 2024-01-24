@@ -91,7 +91,7 @@ struct intrle_enc_state_s {
   uint32_t literal_w;
   uint32_t hdr_bytes;
   uint32_t pl_bytes;
-  uint32_t delta_map[(512 / 32) + 1];
+  bitmask_type delta_map[(512 / cudf::detail::warp_size) + 1];
 };
 
 struct strdata_enc_state_s {
@@ -402,9 +402,10 @@ static __device__ uint32_t IntegerRLE(
     T v0               = (t < numvals) ? inbuf[(inpos + t) & inmask] : 0;
     T v1               = (t + 1 < numvals) ? inbuf[(inpos + t + 1) & inmask] : 0;
     T v2               = (t + 2 < numvals) ? inbuf[(inpos + t + 2) & inmask] : 0;
-    uint32_t delta_map = ballot(t + 2 < numvals && v1 - v0 == v2 - v1), maxvals = min(numvals, 512),
+    bitmask_type delta_map = ballot(t + 2 < numvals && v1 - v0 == v2 - v1);
+    uint32_t maxvals = min(numvals, 512),
              literal_run, delta_run;
-    if (!(t & 0x1f)) s->u.intrle.delta_map[t >> 5] = delta_map;
+    if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) s->u.intrle.delta_map[t >> LOG2_WARPSIZE] = delta_map;
     __syncthreads();
     if (!t) {
       // Find the start of the next delta run (2 consecutive values with the same delta)
@@ -414,20 +415,20 @@ static __device__ uint32_t IntegerRLE(
           uint32_t literal_run_ofs = __FFS(delta_map) - 1;
           literal_run += literal_run_ofs;
           delta_run = __FFS(~((delta_map >> literal_run_ofs) >> 1));
-          if (literal_run_ofs + delta_run == 32) {
+          if (literal_run_ofs + delta_run == cudf::detail::warp_size) {
             for (;;) {
-              uint32_t delta_idx = (literal_run + delta_run) >> 5;
-              delta_map          = (delta_idx < 512 / 32) ? s->u.intrle.delta_map[delta_idx] : 0;
-              if (delta_map != ~0) break;
-              delta_run += 32;
+              uint32_t delta_idx = (literal_run + delta_run) >> LOG2_WARPSIZE;
+              delta_map          = (delta_idx < 512 / cudf::detail::warp_size) ? s->u.intrle.delta_map[delta_idx] : 0;
+              if (delta_map != LANE_MASK_ALL) break;
+              delta_run += cudf::detail::warp_size;
             }
             delta_run += __FFS(~delta_map) - 1;
           }
           delta_run += 2;
           break;
         }
-        literal_run += 32;
-        delta_map = s->u.intrle.delta_map[(literal_run >> 5)];
+        literal_run += cudf::detail::warp_size;
+        delta_map = s->u.intrle.delta_map[(literal_run >> LOG2_WARPSIZE)];
       }
       literal_run             = min(literal_run, maxvals);
       s->u.intrle.literal_run = literal_run;
