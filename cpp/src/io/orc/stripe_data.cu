@@ -768,15 +768,15 @@ Integer_RLEv1(orc_bytestream_s* bs, orc_rlev1_state_s* rle, T* vals, uint32_t ma
   // Expand the runs
   numruns = rle->num_runs;
   if (numruns > 0) {
-    int r  = t >> 5;
-    int tr = t & 0x1f;
+    int r  = t >> LOG2_WARPSIZE;
+    int tr = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
     for (uint32_t run = r; run < numruns; run += num_warps) {
       int32_t run_data = rle->run_data[run];
       int n            = (run_data >> 16) & 0xff;
       int delta        = run_data >> 24;
       uint32_t base    = run_data & 0x3ff;
       uint32_t pos     = vals[base] & 0xffff;
-      for (int i = 1 + tr; i < n; i += 32) {
+      for (int i = 1 + tr; i < n; i += cudf::detail::warp_size) {
         vals[base + i] = ((delta * i) << 16) | pos;
       }
     }
