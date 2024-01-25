@@ -1408,17 +1408,17 @@ CUDF_KERNEL void __launch_bounds__(block_size)
       }
       // We may have some valid values that are not decoded below first_row -> count these in
       // skip_count, so that subsequent kernel can infer the correct row position
-      if (row_in < first_row && t < 32) {
+      if (row_in < first_row && t < cudf::detail::warp_size) {
         uint32_t skippedrows = min(static_cast<uint32_t>(first_row - row_in), nrows);
         uint32_t skip_count  = 0;
-        for (thread_index_type i = t * 32; i < skippedrows; i += 32 * 32) {
+        for (thread_index_type i = t * 32; i < skippedrows; i += cudf::detail::warp_size * 32) {
           // Need to arrange the bytes to apply mask properly.
           uint32_t bits = (i + 32 <= skippedrows) ? s->vals.u32[i >> 5]
                                                   : (__byte_perm(s->vals.u32[i >> 5], 0, 0x0123) &
                                                      (0xffff'ffffu << (0x20 - skippedrows + i)));
           skip_count += __POPC(bits);
         }
-        skip_count = warp_reduce(temp_storage.wr_storage[t / 32]).Sum(skip_count);
+        skip_count = warp_reduce(temp_storage.wr_storage[t / cudf::detail::warp_size]).Sum(skip_count);
         if (t == 0) { s->chunk.skip_count += skip_count; }
       }
       __syncthreads();
