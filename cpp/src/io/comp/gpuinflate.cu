@@ -124,8 +124,13 @@ struct xwarp_s {
 
 #if ENABLE_PREFETCH
 #ifdef __HIP_PLATFORM_AMD__
-// TODO(HIP/AMD): fine-tune these parameters, need a size of 10 here so that 
-// with warp_size=64, enough bytes are getting prefetched for WARP0 (decode_symbols)
+// TODO(HIP/AMD): Fine-tune these parameters.
+// We need a prefetch size of >=2^10 = 1024 bytes here.
+// At batch_size = 2^6 = 64 for HIP AMD backend, wavefront 0
+// requires the prefetcher (wavefront 2) to have prefetched at least 64 * 6 = 384 bytes
+// before proceeding with process_symbols(). However, with prefetch_size<=2^9 = 512 bytes,
+// the prefetcher would only fetch 256 bytes
+// (some space is left on purpose in the buffer), which would cause some unit tests to hang.
 constexpr int log2_prefetch_size = 10;  // Must be at least LOG2_BATCH_SIZE+3
 #else
 constexpr int log2_prefetch_size = 9;  // Must be at least LOG2_BATCH_SIZE+3
