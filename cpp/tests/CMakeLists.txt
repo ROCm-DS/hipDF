@@ -444,9 +444,9 @@ ConfigureTest(SPAN_TEST_DEVICE_VECTOR utilities_tests/span_tests.hip)
 # # * iterator tests --------------------------------------------------------------------------------
 ConfigureTest(
   ITERATOR_TEST
-  # iterator/indexalator_test.hip # Todo(HIP): multiple errors related to RMM
+  iterator/indexalator_test.hip 
   iterator/optional_iterator_test_chrono.hip
-  # iterator/optional_iterator_test_numeric.hip # Todo(HIP): multiple errors related to RMM
+  iterator/optional_iterator_test_numeric.hip 
   iterator/pair_iterator_test_chrono.hip
   iterator/pair_iterator_test_numeric.hip
   iterator/scalar_iterator_test.hip
