@@ -49,6 +49,7 @@ Mark Adler    madler@alumni.caltech.edu
 
 #include <hipcub/hipcub.hpp>
 
+#include <cudf/detail/utilities/cuda.cuh>
 #include <io/utilities/block_utils.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
@@ -82,7 +83,12 @@ struct lut_arr {
 
 /// 4 batches of 32 symbols
 constexpr int log2_batch_count = 2;  // 1..5
-constexpr int log2_batch_size  = 5;
+#ifdef __HIP_PLATFORM_AMD__
+//: results in BATCH_SIZE 64
+constexpr int log2_batch_size  =  6; 
+#else
+constexpr int log2_batch_size  =  5; 
+#endif
 constexpr int batch_count      = (1 << log2_batch_count);
 constexpr int batch_size       = (1 << log2_batch_size);
 
@@ -100,7 +106,18 @@ struct xwarp_s {
 #define ENABLE_PREFETCH 1
 
 #if ENABLE_PREFETCH
+#ifdef __HIP_PLATFORM_AMD__
+// TODO(HIP/AMD): Fine-tune these parameters.
+// We need a prefetch size of >=2^10 = 1024 bytes here.
+// At batch_size = 2^6 = 64 for HIP AMD backend, wavefront 0
+// requires the prefetcher (wavefront 2) to have prefetched at least 64 * 6 = 384 bytes
+// before proceeding with process_symbols(). However, with prefetch_size<=2^9 = 512 bytes,
+// the prefetcher would only fetch 256 bytes
+// (some space is left on purpose in the buffer), which would cause some unit tests to hang.
+constexpr int log2_prefetch_size = 10;  // Must be at least LOG2_BATCH_SIZE+3
+#else
 constexpr int log2_prefetch_size = 9;  // Must be at least LOG2_BATCH_SIZE+3
+#endif
 constexpr int prefetch_size      = (1 << log2_prefetch_size);
 
 /// @brief Prefetcher state
@@ -793,7 +810,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
 
     auto const symt     = (t < batch_len) ? b[t] : 256;
     auto const lit_mask = ballot(symt >= 256);
-    auto pos            = static_cast<uint8_t>(min((__ffs(lit_mask) - 1) & 0xff, 32)); //TODO(HIP): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
+    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, cudf::detail::warp_size)); //TODO(HIP): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
 
     if (t == 0) { s->x.batch_len[batch] = 0; }
 
@@ -817,8 +834,8 @@ __device__ void process_symbols(inflate_state_s* s, int t)
       batch_len--;
       // Process subsequent literals, if any
       if (!((lit_mask >> pos) & 1)) {
-        len    = min((__ffs(lit_mask >> pos) - 1) & 0xff, batch_len);
-        symbol = shuffle(symt, (pos + t) & 0x1f);
+        len    = min((__FFS(lit_mask >> pos) - 1) & 0xff, batch_len);
+        symbol = shuffle(symt, (pos + t) & (cudf::detail::warp_size-1));
         if (t < len && out + t < outend) { out[t] = symbol; }
         out += len;
         pos += len;
@@ -956,11 +973,11 @@ __device__ void prefetch_warp(volatile inflate_state_s* s, int t)
   while (shuffle((t == 0) ? s->pref.run : 0)) {
     auto cur_lo = (int32_t)(size_t)cur_p;
     int do_pref =
-      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - 32 * 4 - 4) : 0);
+      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - cudf::detail::warp_size * 4 - 4) : 0);
     if (do_pref) {
       uint8_t const* p             = cur_p + 4 * t;
       *prefetch_addr32(s->pref, p) = (p < end) ? *reinterpret_cast<uint32_t const*>(p) : 0;
-      cur_p += 4 * 32;
+      cur_p += 4 * cudf::detail::warp_size;
       __threadfence_block();
       hip_extensions::__syncwarp();
       if (!t) {
@@ -1100,7 +1117,7 @@ __global__ void __launch_bounds__(block_size)
       if (t < batch_count) { state->x.batch_len[t] = 0; }
       __syncthreads();
       // decode data until end-of-block code
-      if (t < 1 * 32) {
+      if (t < 1 * cudf::detail::warp_size) {
         // WARP0: decode variable-length symbols
         if (!t) {
           // Thread0: decode symbols (single threaded)
@@ -1109,14 +1126,14 @@ __global__ void __launch_bounds__(block_size)
           state->pref.run = 0;
 #endif
         }
-      } else if (t < 2 * 32) {
+      } else if (t < 2 * cudf::detail::warp_size) {
         // WARP1: perform LZ77 using length and distance codes from WARP0
-        process_symbols(state, t & 0x1f);
+        process_symbols(state, t & (cudf::detail::warp_size-1));
       }
 #if ENABLE_PREFETCH
-      else if (t < 3 * 32) {
+      else if (t < 3 * cudf::detail::warp_size) {
         // WARP2: Prefetcher: prefetch data for WARP0
-        prefetch_warp(state, t & 0x1f);
+        prefetch_warp(state, t & (cudf::detail::warp_size-1));
       }
 #endif
       // else WARP3: idle
@@ -1214,7 +1231,12 @@ void gpuinflate(device_span<device_span<uint8_t const> const> inputs,
                 gzip_header_included parse_hdr,
                 rmm::cuda_stream_view stream)
 {
-  constexpr int block_size = 128;  // Threads per block
+  // AMD/HIP: The algorithm needs four warps/wavefronts to decompress the data in a pipeline-like style:
+  // Wavefront0/warp0: decodes symbols
+  // Wavefront1/warp1: processes the decoded symbols and write them into the output stream
+  // Wavefront2/warp2: prefetch data for warp0
+  // Wavefront3/warp3: copy uncompressed data
+  constexpr int block_size = cudf::detail::warp_size * 4;  // Threads per block
   if (inputs.size() > 0) {
     inflate_kernel<block_size>
       <<<inputs.size(), block_size, 0, stream.value()>>>(inputs, outputs, results, parse_hdr);
