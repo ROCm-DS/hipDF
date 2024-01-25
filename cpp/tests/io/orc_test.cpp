@@ -348,12 +348,13 @@ TEST_F(OrcWriterTest, MultiColumn)
   auto col4_data = random_values<float>(num_rows);
   auto col5_data = random_values<double>(num_rows);
   auto col6_vals = random_values<int64_t>(num_rows);
-  auto col6_data = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
-    return numeric::decimal128{col6_vals[i], numeric::scale_type{12}};
-  });
-  auto col7_data = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
-    return numeric::decimal128{col6_vals[i], numeric::scale_type{-12}};
-  });
+  //: TODO(HIP/AMD): add later when decimal128 is supported
+  // auto col6_data = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
+  //   return numeric::decimal128{col6_vals[i], numeric::scale_type{12}};
+  // });
+  // auto col7_data = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
+  //   return numeric::decimal128{col6_vals[i], numeric::scale_type{-12}};
+  // });
 
   bool_col col0(col0_data.begin(), col0_data.end());
   int8_col col1(col1_data.begin(), col1_data.end());
@@ -361,8 +362,9 @@ TEST_F(OrcWriterTest, MultiColumn)
   int32_col col3(col3_data.begin(), col3_data.end());
   float32_col col4(col4_data.begin(), col4_data.end());
   float64_col col5(col5_data.begin(), col5_data.end());
-  dec128_col col6(col6_data, col6_data + num_rows);
-  dec128_col col7(col7_data, col7_data + num_rows);
+  //: TODO(HIP/AMD): add later when decimal128 is supported
+  // dec128_col col6(col6_data, col6_data + num_rows);
+  // dec128_col col7(col7_data, col7_data + num_rows);
 
   list_col<int64_t> col8{
     {9, 8}, {7, 6, 5}, {}, {4}, {3, 2, 1, 0}, {20, 21, 22, 23, 24}, {}, {66, 666}, {}, {-1, -2}};
@@ -370,7 +372,7 @@ TEST_F(OrcWriterTest, MultiColumn)
   int32_col child_col{48, 27, 25, 31, 351, 351, 29, 15, -1, -99};
   struct_col col9{child_col};
 
-  table_view expected({col0, col1, col2, col3, col4, col5, col6, col7, col8, col9});
+  table_view expected({col0, col1, col2, col3, col4, col5, /*col6, col7,*/ col8, col9});
 
   cudf::io::table_input_metadata expected_metadata(expected);
   expected_metadata.column_metadata[0].set_name("bools");
@@ -379,10 +381,11 @@ TEST_F(OrcWriterTest, MultiColumn)
   expected_metadata.column_metadata[3].set_name("int32s");
   expected_metadata.column_metadata[4].set_name("floats");
   expected_metadata.column_metadata[5].set_name("doubles");
-  expected_metadata.column_metadata[6].set_name("decimal_pos_scale");
-  expected_metadata.column_metadata[7].set_name("decimal_neg_scale");
-  expected_metadata.column_metadata[8].set_name("lists");
-  expected_metadata.column_metadata[9].set_name("structs");
+  //: TODO(HIP/AMD): add later when decimal128 is supported
+  //expected_metadata.column_metadata[6].set_name("decimal_pos_scale");
+  //expected_metadata.column_metadata[7].set_name("decimal_neg_scale");
+  expected_metadata.column_metadata[6/*8*/].set_name("lists");
+  expected_metadata.column_metadata[7/*9*/].set_name("structs");
 
   auto filepath = temp_env->get_temp_filepath("OrcMultiColumn.orc");
   cudf::io::orc_writer_options out_opts =
@@ -1481,6 +1484,11 @@ TEST_F(OrcReaderTest, NestedColumnSelection)
 
 TEST_F(OrcReaderTest, DecimalOptions)
 {
+
+#ifdef __HIP_PLATFORM_AMD__
+  GTEST_SKIP() << "Support for DECIMAL128 is required";
+#endif
+
   constexpr auto num_rows = 10;
   auto col_vals           = random_values<int64_t>(num_rows);
   auto col_data           = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
@@ -1509,6 +1517,11 @@ TEST_F(OrcReaderTest, DecimalOptions)
 
 TEST_F(OrcWriterTest, DecimalOptionsNested)
 {
+
+#ifdef __HIP_PLATFORM_AMD__
+  GTEST_SKIP() << "Support for DECIMAL128 is required";
+#endif
+
   auto const num_rows = 100;
 
   auto dec_vals  = random_values<int32_t>(num_rows);
