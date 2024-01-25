@@ -23,7 +23,8 @@
  */
 
 #include <cudf/fixed_point/temporary.hpp>
-
+#include <cudf/detail/utilities/assert.cuh>
+#include <cudf/utilities/error.hpp>
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
@@ -32,6 +33,7 @@
 namespace cudf {
 //! Utility functions
 namespace util {
+
 /**
  * @brief Rounds `number_to_round` up to the next multiple of modulus
  *
@@ -50,7 +52,11 @@ constexpr S round_up_safe(S number_to_round, S modulus)
   if (remainder == 0) { return number_to_round; }
   auto rounded_up = number_to_round - remainder + modulus;
   if (rounded_up < number_to_round) {
-    throw std::invalid_argument("Attempt to round up beyond the type's maximum value");
+    #if __HIP_DEVICE_COMPILE__
+      CUDF_EXP_ON_DEVICE("Attempt to round up beyond the type's maximum value");
+    #else
+      throw std::invalid_argument("Attempt to round up beyond the type's maximum value");
+    #endif
   }
   return rounded_up;
 }

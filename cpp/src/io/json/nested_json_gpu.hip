@@ -19,14 +19,13 @@
 #include <io/fst/logical_stack.cuh>
 #include <io/fst/lookup_tables.cuh>
 #include <io/utilities/parsing_utils.cuh>
-#include <io/utilities/type_inference.cuh>
+#include <io/utilities/string_parsing.hpp>
 
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/detail/utilities/visitor_overload.hpp>
 #include <cudf/detail/valid_if.cuh>
-#include <cudf/io/detail/data_casting.cuh>
 #include <cudf/io/detail/tokenize_json.hpp>
 #include <cudf/io/json.hpp>
 #include <cudf/table/table.hpp>
@@ -496,8 +495,16 @@ struct PdaSymbolToSymbolGroupId {
     // The relative symbol group id of the current input symbol
     constexpr auto pda_sgid_lookup_size =
       static_cast<int32_t>(sizeof(tos_sg_to_pda_sgid) / sizeof(tos_sg_to_pda_sgid[0]));
-    PdaSymbolGroupIdT symbol_gid =
-      tos_sg_to_pda_sgid[min(static_cast<int32_t>(symbol), pda_sgid_lookup_size - 1)];
+    // HIP: It is possible that for some characters (e.g., ʒ), the cast to int32_t is negative.
+    // In CUDA, For such cases, the negative index into array tos_sg_to_pda_sgid return always 0 (luck?).
+    // We need this check and set symbol_grid to 0 for such cases.
+    PdaSymbolGroupIdT symbol_gid;
+    if(min(static_cast<int32_t>(symbol), pda_sgid_lookup_size - 1) < 0)
+      symbol_gid = 0;
+    else{
+      symbol_gid =
+        tos_sg_to_pda_sgid[min(static_cast<int32_t>(symbol), pda_sgid_lookup_size - 1)];
+    }
     return stack_idx * static_cast<PdaSymbolGroupIdT>(symbol_group_id::NUM_PDA_INPUT_SGS) +
            symbol_gid;
   }
@@ -1649,7 +1656,7 @@ void make_json_column(json_column& root_column,
         // The child column has yet to be created
         if (current_data_path.top().column->child_columns.empty()) {
           current_data_path.top().column->child_columns.emplace(std::string{list_child_name},
-                                                                json_column{/*Todo(HIP): json_col_t::Unknown*/});
+                                                                json_column{json_col_t::Unknown});
           current_data_path.top().column->column_order.push_back(list_child_name);
         }
         current_data_path.top().current_selected_col =
@@ -1949,20 +1956,6 @@ std::pair<std::unique_ptr<column>, std::vector<column_name_info>> json_column_to
       auto offset_length_it =
         thrust::make_zip_iterator(d_string_offsets.begin(), d_string_lengths.begin());
 
-      // Prepare iterator that returns (string_offset, string_length)-pairs needed by inference
-      auto string_ranges_it =
-        thrust::make_transform_iterator(offset_length_it, [] __device__(auto ip) {
-          return thrust::pair<json_column::row_offset_t, std::size_t>{
-            thrust::get<0>(ip), static_cast<std::size_t>(thrust::get<1>(ip))};
-        });
-
-      // Prepare iterator that returns (string_ptr, string_length)-pairs needed by type conversion
-      auto string_spans_it = thrust::make_transform_iterator(
-        offset_length_it, [data = d_input.data()] __device__(auto ip) {
-          return thrust::pair<char const*, std::size_t>{
-            data + thrust::get<0>(ip), static_cast<std::size_t>(thrust::get<1>(ip))};
-        });
-
       data_type target_type{};
 
       if (schema.has_value()) {
@@ -1978,7 +1971,7 @@ std::pair<std::unique_ptr<column>, std::vector<column_name_info>> json_column_to
         target_type =
           cudf::io::detail::infer_data_type(parsing_options(options, stream).json_view(),
                                             d_input,
-                                            string_ranges_it,
+                                            offset_length_it,
                                             col_size,
                                             stream);
       }
@@ -1986,7 +1979,8 @@ std::pair<std::unique_ptr<column>, std::vector<column_name_info>> json_column_to
       auto [result_bitmask, null_count] = make_validity(json_col);
 
       // Convert strings to the inferred data type
-      auto col = parse_data(string_spans_it,
+      auto col = parse_data(d_input.data(),
+                            offset_length_it,
                             col_size,
                             target_type,
                             std::move(result_bitmask),

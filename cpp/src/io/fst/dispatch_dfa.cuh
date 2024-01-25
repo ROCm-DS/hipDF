@@ -364,15 +364,14 @@ struct DispatchFSM : DeviceFSMPolicy {
     size_t vector_scan_storage_bytes = 0;
 
     // [MEMORY REQUIREMENTS] STATE-TRANSITION SCAN
-    // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-    auto dummy = hipcub::DeviceScan::ExclusiveScan(nullptr,
+    CUDF_CUDA_TRY(hipcub::DeviceScan::ExclusiveScan(nullptr,
                                    vector_scan_storage_bytes,
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
                                    static_cast<StateVectorT*>(allocations[MEM_STATE_VECTORS]),
                                    state_vector_scan_op,
                                    state_identity_vector,
                                    num_threads,
-                                   stream);
+                                   stream));
 
     allocation_sizes[MEM_STATE_VECTORS] = num_threads * sizeof(StateVectorT);
     allocation_sizes[MEM_SCAN]          = vector_scan_storage_bytes;
@@ -435,20 +434,18 @@ struct DispatchFSM : DeviceFSMPolicy {
       // Compute state-transition vectors
       // TODO tag dispatch or constexpr if depending on single-pass config to avoid superfluous
       // template instantiations
-      // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-      auto dummy1 = ComputeStateTransitionVector<ActivePolicyT>(
-        sm_count, stv_tile_state, fst_offset_tile_state, d_thread_state_transition);
+      CUDF_CUDA_TRY(ComputeStateTransitionVector<ActivePolicyT>(
+        sm_count, stv_tile_state, fst_offset_tile_state, d_thread_state_transition));
 
       // State-transition vector scan computing using the composition operator
-      // Todo(HIP): error: ignoring return value of function declared with 'nodiscard' attribute
-      dummy1 = hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
+      CUDF_CUDA_TRY(hipcub::DeviceScan::ExclusiveScan(allocations[MEM_SCAN],
                                      allocation_sizes[MEM_SCAN],
                                      d_thread_state_transition,
                                      d_thread_state_transition,
                                      state_vector_scan_op,
                                      state_identity_vector,
                                      num_threads,
-                                     stream);
+                                     stream));
     }
 
     //------------------------------------------------------------------------------
