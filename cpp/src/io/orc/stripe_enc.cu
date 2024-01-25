@@ -216,7 +216,7 @@ static __device__ uint32_t ByteRLE(
     bitmask_type rpt_map = ballot(t + 1 < numvals && v0 == v1);
     uint32_t literal_run, repeat_run,
              maxvals = min(numvals, 512);
-    if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)) s->u.byterle.rpt_map[t >> LOG2_WARPSIZE] = rpt_map;
+    if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) s->u.byterle.rpt_map[t >> LOG2_WARPSIZE] = rpt_map;
     __syncthreads();
     if (t == 0) {
       // Find the start of an identical 3-byte sequence
