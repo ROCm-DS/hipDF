@@ -81,7 +81,7 @@ constexpr bool zero_pll_war = true;
 struct byterle_enc_state_s {
   uint32_t literal_run;
   uint32_t repeat_run;
-  uint32_t rpt_map[(512 / 32) + 1];
+  bitmask_type rpt_map[(512 / cudf::detail::warp_size) + 1];
 };
 
 struct intrle_enc_state_s {
@@ -213,9 +213,10 @@ static __device__ uint32_t ByteRLE(
   while (numvals > 0) {
     uint8_t v0       = (t < numvals) ? inbuf[(inpos + t) & inmask] : 0;
     uint8_t v1       = (t + 1 < numvals) ? inbuf[(inpos + t + 1) & inmask] : 0;
-    uint32_t rpt_map = ballot(t + 1 < numvals && v0 == v1), literal_run, repeat_run,
+    bitmask_type rpt_map = ballot(t + 1 < numvals && v0 == v1);
+    uint32_t literal_run, repeat_run,
              maxvals = min(numvals, 512);
-    if (!(t & 0x1f)) s->u.byterle.rpt_map[t >> 5] = rpt_map;
+    if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)) s->u.byterle.rpt_map[t >> LOG2_WARPSIZE] = rpt_map;
     __syncthreads();
     if (t == 0) {
       // Find the start of an identical 3-byte sequence
@@ -223,17 +224,17 @@ static __device__ uint32_t ByteRLE(
       literal_run = 0;
       repeat_run  = 0;
       while (literal_run < maxvals) {
-        uint32_t next = s->u.byterle.rpt_map[(literal_run >> 5) + 1];
-        uint32_t mask = rpt_map & __funnelshift_r(rpt_map, next, 1);
+        bitmask_type next = s->u.byterle.rpt_map[(literal_run >> LOG2_WARPSIZE) + 1];
+        bitmask_type mask = rpt_map & cudf::detail::__m_funnelshift_r(rpt_map, next, 1);
         if (mask) {
           uint32_t literal_run_ofs = __FFS(mask) - 1;
           literal_run += literal_run_ofs;
           repeat_run = __FFS(~((rpt_map >> literal_run_ofs) >> 1));
-          if (repeat_run + literal_run_ofs == 32) {
-            while (next == ~0) {
-              uint32_t next_idx = ((literal_run + repeat_run) >> 5) + 1;
-              next              = (next_idx < 512 / 32) ? s->u.byterle.rpt_map[next_idx] : 0;
-              repeat_run += 32;
+          if (repeat_run + literal_run_ofs == cudf::detail::warp_size) {
+            while (next == LANE_MASK_ALL) {
+              uint32_t next_idx = ((literal_run + repeat_run) >> LOG2_WARPSIZE) + 1;
+              next              = (next_idx < 512 / cudf::detail::warp_size) ? s->u.byterle.rpt_map[next_idx] : 0;
+              repeat_run += cudf::detail::warp_size;
             }
             repeat_run += __FFS(~next) - 1;
           }
@@ -245,7 +246,7 @@ static __device__ uint32_t ByteRLE(
           break;
         }
         rpt_map = next;
-        literal_run += 32;
+        literal_run += cudf::detail::warp_size;
       }
       if (repeat_run >= 130) {
         // Limit large runs to multiples of 130
