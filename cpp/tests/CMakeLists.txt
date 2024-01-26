@@ -341,9 +341,9 @@ ConfigureTest(
  ConfigureTest(
   FILE_IO_TEST io/file_io_test.cpp
 )
-# #ConfigureTest(
-# #  ORC_TEST io/orc_test.cpp
-# #)
+ConfigureTest(
+  ORC_TEST io/orc_test.cpp
+)
 ConfigureTest(
   PARQUET_TEST 
   io/parquet_test.cpp 
