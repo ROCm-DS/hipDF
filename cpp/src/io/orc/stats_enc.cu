@@ -42,6 +42,8 @@
 #include <cudf/io/orc_types.hpp>
 #include <cudf/strings/detail/convert/fixed_point_to_string.cuh>
 
+#include <cudf/detail/utilities/cuda.cuh>
+
 #include <rmm/cuda_stream_view.hpp>
 
 #include <cuda/std/utility>
@@ -54,7 +56,7 @@ using strings::detail::fixed_point_string_size;
 // files. See https://github.com/rapidsai/cudf/issues/14325 for more details
 constexpr bool enable_nanosecond_statistics = true;
 
-constexpr unsigned int init_threads_per_group = 32;
+constexpr unsigned int init_threads_per_group = cudf::detail::warp_size;
 constexpr unsigned int init_groups_per_block  = 4;
 constexpr unsigned int init_threads_per_block = init_threads_per_group * init_groups_per_block;
 
@@ -268,7 +270,7 @@ __device__ cuda::std::pair<int64_t, int32_t> split_nanosecond_timestamp(int64_t 
  *  optional bool hasNull = 10;
  * }
  */
-constexpr unsigned int encode_threads_per_chunk = 32;
+constexpr unsigned int encode_threads_per_chunk = cudf::detail::warp_size;
 constexpr unsigned int encode_chunks_per_block  = 4;
 constexpr unsigned int encode_threads_per_block =
   encode_threads_per_chunk * encode_chunks_per_block;
