@@ -19,6 +19,8 @@
 #include <cudf/io/orc_types.hpp>
 #include <io/utilities/block_utils.cuh>
 
+#include <cudf/detail/utilities/cuda.cuh>
+
 #include <rmm/cuda_stream_view.hpp>
 
 namespace cudf {
@@ -26,7 +28,7 @@ namespace io {
 namespace orc {
 namespace gpu {
 
-constexpr unsigned int init_threads_per_group = 32;
+constexpr unsigned int init_threads_per_group = cudf::detail::warp_size;
 constexpr unsigned int init_groups_per_block  = 4;
 constexpr unsigned int init_threads_per_block = init_threads_per_group * init_groups_per_block;
 
@@ -210,7 +212,7 @@ __device__ inline uint8_t* pb_put_fixed64(uint8_t* p, uint32_t id, void const* r
  *  optional bool hasNull = 10;
  * }
  */
-constexpr unsigned int encode_threads_per_chunk = 32;
+constexpr unsigned int encode_threads_per_chunk = cudf::detail::warp_size;
 constexpr unsigned int encode_chunks_per_block  = 4;
 constexpr unsigned int encode_threads_per_block =
   encode_threads_per_chunk * encode_chunks_per_block;
