@@ -221,7 +221,8 @@ __global__ void __launch_bounds__(encode_threads_per_block)
                         statistics_chunk const* chunks,
                         uint32_t statistics_count)
 {
-  __shared__ __align__(8) stats_state_s state_g[encode_chunks_per_block];
+  //: TODO(HIP/AMD): This is a work around for "initialization is not supported for __shared__ variables"
+  extern __shared__ __align__(8) stats_state_s state_g[/*encode_chunks_per_block*/];
   auto t                 = threadIdx.x;
   auto idx               = blockIdx.x * encode_chunks_per_block + threadIdx.y;
   stats_state_s* const s = &state_g[threadIdx.y];
@@ -399,7 +400,7 @@ void orc_encode_statistics(uint8_t* blob_bfr,
   unsigned int num_blocks =
     (statistics_count + encode_chunks_per_block - 1) / encode_chunks_per_block;
   dim3 dim_block(encode_threads_per_chunk, encode_chunks_per_block);
-  gpu_encode_statistics<<<num_blocks, dim_block, 0, stream.value()>>>(
+  gpu_encode_statistics<<<num_blocks, dim_block, encode_chunks_per_block*sizeof(stats_state_s), stream.value()>>>(
     blob_bfr, groups, chunks, statistics_count);
 }
 
