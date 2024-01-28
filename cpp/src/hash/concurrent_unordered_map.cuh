@@ -533,26 +533,32 @@ class concurrent_unordered_map {
       m_unused_element(unused_element),
       m_unused_key(unused_key)
   {
-    m_hashtbl_values         = m_allocator.allocate(m_capacity, stream);
-    constexpr int block_size = 128;
-    {
-      hipPointerAttribute_t hashtbl_values_ptr_attributes;
-      hipError_t status =
-        hipPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
+    // https://github.com/AMD-AI/hipdf/issues/86
+    // HIP: If capacity == 0, hipPointerGetAttributes returns hipErrorInvalidValue;
+    // unlike cuda which returns cudaSuccess. In such cases we dont need to do anything?
+    if(capacity > 0){
+      m_hashtbl_values         = m_allocator.allocate(m_capacity, stream);
+      constexpr int block_size = 128;
+      {
+        hipPointerAttribute_t hashtbl_values_ptr_attributes;
+        hipError_t status =
+          hipPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
+        CUDF_CHECK_CUDA(stream.value());
 
-      if (hipSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
-        int dev_id = 0;
-        CUDF_CUDA_TRY(hipGetDevice(&dev_id));
-        CUDF_CUDA_TRY(hipMemPrefetchAsync(
-          m_hashtbl_values, m_capacity * sizeof(value_type), dev_id, stream.value()));
+        if (hipSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
+          int dev_id = 0;
+          CUDF_CUDA_TRY(hipGetDevice(&dev_id));
+          CUDF_CUDA_TRY(hipMemPrefetchAsync(
+            m_hashtbl_values, m_capacity * sizeof(value_type), dev_id, stream.value()));
+        }
       }
-    }
 
-    if (m_capacity > 0) {
-      init_hashtbl<<<((m_capacity - 1) / block_size) + 1, block_size, 0, stream.value()>>>(
-        m_hashtbl_values, m_capacity, m_unused_key, m_unused_element);
-    }
+      if (m_capacity > 0) {
+        init_hashtbl<<<((m_capacity - 1) / block_size) + 1, block_size, 0, stream.value()>>>(
+          m_hashtbl_values, m_capacity, m_unused_key, m_unused_element);
+      }
 
-    CUDF_CHECK_CUDA(stream.value());
+      CUDF_CHECK_CUDA(stream.value());
+    }
   }
 };
