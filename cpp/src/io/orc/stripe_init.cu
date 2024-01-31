@@ -43,6 +43,8 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
+#include <cudf/detail/utilities/cuda.cuh>
+
 #include <hipcub/hipcub.hpp>
 #include <cuda/std/array>
 #include <thrust/copy.h>
@@ -569,9 +571,11 @@ CUDF_KERNEL void __launch_bounds__(block_size)
     auto const begin_bit = row;
     auto const end_bit   = min(static_cast<size_type>(row + bits_per_word), rg.end);
     auto const mask_len  = end_bit - begin_bit;
+    // HIP: special treatment of mask_len==bits_per_word is necessary, as the originally generated mask would 
+    // be 0 (due to overflow)
     auto const mask_word =
       cudf::detail::get_mask_offset_word(column.pushdown_mask, 0, row, end_bit) &
-      ((1 << mask_len) - 1);
+      ((mask_len == bits_per_word) ? LANE_MASK_ALL : LANE_MASK_ALL_UNTIL_EXCL(mask_len));
     count += __POPC(mask_word);
   }
 
@@ -622,7 +626,7 @@ void __host__ reduce_pushdown_masks(device_span<orc_column_device_view const> co
                                     rmm::cuda_stream_view stream)
 {
   auto const num_blocks    = columns.size() * rowgroups.size().first;  // 1 block per rowgroup
-  constexpr int block_size = 128;
+  constexpr int block_size = 4 * cudf::detail::warp_size;
   gpu_reduce_pushdown_masks<block_size>
     <<<num_blocks, block_size, 0, stream.value()>>>(columns, rowgroups, valid_counts);
 }
