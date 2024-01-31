@@ -1246,6 +1246,7 @@ __device__ inline uint64_t rotater64 (const uint64_t a, const int n)
 // HIP funnelshift implementation using shift and rotate
 __device__ inline bitmask_type __m_funnelshift_r(bitmask_type lo, bitmask_type hi, unsigned int shift)
 {
+    shift = shift % 64;
     bitmask_type _lo      = (bitmask_type)lo >> (bitmask_type)shift;
     bitmask_type _hi      = hi & GENERATE_BITMASK(uint64_t, shift);
     bitmask_type _r       = _lo | rotater64(_hi, shift);
