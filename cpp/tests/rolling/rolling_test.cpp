@@ -46,6 +46,7 @@
 #include <cudf_test/testing_main.hpp>
 #include <cudf_test/type_lists.hpp>
 
+#include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
 #include <cudf/detail/aggregation/aggregation.hpp>
 #include <cudf/detail/iterator.cuh>
@@ -1246,6 +1247,131 @@ struct RollingTestUdf : public cudf::test::BaseFixture {
       }
     )***"};
 
+  const std::string amd_llvm_ir_func= 
+    R"'''(
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_pure_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: cold noreturn nounwind
+declare void @llvm.trap() #1
+
+; Function Attrs: convergent mustprogress noreturn nounwind
+define weak void @__cxa_deleted_virtual() #0 {
+  call void @llvm.trap()
+  unreachable
+}
+
+; Function Attrs: convergent mustprogress nounwind
+define hidden void @rolling_udf(ptr %0, i32 %1, i32 %2, i32 %3, i32 %4, ptr %5, i32 %6, i32 %7) #2 {
+  %9 = alloca ptr, align 8, addrspace(5)
+  %10 = alloca i32, align 4, addrspace(5)
+  %11 = alloca i32, align 4, addrspace(5)
+  %12 = alloca i32, align 4, addrspace(5)
+  %13 = alloca i32, align 4, addrspace(5)
+  %14 = alloca ptr, align 8, addrspace(5)
+  %15 = alloca i32, align 4, addrspace(5)
+  %16 = alloca i32, align 4, addrspace(5)
+  %17 = alloca i64, align 8, addrspace(5)
+  %18 = alloca i32, align 4, addrspace(5)
+  %19 = alloca i32, align 4, addrspace(5)
+  %20 = addrspacecast ptr addrspace(5) %9 to ptr
+  %21 = addrspacecast ptr addrspace(5) %10 to ptr
+  %22 = addrspacecast ptr addrspace(5) %11 to ptr
+  %23 = addrspacecast ptr addrspace(5) %12 to ptr
+  %24 = addrspacecast ptr addrspace(5) %13 to ptr
+  %25 = addrspacecast ptr addrspace(5) %14 to ptr
+  %26 = addrspacecast ptr addrspace(5) %15 to ptr
+  %27 = addrspacecast ptr addrspace(5) %16 to ptr
+  %28 = addrspacecast ptr addrspace(5) %17 to ptr
+  %29 = addrspacecast ptr addrspace(5) %18 to ptr
+  store ptr %0, ptr %20, align 8, !tbaa !7
+  store i32 %1, ptr %21, align 4, !tbaa !11
+  store i32 %2, ptr %22, align 4, !tbaa !11
+  store i32 %3, ptr %23, align 4, !tbaa !11
+  store i32 %4, ptr %24, align 4, !tbaa !11
+  store ptr %5, ptr %25, align 8, !tbaa !7
+  store i32 %6, ptr %26, align 4, !tbaa !11
+  store i32 %7, ptr %27, align 4, !tbaa !11
+  call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) %17) #4
+  store i64 0, ptr %28, align 8, !tbaa !13
+  call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) %18) #4
+  store i32 0, ptr %29, align 4, !tbaa !11
+  br label %30
+
+30:                                               ; preds = %44, %8
+  %31 = load i32, ptr %29, align 4, !tbaa !11
+  %32 = load i32, ptr %26, align 4, !tbaa !11
+  %33 = icmp slt i32 %31, %32
+  br i1 %33, label %35, label %34
+
+34:                                               ; preds = %30
+  call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) %18) #4
+  br label %47
+
+35:                                               ; preds = %30
+  %36 = load ptr, ptr %25, align 8, !tbaa !7
+  %37 = load i32, ptr %29, align 4, !tbaa !11
+  %38 = sext i32 %37 to i64
+  %39 = getelementptr inbounds i32, ptr %36, i64 %38
+  %40 = load i32, ptr %39, align 4, !tbaa !11
+  %41 = sext i32 %40 to i64
+  %42 = load i64, ptr %28, align 8, !tbaa !13
+  %43 = add nsw i64 %42, %41
+  store i64 %43, ptr %28, align 8, !tbaa !13
+  br label %44
+
+44:                                               ; preds = %35
+  %45 = load i32, ptr %29, align 4, !tbaa !11
+  %46 = add nsw i32 %45, 1
+  store i32 %46, ptr %29, align 4, !tbaa !11
+  br label %30, !llvm.loop !15
+
+47:                                               ; preds = %34
+  %48 = load i64, ptr %28, align 8, !tbaa !13
+  %49 = load ptr, ptr %20, align 8, !tbaa !7
+  store i64 %48, ptr %49, align 8, !tbaa !13
+  call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) %17) #4
+  ret void
+}
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.lifetime.start.p5(i64 immarg, ptr addrspace(5) nocapture) #3
+
+; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+declare void @llvm.lifetime.end.p5(i64 immarg, ptr addrspace(5) nocapture) #3
+
+attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #1 = { cold noreturn nounwind }
+attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+attributes #3 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+attributes #4 = { nounwind }
+
+!llvm.module.flags = !{!0, !1, !2, !3, !4}
+!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+
+!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+!3 = !{i32 1, !"wchar_size", i32 4}
+!4 = !{i32 8, !"PIC Level", i32 2}
+!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
+!6 = !{i32 2, i32 0}
+!7 = !{!8, !8, i64 0}
+!8 = !{!"any pointer", !9, i64 0}
+!9 = !{!"omnipotent char", !10, i64 0}
+!10 = !{!"Simple C++ TBAA"}
+!11 = !{!12, !12, i64 0}
+!12 = !{!"int", !9, i64 0}
+!13 = !{!14, !14, i64 0}
+!14 = !{!"long long", !9, i64 0}
+!15 = distinct !{!15, !16}
+!16 = !{!"llvm.loop.mustprogress"}
+    )'''";
+
   const std::string ptx_func{
     R"***(
     //
@@ -1344,7 +1470,7 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-    cudf::udf_type::PTX, this->ptx_func, cudf::data_type{cudf::type_id::INT64});
+    cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_func : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
 
   output = cudf::rolling_window(input, 2, 2, 4, *ptx_udf_agg);
 
@@ -1393,8 +1519,7 @@ TEST_F(RollingTestUdf, DynamicWindow)
 
   // Test PTX UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-    cudf::udf_type::PTX, this->ptx_func, cudf::data_type{cudf::type_id::INT64});
-
+    cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_func : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
   output = cudf::rolling_window(input, preceding, following, 2, *ptx_udf_agg);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
