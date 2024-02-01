@@ -1277,15 +1277,13 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   std::string cuda_source;
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
-#ifdef __HIP_PLATFORM_AMD__
-      //: TODO(HIP/AMD): Add equivalent of PTX.
-      CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n");
-#else
-      cuda_source += cudf::jit::parse_single_function_ptx(udf_agg._source,
-                                                          udf_agg._function_name,
-                                                          cudf::type_to_name(udf_agg._output_type),
-                                                          {0, 5});  // args 0 and 5 are pointers.
-#endif                                                      
+      if(HIP_PLATFORM_AMD)
+        cuda_source = "extern \"C\" __device__ void rolling_udf(long long*, int, int, int, int, const int*, int, int);";
+      else
+        cuda_source += cudf::jit::parse_single_function_ptx(udf_agg._source,
+                                                            udf_agg._function_name,
+                                                            cudf::type_to_name(udf_agg._output_type),
+                                                            {0, 5});  // args 0 and 5 are pointers.                                                      
       break;
     case aggregation::Kind::CUDA:
       cuda_source += cudf::jit::parse_single_function_cuda(udf_agg._source, udf_agg._function_name);
@@ -1308,19 +1306,36 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());
 
-  cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-    .get_kernel(
-      kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {"--offload-arch=gfx."}) //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.
-    ->configure_1d_max_occupancy(0, 0, 0, stream.value())                                         // for CUDA's jitify.
-    ->launch(input.size(),
-             cudf::jit::get_data_ptr(input),
-             input.null_mask(),
-             cudf::jit::get_data_ptr(output_view),
-             output_view.null_mask(),
-             device_valid_count.data(),
-             preceding_window,
-             following_window,
-             min_periods);
+  std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+  jitify2::Kernel kernel;   
+
+  if(udf_agg.kind==aggregation::Kind::PTX) {
+    // CAUTION: We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
+    // need to use preprocessor here, as API extension to jitify2 is not available on CUDA backend
+#if defined(__HIP_PLATFORM_AMD__)
+    kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+       .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &udf_agg._source);
+#else 
+    kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+       .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
+#endif 
+  } 
+  else {
+    kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
+       .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {});
+  }
+
+  kernel->configure_1d_max_occupancy(0, 0, 0, stream.value())                                         // for CUDA's jitify.
+        ->launch(input.size(),
+              cudf::jit::get_data_ptr(input),
+              input.null_mask(),
+              cudf::jit::get_data_ptr(output_view),
+              output_view.null_mask(),
+              device_valid_count.data(),
+              preceding_window,
+              following_window,
+              min_periods);
+
   output->set_null_count(output->size() - device_valid_count.value(stream));
 
   // check the stream for debugging
