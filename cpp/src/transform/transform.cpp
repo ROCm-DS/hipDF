@@ -68,27 +68,47 @@ void unary_operation(mutable_column_view output,
       .instantiate(cudf::type_to_jitsafe_name(output.type()),  // list of template arguments
                    cudf::type_to_jitsafe_name(input.type()));
 
-  std::string cuda_source =
-    is_ptx ? 
-#ifdef __HIP_PLATFORM_AMD__    
-     //: TODO(HIP/AMD): Add equivalent of PTX.
-     CUDF_FAIL("JIT compilation for type PTX is not supported on AMD GPUs\n")
-#else
-     cudf::jit::parse_single_function_ptx(udf,  //
+  std::string cuda_source; 
+  
+  if(is_ptx && HIP_PLATFORM_AMD)
+    cuda_source = "extern \"C\" __device__ void GENERIC_UNARY_OP(" 
+                + cudf::type_to_jitsafe_name(output.type()) +"*"
+                + ","
+                + cudf::type_to_jitsafe_name(input.type())
+                + ");"; 
+  else if(is_ptx && !HIP_PLATFORM_AMD)
+    cuda_source = cudf::jit::parse_single_function_ptx(udf,  //
                                           "GENERIC_UNARY_OP",
                                           cudf::type_to_name(output_type),
-                                          {0})
-#endif
-           : cudf::jit::parse_single_function_cuda(udf,  //
+                                          {0});
+  else 
+    cuda_source = cudf::jit::parse_single_function_cuda(udf,  //
                                                    "GENERIC_UNARY_OP");
 
-  cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-    .get_kernel(
-      kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {"--offload-arch=gfx."})  //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.
-    ->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                                   //
-    ->launch(output.size(),                                                                 //
-             cudf::jit::get_data_ptr(output),
-             cudf::jit::get_data_ptr(input));
+  std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+  jitify2::Kernel kernel;   
+
+  if(is_ptx) {
+    // need to use preprocessor here, as API extension is not available in CUDA's jitify
+#if defined(__HIP_PLATFORM_AMD__)
+    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+      .get_kernel(
+        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &udf); 
+#else
+    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+      .get_kernel(
+        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
+#endif
+  }
+  else {
+    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+      .get_kernel(
+        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}); 
+  }
+  kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())                                   //
+        ->launch(output.size(),                                                                 //
+              cudf::jit::get_data_ptr(output),
+              cudf::jit::get_data_ptr(input));    
 }
 
 }  // namespace
