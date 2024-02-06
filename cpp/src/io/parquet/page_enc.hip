@@ -797,7 +797,7 @@ inline __device__ void PackLiterals(
  * @param[in] numvals Total count of input values
  * @param[in] nbits number of bits per symbol (1..16)
  * @param[in] flush nonzero if last batch in block
- * @param[in] t thread id (0..127)
+ * @param[in] t thread id (0.. 4 * cudf::detail::warp_size -1)
  */
 static __device__ void RleEncode(
   page_enc_state_s* s, uint32_t numvals, uint32_t nbits, uint32_t flush, uint32_t t)
