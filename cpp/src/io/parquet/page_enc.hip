@@ -85,7 +85,7 @@ struct page_enc_state_s {
   uint32_t rle_rpt_count;
   uint32_t page_start_val;
   uint32_t chunk_start_val;
-  volatile uint32_t rpt_map[4];
+  volatile bitmask_type rpt_map[4];  //one per warp
   volatile uint32_t scratch_red[32];
   EncPage page;
   EncColumnChunk ck;
@@ -809,20 +809,20 @@ static __device__ void RleEncode(
     uint32_t pos = rle_pos + t;
     if (rle_run > 0 && !(rle_run & 1)) {
       // Currently in a long repeat run
-      uint32_t mask = ballot(pos < numvals && s->vals[pos & (rle_buffer_size - 1)] == s->run_val);
+      bitmask_type mask = ballot(pos < numvals && s->vals[pos & (rle_buffer_size - 1)] == s->run_val);
       uint32_t rle_rpt_count, max_rpt_count;
-      if (!(t & 0x1f)) { s->rpt_map[t >> 5] = mask; }
+      if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { s->rpt_map[t >> LOG2_WARPSIZE] = mask; }
       __syncthreads();
-      if (t < 32) {
-        uint32_t c32 = ballot(t >= 4 || s->rpt_map[t] != 0xffff'ffffu);
+      if (t < cudf::detail::warp_size) {
+        bitmask_type c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
         if (!t) {
           uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
-            last_idx * 32 + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
+            last_idx * cudf::detail::warp_size + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
         }
       }
       __syncthreads();
-      max_rpt_count = min(numvals - rle_pos, 128);
+      max_rpt_count = min(numvals - rle_pos, 4 * cudf::detail::warp_size);
       rle_rpt_count = s->rle_rpt_count;
       rle_run += rle_rpt_count << 1;
       rle_pos += rle_rpt_count;
@@ -841,34 +841,36 @@ static __device__ void RleEncode(
       // New run or in a literal run
       uint32_t v0      = s->vals[pos & (rle_buffer_size - 1)];
       uint32_t v1      = s->vals[(pos + 1) & (rle_buffer_size - 1)];
-      uint32_t mask    = ballot(pos + 1 < numvals && v0 == v1);
-      uint32_t maxvals = min(numvals - rle_pos, 128);
+      bitmask_type mask    = ballot(pos + 1 < numvals && v0 == v1);
+      uint32_t maxvals = min(numvals - rle_pos, 4 * cudf::detail::warp_size);
       uint32_t rle_lit_count, rle_rpt_count;
-      if (!(t & 0x1f)) { s->rpt_map[t >> 5] = mask; }
+      if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { s->rpt_map[t >> LOG2_WARPSIZE] = mask; }
       __syncthreads();
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         // Repeat run can only start on a multiple of 8 values
-        uint32_t idx8        = (t * 8) >> 5;
-        uint32_t pos8        = (t * 8) & 0x1f;
-        uint32_t m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
-        uint32_t m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
+        uint32_t idx8        = (t * 8) >> LOG2_WARPSIZE;
+        uint32_t pos8        = (t * 8) & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
+        bitmask_type m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
+        bitmask_type m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
         uint32_t needed_mask = kRleRunMask[nbits - 1];
-        mask                 = ballot((__funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
+        //: TODO(HIP/AMD): make this portable for CUDA backend
+        mask                 = ballot((::cudf::detail::__m_funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
         if (!t) {
           uint32_t rle_run_start = (mask != 0) ? min((__FFS(mask) - 1) * 8, maxvals) : maxvals;
           uint32_t rpt_len       = 0;
           if (rle_run_start < maxvals) {
-            uint32_t idx_cur = rle_run_start >> 5;
-            uint32_t idx_ofs = rle_run_start & 0x1f;
+            uint32_t idx_cur = rle_run_start >> LOG2_WARPSIZE;
+            uint32_t idx_ofs = rle_run_start & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
             while (idx_cur < 4) {
               m0   = (idx_cur < 4) ? s->rpt_map[idx_cur] : 0;
               m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
-              mask = ~__funnelshift_r(m0, m1, idx_ofs);
+              //: TODO(HIP/AMD): make this portable for CUDA backend
+              mask = ~::cudf::detail::__m_funnelshift_r(m0, m1, idx_ofs);
               if (mask != 0) {
                 rpt_len += __FFS(mask) - 1;
                 break;
               }
-              rpt_len += 32;
+              rpt_len += cudf::detail::warp_size;
               idx_cur++;
             }
           }
