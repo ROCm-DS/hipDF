@@ -494,9 +494,9 @@ class parquet_writer_options {
   // Specify the sink to use for writer output
   sink_info _sink;
   // Specify the compression format to use
-  compression_type _compression = compression_type::SNAPPY;
+  compression_type _compression = compression_type::NONE; //: TODO(HIP/AMD): enable default compression_type::SNAPPY;
   // Specify the level of statistics in the output file
-  statistics_freq _stats_level = statistics_freq::STATISTICS_ROWGROUP;
+  statistics_freq _stats_level = statistics_freq::STATISTICS_NONE; //: TODO(HIP/AMD): enable default statistics_freq::STATISTICS_ROWGROUP;
   // Sets of columns to output
   table_view _table;
   // Partitions described as {start_row, num_rows} pairs
@@ -521,7 +521,7 @@ class parquet_writer_options {
   // Maximum size of min or max values in column index
   int32_t _column_index_truncate_length = default_column_index_truncate_length;
   // When to use dictionary encoding for data
-  dictionary_policy _dictionary_policy = dictionary_policy::ALWAYS;
+  dictionary_policy _dictionary_policy = dictionary_policy::NEVER; ////: TODO(HIP/AMD): enable default dictionary_policy::ALWAYS;
   // Maximum size of column chunk dictionary (in bytes)
   size_t _max_dictionary_size = default_max_dictionary_size;
   // Maximum number of rows in a page fragment
@@ -1137,9 +1137,9 @@ class chunked_parquet_writer_options {
   // Specify the sink to use for writer output
   sink_info _sink;
   // Specify the compression format to use
-  compression_type _compression = compression_type::AUTO;
+  compression_type _compression = compression_type::NONE; //: TODO(HIP/AMD): enable default compression_type::AUTO;
   // Specify the level of statistics in the output file
-  statistics_freq _stats_level = statistics_freq::STATISTICS_ROWGROUP;
+  statistics_freq _stats_level = statistics_freq::STATISTICS_NONE; //: TODO(HIP/AMD): enable default statistics_freq::STATISTICS_ROWGROUP;
   // Optional associated metadata.
   std::optional<table_input_metadata> _metadata;
   // Optional footer key_value_metadata
@@ -1158,7 +1158,7 @@ class chunked_parquet_writer_options {
   // Maximum size of min or max values in column index
   int32_t _column_index_truncate_length = default_column_index_truncate_length;
   // When to use dictionary encoding for data
-  dictionary_policy _dictionary_policy = dictionary_policy::ALWAYS;
+  dictionary_policy _dictionary_policy =  dictionary_policy::NEVER; //: TODO(HIP/AMD): enable default dictionary_policy::ALWAYS;
   // Maximum size of column chunk dictionary (in bytes)
   size_t _max_dictionary_size = default_max_dictionary_size;
   // Maximum number of rows in a page fragment
