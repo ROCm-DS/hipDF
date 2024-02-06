@@ -53,7 +53,7 @@ namespace cg = cooperative_groups;
 
 namespace {
 
-constexpr int decode_block_size = 256;
+constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
 constexpr int rolling_buf_size  = decode_block_size;
 
 /**
@@ -249,7 +249,6 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                     size_t num_rows,
                     kernel_error::pointer error_code)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   //extern __shared__ __align__(16) page_state_s state_g[];
   extern __shared__ page_state_s state_g[];
@@ -260,7 +259,7 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int page_idx          = blockIdx.x;
-  int t                 = cudf::thread_idx_shrink(threadIdx.x);
+  int t                 = threadIdx.x;
   int out_thread0;
   [[maybe_unused]] null_count_back_copier _{s, t};
 
@@ -277,13 +276,13 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
   bool const has_repetition = s->col.max_level[level_type::REPETITION] > 0;
 
   if (s->dict_base) {
-    out_thread0 = (s->dict_bits > 0) ? 64 : 32;
+    out_thread0 = (s->dict_bits > 0) ? 2 * cudf::detail::warp_size  : cudf::detail::warp_size;
   } else {
     switch (s->col.physical_type) {
       case BOOLEAN: [[fallthrough]];
       case BYTE_ARRAY: [[fallthrough]];
-      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 64; break;
-      default: out_thread0 = 32;
+      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 2 * cudf::detail::warp_size; break;
+      default: out_thread0 = cudf::detail::warp_size;
     }
   }
 
@@ -304,12 +303,12 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                        s->nz_count + (decode_block_size - out_thread0));
     } else {
       target_pos = min(s->nz_count, src_pos + decode_block_size - out_thread0);
-      if (out_thread0 > 32) { target_pos = min(target_pos, s->dict_pos); }
+      if (out_thread0 > cudf::detail::warp_size) { target_pos = min(target_pos, s->dict_pos); }
     }
     // this needs to be here to prevent warp 3 modifying src_pos before all threads have read it
     __syncthreads();
     auto const tile_warp = cg::tiled_partition<cudf::detail::warp_size>(cg::this_thread_block());
-    if (t < 32) {
+    if (t < cudf::detail::warp_size) {
       // decode repetition and definition levels.
       // - update validity vectors
       // - updates offsets (for nested columns)
