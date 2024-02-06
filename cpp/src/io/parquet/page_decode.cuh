@@ -498,7 +498,7 @@ __device__ void gpuDecodeStream(
     }
     if (s->error) { break; }
 
-    batch_len = min(num_input_values - value_count, 32);
+    batch_len = min(num_input_values - value_count, cudf::detail::warp_size);
     if (level_run & 1) {
       // Literal run
       int batch_len8;
