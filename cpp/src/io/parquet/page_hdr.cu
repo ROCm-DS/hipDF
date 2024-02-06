@@ -431,9 +431,9 @@ struct gpuParsePageHeader {
  * @param[in] chunks List of column chunks
  * @param[in] num_chunks Number of column chunks
  */
-// blockDim {128,1,1}
+// blockDim {4 * cudf::detail::warp_size,1,1}
 CUDF_KERNEL
-void __launch_bounds__(128) gpuDecodePageHeaders(ColumnChunkDesc* chunks,
+void __launch_bounds__(4 * cudf::detail::warp_size) gpuDecodePageHeaders(ColumnChunkDesc* chunks,
                                                  chunk_page_info* chunk_pages,
                                                  int32_t num_chunks,
                                                  kernel_error::pointer error_code)
@@ -625,7 +625,8 @@ void __host__ DecodePageHeaders(ColumnChunkDesc* chunks,
                                 kernel_error::pointer error_code,
                                 rmm::cuda_stream_view stream)
 {
-  dim3 dim_block(128, 1);
+  //: TODO(HIP/AMD): does it make sense to use less warps/threads on AMD backend?
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
 
   gpuDecodePageHeaders<<<dim_grid, dim_block, sizeof(byte_stream_s) * 4, stream.value()>>>(
