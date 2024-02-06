@@ -1437,7 +1437,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
       __syncthreads();
       while (s->rle_numvals < s->page.num_rows) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nrows       = min(s->page.num_rows - rle_numvals, 128);
+        uint32_t nrows       = min(s->page.num_rows - rle_numvals, cudf::detail::warp_size * 4);
         auto row             = s->page.start_row + rle_numvals + t;
         // Definition level encodes validity. Checks the valid map and if it is valid, then sets the
         // def_lvl accordingly and sets it in s->vals which is then given to RleEncode to encode
@@ -1480,7 +1480,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
         RleEncode(s, rle_numvals, def_lvl_bits, (rle_numvals == s->page.num_rows), t);
         __syncthreads();
       }
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur     = s->cur;
         uint8_t* const rle_out = s->rle_out;
         // V2 does not write the RLE length field
@@ -1514,7 +1514,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
       size_type col_last_val_idx   = s->col.level_offsets[s->col.num_rows];
       while (s->rle_numvals < s->page.num_values) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nvals       = min(s->page.num_values - rle_numvals, 128);
+        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * cudf::detail::warp_size);
         uint32_t idx         = page_first_val_idx + rle_numvals + t;
         uint32_t lvl_val =
           (rle_numvals + t < s->page.num_values && idx < col_last_val_idx) ? lvl_val_data[idx] : 0;
@@ -1524,7 +1524,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
         RleEncode(s, rle_numvals, nbits, (rle_numvals == s->page.num_values), t);
         __syncthreads();
       }
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur     = s->cur;
         uint8_t* const rle_out = s->rle_out;
         // V2 does not write the RLE length field
