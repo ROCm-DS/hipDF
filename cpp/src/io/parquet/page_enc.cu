@@ -127,7 +127,7 @@ struct page_enc_state_s {
   uint32_t rle_rpt_count;
   uint32_t page_start_val;
   uint32_t chunk_start_val;
-  uint32_t rpt_map[num_encode_warps];
+  bitmask_type rpt_map[num_encode_warps];
   EncPage page;
   EncColumnChunk ck;
   parquet_column_device_view col;
@@ -1193,7 +1193,7 @@ static __device__ void RleEncode(
       if (lane_id == 0) { s->rpt_map[warp_id] = mask; }
       __syncthreads();
       if (t < warp_size) {
-        uint32_t c32 = ballot(t >= 4 || s->rpt_map[t] != 0xffff'ffffu);
+        uint32_t c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
         if (t == 0) {
           uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
@@ -1220,7 +1220,7 @@ static __device__ void RleEncode(
       // New run or in a literal run
       uint32_t v0      = s->vals[rolling_idx(pos)];
       uint32_t v1      = s->vals[rolling_idx(pos + 1)];
-      uint32_t mask    = ballot(pos + 1 < numvals && v0 == v1);
+      bitmask_type mask    = ballot(pos + 1 < numvals && v0 == v1);
       uint32_t maxvals = min(numvals - rle_pos, encode_block_size);
       uint32_t rle_lit_count, rle_rpt_count;
       if (lane_id == 0) { s->rpt_map[warp_id] = mask; }
@@ -1229,10 +1229,11 @@ static __device__ void RleEncode(
         // Repeat run can only start on a multiple of 8 values
         uint32_t idx8        = (t * 8) / warp_size;
         uint32_t pos8        = (t * 8) % warp_size;
-        uint32_t m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
-        uint32_t m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
+        bitmask_type m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
+        bitmask_type m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
         uint32_t needed_mask = kRleRunMask[nbits - 1];
-        mask                 = ballot((__funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
+        //: TODO(HIP/AMD): make this portable for CUDA backend
+        mask                 = ballot((::cudf::detail::__m_funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
         if (!t) {
           uint32_t rle_run_start = (mask != 0) ? min((__FFS(mask) - 1) * 8, maxvals) : maxvals;
           uint32_t rpt_len       = 0;
@@ -1242,7 +1243,8 @@ static __device__ void RleEncode(
             while (idx_cur < 4) {
               m0   = (idx_cur < 4) ? s->rpt_map[idx_cur] : 0;
               m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
-              mask = ~__funnelshift_r(m0, m1, idx_ofs);
+              //: TODO(HIP/AMD): make this portable for CUDA backend
+              mask = ~::cudf::detail::__m_funnelshift_r(m0, m1, idx_ofs);
               if (mask != 0) {
                 rpt_len += __FFS(mask) - 1;
                 break;
