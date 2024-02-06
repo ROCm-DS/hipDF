@@ -625,16 +625,16 @@ __device__ void gpuDecodeStream(
  */
 inline __device__ void store_validity(int valid_map_offset,
                                       bitmask_type* valid_map,
-                                      uint32_t valid_mask,
+                                      bitmask_type valid_mask,
                                       int32_t value_count)
 {
-  int word_offset = valid_map_offset / 32;
-  int bit_offset  = valid_map_offset % 32;
+  int word_offset = valid_map_offset / cudf::detail::warp_size;
+  int bit_offset  = valid_map_offset % cudf::detail::warp_size;
   // if we fit entirely in the output word
-  if (bit_offset + value_count <= 32) {
-    auto relevant_mask = static_cast<uint32_t>((static_cast<uint64_t>(1) << value_count) - 1);
+  if (bit_offset + value_count <= cudf::detail::warp_size) {
+    auto relevant_mask =  (value_count == cudf::detail::warp_size) ? LANE_MASK_ALL :  (static_cast<uint64_t>(1) << value_count) - 1;
 
-    if (relevant_mask == ~0) {
+    if (relevant_mask == LANE_MASK_ALL) {
       valid_map[word_offset] = valid_mask;
     } else {
       atomicAnd(valid_map + word_offset, ~(relevant_mask << bit_offset));
@@ -647,17 +647,17 @@ inline __device__ void store_validity(int valid_map_offset,
   // however, some basic performance tests shows almost no difference between these two
   // methods. More detailed performance testing might be worthwhile here.
   else {
-    uint32_t bits_left = 32 - bit_offset;
+    uint32_t bits_left = cudf::detail::warp_size - bit_offset;
 
     // first word. strip bits_left bits off the beginning and store that
-    uint32_t relevant_mask = ((1 << bits_left) - 1);
-    uint32_t mask_word0    = valid_mask & relevant_mask;
+    bitmask_type relevant_mask = ((1 << bits_left) - 1);
+    bitmask_type mask_word0    = valid_mask & relevant_mask;
     atomicAnd(valid_map + word_offset, ~(relevant_mask << bit_offset));
     atomicOr(valid_map + word_offset, mask_word0 << bit_offset);
 
     // second word. strip the remainder of the bits off the end and store that
     relevant_mask       = ((1 << (value_count - bits_left)) - 1);
-    uint32_t mask_word1 = valid_mask & (relevant_mask << bits_left);
+    bitmask_type mask_word1 = valid_mask & (relevant_mask << bits_left);
     atomicAnd(valid_map + word_offset + 1, ~(relevant_mask));
     atomicOr(valid_map + word_offset + 1, mask_word1 >> bits_left);
   }
@@ -768,9 +768,9 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
     // track (page-relative) row index for the thread so we can compare against input bounds
     // keep track of overall # of rows we've read.
     int const is_new_row               = start_depth == 0 ? 1 : 0;
-    uint32_t const warp_row_count_mask = ballot(is_new_row);
+    bitmask_type const warp_row_count_mask = ballot(is_new_row);
     int32_t const thread_row_index =
-      input_row_count + ((__POPC(warp_row_count_mask & ((1 << t) - 1)) + is_new_row) - 1);
+      input_row_count + ((__POPC(warp_row_count_mask & ((static_cast<bitmask_type>(1) << t) - 1)) + is_new_row) - 1);
     input_row_count += __POPC(warp_row_count_mask);
     // is this thread within read row bounds?
     int const in_row_bounds = thread_row_index >= s->row_index_lower_bound &&
@@ -779,12 +779,12 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
                                 : 0;
 
     // compute warp and thread value counts
-    uint32_t const warp_count_mask =
+    bitmask_type const warp_count_mask =
       ballot((0 >= start_depth && 0 <= end_depth) && in_row_bounds ? 1 : 0);
 
     warp_value_count = __POPC(warp_count_mask);
     // Note : ((1 << t) - 1) implies "for all threads before me"
-    thread_value_count = __POPC(warp_count_mask & ((1 << t) - 1));
+    thread_value_count = __POPC(warp_count_mask & ((static_cast<bitmask_type>(1) << t) - 1));
 
     // walk from 0 to max_depth
     uint32_t next_thread_value_count, next_warp_value_count;
@@ -799,7 +799,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
       uint32_t const is_valid = d >= nesting_info->max_def_level && in_nesting_bounds ? 1 : 0;
 
       // compute warp and thread valid counts
-      uint32_t const warp_valid_mask =
+      bitmask_type const warp_valid_mask =
         // for flat schemas, a simple ballot_sync gives us the correct count and bit positions
         // because every value in the input matches to a value in the output
         !has_repetition
@@ -810,9 +810,9 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
           // the validity bit for thread t might actually represent output value t-6. the correct
           // position for thread t's bit is thread_value_count. for cuda 11 we could use
           // __reduce_or_sync(), but until then we have to do a warp reduce.
-          WarpReduceOr32(is_valid << thread_value_count);
+          WarpReduceOr64(is_valid << thread_value_count);
 
-      thread_valid_count = __POPC(warp_valid_mask & ((1 << thread_value_count) - 1));
+      thread_valid_count = __POPC(warp_valid_mask & ((static_cast<bitmask_type>(1) << thread_value_count) - 1));
       warp_valid_count   = __POPC(warp_valid_mask);
 
       // if this is the value column emit an index for value decoding
@@ -828,10 +828,10 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
       // level. more concretely : the offset for the current nesting level == current length of the
       // next nesting level
       if (s_idx < max_depth - 1) {
-        uint32_t const next_warp_count_mask =
+        bitmask_type const next_warp_count_mask =
           ballot((s_idx + 1 >= start_depth && s_idx + 1 <= end_depth && in_row_bounds) ? 1 : 0);
         next_warp_value_count   = __POPC(next_warp_count_mask);
-        next_thread_value_count = __POPC(next_warp_count_mask & ((1 << t) - 1));
+        next_thread_value_count = __POPC(next_warp_count_mask & ((static_cast<bitmask_type>(1) << t) - 1));
 
         // if we're -not- at a leaf column and we're within nesting/row bounds
         // and we have a valid data_out pointer, it implies this is a list column, so
@@ -864,7 +864,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
       // increment count of valid values, count of total values, and update validity mask
       if (!t) {
         if (nesting_info->valid_map != nullptr && warp_valid_mask_bit_count > 0) {
-          uint32_t const warp_output_valid_mask = warp_valid_mask >> first_thread_in_write_range;
+          bitmask_type const warp_output_valid_mask = warp_valid_mask >> first_thread_in_write_range;
           store_validity(nesting_info->valid_map_offset,
                          nesting_info->valid_map,
                          warp_output_valid_mask,
@@ -881,7 +881,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
       thread_value_count = next_thread_value_count;
     }
 
-    input_value_count += min(32, (target_input_value_count - input_value_count));
+    input_value_count += min(cudf::detail::warp_size, (target_input_value_count - input_value_count));
     __syncwarp();
   }
 
@@ -1326,8 +1326,8 @@ inline __device__ bool setupLocalPageInfo(page_state_s* const s,
             }
             nesting_info->valid_map = s->col.valid_map_base[idx];
             if (nesting_info->valid_map != nullptr) {
-              nesting_info->valid_map += output_offset >> 5;
-              nesting_info->valid_map_offset = (int32_t)(output_offset & 0x1f);
+              nesting_info->valid_map += output_offset >> LOG2_WARPSIZE;
+              nesting_info->valid_map_offset = (int32_t)(output_offset & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
             }
           }
         }

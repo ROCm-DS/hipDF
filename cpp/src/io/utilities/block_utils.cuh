@@ -92,6 +92,14 @@ inline __device__ T WarpReduceOr32(T acc)
 }
 
 template <typename T>
+inline __device__ T WarpReduceOr64(T acc)
+{
+  acc = WarpReduceOr32(acc);
+  return acc | shuffle_xor(acc, 32);
+}
+
+
+template <typename T>
 inline __device__ T WarpReducePos2(T pos, uint32_t t)
 {
   T tmp = shuffle(pos, t & 0x1e);
