@@ -1014,7 +1014,6 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
                  device_span<compression_result> comp_results,
                  bool write_v2_headers)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   __shared__ __align__(8) page_enc_state_s state_g;
   using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
@@ -1025,7 +1024,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   } temp_storage;
 
   page_enc_state_s* const s = &state_g;
-  auto const t              = thread_idx_shrink(threadIdx.x);
+  auto const t              = threadIdx.x;
 
   if (t == 0) {
     state_g = page_enc_state_s{};
@@ -1063,7 +1062,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
       __syncthreads();
       while (s->rle_numvals < s->page.num_rows) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nrows       = min(s->page.num_rows - rle_numvals, 128);
+        uint32_t nrows       = min(s->page.num_rows - rle_numvals, cudf::detail::warp_size * 4);
         auto row             = s->page.start_row + rle_numvals + t;
         // Definition level encodes validity. Checks the valid map and if it is valid, then sets the
         // def_lvl accordingly and sets it in s->vals which is then given to RleEncode to encode
@@ -1099,7 +1098,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
         RleEncode(s, rle_numvals, def_lvl_bits, (rle_numvals == s->page.num_rows), t);
         __syncthreads();
       }
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur       = s->cur;
         uint8_t* const rle_out   = s->rle_out;
         uint32_t const rle_bytes = static_cast<uint32_t>(rle_out - cur) - (is_v2 ? 0 : 4);
@@ -1132,7 +1131,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
       size_type col_last_val_idx   = s->col.level_offsets[s->col.num_rows];
       while (s->rle_numvals < s->page.num_values) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nvals       = min(s->page.num_values - rle_numvals, 128);
+        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * cudf::detail::warp_size);
         uint32_t idx         = page_first_val_idx + rle_numvals + t;
         uint32_t lvl_val =
           (rle_numvals + t < s->page.num_values && idx < col_last_val_idx) ? lvl_val_data[idx] : 0;
@@ -1142,7 +1141,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
         RleEncode(s, rle_numvals, nbits, (rle_numvals == s->page.num_values), t);
         __syncthreads();
       }
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur       = s->cur;
         uint8_t* const rle_out   = s->rle_out;
         uint32_t const rle_bytes = static_cast<uint32_t>(rle_out - cur) - (is_v2 ? 0 : 4);
@@ -1196,7 +1195,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   __syncthreads();
   uint32_t num_valid = 0;
   for (uint32_t cur_val_idx = 0; cur_val_idx < s->page.num_leaf_values;) {
-    uint32_t nvals = min(s->page.num_leaf_values - cur_val_idx, 128);
+    uint32_t nvals = min(s->page.num_leaf_values - cur_val_idx, 4 * cudf::detail::warp_size);
     uint32_t len, pos;
 
     auto [is_valid, val_idx] = [&]() {
@@ -2329,6 +2328,8 @@ void EncodePages(device_span<gpu::EncPage> pages,
   auto num_pages = pages.size();
   // A page is part of one column. This is launching 1 block per page. 1 block will exclusively
   // deal with one datatype.
+
+  //: TODO(HIP/AMD): decrease this to 128 threads like on CUDA for better performance?
   gpuEncodePages<4 * cudf::detail::warp_size><<<num_pages, 4 * cudf::detail::warp_size, 0, stream.value()>>>(
     pages, comp_in, comp_out, comp_results, write_v2_headers);
 }
