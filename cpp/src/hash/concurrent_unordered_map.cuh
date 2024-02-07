@@ -567,5 +567,4 @@ class concurrent_unordered_map {
 
       CUDF_CHECK_CUDA(stream.value());
     }
-  }
 };
