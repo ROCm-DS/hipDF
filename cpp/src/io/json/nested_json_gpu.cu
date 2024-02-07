@@ -656,6 +656,7 @@ struct PdaSymbolToSymbolGroupId {
       symbol_gid = 0;
     else
       symbol_gid = tos_sg_to_pda_sgid[sgid_lookup_idx];
+)
     return stack_idx * static_cast<PdaSymbolGroupIdT>(symbol_group_id::NUM_PDA_INPUT_SGS) +
            symbol_gid;
   }
