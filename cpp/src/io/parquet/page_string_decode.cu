@@ -58,6 +58,7 @@ namespace cg = cooperative_groups;
 
 namespace {
 
+// TODO(HIP/AMD): investigate the setting of these constants
 constexpr int preprocess_block_size    = 512;
 constexpr int delta_preproc_block_size = 64;
 constexpr int delta_length_block_size  = 32;
