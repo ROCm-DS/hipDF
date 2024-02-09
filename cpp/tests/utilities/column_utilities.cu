@@ -553,7 +553,7 @@ struct column_comparator_impl {
     using ComparatorType =
       std::conditional_t<check_exact_equality,
                          corresponding_rows_unequal<decltype(device_comparator)>,
-                         corresponding_rows_not_equivalent<decltype(device_comparator)>>;                                  
+                         corresponding_rows_not_equivalent<decltype(device_comparator)>>;
 
     auto differences = rmm::device_uvector<int>(
       lhs_row_indices.size(),
