@@ -554,7 +554,7 @@ struct column_comparator_impl {
     using ComparatorType =
       std::conditional_t<check_exact_equality,
                          corresponding_rows_unequal<decltype(device_comparator)>,
-                         corresponding_rows_not_equivalent<decltype(device_comparator)>>;                                  
+                         corresponding_rows_not_equivalent<decltype(device_comparator)>>;
 
     auto differences = rmm::device_uvector<int>(
       lhs_row_indices.size(),
@@ -844,6 +844,7 @@ bool expect_columns_equal(cudf::column_view const& lhs,
                           cudf::column_view const& rhs,
                           debug_output_level verbosity)
 {
+  std::cout<<"checking column"<<std::endl;
   auto lhs_indices = generate_all_row_indices(lhs.size());
   auto rhs_indices = generate_all_row_indices(rhs.size());
   return cudf::type_dispatcher(lhs.type(),
