@@ -331,7 +331,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   }
 }
 
-// blockDim {128,1,1}
+// blockDim {4 * cudf::detail::warp_size,1,1}
 __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitPages(device_2dspan<EncColumnChunk> chunks,
                device_span<gpu::EncPage> pages,
@@ -346,7 +346,6 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
                uint32_t page_align,
                bool write_v2_headers)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   // TODO: All writing seems to be done by thread 0. Could be replaced by thrust foreach
   __shared__ __align__(8) parquet_column_device_view col_g;
@@ -356,7 +355,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   //extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
   extern __shared__ statistics_merge_group pagestats_g[];
 
-  uint32_t const t          = thread_idx_shrink(threadIdx.x);
+  uint32_t const t          = threadIdx.x;
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
 
   if (t == 0) {
@@ -365,7 +364,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
     page_g = {};
   }
   __syncthreads();
-  if (t < 32) {
+  if (t < cudf::detail::warp_size) {
     uint32_t fragments_in_chunk  = 0;
     uint32_t rows_in_page        = 0;
     uint32_t values_in_page      = 0;
