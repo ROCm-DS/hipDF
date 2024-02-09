@@ -844,7 +844,6 @@ bool expect_columns_equal(cudf::column_view const& lhs,
                           cudf::column_view const& rhs,
                           debug_output_level verbosity)
 {
-  std::cout<<"checking column"<<std::endl;
   auto lhs_indices = generate_all_row_indices(lhs.size());
   auto rhs_indices = generate_all_row_indices(rhs.size());
   return cudf::type_dispatcher(lhs.type(),
