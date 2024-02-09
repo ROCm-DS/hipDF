@@ -63,6 +63,7 @@ __device__ size_type gpuDecodeTotalPageStringSize(page_state_s* s, int t)
     target_pos = new_target_pos;
     str_len    = len;
   } else if ((s->col.data_type & 7) == BYTE_ARRAY) {
+    //Caution: The result is only valid on thread 0!
     str_len = gpuInitStringDescriptors<true, unused_state_buf>(s, nullptr, target_pos, t);
   }
   if (!t) { *(int32_t volatile*)&s->dict_pos = target_pos; }
@@ -351,8 +352,13 @@ __global__ void __launch_bounds__(preprocess_block_size)
 
   // retrieve total string size.
   // TODO: make this block-based instead of just 1 warp
+
+  // Caution: There is a path in gpuDecodeTotalPageStringSize where str_bytes only contains the correct result on t == 0.
+  // This is why we only let thread 0 write the final result into shared memory.
   if (compute_string_sizes) {
-    if (t < cudf::detail::warp_size) { s->page.str_bytes = gpuDecodeTotalPageStringSize(s, t); }
+    size_t str_bytes = 0;
+    if (t < cudf::detail::warp_size) { str_bytes = gpuDecodeTotalPageStringSize(s, t); }
+    if (!t) s->page.str_bytes = str_bytes;
   }
 
   // update output results:
