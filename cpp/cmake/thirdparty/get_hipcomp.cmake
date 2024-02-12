@@ -23,6 +23,7 @@ function(find_and_configure_hipcomp)
   )
 
   # Per-thread default stream
+  target_compile_definitions(hipcomp PRIVATE "CG_WORKAROUND") # TODO(HIP): Remove it later
   if(TARGET hipcomp AND HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
     target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__)
   endif()

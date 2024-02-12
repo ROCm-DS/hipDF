@@ -539,7 +539,20 @@ class concurrent_unordered_map {
       hipPointerAttribute_t hashtbl_values_ptr_attributes;
       hipError_t status =
         hipPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
-
+      // https://github.com/AMD-AI/hipdf/issues/86
+      // https://ontrack-internal.amd.com/browse/SWDEV-444830
+      // HIP: If capacity == 0, m_hashtbl_values is nullptr 
+      // and hipPointerGetAttributes returns hipErrorInvalidValue.
+      // This HIP behavior aims to match CUDA < 11.0. Therefore, in accordance with CUDA < 11.0, 
+      // we have to expect hipErrorInvalidValue if we pass an unregistered host pointer or 
+      // the nullptr to hipPointerGetAttributes.
+      // In this case, we can safely ignore the error.
+#ifdef __HIP_PLATFORM_AMD__
+      if (status == hipErrorInvalidValue && m_hashtbl_values == nullptr) {
+        // error is normal for non-device memory -- clear the error 
+        static_cast<void>(hipGetLastError());
+      }
+#endif
       if (hipSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
         int dev_id = 0;
         CUDF_CUDA_TRY(hipGetDevice(&dev_id));
