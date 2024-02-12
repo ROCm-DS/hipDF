@@ -559,12 +559,13 @@ class concurrent_unordered_map {
         CUDF_CUDA_TRY(hipMemPrefetchAsync(
           m_hashtbl_values, m_capacity * sizeof(value_type), dev_id, stream.value()));
       }
-
-      if (m_capacity > 0) {
-        init_hashtbl<<<((m_capacity - 1) / block_size) + 1, block_size, 0, stream.value()>>>(
-          m_hashtbl_values, m_capacity, m_unused_key, m_unused_element);
-      }
-
-      CUDF_CHECK_CUDA(stream.value());
     }
+
+    if (m_capacity > 0) {
+      init_hashtbl<<<((m_capacity - 1) / block_size) + 1, block_size, 0, stream.value()>>>(
+        m_hashtbl_values, m_capacity, m_unused_key, m_unused_element);
+    }
+
+    CUDF_CHECK_CUDA(stream.value());
+  }
 };
