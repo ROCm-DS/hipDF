@@ -47,6 +47,7 @@ function(find_and_configure_hipcomp)
   target_compile_definitions(hipcomp PRIVATE CG_WORKAROUND) #TODO(HIP/AMD): This is required to work around SWDEV-440342, remove when resolved
 
   # Per-thread default stream
+  target_compile_options(hipcomp PRIVATE "-DCG_WORKAROUND")
   if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
     target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__)
   endif()
