@@ -10,6 +10,7 @@ python/cudf/cudf/utils/__pycache__/
 python/cudf/dist/cudf-23.10.0.0-cp310-cp310-linux_x86_64.whl
 python/dask_cudf/build/
 python/dask_cudf/dask_cudf.egg-info/
+python/cudf/cudf.egg-info/
 python/cudf/cudf/utils/metadata/orc_column_statistics_pb2.py
 python/cudf/cudf/tests/dataframe/__pycache__/
 python/cudf/cudf/tests/general_functions/__pycache__/
