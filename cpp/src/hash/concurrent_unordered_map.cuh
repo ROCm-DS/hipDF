@@ -558,7 +558,6 @@ class concurrent_unordered_map {
         CUDF_CUDA_TRY(hipGetDevice(&dev_id));
         CUDF_CUDA_TRY(hipMemPrefetchAsync(
           m_hashtbl_values, m_capacity * sizeof(value_type), dev_id, stream.value()));
-)
       }
     }
 
