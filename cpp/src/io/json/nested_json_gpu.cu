@@ -651,12 +651,11 @@ struct PdaSymbolToSymbolGroupId {
     // In CUDA, For such cases, the negative index into array tos_sg_to_pda_sgid return always 0 (luck?).
     // We need this check and set symbol_grid to 0 for such cases.
     PdaSymbolGroupIdT symbol_gid;
-    auto _min = min(static_cast<int32_t>(symbol_position), pda_sgid_lookup_size - 1);
-    if(_min < 0)
+    auto sgid_lookup_idx = min(static_cast<int32_t>(symbol_position), pda_sgid_lookup_size - 1);
+    if(sgid_lookup_idx < 0)
       symbol_gid = 0;
     else
-      symbol_gid = tos_sg_to_pda_sgid[_min];
-)
+      symbol_gid = tos_sg_to_pda_sgid[sgid_lookup_idx];
     return stack_idx * static_cast<PdaSymbolGroupIdT>(symbol_group_id::NUM_PDA_INPUT_SGS) +
            symbol_gid;
   }
