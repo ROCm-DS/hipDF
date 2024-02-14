@@ -150,7 +150,9 @@ def test_column_slicing(pandas_input, offset, size):
 @pytest.mark.parametrize("scale", [0, 1, 2])
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal128Dtype, cudf.Decimal64Dtype, cudf.Decimal32Dtype],
+    # Todo(HIP): enable cudf.Decimal128Dtype when it is available
+    #[cudf.Decimal128Dtype, cudf.Decimal64Dtype, cudf.Decimal32Dtype],
+    [cudf.Decimal64Dtype, cudf.Decimal32Dtype],
 )
 def test_decimal_column_slicing(offset, size, precision, scale, decimal_type):
     col = cudf.core.column.as_column(pd.Series(np.random.rand(1000)))
@@ -413,11 +415,12 @@ def test_as_column_buffer(data, expected):
 @pytest.mark.parametrize(
     "data,pyarrow_kwargs,cudf_kwargs",
     [
-        (
-            [100, 200, 300],
-            {"type": pa.decimal128(3)},
-            {"dtype": cudf.core.dtypes.Decimal128Dtype(3, 0)},
-        ),
+        # Todo(HIP): enable when Decimal128 is available
+        #(
+        #    [100, 200, 300],
+        #    {"type": pa.decimal128(3)},
+        #    {"dtype": cudf.core.dtypes.Decimal128Dtype(3, 0)},
+        #),
         (
             [{"a": 1, "b": 3}, {"c": 2, "d": 4}],
             {},
