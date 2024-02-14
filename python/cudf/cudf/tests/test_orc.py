@@ -904,7 +904,7 @@ def test_empty_string_columns(data):
 @pytest.mark.parametrize("scale", [-3, 0, 3])
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
 )
 def test_orc_writer_decimal(tmpdir, scale, decimal_type):
     np.random.seed(0)
