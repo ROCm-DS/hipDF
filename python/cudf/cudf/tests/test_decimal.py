@@ -381,11 +381,12 @@ def test_decimal_invalid_precision():
         _ = cudf.Series([Decimal("300")], dtype=cudf.Decimal64Dtype(2, 1))
 
 
-def test_decimal_overflow():
-    s = cudf.Series([Decimal("0.0009384233522166997927180531650178250")])
-    result = s * s
-    assert_eq(cudf.Decimal128Dtype(precision=38, scale=37), result.dtype)
+# Todo(HIP): enable when decimal128 is available
+# def test_decimal_overflow():
+#     s = cudf.Series([Decimal("0.0009384233522166997927180531650178250")])
+#     result = s * s
+#     assert_eq(cudf.Decimal128Dtype(precision=38, scale=37), result.dtype)
 
-    s = cudf.Series([1, 2], dtype=cudf.Decimal128Dtype(precision=38, scale=0))
-    result = s * Decimal("1.0")
-    assert_eq(cudf.Decimal128Dtype(precision=38, scale=1), result.dtype)
+#     s = cudf.Series([1, 2], dtype=cudf.Decimal128Dtype(precision=38, scale=0))
+#     result = s * Decimal("1.0")
+#     assert_eq(cudf.Decimal128Dtype(precision=38, scale=1), result.dtype)
