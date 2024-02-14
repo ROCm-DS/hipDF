@@ -366,7 +366,7 @@ fi
 # Build and install the dask_hipdf Python package
 if buildAll || hasArg dask_hipdf; then
 
-    cd ${REPODIR}/python/dask_hipdf
+    cd ${REPODIR}/python/dask_cudf
     python -m pip install --no-build-isolation --no-deps .
 fi
 
