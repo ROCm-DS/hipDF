@@ -47,30 +47,34 @@ _UDF_STRING_PTR = types.CPointer(udf_string)
 
 
 # CUDA function declarations
+# TODO(HIP): add support declare_device to rocnumba
 # read-only (input is a string_view, output is a fixed with type)
-_string_view_len = cuda.declare_device("len", size_type(_STR_VIEW_PTR))
-_concat_string_view = cuda.declare_device(
-    "concat", types.void(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR)
-)
+# _string_view_len = cuda.declare_device("len", size_type(_STR_VIEW_PTR))
+# _concat_string_view = cuda.declare_device(
+#     "concat", types.void(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR)
+# )
 
-_string_view_replace = cuda.declare_device(
-    "replace",
-    types.void(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR),
-)
+# _string_view_replace = cuda.declare_device(
+#     "replace",
+#     types.void(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR),
+# )
 
 
 def _declare_binary_func(lhs, rhs, out, name):
+    # TODO(HIP): add support declare_device to rocnumba
     # Declare a binary function
-    return cuda.declare_device(
-        name,
-        out(lhs, rhs),
-    )
+    # return cuda.declare_device(
+    #     name,
+    #     out(lhs, rhs),
+    # )
+    return 
 
 
 def _declare_strip_func(name):
-    return cuda.declare_device(
-        name, size_type(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR)
-    )
+    # return cuda.declare_device(
+    #     name, size_type(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR)
+    # )
+    return 
 
 
 # A binary function of the form f(string, string) -> bool
@@ -106,16 +110,18 @@ _declare_bool_str_int_func = partial(
 
 
 def _declare_upper_or_lower(func):
-    return cuda.declare_device(
-        func,
-        types.void(
-            _UDF_STRING_PTR,
-            _STR_VIEW_PTR,
-            types.uintp,
-            types.uintp,
-            types.uintp,
-        ),
-    )
+    # TODO(HIP): add support declare_device to rocnumba
+    # return cuda.declare_device(
+    #     func,
+    #     types.void(
+    #         _UDF_STRING_PTR,
+    #         _STR_VIEW_PTR,
+    #         types.uintp,
+    #         types.uintp,
+    #         types.uintp,
+    #     ),
+    # )
+    return
 
 
 _string_view_isdigit = _declare_bool_str_int_func("pyisdigit")
@@ -130,11 +136,11 @@ _string_view_istitle = _declare_bool_str_int_func("pyistitle")
 _string_view_upper = _declare_upper_or_lower("upper")
 _string_view_lower = _declare_upper_or_lower("lower")
 
-
-_string_view_count = cuda.declare_device(
-    "pycount",
-    size_type(_STR_VIEW_PTR, _STR_VIEW_PTR),
-)
+# TODO(HIP): add support declare_device to rocnumba
+# _string_view_count = cuda.declare_device(
+#     "pycount",
+#     size_type(_STR_VIEW_PTR, _STR_VIEW_PTR),
+# )
 
 
 # casts
@@ -197,14 +203,15 @@ def cast_udf_string_to_string_view(context, builder, fromty, toty, val):
 
 
 # utilities
-_create_udf_string_from_string_view = cuda.declare_device(
-    "udf_string_from_string_view",
-    types.void(_STR_VIEW_PTR, _UDF_STRING_PTR),
-)
-_create_string_view_from_udf_string = cuda.declare_device(
-    "string_view_from_udf_string",
-    types.void(_UDF_STRING_PTR, _STR_VIEW_PTR),
-)
+# TODO(HIP): add support declare_device to rocnumba
+# _create_udf_string_from_string_view = cuda.declare_device(
+#     "udf_string_from_string_view",
+#     types.void(_STR_VIEW_PTR, _UDF_STRING_PTR),
+# )
+# _create_string_view_from_udf_string = cuda.declare_device(
+#     "string_view_from_udf_string",
+#     types.void(_UDF_STRING_PTR, _STR_VIEW_PTR),
+# )
 
 
 def call_create_udf_string_from_string_view(sv, udf_str):

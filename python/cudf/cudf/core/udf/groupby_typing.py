@@ -153,10 +153,11 @@ call_cuda_functions: dict[Any, Any] = {}
 
 
 def _register_cuda_binary_reduction_caller(funcname, lty, rty, retty):
-    cuda_func = cuda.declare_device(
-        f"Block{funcname}_{lty}_{rty}",
-        retty(types.CPointer(lty), types.CPointer(rty), group_size_type),
-    )
+    # TODO(HIP): add support declare_device to rocnumba
+    # cuda_func = cuda.declare_device(
+    #     f"Block{funcname}_{lty}_{rty}",
+    #     retty(types.CPointer(lty), types.CPointer(rty), group_size_type),
+    # )
 
     def caller(lhs, rhs, size):
         return cuda_func(lhs, rhs, size)
@@ -168,10 +169,11 @@ def _register_cuda_binary_reduction_caller(funcname, lty, rty, retty):
 
 
 def _register_cuda_unary_reduction_caller(funcname, inputty, retty):
-    cuda_func = cuda.declare_device(
-        f"Block{funcname}_{inputty}",
-        retty(types.CPointer(inputty), group_size_type),
-    )
+    # TODO(HIP): add support declare_device to rocnumba
+    # cuda_func = cuda.declare_device(
+    #     f"Block{funcname}_{inputty}",
+    #     retty(types.CPointer(inputty), group_size_type),
+    # )
 
     def caller(data, size):
         return cuda_func(data, size)
@@ -183,14 +185,15 @@ def _register_cuda_unary_reduction_caller(funcname, inputty, retty):
 
 
 def _register_cuda_idx_reduction_caller(funcname, inputty):
-    cuda_func = cuda.declare_device(
-        f"Block{funcname}_{inputty}",
-        types.int64(
-            types.CPointer(inputty),
-            types.CPointer(index_default_type),
-            group_size_type,
-        ),
-    )
+    # TODO(HIP): add support declare_device to rocnumba
+    # cuda_func = cuda.declare_device(
+    #     f"Block{funcname}_{inputty}",
+    #     types.int64(
+    #         types.CPointer(inputty),
+    #         types.CPointer(index_default_type),
+    #         group_size_type,
+    #     ),
+    # )
 
     def caller(data, index, size):
         return cuda_func(data, index, size)
