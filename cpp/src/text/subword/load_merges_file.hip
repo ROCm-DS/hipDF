@@ -85,17 +85,15 @@ std::unique_ptr<cudf::column> load_file_to_column(std::string const& filename_me
   return cudf::make_strings_column(d_chars, d_offsets, {}, 0);
 }
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
-#if 0
 std::unique_ptr<detail::merge_pairs_map_type> initialize_merge_pairs_map(
   cudf::column_device_view const& input, rmm::cuda_stream_view stream)
 {
   // Ensure capacity is at least (size/0.7) as documented here:
-  // https://github.com/NVIDIA/hipCollections/blob/6ec8b6dcdeceea07ab4456d32461a05c18864411/include/hipco/static_map.cuh#L179-L182
+  // https://github.com/NVIDIA/cuCollections/blob/6ec8b6dcdeceea07ab4456d32461a05c18864411/include/cuco/static_map.cuh#L179-L182
   auto merge_pairs_map = std::make_unique<merge_pairs_map_type>(
     static_cast<size_t>(input.size() * 2),  // capacity is 2x;
     hipco::empty_key{-1},
-    hipco::empty_value{-1},                  // empty value is not used
+    hipco::empty_value{-1},  // empty value is not used
     bpe_equal{input},
     probe_scheme{bpe_hasher{input}},
     hash_table_allocator_type{default_allocator<char>{}, stream},
@@ -126,12 +124,9 @@ std::unique_ptr<bpe_merge_pairs::bpe_merge_pairs_impl> create_bpe_merge_pairs_im
   return create_bpe_merge_pairs_impl(std::make_unique<cudf::column>(input.parent(), stream, mr),
                                      stream);
 }
-#endif
 
 }  // namespace
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
-#if 0
 std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filename_merges,
                                                        rmm::cuda_stream_view stream,
                                                        rmm::mr::device_memory_resource* mr)
@@ -140,11 +135,8 @@ std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filena
   return std::make_unique<bpe_merge_pairs>(std::move(input_column), stream, mr);
 }
 
-#endif
 }  // namespace detail
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
-#if 0 
 std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filename_merges,
                                                        rmm::mr::device_memory_resource* mr)
 {
@@ -178,5 +170,5 @@ bpe_merge_pairs::bpe_merge_pairs(cudf::strings_column_view const& input,
 }
 
 bpe_merge_pairs::~bpe_merge_pairs() = default;
-#endif
+
 }  // namespace nvtext

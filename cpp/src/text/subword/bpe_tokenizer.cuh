@@ -18,10 +18,9 @@
 
 #include <nvtext/bpe_tokenize.hpp>
 
-#include <hash/hash_allocator.cuh>
-
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_device_view.cuh>
+#include <cudf/hashing/detail/hash_allocator.cuh>
 #include <cudf/hashing/detail/murmurhash3_x86_32.cuh>
 #include <cudf/strings/string_view.cuh>
 
@@ -80,17 +79,15 @@ struct bpe_equal {
 
 using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
 
+using probe_scheme = hipco::experimental::linear_probing<1, bpe_hasher>;
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
-//using probe_scheme = hipco::experimental::linear_probing<1, bpe_hasher>;
-
-/*using merge_pairs_map_type = hipco::static_map<cudf::size_type,
+using merge_pairs_map_type = hipco::experimental::static_map<cudf::size_type,
                                                             cudf::size_type,
                                                             hipco::experimental::extent<std::size_t>,
                                                             hip::thread_scope_device,
                                                             bpe_equal,
                                                             probe_scheme,
-                                                            hash_table_allocator_type>;*/
+                                                            hash_table_allocator_type>;
 
 }  // namespace detail
 
@@ -100,18 +97,18 @@ using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allo
 using col_device_view = std::invoke_result_t<decltype(&cudf::column_device_view::create),
                                              cudf::column_view,
                                              rmm::cuda_stream_view>;
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
-// struct bpe_merge_pairs::bpe_merge_pairs_impl {
-//   std::unique_ptr<cudf::column> const merge_pairs;
-//   col_device_view const d_merge_pairs;
-//   //std::unique_ptr<detail::merge_pairs_map_type> merge_pairs_map;
 
-//   bpe_merge_pairs_impl(std::unique_ptr<cudf::column>&& merge_pairs,
-//                        col_device_view&& d_merge_pairs,
-//                        std::unique_ptr<detail::merge_pairs_map_type>&& merge_pairs_map);
+struct bpe_merge_pairs::bpe_merge_pairs_impl {
+  std::unique_ptr<cudf::column> const merge_pairs;
+  col_device_view const d_merge_pairs;
+  std::unique_ptr<detail::merge_pairs_map_type> merge_pairs_map;
 
-//   auto const get_merge_pairs() const { return *d_merge_pairs; }
-//   auto get_merge_pairs_ref() const { return merge_pairs_map->ref(hipco::experimental::op::find); }
-// };
+  bpe_merge_pairs_impl(std::unique_ptr<cudf::column>&& merge_pairs,
+                       col_device_view&& d_merge_pairs,
+                       std::unique_ptr<detail::merge_pairs_map_type>&& merge_pairs_map);
+
+  auto const get_merge_pairs() const { return *d_merge_pairs; }
+  auto get_merge_pairs_ref() const { return merge_pairs_map->ref(hipco::experimental::op::find); }
+};
 
 }  // namespace nvtext
