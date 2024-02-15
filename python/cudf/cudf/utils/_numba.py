@@ -29,7 +29,7 @@ def _get_ptx_file(path, prefix):
         # cc=60 ptx is always built
         cc = int(os.environ.get("STRINGS_UDF_CC", "60"))
     else:
-        from numba import cuda
+        import numba.roc as cuda #TODO(HIP): adapted for AMD
 
         dev = cuda.get_current_device()
 
