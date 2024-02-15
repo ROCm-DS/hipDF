@@ -12,7 +12,8 @@ from functools import partial
 import numpy as np
 import pandas as pd
 import pytest
-from numba import cuda
+# TODO(HIP): fix this import
+import numba.roc as cuda
 from numpy.testing import assert_array_equal
 
 import rmm
@@ -21,7 +22,8 @@ import cudf
 from cudf import DataFrame, Series
 from cudf.core._compat import PANDAS_GE_150, PANDAS_LT_140
 from cudf.core.udf.groupby_typing import SUPPORTED_GROUPBY_NUMPY_TYPES
-from cudf.core.udf.utils import precompiled
+# TODO(HIP): fix this import
+#from cudf.core.udf.utils import precompiled
 from cudf.testing._utils import (
     DATETIME_TYPES,
     SIGNED_TYPES,
