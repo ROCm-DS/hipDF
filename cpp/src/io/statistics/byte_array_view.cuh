@@ -120,7 +120,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if this byte_array_view is ordered before rhs
    */
-  [[nodiscard]] __device__ inline bool operator<(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]] __attribute__((noinline)) __device__ inline bool operator<(byte_array_view const& rhs) const
   {
     return compare(rhs) < 0;
   }
@@ -130,7 +133,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if rhs is ordered before this byte_array_view
    */
-  [[nodiscard]] __device__ inline bool operator>(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]] __attribute__((noinline)) __device__ inline bool operator>(byte_array_view const& rhs) const
   {
     return compare(rhs) > 0;
   }
@@ -141,7 +147,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if this byte_array_view is ordered before rhs
    */
-  [[nodiscard]] __device__ inline bool operator<=(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]]  __attribute__((noinline)) __device__ inline bool operator<=(byte_array_view const& rhs) const
   {
     return compare(rhs) <= 0;
   }
@@ -151,7 +160,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if rhs is ordered before this byte_array_view
    */
-  [[nodiscard]] __device__ inline bool operator>=(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]]  __attribute__((noinline)) __device__ inline bool operator>=(byte_array_view const& rhs) const
   {
     return compare(rhs) >= 0;
   }
@@ -161,14 +173,20 @@ class byte_array_view {
    *
    * @return An empty byte_array_view
    */
-  [[nodiscard]] __device__ inline static byte_array_view min() { return byte_array_view(); }
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]] __attribute__((noinline)) __device__ inline static byte_array_view min() { return byte_array_view(); }
 
   /**
    * @brief Return a byte_array_view to interpret as maximum value
    *
    * @return A byte_array_view value which represents the largest possible byte_array_view
    */
-  [[nodiscard]] __device__ inline static byte_array_view max()
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]]  __attribute__((noinline)) __device__ inline static byte_array_view max()
   {
     return byte_array_view(nullptr, std::numeric_limits<std::size_t>::max());
   }
