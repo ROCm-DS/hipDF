@@ -4,7 +4,7 @@ import numba
 import numpy as np
 import pandas as pd
 import pytest
-from numba import cuda
+from numba import roc as cuda
 from numba.core.typing import signature as nb_signature
 from numba.types import CPointer, void
 
@@ -12,17 +12,17 @@ import rmm
 
 import cudf
 # TODO(HIP): support strings_udf module
-# from cudf._lib.strings_udf import (
-#     column_from_udf_string_array,
-#     column_to_string_view_array,
-# )
+from cudf._lib.strings_udf import (
+    column_from_udf_string_array,
+    column_to_string_view_array,
+)
 from cudf.core.udf.strings_typing import (
     str_view_arg_handler,
     string_view,
     udf_string,
 )
 # TODO(HIP): support this import
-# from cudf.core.udf.utils import _PTX_FILE, _get_extensionty_size
+from cudf.core.udf.utils import _PTX_FILE, _get_extensionty_size
 from cudf.testing._utils import assert_eq, sv_to_udf_str
 from cudf.utils._numba import _CUDFNumbaConfig
 
@@ -45,7 +45,7 @@ def get_kernels(func, dtype, size):
         outty = numba.np.numpy_support.from_dtype(dtype)[::1]
     sig = nb_signature(void, CPointer(string_view), outty)
 
-    @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
+    # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def string_view_kernel(input_strings, output_col):
         id = cuda.grid(1)
         if id < size:
@@ -53,7 +53,7 @@ def get_kernels(func, dtype, size):
             result = func(st)
             output_col[id] = result
 
-    @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
+    # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def udf_string_kernel(input_strings, output_col):
         # test the string function with a udf_string as input
         id = cuda.grid(1)
