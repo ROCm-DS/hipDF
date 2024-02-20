@@ -185,7 +185,7 @@ def query_compile(expr):
 
 
 _kernel_source = """
-@cuda.jit
+# @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
 def {kernelname}(out, {args}):
     idx = cuda.grid(1)
     if idx < out.size:

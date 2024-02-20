@@ -69,7 +69,7 @@ def get_kernels(func, dtype, size):
         outty = numba.np.numpy_support.from_dtype(dtype)[::1]
     sig = nb_signature(void, CPointer(string_view), outty)
 
-    @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
+    # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def string_view_kernel(input_strings, output_col):
         id = cuda.grid(1)
         if id < size:
@@ -77,7 +77,7 @@ def get_kernels(func, dtype, size):
             result = func(st)
             output_col[id] = result
 
-    @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
+    # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def udf_string_kernel(input_strings, output_col):
             st = input_strings[id]
             st = sv_to_udf_str(st)

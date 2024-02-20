@@ -35,7 +35,7 @@ from cudf.utils._numba import _CUDFNumbaConfig
 #
 
 
-@cuda.jit
+# @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
 def gpu_window_sizes_from_offset(arr, window_sizes, offset):
     i = cuda.grid(1)
     j = i
@@ -57,7 +57,7 @@ def window_sizes_from_offset(arr, offset):
     return window_sizes
 
 
-@cuda.jit
+# @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
 def gpu_grouped_window_sizes_from_offset(
     arr, window_sizes, group_starts, offset
 ):
