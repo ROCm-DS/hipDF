@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/utilities/span.hpp>
@@ -135,7 +157,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if this byte_array_view is ordered before rhs
    */
-  [[nodiscard]] __device__ inline bool operator<(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue internal issue 93 and SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]] __attribute__((noinline)) __device__ inline bool operator<(byte_array_view const& rhs) const
   {
     return compare(rhs) < 0;
   }
@@ -145,7 +170,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if rhs is ordered before this byte_array_view
    */
-  [[nodiscard]] __device__ inline bool operator>(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue internal issue 93 and SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]] __attribute__((noinline)) __device__ inline bool operator>(byte_array_view const& rhs) const
   {
     return compare(rhs) > 0;
   }
@@ -156,7 +184,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if this byte_array_view is ordered before rhs
    */
-  [[nodiscard]] __device__ inline bool operator<=(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue internal issue 93 and SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]]  __attribute__((noinline)) __device__ inline bool operator<=(byte_array_view const& rhs) const
   {
     return compare(rhs) <= 0;
   }
@@ -166,7 +197,10 @@ class byte_array_view {
    * @param rhs Target byte_array_view to compare with this byte_array_view.
    * @return true if rhs is ordered before this byte_array_view
    */
-  [[nodiscard]] __device__ inline bool operator>=(byte_array_view const& rhs) const
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue internal issue 93 and SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]]  __attribute__((noinline)) __device__ inline bool operator>=(byte_array_view const& rhs) const
   {
     return compare(rhs) >= 0;
   }
@@ -176,14 +210,20 @@ class byte_array_view {
    *
    * @return An empty byte_array_view
    */
-  [[nodiscard]] __device__ inline static byte_array_view min() { return {}; }
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue internal issue 93 and SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]] __attribute__((noinline)) __device__ inline static byte_array_view min() { return {}; }
 
   /**
    * @brief Return a byte_array_view to interpret as maximum value
    *
    * @return A byte_array_view value which represents the largest possible byte_array_view
    */
-  [[nodiscard]] __device__ inline static byte_array_view max()
+  //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
+  // __attribute__((noinline)) works around this issue. See issue internal issue 93 and SWDEV-445786.
+  // To be resolved in upcoming ROCm release. 
+  [[nodiscard]]  __attribute__((noinline)) __device__ inline static byte_array_view max()
   {
     return {nullptr, cuda::std::numeric_limits<std::size_t>::max()};
   }
