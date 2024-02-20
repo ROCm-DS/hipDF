@@ -14,7 +14,7 @@ from cudf.core.udf.templates import (
     row_kernel_template,
     unmasked_input_initializer_template,
 )
-from cudf.core.udf.utils import (
+from cudf.core.udf.utils import ( 
     Row,
     _all_dtypes_from_frame,
     _construct_signature,
