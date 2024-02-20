@@ -1,4 +1,27 @@
 # Copyright (c) 2021-2024, NVIDIA CORPORATION.
+
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import operator
 
 import cupy as cp
@@ -73,11 +96,11 @@ def test_compile_masked_unary(op, ty):
 @pytest.mark.parametrize("op", arith_ops)
 @pytest.mark.parametrize("ty", number_types, ids=number_ids)
 def test_execute_masked_binary(op, ty):
-    @cuda.jit(device=True)
+    # @cuda.jit(device=True) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def func(x, y):
         return op(x, y)
 
-    @cuda.jit
+    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def test_kernel(x, y, err):
         # Reference result with unmasked value
         u = func(x, y)
@@ -203,7 +226,7 @@ def test_is_na(fn):
 
     device_fn = cuda.jit(device=True)(fn)
 
-    @cuda.jit
+    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def test_kernel(err):
         valid_is_na = device_fn(valid)
         invalid_is_na = device_fn(invalid)
@@ -289,7 +312,7 @@ na_comparison_funcs = (
 def test_na_masked_comparisons(fn, ty):
     device_fn = cuda.jit(device=True)(fn)
 
-    @cuda.jit
+    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def test_kernel(err):
         unmasked = ty(1)
         valid_masked = Masked(unmasked, True)
@@ -317,7 +340,7 @@ def test_na_masked_comparisons(fn, ty):
 def test_na_scalar_comparisons(fn, ty):
     device_fn = cuda.jit(device=True)(fn)
 
-    @cuda.jit
+    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def test_kernel(err):
         unmasked = ty(1)
 
