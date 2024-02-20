@@ -58,7 +58,7 @@ include(rapids-cython-core)
 rapids_cython_init()
 
 add_subdirectory(cudf/_lib)
-# add_subdirectory(udf_cpp) #: FIXME: Reenable UDFs when we know what to use as PTX equivalent
+add_subdirectory(udf_cpp)
 
 if(DEFINED cython_lib_dir)
   rapids_cython_add_rpath_entries(TARGET cudf PATHS "${cython_lib_dir}")

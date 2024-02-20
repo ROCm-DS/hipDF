@@ -12,6 +12,28 @@
 # the License.
 # =============================================================================
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 cmake_minimum_required(VERSION 3.26.4)
 
 include(rapids-cmake)
@@ -21,13 +43,15 @@ include(rapids-find)
 rapids_cpm_init()
 
 rapids_find_package(
-  CUDAToolkit REQUIRED
+  HIP REQUIRED
   BUILD_EXPORT_SET udf-exports
   INSTALL_EXPORT_SET udf-exports
 )
 
 include(${rapids-cmake-dir}/cpm/cccl.cmake)
 rapids_cpm_cccl(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+#include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
+#rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
 
 add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
 target_include_directories(
@@ -47,23 +71,24 @@ set_target_properties(
 )
 
 set(UDF_CXX_FLAGS)
-set(UDF_CUDA_FLAGS --expt-extended-lambda --expt-relaxed-constexpr)
+set(UDF_CUDA_FLAGS) # Todo: HIP/AMD: Removed --expt-extended-lambda --expt-relaxed-constexpr
 target_compile_options(
   cudf_strings_udf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${UDF_CXX_FLAGS}>"
-                           "$<$<COMPILE_LANGUAGE:CUDA>:${UDF_CUDA_FLAGS}>"
+                            "$<$<COMPILE_LANGUAGE:HIP>:${UDF_CUDA_FLAGS}>"
 )
 target_link_libraries(cudf_strings_udf PUBLIC cudf::cudf)
 install(TARGETS cudf_strings_udf DESTINATION ./cudf/_lib/)
 
 # Create the shim library for each architecture.
-set(SHIM_CUDA_FLAGS --expt-relaxed-constexpr -rdc=true)
+set(SHIM_CUDA_FLAGS -fgpu-rdc -S -emit-llvm) # Todo: HIP/AMD: Removed --expt-relaxed-constexpr -rdc=true
 
 # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
 # safely queried through a context
-list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "70")
+list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "gfx90a")
 
-list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
-list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
+# Todo: HIP/AMD: We dont supprt real and virtual archs
+# list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
+# list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
 list(SORT CMAKE_CUDA_ARCHITECTURES)
 list(REMOVE_DUPLICATES CMAKE_CUDA_ARCHITECTURES)
 
@@ -72,12 +97,12 @@ foreach(arch IN LISTS CMAKE_CUDA_ARCHITECTURES)
 
   add_library(${tgt} OBJECT shim.cu)
 
-  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch} CUDA_PTX_COMPILATION ON)
+  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch}) # Todo: HIP/AMD: Removed  CUDA_PTX_COMPILATION ON
 
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
   )
-  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${SHIM_CUDA_FLAGS}>")
+  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_CUDA_FLAGS}>")
   target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
   install(

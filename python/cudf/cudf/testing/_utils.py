@@ -1,27 +1,5 @@
 # Copyright (c) 2020-2024, NVIDIA CORPORATION.
 
-# MIT License
-#
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import itertools
 import string
 import time
@@ -41,8 +19,8 @@ import pylibcudf as plc
 
 import cudf
 from cudf.core.column.timedelta import _unit_to_nanoseconds_conversion
-#: from cudf.core.udf.strings_lowering import cast_string_view_to_udf_string #: TODO HIP/AMD reenable, uses udfs
-#: from cudf.core.udf.strings_typing import StringView, string_view, udf_string #: TODO HIP/AMD reenable, uses udfs
+from cudf.core.udf.strings_lowering import cast_string_view_to_udf_string
+from cudf.core.udf.strings_typing import StringView, string_view, udf_string
 from cudf.utils import dtypes as dtypeutils
 
 supported_numpy_dtypes = [
@@ -380,14 +358,14 @@ def sv_to_udf_str(sv):
     pass
 
 
-#: @cuda_decl_registry.register_global(sv_to_udf_str) #: TODO: HIP/AMD: enable when numba roc compiler enabled
+@cuda_decl_registry.register_global(sv_to_udf_str)
 class StringViewToUDFStringDecl(AbstractTemplate):
     def generic(self, args, kws):
         if isinstance(args[0], StringView) and len(args) == 1:
             return nb_signature(udf_string, string_view)
 
 
-#: @cuda_lower(sv_to_udf_str, string_view) #: TODO: HIP/AMD: enable when numba roc compiler enabled
+@cuda_lower(sv_to_udf_str, string_view)
 def sv_to_udf_str_testing_lowering(context, builder, sig, args):
     return cast_string_view_to_udf_string(
         context, builder, sig.args[0], sig.return_type, args[0]
