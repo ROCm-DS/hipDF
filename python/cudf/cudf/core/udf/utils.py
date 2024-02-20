@@ -17,10 +17,10 @@ from numba.types import CPointer, Poison, Record, Tuple, boolean, int64, void
 
 import rmm
 
-#: from cudf._lib.strings_udf import ( #: TODO: HIP/AMD: reenable when udf is enabled
-#:     column_from_udf_string_array,
-#:     column_to_string_view_array,
-#: )
+from cudf._lib.strings_udf import (
+    column_from_udf_string_array,
+    column_to_string_view_array,
+)
 from cudf.api.types import is_scalar
 from cudf.core.column.column import as_column
 from cudf.core.dtypes import dtype
@@ -203,7 +203,7 @@ class Row(Record):
 register_model(Row)(models.RecordModel)
 
 
-@cuda.jit(device=True)
+# @cuda.jit(device=True) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
 def _mask_get(mask, pos):
     """Return the validity of mask[pos] as a word."""
     return (mask[pos // MASK_BITSIZE] >> (pos % MASK_BITSIZE)) & 1

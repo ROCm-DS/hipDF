@@ -14,17 +14,17 @@ from cudf.core.udf.templates import (
     row_kernel_template,
     unmasked_input_initializer_template,
 )
-#: from cudf.core.udf.utils import ( #: TODO: HIP/AMD: reeneable when udf is available
-#:     Row,
-#:     _all_dtypes_from_frame,
-#:     _construct_signature,
-#:     _get_extensionty_size,
-#:     _get_kernel,
-#:     _get_udf_return_type,
-#:     _mask_get,
-#:     _supported_cols_from_frame,
-#:     _supported_dtypes_from_frame,
-#: )
+from cudf.core.udf.utils import ( 
+    Row,
+    _all_dtypes_from_frame,
+    _construct_signature,
+    _get_extensionty_size,
+    _get_kernel,
+    _get_udf_return_type,
+    _mask_get,
+    _supported_cols_from_frame,
+    _supported_dtypes_from_frame,
+)
 
 
 def _get_frame_row_type(dtype):

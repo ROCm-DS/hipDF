@@ -21,15 +21,15 @@ include(rapids-find)
 rapids_cpm_init()
 
 rapids_find_package(
-  CUDAToolkit REQUIRED
+  HIP REQUIRED
   BUILD_EXPORT_SET udf-exports
   INSTALL_EXPORT_SET udf-exports
 )
 
-include(${rapids-cmake-dir}/cpm/libcudacxx.cmake)
-rapids_cpm_libcudacxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
+rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
 
-add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
+add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.hip)
 target_include_directories(
   cudf_strings_udf PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
 )
@@ -47,10 +47,10 @@ set_target_properties(
 )
 
 set(UDF_CXX_FLAGS)
-set(UDF_CUDA_FLAGS --expt-extended-lambda --expt-relaxed-constexpr)
+set(UDF_CUDA_FLAGS) # Todo: HIP/AMD: Removed --expt-extended-lambda --expt-relaxed-constexpr
 target_compile_options(
   cudf_strings_udf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${UDF_CXX_FLAGS}>"
-                           "$<$<COMPILE_LANGUAGE:CUDA>:${UDF_CUDA_FLAGS}>"
+                            "$<$<COMPILE_LANGUAGE:HIP>:${UDF_CUDA_FLAGS}>"
 )
 target_link_libraries(cudf_strings_udf PUBLIC cudf::cudf)
 install(TARGETS cudf_strings_udf DESTINATION ./cudf/_lib/)
@@ -80,28 +80,29 @@ file(COPY_FILE \${ptx_path} \"${destination}/${new_name}\")"
 endfunction()
 
 # Create the shim library for each architecture.
-set(SHIM_CUDA_FLAGS --expt-relaxed-constexpr -rdc=true)
+set(SHIM_CUDA_FLAGS -fgpu-rdc -S -emit-llvm) # Todo: HIP/AMD: Removed --expt-relaxed-constexpr -rdc=true
 
 # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
 # safely queried through a context
-list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "60")
+list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "gfx90a")
 
-list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
-list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
+# Todo: HIP/AMD: We dont supprt real and virtual archs
+# list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
+# list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
 list(SORT CMAKE_CUDA_ARCHITECTURES)
 list(REMOVE_DUPLICATES CMAKE_CUDA_ARCHITECTURES)
 
 foreach(arch IN LISTS CMAKE_CUDA_ARCHITECTURES)
   set(tgt shim_${arch})
 
-  add_library(${tgt} OBJECT shim.cu)
+  add_library(${tgt} OBJECT shim.hip)
 
-  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch} CUDA_PTX_COMPILATION ON)
+  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch}) # Todo: HIP/AMD: Removed  CUDA_PTX_COMPILATION ON
 
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
   )
-  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${SHIM_CUDA_FLAGS}>")
+  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_CUDA_FLAGS}>")
   target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
   copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ptx)
