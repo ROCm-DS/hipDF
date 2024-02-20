@@ -296,6 +296,7 @@ __device__ void cooperative_load(T& destination, T const* source = nullptr)
       reinterpret_cast<load_type*>(&destination)[i] = load_type{0};
     }
   } else {
+    //: TODO(HIP/AMD): auto does not work here correctly and yields erroneous results/segfaults, see SWDEV-443265
     for (size_t i = threadIdx.x; i < sizeof(T) / sizeof(load_type); i += blockDim.x) {
       reinterpret_cast<load_type*>(&destination)[i] = reinterpret_cast<load_type const*>(source)[i];
     }
