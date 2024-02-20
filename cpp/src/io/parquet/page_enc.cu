@@ -509,16 +509,15 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   if (t == 0) { frag[blockIdx.x] = s->frag; }
 }
 
-// blockDim {128,1,1}
+// blockDim {4 * cudf::detail::warp_size,1,1}
 CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitFragmentStats(device_span<statistics_group> groups,
                        device_span<PageFragment const> fragments)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
-  int idx = thread_idx_shrink(threadIdx.x);
+  int idx = threadIdx.x;
   uint32_t const lane_id = idx & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (idx / 32);
+  uint32_t const frag_id = blockIdx.x * 4 + (idx / cudf::detail::warp_size);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
@@ -641,7 +640,7 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
   __shared__ __align__(8) PageFragment frag_g;
   __shared__ __align__(8) EncPage page_g;
   //extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
-  extern __shared__ statistics_merge_group pagestats_g[];
+  extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
 
   uint32_t const t          = threadIdx.x;
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
