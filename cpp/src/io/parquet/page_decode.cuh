@@ -632,7 +632,7 @@ inline __device__ void store_validity(int valid_map_offset,
   int bit_offset  = valid_map_offset % cudf::detail::warp_size;
   // if we fit entirely in the output word
   if (bit_offset + value_count <= cudf::detail::warp_size) {
-    auto relevant_mask =  (value_count == cudf::detail::warp_size) ? LANE_MASK_ALL :  (static_cast<uint64_t>(1) << value_count) - 1;
+    auto relevant_mask =  (value_count == cudf::detail::warp_size) ? LANE_MASK_ALL :  (static_cast<bitmask_type>(1) << value_count) - 1;
 
     if (relevant_mask == LANE_MASK_ALL) {
       valid_map[word_offset] = valid_mask;
@@ -650,13 +650,13 @@ inline __device__ void store_validity(int valid_map_offset,
     uint32_t bits_left = cudf::detail::warp_size - bit_offset;
 
     // first word. strip bits_left bits off the beginning and store that
-    bitmask_type relevant_mask = ((1 << bits_left) - 1);
+    bitmask_type relevant_mask = ((static_cast<bitmask_type>(1) << bits_left) - 1);
     bitmask_type mask_word0    = valid_mask & relevant_mask;
     atomicAnd(valid_map + word_offset, ~(relevant_mask << bit_offset));
     atomicOr(valid_map + word_offset, mask_word0 << bit_offset);
 
     // second word. strip the remainder of the bits off the end and store that
-    relevant_mask       = ((1 << (value_count - bits_left)) - 1);
+    relevant_mask       = ((static_cast<bitmask_type>(1) << (value_count - bits_left)) - 1);
     bitmask_type mask_word1 = valid_mask & (relevant_mask << bits_left);
     atomicAnd(valid_map + word_offset + 1, ~(relevant_mask));
     atomicOr(valid_map + word_offset + 1, mask_word1 >> bits_left);
@@ -810,7 +810,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
           // the validity bit for thread t might actually represent output value t-6. the correct
           // position for thread t's bit is thread_value_count. for cuda 11 we could use
           // __reduce_or_sync(), but until then we have to do a warp reduce.
-          WarpReduceOr64(is_valid << thread_value_count);
+          WarpReduceOr64(static_cast<uint64_t>(is_valid) << thread_value_count);
 
       thread_valid_count = __POPC(warp_valid_mask & ((static_cast<bitmask_type>(1) << thread_value_count) - 1));
       warp_valid_count   = __POPC(warp_valid_mask);
