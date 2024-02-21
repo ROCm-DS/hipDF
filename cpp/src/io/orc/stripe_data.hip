@@ -1049,9 +1049,9 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
           return (v * kPow5i[abs_scale]) << abs_scale;
         } else {
           auto const abs_scale = min(-scale, 27);
-#if 0 //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+#if 0 //: TODO(HIP/AMD): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
           return (v / kPow5i[abs_scale]) >> abs_scale;
-#endif //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+#endif //: TODO(HIP/AMD): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
           printf("Error: Trying to decode a decimal using int128_t division, which is not supported with hipclang yet. See https://ontrack-internal.amd.com/browse/SWDEV-426193\n");
         }
       }();
@@ -1700,7 +1700,7 @@ __global__ void __launch_bounds__(block_size)
         if (row < max_num_rows) {
           void* data_out = s->chunk.column_data_base;
           switch (s->chunk.type_kind) {
-            // Todo(HIP): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION' 
+            // TODO(HIP/AMD): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION' 
             // not handled in switch [-Werror,-Wswitch]
             case INVALID_TYPE_KIND: 
             case STRUCT: 
