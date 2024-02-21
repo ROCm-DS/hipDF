@@ -51,6 +51,6 @@ using thread_range = ::nvtx3::domain_thread_range<libcudf_domain>;
  */
 #define CUDF_FUNC_RANGE() NVTX3_FUNC_RANGE_IN(cudf::libcudf_domain)
 #else
-// TODO : FIXME for HIP
+// FIXME(HIP/AMD)
 #define CUDF_FUNC_RANGE()
 #endif

@@ -32,7 +32,7 @@ project(
             # language to be enabled here. The test project that is built in scikit-build to verify
             # various linking options for the python library is hardcoded to build with C, so until
             # that is fixed we need to keep C.
-            C CXX HIP #: FIXME: CUDA required for PTX codegen in python/cudf/udf_cpp, which we disable for the time being
+            C CXX HIP # FIXME(HIP/AMD): CUDA required for PTX codegen in python/cudf/udf_cpp, which we disable for the time being
 )
 
 option(FIND_CUDF_CPP "Search for existing CUDF C++ installations before defaulting to local files"
