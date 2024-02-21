@@ -433,7 +433,7 @@ class orc_writer_options {
   // Specify the sink to use for writer output
   sink_info _sink;
   // Specify the compression format to use
-  compression_type _compression = compression_type::NONE; //: TODO(HIP/AMD): change to AUTO when compression is supported
+  compression_type _compression = compression_type::AUTO;
   // Specify frequency of statistics collection
   statistics_freq _stats_freq = ORC_STATISTICS_ROW_GROUP;
   // Maximum size of each stripe (unless smaller than a single row group)
@@ -851,7 +851,7 @@ class chunked_orc_writer_options {
   // Specify the sink to use for writer output
   sink_info _sink;
   // Specify the compression format to use
-  compression_type _compression = compression_type::NONE; //: TODO(HIP/AMD): change to AUTO when compression is supported
+  compression_type _compression = compression_type::AUTO;
   // Specify granularity of statistics collection
   statistics_freq _stats_freq = ORC_STATISTICS_ROW_GROUP;
   // Maximum size of each stripe (unless smaller than a single row group)
