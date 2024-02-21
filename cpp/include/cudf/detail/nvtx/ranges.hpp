@@ -83,6 +83,6 @@ using scoped_range = ::nvtx3::scoped_range_in<libcudf_domain>;
  */
 #define CUDF_FUNC_RANGE() NVTX3_FUNC_RANGE_IN(cudf::libcudf_domain)
 #else
-// TODO : FIXME for HIP
+// FIXME(HIP/AMD)
 #define CUDF_FUNC_RANGE()
 #endif

@@ -550,13 +550,10 @@ struct column_comparator_impl {
 
     auto const device_comparator = comparator.equal_to<false>(cudf::nullate::DYNAMIC{has_nulls});
 
-// TODO FIXME
-//#if 0
     using ComparatorType =
       std::conditional_t<check_exact_equality,
                          corresponding_rows_unequal<decltype(device_comparator)>,
-                         corresponding_rows_not_equivalent<decltype(device_comparator)>>;
-//#endif                                    
+                         corresponding_rows_not_equivalent<decltype(device_comparator)>>;                                  
 
     auto differences = rmm::device_uvector<int>(
       lhs_row_indices.size(),
@@ -566,8 +563,6 @@ struct column_comparator_impl {
     auto diff_map =
       rmm::device_uvector<bool>(lhs_row_indices.size(), cudf::test::get_default_stream());
 
-// TODO FIXME
-#if 0
     thrust::transform(
       rmm::exec_policy(cudf::test::get_default_stream()),
       input_iter,
@@ -575,7 +570,6 @@ struct column_comparator_impl {
       diff_map.begin(),
       ComparatorType(
         *d_lhs_row_indices, *d_rhs_row_indices, fp_ulps, device_comparator, *d_lhs, *d_rhs));
-#endif
 
     auto diff_iter = thrust::copy_if(rmm::exec_policy(cudf::test::get_default_stream()),
                                      input_iter,
