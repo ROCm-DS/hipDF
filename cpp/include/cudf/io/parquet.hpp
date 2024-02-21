@@ -494,9 +494,9 @@ class parquet_writer_options {
   // Specify the sink to use for writer output
   sink_info _sink;
   // Specify the compression format to use
-  compression_type _compression = compression_type::NONE; //: TODO(HIP/AMD): enable default compression_type::SNAPPY;
+  compression_type _compression = compression_type::SNAPPY;
   // Specify the level of statistics in the output file
-  statistics_freq _stats_level = statistics_freq::STATISTICS_NONE; //: TODO(HIP/AMD): enable default statistics_freq::STATISTICS_ROWGROUP;
+  statistics_freq _stats_level = statistics_freq::STATISTICS_ROWGROUP;
   // Sets of columns to output
   table_view _table;
   // Partitions described as {start_row, num_rows} pairs
@@ -1137,9 +1137,9 @@ class chunked_parquet_writer_options {
   // Specify the sink to use for writer output
   sink_info _sink;
   // Specify the compression format to use
-  compression_type _compression = compression_type::NONE; //: TODO(HIP/AMD): enable default compression_type::AUTO;
+  compression_type _compression = compression_type::AUTO;
   // Specify the level of statistics in the output file
-  statistics_freq _stats_level = statistics_freq::STATISTICS_NONE; //: TODO(HIP/AMD): enable default statistics_freq::STATISTICS_ROWGROUP;
+  statistics_freq _stats_level = statistics_freq::STATISTICS_ROWGROUP;
   // Optional associated metadata.
   std::optional<table_input_metadata> _metadata;
   // Optional footer key_value_metadata
