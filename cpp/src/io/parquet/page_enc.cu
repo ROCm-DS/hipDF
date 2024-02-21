@@ -1099,7 +1099,7 @@ inline __device__ void PackLiteralsRoundRobin(
   // Scratch space to temporarily write to. Needed because we will use atomics to write 32 bit
   // words but the destination mem may not be a multiple of 4 bytes.
   // TODO (dm): This assumes blockdim = 128. Reduce magic numbers.
-  constexpr uint32_t NUM_THREADS  = 128;  // this needs to match gpuEncodePages block_size parameter
+  constexpr uint32_t NUM_THREADS  = 4 * cudf::detail::warp_size; // this needs to match gpuEncodePages block_size parameter
   constexpr uint32_t NUM_BYTES    = (NUM_THREADS * MAX_DICT_BITS) >> 3;
   constexpr uint32_t SCRATCH_SIZE = NUM_BYTES / sizeof(uint32_t);
   __shared__ uint32_t scratch[SCRATCH_SIZE];
@@ -2018,7 +2018,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
   }
 
   // save RLE length if necessary
-  if (s->rle_len_pos != nullptr && t < 32) {
+  if (s->rle_len_pos != nullptr && t < cudf::detail::warp_size) {
     // size doesn't include the 4 bytes for the length
     auto const rle_size = static_cast<uint32_t>(s->cur - s->rle_len_pos) - RLE_LENGTH_FIELD_LEN;
     if (t < RLE_LENGTH_FIELD_LEN) { s->rle_len_pos[t] = rle_size >> (t * 8); }
