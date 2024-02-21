@@ -43,14 +43,14 @@ struct compressed_stream_s {
 };
 
 // blockDim {128,1,1}
-__global__ void __launch_bounds__(128, 8) gpuParseCompressedStripeData(
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseCompressedStripeData(
   CompressedStreamInfo* strm_info, int32_t num_streams, uint32_t block_size, uint32_t log2maxcr)
 {
   extern __shared__ compressed_stream_s strm_g[];
 
-  compressed_stream_s* const s = &strm_g[threadIdx.x / 32];
-  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / 32);
-  int lane_id                  = threadIdx.x % 32;
+  compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
+  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  int lane_id                  = threadIdx.x % cudf::detail::warp_size;
 
   if (strm_id < num_streams && lane_id == 0) { s->info = strm_info[strm_id]; }
 
@@ -140,14 +140,14 @@ __global__ void __launch_bounds__(128, 8) gpuParseCompressedStripeData(
 }
 
 // blockDim {128,1,1}
-__global__ void __launch_bounds__(128, 8)
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   gpuPostDecompressionReassemble(CompressedStreamInfo* strm_info, int32_t num_streams)
 {
   extern __shared__ compressed_stream_s strm_g[];
 
-  compressed_stream_s* const s = &strm_g[threadIdx.x / 32];
-  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / 32);
-  int lane_id                  = threadIdx.x % 32;
+  compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
+  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  int lane_id                  = threadIdx.x % cudf::detail::warp_size;
 
   if (strm_id < num_streams && lane_id == 0) s->info = strm_info[strm_id];
 
@@ -187,7 +187,7 @@ __global__ void __launch_bounds__(128, 8)
       // block
       if (uncompressed_actual < uncompressed_estimated) {
         // warp-level memmove
-        for (int i = lane_id; i < (int)uncompressed_size_actual; i += 32) {
+        for (int i = lane_id; i < (int)uncompressed_size_actual; i += cudf::detail::warp_size) {
           uncompressed_actual[i] = uncompressed_estimated[i];
         }
       }
@@ -216,8 +216,8 @@ struct rowindex_state_s {
   int is_compressed;
   uint32_t row_index_entry[3][CI_PRESENT];  // NOTE: Assumes CI_PRESENT follows CI_DATA and CI_DATA2
   CompressedStreamInfo strm_info[2];
-  RowGroup rowgroups[128];
-  uint32_t compressed_offset[128][2];
+  RowGroup rowgroups[4 * cudf::detail::warp_size];
+  uint32_t compressed_offset[4 * cudf::detail::warp_size][2];
 };
 
 enum row_entry_state_e {
@@ -443,7 +443,7 @@ static __device__ void gpuMapRowIndexToUncompressed(rowindex_state_s* s,
  * value
  */
 // blockDim {128,1,1}
-__global__ void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_groups,
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseRowGroupIndex(RowGroup* row_groups,
                                                                 CompressedStreamInfo* strm_info,
                                                                 ColumnDesc* chunks,
                                                                 uint32_t num_columns,
@@ -472,7 +472,7 @@ __global__ void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_gr
   }
   __syncthreads();
   while (s->rowgroup_start < s->rowgroup_end) {
-    int num_rowgroups = min(s->rowgroup_end - s->rowgroup_start, 128);
+    int num_rowgroups = min(s->rowgroup_end - s->rowgroup_start, 4 * cudf::detail::warp_size);
     int rowgroup_size4, t4, t32;
 
     s->rowgroups[t].chunk_id = chunk_id;
@@ -491,7 +491,7 @@ __global__ void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_gr
     rowgroup_size4 = sizeof(RowGroup) / sizeof(uint32_t);
     t4             = t & 3;
     t32            = t >> 2;
-    for (int i = t32; i < num_rowgroups; i += 32) {
+    for (int i = t32; i < num_rowgroups; i += cudf::detail::warp_size) {
       auto const num_rows =
         (use_base_stride) ? rowidx_stride
                           : row_groups[(s->rowgroup_start + i) * num_columns + blockIdx.x].num_rows;
@@ -531,6 +531,8 @@ __global__ void __launch_bounds__(block_size)
   auto const use_child_rg = column.type().id() == type_id::LIST;
   auto const rg           = rowgroup_bounds[rowgroup_id][column_id + (use_child_rg ? 1 : 0)];
 
+ // if(!t) printf("col_id: %d column.pd_mask %p\n", (int) column_id, column.pushdown_mask);
+
   if (column.pushdown_mask == nullptr) {
     // All elements are valid if the null mask is not present
     if (t == 0) { set_counts[rowgroup_id][column_id] = rg.size(); }
@@ -561,7 +563,7 @@ void __host__ ParseCompressedStripeData(CompressedStreamInfo* strm_info,
                                         uint32_t log2maxcr,
                                         rmm::cuda_stream_view stream)
 {
-  dim3 dim_block(128, 1);
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);
   dim3 dim_grid((num_streams + 3) >> 2, 1);  // 1 stream per warp, 4 warps per block
   gpuParseCompressedStripeData<<<dim_grid, dim_block, sizeof(compressed_stream_s) * 4, stream.value()>>>(
     strm_info, num_streams, compression_block_size, log2maxcr);
@@ -571,7 +573,7 @@ void __host__ PostDecompressionReassemble(CompressedStreamInfo* strm_info,
                                           int32_t num_streams,
                                           rmm::cuda_stream_view stream)
 {
-  dim3 dim_block(128, 1);
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);
   dim3 dim_grid((num_streams + 3) >> 2, 1);  // 1 stream per warp, 4 warps per block
   gpuPostDecompressionReassemble<<<dim_grid, dim_block, sizeof(compressed_stream_s) * 4, stream.value()>>>(strm_info,
                                                                              num_streams);
@@ -587,7 +589,7 @@ void __host__ ParseRowGroupIndex(RowGroup* row_groups,
                                  bool use_base_stride,
                                  rmm::cuda_stream_view stream)
 {
-  dim3 dim_block(128, 1);
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);
   dim3 dim_grid(num_columns, num_stripes);  // 1 column chunk per block
   gpuParseRowGroupIndex<<<dim_grid, dim_block, sizeof(rowindex_state_s), stream.value()>>>(row_groups,
                                                                     strm_info,
