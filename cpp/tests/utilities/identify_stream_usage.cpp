@@ -79,7 +79,7 @@ bool stream_is_invalid(hipStream_t stream)
   // `thrust::device` and the default value of
   // `cudf::get_default_stream().value()` are actually the same. At present, the
   // former is `cudaStreamLegacy` while the latter is 0.
-  // TODO PORTING cudaStreamLegacy
+  // TODO(HIP/AMD): PORTING cudaStreamLegacy
   return (stream == hipStreamDefault) || (stream == hipStreamPerThread);
 #endif
 }
