@@ -832,10 +832,6 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
         }
       }
     });
-  aligned_rgs.device_to_host_sync(stream);
-
-  std::vector<std::vector<rowgroup_rows>> h_aligned_rgs;
-  h_aligned_rgs.reserve(segmentation.num_rowgroups());
   std::transform(thrust::make_counting_iterator(0ul),
                  thrust::make_counting_iterator(segmentation.num_rowgroups()),
                  std::back_inserter(h_aligned_rgs),
@@ -1738,10 +1734,6 @@ pushdown_null_masks init_pushdown_null_masks(orc_table_view& orc_table,
      ptrs = device_span<bitmask_type const* const>{d_mask_ptrs}] __device__(auto& idx) {
       cols[idx].pushdown_mask = ptrs[idx];
     });
-
-  return {std::move(pd_masks), std::move(mask_ptrs)};
-}
-
 template <typename T>
 struct device_stack {
   __device__ device_stack(T* stack_storage, int capacity)
