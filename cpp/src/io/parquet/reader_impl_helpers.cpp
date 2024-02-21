@@ -115,7 +115,7 @@ type_id to_type_id(SchemaElement const& schema,
         if (schema.type_length <= static_cast<int32_t>(sizeof(int64_t))) {
           return type_id::DECIMAL64;
         }
-        //Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+        //TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
         // if (schema.type_length <= static_cast<int32_t>(sizeof(__int128_t))) {
         //   return type_id::DECIMAL128;
         // }
@@ -127,7 +127,7 @@ type_id to_type_id(SchemaElement const& schema,
         } else if (decimal_precision <= MAX_DECIMAL64_PRECISION) {
           return type_id::DECIMAL64;
         } 
-        // Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+        // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
         // else {
         //   return type_id::DECIMAL128;
         // }

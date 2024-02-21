@@ -52,7 +52,7 @@ cudf::null_policy::INCLUDE);
 
 TEST_F(ListRankScanTest, DeepList)
 {
-  // Todo(HIP): Applied workaround for lists
+  // TODO(HIP/AMD): Applied workaround for lists
   using LCW = cudf::test::lists_column_wrapper<uint64_t>;
   LCW col{
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},

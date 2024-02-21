@@ -70,7 +70,7 @@ TEST(StreamCheck, CatchFailedKernel)
   EXPECT_THROW(CUDF_CHECK_CUDA(stream.value()), cudf::cuda_error);
 }
 
-// TODO(HIP): should we use s_trap here?
+// TODO(HIP/AMD): should we use s_trap here?
 __global__ void kernel() { abort(); }
 
 TEST(DeathTest, CudaFatalError)

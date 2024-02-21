@@ -447,7 +447,7 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
       tiles_in_launch,
       tile_multistates,
       tile_offsets);
-    // Todo(HIP): what should be the value of flag? 0?
+    // TODO(HIP/AMD): what should be the value of flag? 0?
     // CUDF_CUDA_TRY(hipStreamWaitEvent(scan_stream.value(), last_launch_event));
     CUDF_CUDA_TRY(hipStreamWaitEvent(scan_stream.value(), last_launch_event, 0));
 

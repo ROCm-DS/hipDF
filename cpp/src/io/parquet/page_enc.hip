@@ -98,7 +98,7 @@ struct page_enc_state_s {
  */
 constexpr uint32_t physical_type_len(Type physical_type, type_id id)
 {
-  //Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+  // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
   // if (physical_type == FIXED_LEN_BYTE_ARRAY and id == type_id::DECIMAL128) {
   //   return sizeof(__int128_t);
   // }
@@ -1332,7 +1332,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
                 case type_id::TIMESTAMP_NANOSECONDS: {
                   return julian_days_with_time<hip::std::micro>(v);
                 } break;
-                // Todo(HIP): 25 enumeration values not handled in switch: 'EMPTY', 'INT8', 'INT16'... [-Werror,-Wswitch]
+                // TODO(HIP/AMD): 25 enumeration values not handled in switch: 'EMPTY', 'INT8', 'INT16'... [-Werror,-Wswitch]
                 default:
                   break;
               }
@@ -1382,7 +1382,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
             if (v != 0) memcpy(dst + pos + 4, bytes, v);
           } break;
           case FIXED_LEN_BYTE_ARRAY: {
-            // Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+            // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
             // if (type_id == type_id::DECIMAL128) {
             //   // When using FIXED_LEN_BYTE_ARRAY for decimals, the rep is encoded in big-endian
             //   auto const v = s->col.leaf_column->element<numeric::decimal128>(val_idx).value();
@@ -1393,7 +1393,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
             //                dst + pos);
             // }
           } break;
-          // Todo(HIP): error: enumeration values 'UNDEFINED_TYPE' and 'BOOLEAN' not handled in switch [-Werror,-Wswitch]
+          // TODO(HIP/AMD): error: enumeration values 'UNDEFINED_TYPE' and 'BOOLEAN' not handled in switch [-Werror,-Wswitch]
           default:
             break;
         }
@@ -2110,7 +2110,7 @@ __device__ int32_t compare_values(Type ptype,
     case Type::BYTE_ARRAY: return static_cast<string_view>(v1.str_val).compare(v2.str_val);
     case Type::FIXED_LEN_BYTE_ARRAY:
       if (ctype == ConvertedType::DECIMAL) { return compare(v1.d128_val, v2.d128_val); }
-    // Todo(HIP): error: enumeration values 'UNDEFINED_TYPE' and 'INT96' not handled in switch [-Werror,-Wswitch]
+    // TODO(HIP/AMD): error: enumeration values 'UNDEFINED_TYPE' and 'INT96' not handled in switch [-Werror,-Wswitch]
     default:
       break;
   }
@@ -2170,7 +2170,7 @@ __device__ int32_t calculate_boundary_order(statistics_chunk const* s,
   return BoundaryOrder::UNORDERED;
 }
 
-// Todo(HIP): reinterpret_cast is not allowed in a constant expression
+// TODO(HIP/AMD): reinterpret_cast is not allowed in a constant expression
 // Removed constexpr
 // constexpr __device__ void* align8(void* ptr)
 // align ptr to an 8-byte boundary. address returned will be <= ptr.

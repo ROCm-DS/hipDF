@@ -53,7 +53,7 @@ class file_source : public datasource {
 //       CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode {}.",
 //                     _kvikio_file.is_compat_mode_on() ? "on" : "off");
 // #else
-//       //TODO(HIP): improve error handling
+//       //TODO(HIP/AMD): improve error handling
 //       throw std::runtime_error("Error: Kvikio is not supported\n");
 // #endif
 //     } else {

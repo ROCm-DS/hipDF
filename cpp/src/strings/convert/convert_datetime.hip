@@ -662,7 +662,7 @@ struct check_datetime_format {
     auto const dateparts = check_string(d_str);
     if (!dateparts.has_value()) return false;
 
-    // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a
+    // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust, need to file a
     // ticket
     auto const year  = dateparts.value().year;
     auto const month = static_cast<uint32_t>(dateparts.value().month);
@@ -847,7 +847,7 @@ struct datetime_formatter_fn {
         case 'a':    // weekday abbreviated
         case 'A': {  // weekday full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
+          // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust
           auto const day_of_week =
             hip::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
           auto const day_idx =
@@ -859,7 +859,7 @@ struct datetime_formatter_fn {
         case 'b':    // month abbreviated
         case 'B': {  // month full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          // TODO(HIP): thrust::optional::value requires a patched version of rocthrust
+          // TODO(HIP/AMD): thrust::optional::value requires a patched version of rocthrust
           auto const month =
             static_cast<uint32_t>(hip::std::chrono::year_month_day(days.value()).month());
           auto const month_idx =

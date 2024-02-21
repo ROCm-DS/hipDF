@@ -175,7 +175,7 @@ class tiled_partition_internal_ext : public cooperative_group_base {
  * CAUTION: currently, only cooperative groups of size <=64 are supported.
  */
 class coalesced_group_ext : public cooperative_group_base {
- public:  // todo(hip): hide constructor
+ public:  // TODO(HIP/AMD): hide constructor
   /**
    * @brief Creates a coalesced group with the given input lane mask.
    * @param lm Lane mask in which bit N is set if and only if the Nth thread belongs to the
@@ -241,7 +241,7 @@ __device__ thread_block_tile<Size> tiled_partition(cooperative_groups::thread_bl
  */
 __device__ cooperative_groups::thread_block this_thread_block()
 {
-  // Todo(HIP): complete the implementation
+  // TODO(HIP/AMD): complete the implementation
   return cooperative_groups::this_thread_block();
 }
 

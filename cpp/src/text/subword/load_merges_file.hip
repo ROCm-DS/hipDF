@@ -85,7 +85,7 @@ std::unique_ptr<cudf::column> load_file_to_column(std::string const& filename_me
   return cudf::make_strings_column(d_chars, d_offsets, {}, 0);
 }
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+//TODO(HIP/AMD): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
 #if 0
 std::unique_ptr<detail::merge_pairs_map_type> initialize_merge_pairs_map(
   cudf::column_device_view const& input, rmm::cuda_stream_view stream)
@@ -130,7 +130,7 @@ std::unique_ptr<bpe_merge_pairs::bpe_merge_pairs_impl> create_bpe_merge_pairs_im
 
 }  // namespace
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+//TODO(HIP/AMD): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
 #if 0
 std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filename_merges,
                                                        rmm::cuda_stream_view stream,
@@ -143,7 +143,7 @@ std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filena
 #endif
 }  // namespace detail
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+//TODO(HIP/AMD): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
 #if 0 
 std::unique_ptr<bpe_merge_pairs> load_merge_pairs_file(std::string const& filename_merges,
                                                        rmm::mr::device_memory_resource* mr)

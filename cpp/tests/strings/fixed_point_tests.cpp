@@ -82,7 +82,7 @@ TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVeryLarge)
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
 }
 
-// Todo(HIP): Enable once we have support for decimal 128 type
+// TODO(HIP/AMD): Enable once we have support for decimal 128 type
 // TEST_F(StringsConvertTest, ToFixedPointDecimal128)
 // {
 //   using namespace numeric;
@@ -110,7 +110,7 @@ TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVeryLarge)
 //   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
 // }
 
-// Todo(HIP): Enable once we have support for decimal 128 type
+// TODO(HIP/AMD): Enable once we have support for decimal 128 type
 // TEST_F(StringsConvertTest, ToFixedPointLargeScale)
 // {
 //   using namespace numeric;
@@ -127,7 +127,7 @@ TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVeryLarge)
 //   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
 // }
 
-// Todo(HIP): Enable once we have support for decimal 128 type
+// TODO(HIP/AMD): Enable once we have support for decimal 128 type
 // TEST_F(StringsConvertTest, FromFixedPointDecimal128)
 // {
 //   using namespace numeric;
@@ -291,7 +291,7 @@ TEST_F(StringsConvertTest, IsFixedPoint)
     {true, true, true, true, true, false, false, false, false, false});
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64);
 
-  // Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+  // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
   // results                = cudf::strings::is_fixed_point(cudf::strings_column_view(big_numbers),
   //                                         cudf::data_type{cudf::type_id::DECIMAL128});
   // auto const expected128 = cudf::test::fixed_width_column_wrapper<bool>(
@@ -319,7 +319,7 @@ TEST_F(StringsConvertTest, IsFixedPoint)
     {true, true, true, false, false, false, false, false, false, false});
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64_scaled);
 }
-// Todo(HIP): Enable once we have support for decimal 128 type
+// TODO(HIP/AMD): Enable once we have support for decimal 128 type
 // #ifdef NDEBUG
 // TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
 // #else

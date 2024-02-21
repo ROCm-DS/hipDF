@@ -82,7 +82,7 @@ __device__ inline void __syncwarp()
 }
 
 /*
-* TODO: HIP/AMD: Due to a lack of IFP on AMD GPUs, the active mask is
+* TODO(HIP/AMD): Due to a lack of IFP on AMD GPUs, the active mask is
 * ignored here, but it is convenient for porting to have this overload
 * available.
 */

@@ -193,7 +193,7 @@ std::unique_ptr<cudf::column> ngrams_tokenize(cudf::strings_column_view const& s
     thrust::make_counting_iterator<cudf::size_type>(0),
     thrust::make_counting_iterator<cudf::size_type>(strings_count),
     d_ngram_offsets + 1,
-    [d_token_offsets, ngrams] __host__ __device__(cudf::size_type idx) { //TODO(HIP): __host__ is needed here to avoid thrust compilation error "no type type"
+    [d_token_offsets, ngrams] __host__ __device__(cudf::size_type idx) { //TODO(HIP/AMD): __host__ is needed here to avoid thrust compilation error "no type type"
       auto token_count = d_token_offsets[idx + 1] - d_token_offsets[idx];
       return (token_count >= ngrams) ? token_count - ngrams + 1 : 0;
     },

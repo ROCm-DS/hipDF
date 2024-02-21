@@ -339,7 +339,7 @@ TYPED_TEST(HashPartitionFixedWidth, HasNulls)
   run_fixed_width_test<TypeParam>(10, 1000, 10, cudf::hash_id::HASH_IDENTITY, true);
 }
 
-// Todo(HIP): This test seems to use 128bit which we do not support currently. Enable it again once
+// TODO(HIP/AMD): This test seems to use 128bit which we do not support currently. Enable it again once
 // we have the support
 TEST_F(HashPartition, FixedPointColumnsToHash)
 {
