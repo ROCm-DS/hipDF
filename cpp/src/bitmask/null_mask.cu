@@ -407,7 +407,7 @@ std::vector<size_type> segmented_count_set_bits(bitmask_type const* bitmask,
                                                 host_span<size_type const> indices,
                                                 rmm::cuda_stream_view stream)
 {
-  //Todo(HIP)-
+  //TODO(HIP/AMD)-
   //std::vector<size_type> dummy;
   //return dummy;
   return detail::segmented_count_set_bits(bitmask, indices.begin(), indices.end(), stream);
@@ -418,7 +418,7 @@ std::vector<size_type> segmented_count_unset_bits(bitmask_type const* bitmask,
                                                   host_span<size_type const> indices,
                                                   rmm::cuda_stream_view stream)
 {
-  //Todo(HIP)-
+  //TODO(HIP/AMD)-
   //std::vector<size_type> dummy;
   //return dummy;
   return detail::segmented_count_unset_bits(bitmask, indices.begin(), indices.end(), stream);
@@ -429,7 +429,7 @@ std::vector<size_type> segmented_valid_count(bitmask_type const* bitmask,
                                              host_span<size_type const> indices,
                                              rmm::cuda_stream_view stream)
 {
-  //Todo(HIP)-
+  //TODO(HIP/AMD)-
   //std::vector<size_type> dummy;
   //return dummy;
   return detail::segmented_valid_count(bitmask, indices.begin(), indices.end(), stream);
@@ -440,7 +440,7 @@ std::vector<size_type> segmented_null_count(bitmask_type const* bitmask,
                                             host_span<size_type const> indices,
                                             rmm::cuda_stream_view stream)
 {
-  //Todo(HIP)-
+  //TODO(HIP/AMD)-
   //std::vector<size_type> dummy;
   //return dummy;
   return detail::segmented_null_count(bitmask, indices.begin(), indices.end(), stream);

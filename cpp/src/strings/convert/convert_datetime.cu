@@ -684,7 +684,7 @@ struct check_datetime_format {
     auto const dateparts = check_string(d_str);
     if (!dateparts.has_value()) return false;
 
-    // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust, need to file a
+    // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust, need to file a
     // ticket
     auto const year  = dateparts.value().year;
     auto const month = static_cast<uint32_t>(dateparts.value().month);

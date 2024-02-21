@@ -81,7 +81,7 @@ constexpr bool use_fused_kernel_heuristic(bool const has_nulls,
 // error: The enclosing parent function ("create_strings_device_views") for an
 // extended __device__ lambda must not have deduced return type
 struct chars_size_transform {
-  // Todo(HIP): error: no type named 'type' in 'std::invoke_result<cudf::strings::detail::chars_size_transform, cudf::column_device_view>'
+  // TODO(HIP/AMD): error: no type named 'type' in 'std::invoke_result<cudf::strings::detail::chars_size_transform, cudf::column_device_view>'
   // Adding __host__ fixes the issue
   __host__ __device__ size_t operator()(column_device_view const& col) const
   {

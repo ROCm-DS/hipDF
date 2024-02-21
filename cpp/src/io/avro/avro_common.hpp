@@ -47,7 +47,7 @@ namespace cudf {
 namespace io {
 namespace avro {
 struct block_desc_s {
-  __host__ __device__ block_desc_s() = default;  //TODO(HIP): default constructor needs to be marked as __host__ __device__ to avoid compiler error
+  __host__ __device__ block_desc_s() = default;  //TODO(HIP/AMD): default constructor needs to be marked as __host__ __device__ to avoid compiler error
   explicit constexpr block_desc_s(
     size_t offset_, uint32_t size_, uint32_t row_offset_, uint32_t first_row_, uint32_t num_rows_)
     : offset(offset_),

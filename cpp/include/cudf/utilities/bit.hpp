@@ -196,7 +196,7 @@ constexpr CUDF_HOST_DEVICE inline bitmask_type set_most_significant_bits(size_ty
 {
   constexpr size_type word_size{detail::size_in_bits<bitmask_type>()};
   constexpr_assert(0 <= n && n < word_size);
-  // Todo(HIP): warning: shift count >= width of type
+  // TODO(HIP/AMD): warning: shift count >= width of type
   // Check the returned value to not exceed UINT32_MAX.
   return ~((bitmask_type{1} << (word_size - n)) - 1);
 }
@@ -216,7 +216,7 @@ constexpr CUDF_HOST_DEVICE inline uint32_t set_most_significant_bits_32(size_typ
 {
   constexpr size_type word_size{detail::size_in_bits<uint32_t>()};
   constexpr_assert(0 <= n && n < word_size);
-  // Todo(HIP): warning: shift count >= width of type
+  // TODO(HIP/AMD): warning: shift count >= width of type
   // To fix the issue, we should check if the returned value does not exceed UINT32_MAX.
   return ~((uint32_t{1} << (word_size - n)) - 1);
 }

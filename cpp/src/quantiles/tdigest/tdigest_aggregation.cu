@@ -1183,8 +1183,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         min_iter,
                         thrust::make_discard_iterator(),
                         merged_min_col->mutable_view().begin<double>(),
-                        thrust::equal_to<double>{},  // key equality check //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
-                        thrust::minimum<double>{}); //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        thrust::equal_to<double>{},  // key equality check //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        thrust::minimum<double>{}); //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
 
   auto merged_max_col = cudf::make_numeric_column(
     data_type{type_id::FLOAT64}, num_groups, mask_state::UNALLOCATED, stream, mr);
@@ -1198,8 +1198,8 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
                         max_iter,
                         thrust::make_discard_iterator(),
                         merged_max_col->mutable_view().begin<double>(),
-                        thrust::equal_to<double>{},  // key equality check //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
-                        thrust::maximum<double>{}); //TODO(HIP): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        thrust::equal_to<double>{},  // key equality check //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
+                        thrust::maximum<double>{}); //TODO(HIP/AMD): is double the right type here? Needs to be specified as otherwise, the compiler returns an error.
 
   auto tdigest_offsets = tdv.centroids().offsets();
 

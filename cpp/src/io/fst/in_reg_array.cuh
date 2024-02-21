@@ -85,7 +85,7 @@ class MultiFragmentInRegArray {
   /**
    * @brief Returns the \p num_bits bits starting at \p bit_start
    */
-  // Todo(HIP): removed [[nodiscard]] for now
+  // TODO(HIP/AMD): removed [[nodiscard]] for now
   CUDF_HOST_DEVICE uint32_t bfe(uint32_t const& data,
                                               uint32_t bit_start,
                                               uint32_t num_bits) const
@@ -116,7 +116,7 @@ class MultiFragmentInRegArray {
   // ACCESSORS
   //------------------------------------------------------------------------------
  public:
- // Todo(HIP): removed [[nodiscard]] for now
+ // TODO(HIP/AMD): removed [[nodiscard]] for now
   CUDF_HOST_DEVICE uint32_t Get(int32_t index) const
   {
     uint32_t val = 0;

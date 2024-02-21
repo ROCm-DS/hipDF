@@ -51,8 +51,8 @@ target_compile_options(
 
 if(NOT CUDA_BACKEND)
 target_compile_options(
-  cudf_datagen PUBLIC -Wno-injected-class-name #TODO: HIP/AMD: clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
-		      -Wno-absolute-value  #TODO: HIP/AMD: clang compiler will emit an error when std::abs is called on unsigned ints
+  cudf_datagen PUBLIC -Wno-injected-class-name #TODO(HIP/AMD): clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
+		      -Wno-absolute-value  #TODO(HIP/AMD): clang compiler will emit an error when std::abs is called on unsigned ints
 )
 endif()
 

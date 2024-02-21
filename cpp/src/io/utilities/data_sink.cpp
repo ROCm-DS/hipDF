@@ -70,7 +70,7 @@ class file_sink : public data_sink {
       CUDF_LOG_INFO("Writing a file using kvikIO, with compatibility mode %s.",
                     _kvikio_file.is_compat_mode_preferred() ? "on" : "off");
 #else
-      //TODO(HIP): Improve error handling
+      //TODO(HIP/AMD): Improve error handling
       throw std::runtime_error("Kvikio is not available\n");
 #endif
     } else {

@@ -84,7 +84,7 @@ TEST_F(ValidIfTest, InvalidRange)
                                       cudf::get_current_device_resource_ref()),
                cudf::logic_error);
 }
-// Todo: This test has been modified to avoid using memset to zeors
+// TODO(HIP/AMD): This test has been modified to avoid using memset to zeros
 TEST_F(ValidIfTest, OddsValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, odds_valid{});
@@ -98,7 +98,7 @@ TEST_F(ValidIfTest, OddsValid)
   EXPECT_EQ(5120, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
-// This test has been modified to avoid using memset to zeors
+// TODO(HIP/AMD): This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, AllValid)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_valid{});
@@ -112,7 +112,7 @@ TEST_F(ValidIfTest, AllValid)
   EXPECT_EQ(0, actual.second);
   EXPECT_EQ(expected.second, actual.second);
 }
-// This test has been modified to avoid using memset to zeors
+// TODO(HIP/AMD): This test has been modified to avoid using memset to zeors
 TEST_F(ValidIfTest, AllNull)
 {
   auto iter     = cudf::detail::make_counting_transform_iterator(0, all_null{});

@@ -59,7 +59,7 @@ class list_device_view {
   using lists_column_device_view = cudf::detail::lists_column_device_view;
 
  public:
- //Todo(HIP)
+ //TODO(HIP/AMD)
   list_device_view() ;
 //  list_device_view() = default;
 
@@ -279,7 +279,7 @@ class list_device_view {
    *
    * @tparam T The element-type of the list row
    */
-  //Todo(HIP)
+  //TODO(HIP/AMD)
   public:
   template <typename T>
   struct pair_accessor {

@@ -197,7 +197,7 @@ inline __device__ unsigned int bfe(unsigned int source,
                                    unsigned int bit_start,
                                    unsigned int num_bits)
 {
-  // TODO(HIP): check if we have an equivalent ISA instruction/intrinsic that can be used here
+  // TODO(HIP/AMD): check if we have an equivalent ISA instruction/intrinsic that can be used here
   //unsigned int bits;
   //asm("bfe.u32 %0, %1, %2, %3;" : "=r"(bits) : "r"(source), "r"(bit_start), "r"(num_bits));
   return hipcub::BFE(source, bit_start, num_bits);
@@ -726,7 +726,7 @@ __device__ void init_length_lut(inflate_state_s* s, int t)
   for (uint32_t bits = t; bits < (1 << log2_len_lut); bits += blockDim.x) {
     int16_t const* cnt     = s->lencnt;
     int16_t const* symbols = s->lensym;
-    int sym                = -320; //TODO(HIP): -10 << 5; the original left shift is not accepted by hipclang as it is undefined (see https://en.cppreference.com/w/cpp/language/operator_arithmetic)
+    int sym                = -320; //TODO(HIP/AMD): -10 << 5; the original left shift is not accepted by hipclang as it is undefined (see https://en.cppreference.com/w/cpp/language/operator_arithmetic)
     unsigned int first     = 0;
     unsigned int rbits     = __brev(bits) >> (32 - log2_len_lut);
     for (unsigned int len = 1; len <= log2_len_lut; len++) {
@@ -827,7 +827,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
 
     auto const symt     = (t < batch_len) ? b[t] : 256;
     auto const lit_mask = ballot(symt >= 256);
-    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, cudf::detail::warp_size)); //TODO(HIP): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
+    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, cudf::detail::warp_size)); //TODO(HIP/AMD): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
 
     if (t == 0) { s->x.batch_len[batch] = 0; }
 
@@ -912,7 +912,7 @@ __device__ void copy_stored(inflate_state_s* s, int t)
   auto cur              = s->cur + s->bitpos / 8;
   auto out              = s->out;
   auto outend           = s->outend;
-  auto const slow_bytes = static_cast<uint8_t>(min(len, (int)((16 - reinterpret_cast<size_t>(out)) % 16))); //TODO(HIP): static_cast safe here (WAR for compiler error)?
+  auto const slow_bytes = static_cast<uint8_t>(min(len, (int)((16 - reinterpret_cast<size_t>(out)) % 16))); //TODO(HIP/AMD): static_cast safe here (WAR for compiler error)?
 
   // Slow copy until output is 16B aligned
   if (slow_bytes) {

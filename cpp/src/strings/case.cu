@@ -255,7 +255,7 @@ CUDF_KERNEL void count_bytes_kernel(convert_char_fn converter,
 
   // initialize the output for the atomicAdd
   if (lane_idx == 0) { d_sizes[str_idx] = 0; }
-  //TODO(HIP): double check that this is not necessary
+  //TODO(HIP/AMD): double check that this is not necessary
   __syncwarp();
 
   if (d_strings.is_null(str_idx)) { return; }

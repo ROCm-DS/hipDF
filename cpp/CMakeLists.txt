@@ -358,7 +358,7 @@ endif()
 if(CUDA_BACKEND)
   include(cmake/Modules/JitifyPreprocessKernels.cmake)
 else()
-  # TODO(HIP): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
+  # TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
   # header conflicts during jitify preprocessing
   #include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
 endif()
@@ -394,7 +394,7 @@ endif()
 
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
-#Todo(HIP)
+#TODO(HIP/AMD)
 add_library(
   cudf
   src/aggregation/aggregation.cpp
@@ -856,7 +856,7 @@ add_library(
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(VERBOSE "CUDF: Building with debugging flags")
 
-  # Todo(HIP): The following files do not complete build in acceptable time (or the build is hanging)
+  # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is hanging)
   # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround.
   set_source_files_properties(src/join/conditional_join.cu
                               src/join/mixed_join_kernel_nulls.cu
@@ -969,11 +969,11 @@ endif()
 target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
 
 # Compile stringified JIT sources first
-# TODO(HIP): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
+# TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
 # header conflicts during jitify preprocessing
 # add_dependencies(cudf jitify_preprocess_run)
 
-# todo(hip): WAR for thrust_create_target not being available in rocThrust
+# TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
 set(THRUST_LIBRARY cudf::Thrust)
 else()
@@ -1002,7 +1002,7 @@ endif()
 
 rapids_cuda_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
-#todo(hip): do we need a linker script for HIP?
+#TODO(HIP/AMD): do we need a linker script for HIP?
 if(CUDA_BACKEND)
   file(
     WRITE "${CUDF_BINARY_DIR}/fatbin.ld"

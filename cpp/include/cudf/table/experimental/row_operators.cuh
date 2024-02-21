@@ -140,7 +140,7 @@ struct strong_index_iterator : public thrust::iterator_facade<strong_index_itera
  private:
   __device__ constexpr void increment() { ++begin; }
   __device__ constexpr void decrement() { --begin; }
-  // Todo(HIP): added __host__
+  // TODO(HIP/AMD): added __host__
   __host__ __device__ constexpr void advance(Underlying n) { begin += n; }
 
   __device__ constexpr bool equal(strong_index_iterator<Index> const& other) const noexcept
@@ -149,7 +149,7 @@ struct strong_index_iterator : public thrust::iterator_facade<strong_index_itera
   }
 
   __device__ constexpr Index dereference() const noexcept { return static_cast<Index>(begin); }
-  // Todo(HIP): added __host__
+  // TODO(HIP/AMD): added __host__
   __host__ __device__ constexpr Underlying distance_to(
     strong_index_iterator<Index> const& other) const noexcept
   {
@@ -660,7 +660,7 @@ class device_row_comparator {
                                              _comparator,
                                              l_dremel_i,
                                              r_dremel_i};
-      //Todo(HIP)
+      //TODO(HIP/AMD)
       weak_ordering state{};
       // weak_ordering state;
       cuda::std::tie(state, last_null_depth) =
@@ -1485,7 +1485,7 @@ class device_row_comparator {
       column_device_view rcol = rhs.slice(rhs_element_index, 1);
       while (lcol.type().id() == type_id::STRUCT || lcol.type().id() == type_id::LIST) {
         if (check_nulls) {
-          //Todo(HIP)-
+          //TODO(HIP/AMD)-
           auto lvalid = detail::make_validity_iterator<true>(lcol);
           auto rvalid = detail::make_validity_iterator<true>(rcol);
           if (nulls_are_equal == null_equality::UNEQUAL) {

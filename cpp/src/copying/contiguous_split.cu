@@ -280,7 +280,7 @@ __attribute__((optnone)) __device__ void copy_buffer(uint8_t* __restrict__ dst,
         std::size_t const max_row    = (num_bytes * 8);
         std::size_t const slack_bits = max_row > num_rows ? max_row - num_rows : 0;
         auto const slack_mask        = set_most_significant_bits_32(slack_bits);
-        // Todo(HIP): It is possible that set_most_significant_bits_32 returns an overflown value.
+        // TODO(HIP/AMD): It is possible that set_most_significant_bits_32 returns an overflown value.
         // In this case, we should behave as if slack_mask == 0.
         if (slack_mask > 0 && slack_mask != UINT32_MAX) {
           uint32_t const last_word = reinterpret_cast<uint32_t*>(dst + (num_bytes - 4))[0];
@@ -929,7 +929,7 @@ struct dst_valid_count_output_iterator {
     c++;
     return *this;
   }
-  //TODO(HIP): this is a WAR for rocthrust/rocprim expecting an implementation of the - operator
+  //TODO(HIP/AMD): this is a WAR for rocthrust/rocprim expecting an implementation of the - operator
   dst_valid_count_output_iterator __host__ __device__ operator- (int i)
   {
     return dst_valid_count_output_iterator{c - i};

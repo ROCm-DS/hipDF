@@ -254,7 +254,7 @@ __device__ inline int __POPC<unsigned long long int>(unsigned long long int v) {
 template <typename T>
 size_type distance(T f, T l)
 {
-  //TODO(HIP): HIPRTC doesn't define std::distance, while NVRTC does (even if iterator is not included!)
+  //TODO(HIP/AMD): HIPRTC doesn't define std::distance, while NVRTC does (even if iterator is not included!)
   // investigate further workarounds if required
   // We could e.g. add an sample implementation to the jitsafe iterator
   // header in jitify (header <iterator> is supposed to provide std::distance)

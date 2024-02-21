@@ -81,7 +81,7 @@ CUDF_HOST_DEVICE inline auto max(LHS const& lhs, RHS const& rhs)
 }
 }  // namespace detail
 
-// TODO: HIP/AMD: This operator is necessary for ITERATOR_BENCH (iterator.cu) file
+// TODO(HIP/AMD): This operator is necessary for ITERATOR_BENCH (iterator.cu) file
 // where it was originally defined.
 // Unfortunately, hipcc/clang seems to need it visible earlier for the template instantiation
 // of DeviceSum::operator() to work properly. We're therefore moving it here for the time 

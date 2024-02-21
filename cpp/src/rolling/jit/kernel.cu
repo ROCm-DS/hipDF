@@ -79,7 +79,7 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
   cudf::size_type warp_valid_count{0};
 
   //auto active_threads = __ballot_sync(0xffff'ffffu, i < nrows);
-  //TODO(HIP): is this WAR for missing __ballot_sync correct?
+  //TODO(HIP/AMD): is this WAR for missing __ballot_sync correct?
   auto active_threads = __ballot(i < nrows);
   while (i < nrows) {
     int64_t const preceding_window = get_window(preceding_window_begin, i);
@@ -117,7 +117,7 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
 
     // process next element
     i += stride;
-    //TODO(HIP): is this WAR for missing __ballot_sync correct?
+    //TODO(HIP/AMD): is this WAR for missing __ballot_sync correct?
     active_threads = __ballot(i < nrows) & active_threads;
   }
 

@@ -198,7 +198,7 @@ class SingleSymbolSmemLUT {
 
   constexpr CUDF_HOST_DEVICE int32_t lookup(SymbolT const symbol) const
   {
-    // Todo(HIP): error: array subscript is not integer -> used static_cast<int>
+    // TODO(HIP/AMD): error: array subscript is not integer -> used static_cast<int>
     // Look up the symbol group for given symbol
     return temp_storage
       .sym_to_sgid[static_cast<int>(min(static_cast<SymbolGroupIdT>(symbol), num_valid_entries - 1U))];
