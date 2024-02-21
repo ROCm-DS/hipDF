@@ -32,7 +32,7 @@ project(
             # language to be enabled here. The test project that is built in scikit-build to verify
             # various linking options for the python library is hardcoded to build with C, so until
             # that is fixed we need to keep C.
-            C CXX HIP #: FIXME: CUDA required for PTX codegen in python/cudf/udf_cpp, which we disable for the time being
+            C CXX HIP # FIXME(HIP/AMD): CUDA required for PTX codegen in python/cudf/udf_cpp, which we disable for the time being
 )
 
 option(FIND_CUDF_CPP "Search for existing CUDF C++ installations before defaulting to local files"
@@ -125,7 +125,7 @@ endif()
 rapids_cython_init()
 
 add_subdirectory(cudf/_lib)
-# add_subdirectory(udf_cpp) #: FIXME: Reenable UDFs when we know what to use as PTX equivalent
+# add_subdirectory(udf_cpp) # FIXME(HIP/AMD): Reenable UDFs when we know what to use as PTX equivalent
 
 include(cmake/Modules/ProtobufHelpers.cmake)
 codegen_protoc(cudf/utils/metadata/orc_column_statistics.proto)
