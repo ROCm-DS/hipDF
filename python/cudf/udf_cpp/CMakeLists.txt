@@ -42,16 +42,26 @@ include(rapids-find)
 
 rapids_cpm_init()
 
-rapids_find_package(
-  HIP REQUIRED
-  BUILD_EXPORT_SET udf-exports
-  INSTALL_EXPORT_SET udf-exports
-)
+if(CUDA_BACKEND)
+  rapids_find_package(
+    CUDA REQUIRED
+    BUILD_EXPORT_SET udf-exports
+    INSTALL_EXPORT_SET udf-exports
+  )
+  include(${rapids-cmake-dir}/cpm/cccl.cmake)
+  rapids_cpm_cccl(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+else()
+  rapids_find_package(
+    HIP REQUIRED
+    BUILD_EXPORT_SET udf-exports
+    INSTALL_EXPORT_SET udf-exports
+  )
 
-include(${rapids-cmake-dir}/cpm/cccl.cmake)
-rapids_cpm_cccl(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
-#include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
-#rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+  include(${rapids-cmake-dir}/cpm/cccl.cmake)
+  rapids_cpm_cccl(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+  #include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
+  #rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
+endif()
 
 add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
 target_include_directories(
@@ -71,38 +81,66 @@ set_target_properties(
 )
 
 set(UDF_CXX_FLAGS)
-set(UDF_CUDA_FLAGS) # Todo: HIP/AMD: Removed --expt-extended-lambda --expt-relaxed-constexpr
-target_compile_options(
-  cudf_strings_udf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${UDF_CXX_FLAGS}>"
-                            "$<$<COMPILE_LANGUAGE:HIP>:${UDF_CUDA_FLAGS}>"
-)
+if(CUDA_BACKEND)
+  set(UDF_CUDA_FLAGS --expt-extended-lambda --expt-relaxed-constexpr)
+  target_compile_options(
+    cudf_strings_udf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${UDF_CXX_FLAGS}>"
+                              "$<$<COMPILE_LANGUAGE:CUDA>:${UDF_CUDA_FLAGS}>"
+  )
+else()
+  set(UDF_CUDA_FLAGS)
+  target_compile_options(
+    cudf_strings_udf PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${UDF_CXX_FLAGS}>"
+                              "$<$<COMPILE_LANGUAGE:HIP>:${UDF_CUDA_FLAGS}>"
+  )
+endif()
 target_link_libraries(cudf_strings_udf PUBLIC cudf::cudf)
 install(TARGETS cudf_strings_udf DESTINATION ./cudf/_lib/)
 
-# Create the shim library for each architecture.
-set(SHIM_CUDA_FLAGS -fgpu-rdc -S -emit-llvm) # Todo: HIP/AMD: Removed --expt-relaxed-constexpr -rdc=true
+if(CUDA_BACKEND)
+  # Create the shim library for each architecture.
+  set(SHIM_CUDA_FLAGS --expt-relaxed-constexpr -rdc=true)
 
-# always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
-# safely queried through a context
-list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "gfx90a")
+  # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
+  # safely queried through a context
+  list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "60")
 
-# Todo: HIP/AMD: We dont supprt real and virtual archs
-# list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
-# list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
+  list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
+  list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
+else()
+  # Create the shim library for each architecture.
+  set(SHIM_CUDA_FLAGS -fgpu-rdc -S -emit-llvm) 
+
+  # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
+  # safely queried through a context
+  list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "gfx90a")
+endif()
 list(SORT CMAKE_CUDA_ARCHITECTURES)
 list(REMOVE_DUPLICATES CMAKE_CUDA_ARCHITECTURES)
 
 foreach(arch IN LISTS CMAKE_CUDA_ARCHITECTURES)
   set(tgt shim_${arch})
 
+if(CUDA_BACKEND)
   add_library(${tgt} OBJECT shim.cu)
 
-  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch}) # Todo: HIP/AMD: Removed  CUDA_PTX_COMPILATION ON
+  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch} CUDA_PTX_COMPILATION ON)
+else()
+  add_library(${tgt} OBJECT shim.cu)
+
+  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch}) 
+endif()
 
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
   )
+
+if(CUDA_BACKEND)
+  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${SHIM_CUDA_FLAGS}>")
+else()
   target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_CUDA_FLAGS}>")
+endif()
+
   target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
   install(
