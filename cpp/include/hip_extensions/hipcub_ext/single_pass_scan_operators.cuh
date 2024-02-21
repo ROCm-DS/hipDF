@@ -59,7 +59,7 @@
 
 #include "thread_load.cuh"
 
-// TODO Support NVIDIA arch + AMD warpsize 32
+//: TODO(HIP/AMD): Support NVIDIA arch + AMD warpsize 32
 using lane_mask = uint64_t;
 constexpr lane_mask LANE_MASK_ALL = ~lane_mask{0};
 

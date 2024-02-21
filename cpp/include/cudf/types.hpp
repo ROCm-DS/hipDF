@@ -38,7 +38,7 @@
 
 #pragma once
 
-// TODO is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
+//: TODO(HIP/AMD) is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
 #ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
 /**

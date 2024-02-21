@@ -24,11 +24,11 @@
 # To make changes, edit ../../dependencies.yaml and run `rapids-dependency-file-generator`.
 channels:
 #:- rapidsai
-#:- rapidsai-nightly #: TODO: Add AMD channel
+#:- rapidsai-nightly #: TODO(HIP/AMD): Add AMD channel
 - dask/label/dev
 - pytorch
 - conda-forge
-#:- nvidia #: TODO: Add AMD channel
+#:- nvidia #: TODO(HIP/AMD): Add AMD channel
 dependencies:
 - aiobotocore>=2.2.0
 - benchmark==1.8.0
@@ -40,15 +40,15 @@ dependencies:
 - cramjam 
 #:- cubinlinker
 #:- cuda-nvtx=11.8
-#:- cuda-python>=11.7.1,<12.0a0  #: TODO: hip-python as its own conda package?
+#:- cuda-python>=11.7.1,<12.0a0  #: TODO(HIP/AMD): hip-python as its own conda package?
 #:- cuda-sanitizer-api=11.8.86
-#:- cuda-version=11.8 #: TODO: ROCm HIP SDK as its own conda package?
-#:- cudatoolkit #: TODO: ROCm HIP SDK as its own conda package?
+#:- cuda-version=11.8 #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
+#:- cudatoolkit #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
 #:- cupy>=12.0.0
 #:- cxx-compiler
 - cython>=3.0.0
 - dask-core>=2023.7.1
-#: - dask-cuda==23.10.* #: TODO use dask_hip
+#: - dask-cuda==23.10.* #: TODO(HIP/AMD) use dask_hip
 - dask>=2023.7.1
 - distributed>=2023.7.1
 - dlpack>=0.5,<0.6.0a0
@@ -78,12 +78,12 @@ dependencies:
 - nbsphinx
 - ninja
 - notebook
-- numba==0.58.1 #: TODO ROCm version of Numba as its own conda package?
+- numba==0.58.1 #: TODO(HIP/AMD) ROCm version of Numba as its own conda package?
 - numpy==1.24.4
 - numpydoc
-#: - nvcc_linux-64=11.8 #: TODO: ROCm HIP SDK as its own conda package?
+#: - nvcc_linux-64=11.8 #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
 #: - nvcomp==2.6.1 #: provide as local package
-#: - nvtx>=0.2.1 #: TODO provide roctx via HIP Python?
+#: - nvtx>=0.2.1 #: TODO(HIP/AMD) provide roctx via HIP Python?
 - packaging
 - pandas>=1.3,<1.6.0dev0
 - pandoc
