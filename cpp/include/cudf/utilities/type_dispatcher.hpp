@@ -126,7 +126,7 @@ using device_storage_type_t =
 template <typename T>
 constexpr bool type_id_matches_device_storage_type(type_id id)
 {
-  //TODO(HIP): activate again when underlying compiler issue with 128bit ints has been resolved
+  //TODO(HIP/AMD): activate again when underlying compiler issue with 128bit ints has been resolved
   return (id == type_id::DECIMAL32 && std::is_same_v<T, int32_t>) ||
          (id == type_id::DECIMAL64 && std::is_same_v<T, int64_t>) ||
          /*(id == type_id::DECIMAL128 && std::is_same_v<T, __int128_t>) ||*/ id == type_to_id<T>();
@@ -434,7 +434,7 @@ using scalar_device_type_t = typename type_to_scalar_type_impl<T>::ScalarDeviceT
  */
 // This pragma disables a compiler warning that complains about the valid usage
 // of calling a __host__ functor from this function which is __host__ __device__
-//Todo(HIP)
+//TODO(HIP/AMD)
 #if defined(__CUDACC__) || defined(__HIPCC__)
 #pragma nv_exec_check_disable
 #endif
@@ -445,7 +445,7 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
                                                                           Functor f,
                                                                           Ts&&... args)
 {
-    //Todo(HIP)
+    //TODO(HIP/AMD)
   switch (dtype.id()) {
     case type_id::INT8:
       return f.template operator()<typename IdTypeMap<type_id::INT8>::type>(
@@ -537,7 +537,7 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
   #else
        CUDF_UNREACHABLE("Invalid type_id.");
   #endif
-// TODO(HIP): do we need separate treatment for device and host path?
+// TODO(HIP/AMD): do we need separate treatment for device and host path?
 //  #if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__) 
 //       CUDF_FAIL("Invalid type_id.");
 //  #else

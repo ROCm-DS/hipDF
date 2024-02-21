@@ -138,7 +138,7 @@ void binary_operation(mutable_column_view& out,
                       std::string const& ptx,
                       rmm::cuda_stream_view stream)
 {
-#if 0 //: TODO: HIP/AMD: add together with jitify support (udf)
+#if 0 //: TODO(HIP/AMD): add together with jitify support (udf)
   std::string const output_type_name = cudf::type_to_name(out.type());
 
   std::string cuda_source =
@@ -157,7 +157,7 @@ void binary_operation(mutable_column_view& out,
              cudf::jit::get_data_ptr(out),
              cudf::jit::get_data_ptr(lhs),
              cudf::jit::get_data_ptr(rhs));
-#endif //: TODO: HIP/AMD: add together with jitify support (udf)
+#endif //: TODO(HIP/AMD): add together with jitify support (udf)
 }
 }  // namespace jit
 
@@ -355,7 +355,7 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
                                          rmm::cuda_stream_view stream,
                                          rmm::mr::device_memory_resource* mr)
 {
-#if 0 //: TODO: HIP/AMD: add together with jitify support (udf)
+#if 0 //: TODO(HIP/AMD): add together with jitify support (udf)
   // Check for datatype
   auto is_type_supported_ptx = [](data_type type) -> bool {
     return is_fixed_width(type) and not is_fixed_point(type) and
@@ -379,7 +379,7 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
   binops::jit::binary_operation(out_view, lhs, rhs, ptx, stream);
   out->set_null_count(cudf::detail::null_count(out_view.null_mask(), 0, out->size(), stream));
   return out;
-#endif //: TODO: HIP/AMD: add together with jitify support (udf)
+#endif //: TODO(HIP/AMD): add together with jitify support (udf)
   return nullptr;
 }
 }  // namespace detail
@@ -439,10 +439,10 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
                                          data_type output_type,
                                          rmm::mr::device_memory_resource* mr)
 {
-#if 0 //: TODO: HIP/AMD: add together with jitify support (udf)
+#if 0 //: TODO(HIP/AMD): add together with jitify support (udf)
   CUDF_FUNC_RANGE();
   return detail::binary_operation(lhs, rhs, ptx, output_type, cudf::get_default_stream(), mr);
-#endif //: TODO: HIP/AMD: add together with jitify support (udf)
+#endif //: TODO(HIP/AMD): add together with jitify support (udf)
   return nullptr;
 }
 

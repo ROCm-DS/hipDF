@@ -31,7 +31,7 @@ endif()
 
 project(
   HIPDF 
-  VERSION 23.10.00 #todo(hip): which version to choose?
+  VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
   LANGUAGES C CXX
 )
 
@@ -63,7 +63,7 @@ option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
 mark_as_advanced(HIPDF_BUILD_TESTUTIL)
-#TODO : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
+#TODO(HIP/AMD) : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
 # option(HIPDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
 option(HIPDF_USE_ARROW_STATIC "Build and statically link Arrow libraries" OFF)
 option(HIPDF_ENABLE_ARROW_ORC "Build the Arrow ORC adapter" OFF)
@@ -233,7 +233,7 @@ endif()
 if(CUDA_BACKEND)
   include(cmake/Modules/JitifyPreprocessKernels.cmake)
 else()
-  # TODO(HIP): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
+  # TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
   # header conflicts during jitify preprocessing
   #include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
 endif()
@@ -272,7 +272,7 @@ endif()
 
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
-#Todo(HIP)
+#TODO(HIP/AMD)
 add_library(
   hipdf
   src/column/column.hip
@@ -285,7 +285,7 @@ add_library(
   src/aggregation/result_cache.cpp
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
-  src/binaryop/binaryop.cpp  #TODO(HIP): fix jitify issues
+  src/binaryop/binaryop.cpp  #TODO(HIP/AMD): fix jitify issues
   src/binaryop/compiled/ATan2.hip
   src/binaryop/compiled/Add.hip
   src/binaryop/compiled/BitwiseAnd.hip
@@ -318,7 +318,7 @@ add_library(
   src/binaryop/compiled/TrueDiv.hip
   src/binaryop/compiled/binary_ops.hip
   src/binaryop/compiled/equality_ops.hip
-  src/binaryop/compiled/util.cpp # Todo(HIP): error: member reference base type 'int' is not a structure or union
+  src/binaryop/compiled/util.cpp # TODO(HIP/AMD): error: member reference base type 'int' is not a structure or union
   src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
   src/bitmask/is_element_valid.cpp
@@ -362,7 +362,7 @@ add_library(
   src/groupby/sort/group_collect.hip
   src/groupby/sort/group_correlation.hip
   src/groupby/sort/group_count.hip
-  # src/groupby/sort/group_histogram.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
+  # src/groupby/sort/group_histogram.hip # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
   src/groupby/sort/group_m2.hip
   src/groupby/sort/group_max.hip
   src/groupby/sort/group_min.hip
@@ -412,7 +412,7 @@ add_library(
   src/io/functions.cpp
   src/io/json/byte_range_info.hip
   src/io/json/json_column.hip
-  src/io/json/json_tree.hip # Todo(HIP): HipCollections
+  src/io/json/json_tree.hip # TODO(HIP/AMD): HipCollections
   src/io/json/nested_json_gpu.hip
   src/io/json/read_json.hip
   src/io/json/legacy/json_gpu.hip
@@ -423,33 +423,33 @@ add_library(
   src/io/orc/orc.cpp
   src/io/orc/reader_impl.hip
   src/io/orc/stats_enc.hip
-  src/io/orc/stripe_data.hip # Todo(HIP): does not compile in debug mode because of int128_t legalization errors
+  src/io/orc/stripe_data.hip # TODO(HIP/AMD): does not compile in debug mode because of int128_t legalization errors
   src/io/orc/stripe_enc.hip
   src/io/orc/stripe_init.hip
   src/datetime/timezone.cpp
-  src/io/orc/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/orc/writer_impl.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
   src/io/parquet/compact_protocol_reader.cpp
   src/io/parquet/compact_protocol_writer.cpp
-  src/io/parquet/decode_preprocess.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_data.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/decode_preprocess.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_data.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
   src/io/parquet/chunk_dict.hip
-  src/io/parquet/page_enc.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_hdr.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_delta_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_string_decode.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_enc.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_hdr.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_delta_decode.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_string_decode.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
   src/io/parquet/predicate_pushdown.cpp
   src/io/parquet/reader.cpp
   src/io/parquet/reader_impl.cpp
   src/io/parquet/reader_impl_helpers.cpp
   src/io/parquet/reader_impl_preprocess.hip
-  src/io/parquet/writer_impl.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  src/io/statistics/orc_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
-  src/io/statistics/parquet_column_statistics.hip # Todo(HIP): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/writer_impl.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/orc_column_statistics.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/statistics/parquet_column_statistics.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
   src/io/text/byte_range_info.cpp
   src/io/text/data_chunk_source_factories.cpp
   src/io/text/bgzip_data_chunk_source.hip
   src/io/text/bgzip_utils.cpp
-  src/io/text/multibyte_split.hip # Todo(HIP): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
+  src/io/text/multibyte_split.hip # TODO(HIP/AMD): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
   src/io/utilities/arrow_io_source.cpp
   src/io/utilities/column_buffer.cpp
   src/io/utilities/config_utils.cpp
@@ -511,7 +511,7 @@ add_library(
   src/reductions/all.hip
   src/reductions/any.hip
   src/reductions/collect_ops.hip
-  # src/reductions/histogram.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
+  # src/reductions/histogram.hip # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
   src/reductions/max.hip
   src/reductions/mean.hip
   src/reductions/min.hip
@@ -548,7 +548,7 @@ add_library(
   src/reshape/byte_cast.hip
   src/reshape/interleave_columns.hip
   src/reshape/tile.hip
-  src/rolling/detail/optimized_unbounded_window.cpp # Todo(HIP): JIT
+  src/rolling/detail/optimized_unbounded_window.cpp # TODO(HIP/AMD): JIT
   src/rolling/detail/rolling_collect_list.hip
   src/rolling/detail/rolling_fixed_window.hip
   src/rolling/detail/rolling_variable_window.hip
@@ -572,7 +572,7 @@ add_library(
   src/sort/stable_sort.hip
   src/stream_compaction/apply_boolean_mask.hip
   src/stream_compaction/distinct.hip
-  src/stream_compaction/distinct_count.hip #TODO(HIP): There are hipCollection integration errors
+  src/stream_compaction/distinct_count.hip #TODO(HIP/AMD): There are hipCollection integration errors
   src/stream_compaction/distinct_reduce.hip
   src/stream_compaction/drop_nans.hip
   src/stream_compaction/drop_nulls.hip
@@ -652,14 +652,14 @@ add_library(
   src/text/normalize.hip
   src/text/replace.hip
   src/text/stemmer.hip
-  src/text/subword/bpe_tokenizer.hip  #TODO(HIP): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
+  src/text/subword/bpe_tokenizer.hip  #TODO(HIP/AMD): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
   src/text/subword/data_normalizer.hip
   src/text/subword/load_hash_file.hip
-  src/text/subword/load_merges_file.hip #TODO(HIP): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
+  src/text/subword/load_merges_file.hip #TODO(HIP/AMD): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
   src/text/subword/subword_tokenize.hip
   src/text/subword/wordpiece_tokenizer.hip
   src/text/tokenize.hip
-  # src/text/vocabulary_tokenize.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
+  # src/text/vocabulary_tokenize.hip # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
   src/transform/bools_to_mask.hip
   src/transform/compute_column.hip
   src/transform/encode.hip
@@ -667,7 +667,7 @@ add_library(
   src/transform/nans_to_nulls.hip
   src/transform/one_hot_encode.hip
   src/transform/row_bit_count.hip
-  src/transform/transform.cpp # Todo(HIP): JIT
+  src/transform/transform.cpp # TODO(HIP/AMD): JIT
   src/transpose/transpose.hip
   src/unary/cast_ops.hip
   src/unary/math_ops.hip
@@ -677,7 +677,7 @@ add_library(
   src/utilities/linked_column.cpp
   src/utilities/logger.cpp
   src/utilities/stacktrace.cpp
-  # src/utilities/stream_pool.cpp # Todo(HIP): Should be enabled for upgrade to branch-23.10
+  # src/utilities/stream_pool.cpp # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
   src/utilities/traits.cpp
   src/utilities/type_checks.cpp
   src/utilities/type_dispatcher.cpp
@@ -686,7 +686,7 @@ add_library(
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(VERBOSE "HIPDF: Building with debugging flags")
 
-  # Todo(HIP): The following files do not complete build in acceptable time (or the build is hanging)
+  # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is hanging)
   # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround.
   set_source_files_properties(src/join/conditional_join.hip
                               src/join/mixed_join_kernel_nulls.hip
@@ -771,11 +771,11 @@ target_compile_definitions(hipdf PRIVATE "RMM_LOGGING_LEVEL=LIBHIPDF_LOGGING_LEV
 target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBHIPDF_LOGGING_LEVEL}")
 
 # Compile stringified JIT sources first
-# TODO(HIP): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
+# TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
 # header conflicts during jitify preprocessing
 # add_dependencies(hipdf jitify_preprocess_run)
 
-# todo(hip): WAR for thrust_create_target not being available in rocThrust
+# TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
 set(THRUST_LIBRARY hipdf::Thrust)
 else()
@@ -795,7 +795,7 @@ if(TARGET conda_env)
   target_link_libraries(hipdf PRIVATE conda_env)
 endif()
 
-#todo(hip): do we need a linker script for HIP?
+#TODO(HIP/AMD): do we need a linker script for HIP?
 if(CUDA_BACKEND)
   file(
     WRITE "${HIPDF_BINARY_DIR}/fatbin.ld"
@@ -843,7 +843,7 @@ if(HIPDF_BUILD_TESTUTIL)
 
   # Needs to be static so that we support usage of static builds of gtest which doesn't compile with
   # fPIC enabled and therefore can't be embedded into shared libraries.
-  #Todo(HIP)
+  #TODO(HIP/AMD)
   add_library(
     hipdftestutil STATIC
     tests/io/metadata_utilities.cpp

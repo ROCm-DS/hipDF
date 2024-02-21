@@ -1856,7 +1856,7 @@ TYPED_TEST(FixedPointTestAllReps, FixedPointReductionNthElement)
 }
 
 struct Decimal128Only : public cudf::test::BaseFixture {};
-// Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+// TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
 // TEST_F(Decimal128Only, Decimal128ProductReduction)
 // {
 //   using namespace numeric;
@@ -1887,7 +1887,7 @@ struct Decimal128Only : public cudf::test::BaseFixture {};
 //     EXPECT_EQ(init_result_scalar->fixed_point_value(), init_expected);
 //   }
 // }
-// Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+// TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
 // TEST_F(Decimal128Only, Decimal128ProductReduction2)
 // {
 //   using namespace numeric;
@@ -1918,7 +1918,7 @@ struct Decimal128Only : public cudf::test::BaseFixture {};
 //     EXPECT_EQ(init_result_scalar->fixed_point_value(), init_expected);
 //   }
 // }
-// Todo(HIP): https://github.com/AMD-AI/hipdf/issues/3
+// TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
 // TEST_F(Decimal128Only, Decimal128ProductReduction3)
 // {
 //   using namespace numeric;
@@ -2499,7 +2499,7 @@ TEST_F(ListReductionTest, NestedListReductionNthElement)
   // test without nulls
   auto validity    = std::vector<bool>{1, 0, 0, 1, 1};
   auto nested_list = LCW(
-    // Todo(HIP): Applied workaround for lists {LCW{9, 10}} -> LCW({LCW{9, 10}})
+    // TODO(HIP/AMD): Applied workaround for lists {LCW{9, 10}} -> LCW({LCW{9, 10}})
     {{LCW{}, LCW{2, 3, 4}}, {}, {LCW{5}, LCW{6}, LCW{7, 8}}, LCW({LCW{9, 10}}), {LCW{11}, LCW{12, 13}}},
     validity.begin());
   this->reduction_test(

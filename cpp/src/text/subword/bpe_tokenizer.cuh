@@ -81,7 +81,7 @@ struct bpe_equal {
 using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
 
 
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+//TODO(HIP/AMD): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
 //using probe_scheme = hipco::experimental::linear_probing<1, bpe_hasher>;
 
 /*using merge_pairs_map_type = hipco::static_map<cudf::size_type,
@@ -100,7 +100,7 @@ using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allo
 using col_device_view = std::invoke_result_t<decltype(&cudf::column_device_view::create),
                                              cudf::column_view,
                                              rmm::cuda_stream_view>;
-//TODO(HIP): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
+//TODO(HIP/AMD): hipCollections needs to catch up with the most recent cuCollections branch, we need to disable this code as the APIs are not available
 // struct bpe_merge_pairs::bpe_merge_pairs_impl {
 //   std::unique_ptr<cudf::column> const merge_pairs;
 //   col_device_view const d_merge_pairs;

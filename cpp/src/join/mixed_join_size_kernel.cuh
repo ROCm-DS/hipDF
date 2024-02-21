@@ -31,7 +31,7 @@
 
 namespace cudf {
 namespace detail {
-// Todo(HIP)
+// TODO(HIP/AMD)
 namespace cg = hip_extensions::hip_cooperative_groups_ext;
 
 template <int block_size, bool has_nulls>
@@ -73,7 +73,7 @@ __launch_bounds__(block_size) __global__ void compute_mixed_join_output_size(
   make_pair_function pair_func{hash_probe, empty_key_sentinel};
 
   // Figure out the number of elements for this key.
-  cg::thread_block_tile<1> this_thread = cg::this_thread(); //: TODO: HIP/AMD: this uses a custom cg::this_thread() implementation from the CG extensions (not officially in ROCm)
+  cg::thread_block_tile<1> this_thread = cg::this_thread(); //: TODO(HIP/AMD): this uses a custom cg::this_thread() implementation from the CG extensions (not officially in ROCm)
   // TODO: Address asymmetry in operator.
   auto count_equality = pair_expression_equality<has_nulls>{
     evaluator, thread_intermediate_storage, swap_tables, equality_probe};

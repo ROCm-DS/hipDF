@@ -58,7 +58,7 @@ function(ConfigureTest CMAKE_TEST_NAME)
     ${CMAKE_TEST_NAME} PRIVATE hipdftestutil GTest::gmock_main GTest::gtest_main
                                $<TARGET_NAME_IF_EXISTS:conda_env>
   )
-  # TODO(HIP): Is this needed?
+  # TODO(HIP/AMD): Is this needed?
   #target_include_directories(${CMAKE_TEST_NAME}
   #  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
   #  "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>")
@@ -78,7 +78,7 @@ function(ConfigureTest CMAKE_TEST_NAME)
 endfunction()
 
 
-# TODO(hip): we currently don't have support for rapids-test in rapids-cmake, so we cannot use the following
+# TODO(HIP/AMD): we currently don't have support for rapids-test in rapids-cmake, so we cannot use the following
 # code to configure the tests
 # include(rapids-test)
 # rapids_test_init()
@@ -166,7 +166,7 @@ ConfigureTest(TIMESTAMPS_TEST wrappers/timestamps_test.hip)
 
 # ##################################################################################################
 # * cudf tests ------------------------------------------------------------------------------------
-ConfigureTest(ERROR_TEST error/error_handling_test.hip) # todo(HIP): PTX asm("trap;");
+ConfigureTest(ERROR_TEST error/error_handling_test.hip) # TODO(HIP/AMD): PTX asm("trap;");
 
 # ##################################################################################################
 # * groupby tests ---------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ ConfigureTest(
   groupby/covariance_tests.cpp
   groupby/groupby_test_util.cpp
   groupby/groups_tests.cpp
-  # groupby/histogram_tests.cpp # Todo(HIP): Should be enabled for upgrade to branch-23.10
+  # groupby/histogram_tests.cpp # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
   groupby/keys_tests.cpp
   groupby/lists_tests.cpp
   groupby/m2_tests.cpp
@@ -507,7 +507,7 @@ ConfigureTest(
 #   rolling/grouped_rolling_test.cpp
 #   rolling/lead_lag_test.cpp
 #   rolling/nth_element_test.cpp
-#   rolling/offset_row_window_test.cpp # Todo(HIP): Should be enabled for upgrade to branch-23.10
+#   rolling/offset_row_window_test.cpp # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
 #   rolling/range_comparator_test.hip
 #   rolling/range_rolling_window_test.cpp
 #   rolling/range_window_bounds_test.cpp
@@ -678,7 +678,7 @@ ConfigureTest(STREAM_CONCATENATE_TEST streams/concatenate_test.cpp STREAM_MODE t
 ConfigureTest(STREAM_FILLING_TEST streams/filling_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_REPLACE_TEST streams/replace_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_SEARCH_TEST streams/search_test.cpp STREAM_MODE testing)
-# Todo(HIP): Should be enabled for upgrade to branch-23.10
+# TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
 # ConfigureTest(STREAM_DICTIONARY_TEST streams/dictionary_test.cpp STREAM_MODE testing)
 # ConfigureTest(
 #   STREAM_STRINGS_TEST streams/strings/case_test.cpp streams/strings/find_test.cpp STREAM_MODE

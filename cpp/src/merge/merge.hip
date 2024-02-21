@@ -97,7 +97,7 @@ __global__ void materialize_merged_bitmask_kernel(
 
     // Use ballot to find all valid bits in this warp and create the output
     // bitmask element
-    // Todo(HIP): error: non-constant-expression cannot be narrowed from type 'lane_mask' 
+    // TODO(HIP/AMD): error: non-constant-expression cannot be narrowed from type 'lane_mask' 
     // (aka 'unsigned long long') to 'bitmask_type' (aka 'unsigned int') in initializer list [-Wc++11-narrowing]
     bitmask_type const result_mask{static_cast<bitmask_type>(hip_extensions::__ballot_sync(active_threads, source_bit_is_valid))};
 
@@ -201,7 +201,7 @@ index_vector generate_merged_indices(table_view const& left_table,
 
     auto ineq_op = detail::row_lexicographic_tagged_comparator<true>(
       *lhs_device_view, *rhs_device_view, d_column_order.data(), d_null_precedence.data());
-    thrust::merge(thrust::device, //TODO(HIP): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests, see https://github.com/AMD-AI/hipdf/issues/30
+    thrust::merge(thrust::device, //TODO(HIP/AMD): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests, see https://github.com/AMD-AI/hipdf/issues/30
                   left_begin,
                   left_begin + left_size,
                   right_begin,
@@ -211,7 +211,7 @@ index_vector generate_merged_indices(table_view const& left_table,
   } else {
     auto ineq_op = detail::row_lexicographic_tagged_comparator<false>(
       *lhs_device_view, *rhs_device_view, d_column_order.data());
-    thrust::merge(thrust::device, //TODO(HIP): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests#, see https://github.com/AMD-AI/hipdf/issues/30
+    thrust::merge(thrust::device, //TODO(HIP/AMD): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests#, see https://github.com/AMD-AI/hipdf/issues/30
                   left_begin,
                   left_begin + left_size,
                   right_begin,
