@@ -63,7 +63,6 @@ else()
   #rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
 endif()
 
-add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
 target_include_directories(
   cudf_strings_udf PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
 )
@@ -107,33 +106,56 @@ if(CUDA_BACKEND)
 
   list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-real" "")
   list(TRANSFORM CMAKE_CUDA_ARCHITECTURES REPLACE "-virtual" "")
+
+  list(SORT CMAKE_HIP_ARCHITECTURES)
+  list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
+  
+  foreach(arch IN LISTS CMAKE_HIP_ARCHITECTURES)
+    set(tgt shim_${arch})
+
+    add_library(${tgt} OBJECT shim.cu)
+
+    set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch} CUDA_PTX_COMPILATION ON)
+    
+    target_include_directories(
+      ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
+    )
+
+    target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${SHIM_CUDA_FLAGS}>")
+    target_link_libraries(${tgt} PUBLIC cudf::cudf)
+
+    copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ptx)
+    install(
+      FILES $<TARGET_OBJECTS:${tgt}>
+      DESTINATION ./cudf/core/udf/
+      RENAME ${tgt}.ptx
+    )
+  endforeach()
 else()
   # Create the shim library for each architecture.
   set(SHIM_CUDA_FLAGS -fgpu-rdc -S -emit-llvm) 
 
   # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
   # safely queried through a context
-  list(INSERT CMAKE_CUDA_ARCHITECTURES 0 "gfx90a")
-endif()
-list(SORT CMAKE_CUDA_ARCHITECTURES)
-list(REMOVE_DUPLICATES CMAKE_CUDA_ARCHITECTURES)
+  list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a")
+  list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
+  list(SORT CMAKE_HIP_ARCHITECTURES)
+  list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
+  
+  foreach(arch IN LISTS CMAKE_HIP_ARCHITECTURES)
+    set(tgt shim_${arch})
 
-foreach(arch IN LISTS CMAKE_CUDA_ARCHITECTURES)
-  set(tgt shim_${arch})
+    add_library(${tgt} OBJECT shim.cu)
 
-if(CUDA_BACKEND)
-  add_library(${tgt} OBJECT shim.cu)
+    set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES ${arch}) 
 
-  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch} CUDA_PTX_COMPILATION ON)
-else()
-  add_library(${tgt} OBJECT shim.cu)
+    target_include_directories(
+      ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
+    )
 
-  set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch}) 
-endif()
+    target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_CUDA_FLAGS}>")
 
-  target_include_directories(
-    ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
-  )
+    target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
 if(CUDA_BACKEND)
   target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${SHIM_CUDA_FLAGS}>")
