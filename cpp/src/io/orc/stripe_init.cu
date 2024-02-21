@@ -67,7 +67,7 @@ struct compressed_stream_s {
 };
 
 // blockDim {128,1,1}
-CUDF_KERNEL void __launch_bounds__(128, 8)
+CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   gpuParseCompressedStripeData(CompressedStreamInfo* strm_info,
                                int32_t num_streams,
                                uint64_t compression_block_size,
@@ -75,9 +75,9 @@ CUDF_KERNEL void __launch_bounds__(128, 8)
 {
   extern __shared__ compressed_stream_s strm_g[];
 
-  compressed_stream_s* const s = &strm_g[threadIdx.x / 32];
-  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / 32);
-  int lane_id                  = threadIdx.x % 32;
+  compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
+  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  int lane_id                  = threadIdx.x % cudf::detail::warp_size;
 
   if (strm_id < num_streams && lane_id == 0) { s->info = strm_info[strm_id]; }
 
@@ -168,14 +168,14 @@ CUDF_KERNEL void __launch_bounds__(128, 8)
 }
 
 // blockDim {128,1,1}
-CUDF_KERNEL void __launch_bounds__(128, 8)
+CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   gpuPostDecompressionReassemble(CompressedStreamInfo* strm_info, int32_t num_streams)
 {
   extern __shared__ compressed_stream_s strm_g[];
 
-  compressed_stream_s* const s = &strm_g[threadIdx.x / 32];
-  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / 32);
-  int lane_id                  = threadIdx.x % 32;
+  compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
+  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  int lane_id                  = threadIdx.x % cudf::detail::warp_size;
 
   if (strm_id < num_streams && lane_id == 0) s->info = strm_info[strm_id];
 
@@ -215,7 +215,7 @@ CUDF_KERNEL void __launch_bounds__(128, 8)
       // block
       if (uncompressed_actual < uncompressed_estimated) {
         // warp-level memmove
-        for (int i = lane_id; i < (int)uncompressed_size_actual; i += 32) {
+        for (int i = lane_id; i < (int)uncompressed_size_actual; i += cudf::detail::warp_size) {
           uncompressed_actual[i] = uncompressed_estimated[i];
         }
       }
@@ -245,8 +245,8 @@ struct rowindex_state_s {
   uint32_t row_index_entry[3]
                           [CI_PRESENT]{};  // NOTE: Assumes CI_PRESENT follows CI_DATA and CI_DATA2
   CompressedStreamInfo strm_info[2]{};
-  RowGroup rowgroups[128]{};
-  uint32_t compressed_offset[128][2]{};
+  RowGroup rowgroups[4 * cudf::detail::warp_size]{};
+  uint32_t compressed_offset[4 * cudf::detail::warp_size][2]{};
 };
 
 enum row_entry_state_e {
@@ -472,7 +472,7 @@ static __device__ void gpuMapRowIndexToUncompressed(rowindex_state_s* s,
  * value
  */
 // blockDim {128,1,1}
-CUDF_KERNEL void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_groups,
+CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseRowGroupIndex(RowGroup* row_groups,
                                                                  CompressedStreamInfo* strm_info,
                                                                  ColumnDesc* chunks,
                                                                  size_type num_columns,
@@ -501,7 +501,7 @@ CUDF_KERNEL void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_g
   }
   __syncthreads();
   while (s->rowgroup_start < s->rowgroup_end) {
-    int num_rowgroups = min(s->rowgroup_end - s->rowgroup_start, 128);
+    int num_rowgroups = min(s->rowgroup_end - s->rowgroup_start, 4 * cudf::detail::warp_size);
     int rowgroup_size4, t4, t32;
 
     s->rowgroups[t].chunk_id = chunk_id;
@@ -520,7 +520,7 @@ CUDF_KERNEL void __launch_bounds__(128, 8) gpuParseRowGroupIndex(RowGroup* row_g
     rowgroup_size4 = sizeof(RowGroup) / sizeof(uint32_t);
     t4             = t & 3;
     t32            = t >> 2;
-    for (int i = t32; i < num_rowgroups; i += 32) {
+    for (int i = t32; i < num_rowgroups; i += cudf::detail::warp_size) {
       auto const num_rows =
         (use_base_stride) ? rowidx_stride
                           : row_groups[(s->rowgroup_start + i) * num_columns + col_idx].num_rows;
@@ -559,6 +559,8 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   auto const use_child_rg = column.type().id() == type_id::LIST;
   auto const rg           = rowgroup_bounds[rowgroup_id][column_id + (use_child_rg ? 1 : 0)];
 
+ // if(!t) printf("col_id: %d column.pd_mask %p\n", (int) column_id, column.pushdown_mask);
+
   if (column.pushdown_mask == nullptr) {
     // All elements are valid if the null mask is not present
     if (t == 0) { set_counts[rowgroup_id][column_id] = rg.size(); }
@@ -591,7 +593,7 @@ void __host__ ParseCompressedStripeData(CompressedStreamInfo* strm_info,
 {
   auto const num_blocks = (num_streams + 3) >> 2;  // 1 stream per warp, 4 warps per block
   if (num_blocks > 0) {
-    gpuParseCompressedStripeData<<<num_blocks, 128, sizeof(compressed_stream_s) * 4, stream.value()>>>(
+    gpuParseCompressedStripeData<<<num_blocks, 4 * cudf::detail::warp_size, sizeof(compressed_stream_s) * 4, stream.value()>>>(
       strm_info, num_streams, compression_block_size, log2maxcr);
   }
 }
@@ -602,7 +604,7 @@ void __host__ PostDecompressionReassemble(CompressedStreamInfo* strm_info,
 {
   auto const num_blocks = (num_streams + 3) >> 2;  // 1 stream per warp, 4 warps per block
   if (num_blocks > 0) {
-    gpuPostDecompressionReassemble<<<num_blocks, 128, sizeof(compressed_stream_s) * 4, stream.value()>>>(strm_info, num_streams);
+    gpuPostDecompressionReassemble<<<num_blocks, 4 * cudf::detail::warp_size, sizeof(compressed_stream_s) * 4, stream.value()>>>(strm_info, num_streams);
   }
 }
 
@@ -616,7 +618,7 @@ void __host__ ParseRowGroupIndex(RowGroup* row_groups,
                                  rmm::cuda_stream_view stream)
 {
   auto const num_blocks = num_columns * num_stripes;
-  gpuParseRowGroupIndex<<<num_blocks, 128, sizeof(rowindex_state_s), stream.value()>>>(
+  gpuParseRowGroupIndex<<<num_blocks, 4 * cudf::detail::warp_size, sizeof(rowindex_state_s), stream.value()>>>(
     row_groups, strm_info, chunks, num_columns, num_stripes, rowidx_stride, use_base_stride);
 }
 
