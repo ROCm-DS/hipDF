@@ -324,9 +324,9 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
       // 9 lines in `if (s->dict_pos < src_target_pos) {}`. If that change is made here, it will
       // be needed in the other DecodeXXX kernels.
       if (s->dict_base) {
-        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & 0x1f).first;
+        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)).first;
       } else if (s->col.physical_type == BOOLEAN) {
-        src_target_pos = gpuDecodeRleBooleans(s, sb, src_target_pos, t & 0x1f);
+        src_target_pos = gpuDecodeRleBooleans(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       } else if (s->col.physical_type == BYTE_ARRAY or
                  s->col.physical_type == FIXED_LEN_BYTE_ARRAY) {
         gpuInitStringDescriptors<false>(s, sb, src_target_pos, tile_warp);
