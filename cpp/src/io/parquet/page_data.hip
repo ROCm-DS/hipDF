@@ -499,12 +499,12 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
 
       // WARP1: Decode dictionary indices, booleans or string positions
       if (s->dict_base) {
-        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & 0x1f).first;
+        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)).first;
       } else if ((s->col.data_type & 7) == BOOLEAN) {
-        src_target_pos = gpuDecodeRleBooleans(s, sb, src_target_pos, t & 0x1f);
+        src_target_pos = gpuDecodeRleBooleans(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       } else if ((s->col.data_type & 7) == BYTE_ARRAY or
                  (s->col.data_type & 7) == FIXED_LEN_BYTE_ARRAY) {
-        gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & 0x1f);
+        gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       }
       if (t == cudf::detail::warp_size) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
     } else {
