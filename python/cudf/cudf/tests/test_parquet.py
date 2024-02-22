@@ -2464,7 +2464,7 @@ def test_parquet_writer_nested(tmpdir, data):
 
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
 )
 @pytest.mark.parametrize("data", [[1, 2, 3], [0.00, 0.01, None, 0.5]])
 def test_parquet_writer_decimal(decimal_type, data):
@@ -2515,7 +2515,7 @@ def test_parquet_writer_nulls_pandas_read(tmpdir, pdf):
 
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
 )
 def test_parquet_decimal_precision(tmpdir, decimal_type):
     df = cudf.DataFrame({"val": ["3.5", "4.2"]}).astype(decimal_type(5, 2))

@@ -15,6 +15,7 @@ dependencies:
 #:- c-compiler
 - cachetools
 - cmake>=3.26.4
+- cramjam 
 #:- cubinlinker
 #:- cuda-nvtx=11.8
 #:- cuda-python>=11.7.1,<12.0a0  #: TODO(HIP/AMD): hip-python as its own conda package?
@@ -55,7 +56,7 @@ dependencies:
 - nbsphinx
 - ninja
 - notebook
-- numba>=0.57 #: TODO(HIP/AMD) ROCm version of Numba as its own conda package?
+- numba==0.58.1 #: TODO(HIP/AMD) ROCm version of Numba as its own conda package?
 - numpy==1.24.4
 - numpydoc
 #: - nvcc_linux-64=11.8 #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
@@ -71,7 +72,7 @@ dependencies:
 - pyarrow==12.0.1.*
 - pydata-sphinx-theme
 - pyorc
-- pytest
+- pytest==7.4.4
 - pytest-benchmark
 - pytest-cases
 - pytest-cov
