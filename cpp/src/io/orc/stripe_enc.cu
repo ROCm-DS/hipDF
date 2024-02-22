@@ -225,7 +225,11 @@ static __device__ uint32_t ByteRLE(
       repeat_run  = 0;
       while (literal_run < maxvals) {
         bitmask_type next = s->u.byterle.rpt_map[(literal_run >> LOG2_WARPSIZE) + 1];
+#ifdef __HIP_PLATFORM_AMD__
         bitmask_type mask = rpt_map & cudf::detail::__m_funnelshift_r(rpt_map, next, 1);
+#else
+        bitmask_type mask = rpt_map & __funnelshift_r(rpt_map, next, 1);
+#endif
         if (mask) {
           uint32_t literal_run_ofs = __FFS(mask) - 1;
           literal_run += literal_run_ofs;
