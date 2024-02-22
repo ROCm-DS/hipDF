@@ -559,8 +559,6 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   auto const use_child_rg = column.type().id() == type_id::LIST;
   auto const rg           = rowgroup_bounds[rowgroup_id][column_id + (use_child_rg ? 1 : 0)];
 
- // if(!t) printf("col_id: %d column.pd_mask %p\n", (int) column_id, column.pushdown_mask);
-
   if (column.pushdown_mask == nullptr) {
     // All elements are valid if the null mask is not present
     if (t == 0) { set_counts[rowgroup_id][column_id] = rg.size(); }
