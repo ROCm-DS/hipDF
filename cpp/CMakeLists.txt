@@ -659,7 +659,7 @@ add_library(
   src/text/subword/subword_tokenize.hip
   src/text/subword/wordpiece_tokenizer.hip
   src/text/tokenize.hip
-  # src/text/vocabulary_tokenize.hip # Todo(HIP): Should be enabled for upgrade to branch-23.10
+  src/text/vocabulary_tokenize.hip 
   src/transform/bools_to_mask.hip
   src/transform/compute_column.hip
   src/transform/encode.hip
