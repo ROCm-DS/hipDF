@@ -4,6 +4,7 @@ python/cudf/_skbuild/
 python/cudf/cudf/__pycache__
 python/cudf/cudf/tests/__pycache__
 python/cudf/cudf/tests/input_output/__pycache__/
+python/cudf/cudf/utils/__pycache__/
 python/cudf/cudf.egg-info/
 python/cudf/dist/cudf-23.10.0.0-cp310-cp310-linux_x86_64.whl
 python/cudf/cudf/utils/metadata/orc_column_statistics_pb2.py
