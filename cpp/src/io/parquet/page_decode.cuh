@@ -209,7 +209,7 @@ inline __device__ hip::std::pair<char const*, size_t> gpuGetStringData(page_stat
  * @param[out] sb Page state buffer output
  * @param[in] target_pos Target index position in dict_idx buffer (may exceed this value by up to
  * 31)
- * @param[in] t Warp1 thread ID (0..31)
+ * @param[in] t Warp1 thread ID (0..warp_size - 1)
  * @tparam sizes_only True if only sizes are to be calculated
  * @tparam state_buf Typename of the `state_buf` (usually inferred)
  *
@@ -254,12 +254,12 @@ __device__ hip::std::pair<int, int> gpuDecodeDictionaryIndices(
       if (run & 1) {
         // Literal batch: must output a multiple of 8, except for the last batch
         int batch_len_div8;
-        batch_len      = max(min(32, (int)(run >> 1) * 8), 1);
+        batch_len      = max(min(cudf::detail::warp_size, (int)(run >> 1) * 8), 1);
         batch_len_div8 = (batch_len + 7) >> 3;
         run -= batch_len_div8 * 2;
         cur += batch_len_div8 * dict_bits;
       } else {
-        batch_len = max(min(32, (int)(run >> 1)), 1);
+        batch_len = max(min(cudf::detail::warp_size, (int)(run >> 1)), 1);
         run -= batch_len * 2;
       }
       s->dict_run   = run;
