@@ -83,6 +83,7 @@ THE SOFTWARE.
 
 #include <cudf/detail/utilities/cuda.hpp>
 #include <cudf/utilities/error.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
 
@@ -1886,7 +1887,7 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
       distance_code = shuffle(distance_code);
       if (distance_code > 0) {
         // Copy
-        for (uint32_t i = t; i < copy_length; i += 32) {
+        for (uint32_t i = t; i < copy_length; i += cudf::detail::warp_size) {
           uint8_t const* src =
             out + pos + ((i >= (uint32_t)distance_code) ? (i % (uint32_t)distance_code) : i) -
             distance_code;
@@ -1899,14 +1900,14 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
         if (t < copy_length) {
           b            = src[t];
           out[pos + t] = b;
-          if (32 + t < copy_length) {
-            b                 = src[32 + t];
-            out[pos + 32 + t] = b;
+          if (cudf::detail::warp_size + t < copy_length) {
+            b                 = src[cudf::detail::warp_size + t];
+            out[pos + cudf::detail::warp_size + t] = b;
           }
         }
       }
-      p1 = shuffle((uint32_t)b, (copy_length - 1) & 0x1f);
-      p2 = shuffle((uint32_t)b, (copy_length - 2) & 0x1f);
+      p1 = shuffle((uint32_t)b, (copy_length - 1) & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
+      p2 = shuffle((uint32_t)b, (copy_length - 2) & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       pos += copy_length;
     }
   }
@@ -2017,7 +2018,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 2)
           __syncthreads();
           if (!s->error) {
             // Warp0: Decode compressed block, warps 1..7 are all idle (!)
-            if (t < 32)
+            if (t < cudf::detail::warp_size)
               ProcessCommands(s, reinterpret_cast<brotli_dictionary_s*>(scratch + scratch_size), t);
             __syncthreads();
           }
@@ -2110,7 +2111,9 @@ void gpu_debrotli(device_span<device_span<uint8_t const> const> inputs,
 
   CUDF_EXPECTS(scratch_size >= sizeof(brotli_dictionary_s),
                "Insufficient scratch space for debrotli");
-  scratch_size = min(scratch_size, static_cast<size_t>(0xffff'ffffu));
+  
+  //: TODO(HIP/AMD): Need to use std::min here, as the one in global namespace misbehaves: see SWDEV-446564
+  scratch_size = std::min(scratch_size, static_cast<size_t>(0xffff'ffffu));
   fb_heap_size = (uint32_t)((scratch_size - sizeof(brotli_dictionary_s)) & ~0xf);
 
   CUDF_CUDA_TRY(cudaMemsetAsync(scratch_u8, 0, 2 * sizeof(uint32_t), stream.value()));
