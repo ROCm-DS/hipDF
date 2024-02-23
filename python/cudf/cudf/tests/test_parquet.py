@@ -610,23 +610,23 @@ def test_parquet_reader_spark_timestamps(datadir):
 
     assert_eq(expect, got)
 
+# TODO(HIP): Re-enable this test again when DECIMAL128 type is supported
+#def test_parquet_reader_spark_decimals(datadir):
+#    fname = datadir / "spark_decimal.parquet"
+#
+#    expect = pd.read_parquet(fname)
+#    got = cudf.read_parquet(fname)
+#
+#    assert_eq(expect, got)
 
-def test_parquet_reader_spark_decimals(datadir):
-    fname = datadir / "spark_decimal.parquet"
 
-    expect = pd.read_parquet(fname)
-    got = cudf.read_parquet(fname)
-
-    assert_eq(expect, got)
-
-
-@pytest.mark.parametrize("columns", [["a"], ["b", "a"], None])
-def test_parquet_reader_decimal128(datadir, columns):
-    fname = datadir / "nested_decimal128_file.parquet"
-    got = cudf.read_parquet(fname, columns=columns)
-    expect = cudf.read_parquet(fname, columns=columns)
-
-    assert_eq(expect, got)
+#@pytest.mark.parametrize("columns", [["a"], ["b", "a"], None])
+#def test_parquet_reader_decimal128(datadir, columns):
+#    fname = datadir / "nested_decimal128_file.parquet"
+#    got = cudf.read_parquet(fname, columns=columns)
+#    expect = cudf.read_parquet(fname, columns=columns)
+#
+#    assert_eq(expect, got)
 
 
 def test_parquet_reader_microsecond_timestamps(datadir):
@@ -2464,7 +2464,7 @@ def test_parquet_writer_nested(tmpdir, data):
 
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP/AMD): enable again when Decimal128 is available
 )
 @pytest.mark.parametrize("data", [[1, 2, 3], [0.00, 0.01, None, 0.5]])
 def test_parquet_writer_decimal(decimal_type, data):
@@ -2515,7 +2515,7 @@ def test_parquet_writer_nulls_pandas_read(tmpdir, pdf):
 
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] # , cudf.Decimal128Dtype], TODO(HIP/AMD): reenable when DECIMAL128 is supported
 )
 def test_parquet_decimal_precision(tmpdir, decimal_type):
     df = cudf.DataFrame({"val": ["3.5", "4.2"]}).astype(decimal_type(5, 2))
@@ -2558,14 +2558,14 @@ def test_parquet_reader_one_level_list(datadir):
 
     assert_eq(expect, got)
 
+# TODO(HIP): re-enable when DECIMAL128 is supported
+#def test_parquet_reader_binary_decimal(datadir):
+#    fname = datadir / "binary_decimal.parquet"
 
-def test_parquet_reader_binary_decimal(datadir):
-    fname = datadir / "binary_decimal.parquet"
+#    expect = pd.read_parquet(fname)
+#    got = cudf.read_parquet(fname).to_pandas()
 
-    expect = pd.read_parquet(fname)
-    got = cudf.read_parquet(fname).to_pandas()
-
-    assert_eq(expect, got)
+#    assert_eq(expect, got)
 
 
 def test_parquet_reader_fixed_bin(datadir):
