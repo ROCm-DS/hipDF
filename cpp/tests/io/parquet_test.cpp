@@ -39,6 +39,7 @@
 #include <cudf/unary.hpp>
 #include <cudf/utilities/span.hpp>
 #include <cudf/wrappers/timestamps.hpp>
+#include <src/io/comp/hipcomp_adapter.hpp>
 
 #include <src/io/parquet/compact_protocol_reader.hpp>
 #include <src/io/parquet/parquet.hpp>
@@ -5287,10 +5288,14 @@ TEST_F(ParquetWriterTest, DictionaryAdaptiveTest)
   auto const expected = table_view{{col0, col1}};
 
   auto const filepath = temp_env->get_temp_filepath("DictionaryAdaptiveTest.parquet");
+
+  auto compression_type = cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD) 
+                                     ? cudf::io::compression_type::NONE : cudf::io::compression_type::ZSTD;
+
   // no compression so we can easily read page data
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(compression_type)
       .dictionary_policy(cudf::io::dictionary_policy::ADAPTIVE);
   cudf::io::write_parquet(out_opts);
 
@@ -5338,11 +5343,14 @@ TEST_F(ParquetWriterTest, DictionaryAlwaysTest)
 
   auto const expected = table_view{{col0, col1}};
 
+  auto compression_type = cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD)
+                                        ? cudf::io::compression_type::NONE : cudf::io::compression_type::ZSTD;
+
   auto const filepath = temp_env->get_temp_filepath("DictionaryAlwaysTest.parquet");
   // no compression so we can easily read page data
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(compression_type)
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -5393,10 +5401,13 @@ TEST_F(ParquetWriterTest, DictionaryPageSizeEst)
 
   auto const expected = table_view{{col0}};
 
+  auto compression_type = cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD) 
+                                    ? cudf::io::compression_type::NONE : cudf::io::compression_type::ZSTD;
+
   auto const filepath = temp_env->get_temp_filepath("DictionaryPageSizeEst.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(compression_type)
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
