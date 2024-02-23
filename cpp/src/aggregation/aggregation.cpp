@@ -834,7 +834,7 @@ struct is_valid_aggregation_impl {
 // Return target data_type for the given source_type and aggregation
 data_type target_type(data_type source, aggregation::Kind k)
 {
-  //Todo(HIP)-
+  //TODO(HIP/AMD)-
   // return source;
   return dispatch_type_and_aggregation(source, k, target_type_functor{source});
 }
@@ -842,7 +842,7 @@ data_type target_type(data_type source, aggregation::Kind k)
 // Verifies the aggregation `k` is valid on the type `source`
 bool is_valid_aggregation(data_type source, aggregation::Kind k)
 {
-  //Todo(HIP)-
+  //TODO(HIP/AMD)-
   // return true;
   return dispatch_type_and_aggregation(source, k, is_valid_aggregation_impl{});
 }

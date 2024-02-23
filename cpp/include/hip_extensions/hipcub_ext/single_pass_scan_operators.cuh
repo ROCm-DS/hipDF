@@ -37,7 +37,7 @@
 
 #include "thread_load.cuh"
 
-// TODO Support NVIDIA arch + AMD warpsize 32
+//: TODO(HIP/AMD): Support NVIDIA arch + AMD warpsize 32
 using lane_mask = uint64_t;
 constexpr lane_mask LANE_MASK_ALL = ~lane_mask{0};
 
@@ -255,7 +255,7 @@ struct ScanTileState<T, true>
         TileDescriptor tile_descriptor;
         do
         {
-            // Todo(HIP): We changed it from threadfence_block to threadfence 
+            // TODO(HIP/AMD): We changed it from threadfence_block to threadfence 
             // because it created a runtime issue: FST_TEST hangs in TEST_F(FstTest, GroundTruth).
             // Finite-State Transducer (FST) is a key component of nested JSON parser. 
             // Parallel FST algorithm is described here: https://eliasstehle.com/media/parparaw_vldb_2020.pdf

@@ -47,7 +47,7 @@
 #include <hip/atomic>
 
 #include <algorithm>
-// Todo(HIP)
+// TODO(HIP/AMD)
 #include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
 
 namespace cudf {
@@ -176,7 +176,7 @@ __launch_bounds__(block_size) __global__
         int valid_index = (block_offset / cudf::detail::warp_size) + wid;
 
         // compute the valid mask for this warp
-        //Todo(HIP)
+        //TODO(HIP/AMD)
         cudf::bitmask_type valid_warp = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, temp_valids[threadIdx.x]);
 
         // Note the atomicOr's below assume that output_valid has been set to
@@ -194,7 +194,7 @@ __launch_bounds__(block_size) __global__
 
         // if the block is full and not aligned then we have one more warp to cover
         if ((wid == 0) && (last_warp == num_warps)) {
-          //Todo(HIP)
+          //TODO(HIP/AMD)
           cudf::bitmask_type valid_warp = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, temp_valids[block_size + threadIdx.x]);
           if (lane == 0 && valid_warp != 0) {
             tmp_warp_valid_counts += __POPC(valid_warp);
@@ -359,7 +359,7 @@ std::unique_ptr<table> copy_if(table_view const& input,
   if (grid.num_blocks > 1) {
     // Determine and allocate temporary device storage
     size_t temp_storage_bytes = 0;
-    //Todo(HIP)
+    //TODO(HIP/AMD)
     auto dummy = hipcub::DeviceScan::InclusiveSum(nullptr,
                                   temp_storage_bytes,
                                   block_counts.begin(),
@@ -369,7 +369,7 @@ std::unique_ptr<table> copy_if(table_view const& input,
     rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
     // Run exclusive prefix sum
-    //Todo(HIP)
+    //TODO(HIP/AMD)
     auto dummy2 = hipcub::DeviceScan::InclusiveSum(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   block_counts.begin(),

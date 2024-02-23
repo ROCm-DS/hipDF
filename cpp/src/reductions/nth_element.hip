@@ -54,7 +54,7 @@ std::unique_ptr<cudf::scalar> nth_element(column_view const& col,
                            null_skipped_index.begin());
 
     auto n_pos = thrust::upper_bound(
-      // rmm::exec_policy(stream), // Todo(HIP): This line causes a seg fault in 
+      // rmm::exec_policy(stream), // TODO(HIP/AMD): This line causes a seg fault in 
       // hipdf/cpp/tests/reductions/reduction_tests.cpp nthelement test.
       // We should replace it once we have a fix in RMM
       thrust::device,

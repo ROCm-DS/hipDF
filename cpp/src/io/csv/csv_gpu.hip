@@ -654,7 +654,7 @@ __global__ void __launch_bounds__(rowofs_block_dim)
   char const* cur = start + block_pos;
 
   // Initial state is neutral context (no state transitions), zero rows
-  //Todo(HIP): unrolled the initialization
+  //TODO(HIP/AMD): unrolled the initialization
   uint4 ctx_map;
   ctx_map.x = 0;
   ctx_map.y = 0;

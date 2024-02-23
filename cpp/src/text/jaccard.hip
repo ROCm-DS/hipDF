@@ -210,7 +210,7 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
   // this is wicked fast and much faster than using cudf::lists::detail::sort_list
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
-  //TODO(HIP): add proper error checking
+  //TODO(HIP/AMD): add proper error checking
   (void) hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,

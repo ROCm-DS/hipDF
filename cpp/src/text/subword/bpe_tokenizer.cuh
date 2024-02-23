@@ -97,7 +97,6 @@ using merge_pairs_map_type = hipco::experimental::static_map<cudf::size_type,
 using col_device_view = std::invoke_result_t<decltype(&cudf::column_device_view::create),
                                              cudf::column_view,
                                              rmm::cuda_stream_view>;
-
 struct bpe_merge_pairs::bpe_merge_pairs_impl {
   std::unique_ptr<cudf::column> const merge_pairs;
   col_device_view const d_merge_pairs;

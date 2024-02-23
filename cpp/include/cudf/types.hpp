@@ -16,7 +16,7 @@
 
 #pragma once
 
-// TODO is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
+//: TODO(HIP/AMD) is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
 #ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
 #include "hip/hip_runtime.h" //: including "hip/device_functions.h" causes errors
@@ -219,7 +219,7 @@ __device__ inline int __POPC<unsigned long long int>(unsigned long long int v) {
 template <typename T>
 size_type distance(T f, T l)
 {
-  //TODO(HIP): HIPRTC doesn't define std::distance, while NVRTC does (even if iterator is not included!)
+  //TODO(HIP/AMD): HIPRTC doesn't define std::distance, while NVRTC does (even if iterator is not included!)
   // investigate further workarounds if required
   // We could e.g. add an sample implementation to the jitsafe iterator
   // header in jitify (header <iterator> is supposed to provide std::distance)
@@ -344,7 +344,7 @@ enum class type_id : int32_t {
   LIST,                    ///< List elements
   DECIMAL32,               ///< Fixed-point type with int32_t
   DECIMAL64,               ///< Fixed-point type with int64_t
-			   // TODO(HIP): activate again when compiler issue with 128bit ints
+			   // TODO(HIP/AMD): activate again when compiler issue with 128bit ints
 			   // (unsupported legalization) has been resolved
  // DECIMAL128,              ///< Fixed-point type with __int128_t
   STRUCT,                  ///< Struct elements
@@ -394,7 +394,7 @@ class data_type {
    */
   explicit data_type(type_id id, int32_t scale) : _id{id}, _fixed_point_scale{scale}
   {
-    assert(id == type_id::DECIMAL32 || id == type_id::DECIMAL64); // TODO(HIP): re-enable when support becomes available:  "|| id == type_id::DECIMAL128);"
+    assert(id == type_id::DECIMAL32 || id == type_id::DECIMAL64); // TODO(HIP/AMD): re-enable when support becomes available:  "|| id == type_id::DECIMAL128);"
   }
 
   /**

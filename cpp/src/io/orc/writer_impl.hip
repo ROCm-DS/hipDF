@@ -717,7 +717,7 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
     segmentation.stripes, stream, rmm::mr::get_current_device_resource());
 
   // One thread per column, per stripe
-  #if 0 //: FIXME: HIP/AMD: use of undeclared identifier 'columns'.
+  #if 0 //: FIXME(HIP/AMD): use of undeclared identifier 'columns'.
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator(0),
@@ -824,7 +824,7 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
         }
       }
     });
-  # endif //: FIXME: HIP/AMD: use of undeclared identifier 'columns'.
+  # endif //: FIXME(HIP/AMD): use of undeclared identifier 'columns'.
   aligned_rgs.device_to_host_sync(stream);
 
   std::vector<std::vector<rowgroup_rows>> h_aligned_rgs;
@@ -1689,7 +1689,7 @@ pushdown_null_masks init_pushdown_null_masks(orc_table_view& orc_table,
   // Attach null masks to device column views (async)
   auto const d_mask_ptrs = cudf::detail::make_device_uvector_async(
     mask_ptrs, stream, rmm::mr::get_current_device_resource());
-  #if 0 //: FIXME: HIP/AMD: use of undeclared identifier 'cols'; did you mean 'cos'?
+  #if 0 //: FIXME(HIP/AMD): use of undeclared identifier 'cols'; did you mean 'cos'?
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator(0ul),
@@ -1698,7 +1698,7 @@ pushdown_null_masks init_pushdown_null_masks(orc_table_view& orc_table,
      ptrs = device_span<bitmask_type const* const>{d_mask_ptrs}] __device__(auto& idx) {
       cols[idx].pushdown_mask = ptrs[idx];
     });
-  #endif //: FIXME: HIP/AMD: use of undeclared identifier 'cols'; did you mean 'cos'?
+  #endif //: FIXME(HIP/AMD): use of undeclared identifier 'cols'; did you mean 'cos'?
 
   return {std::move(pd_masks), std::move(mask_ptrs)};
 }
@@ -1781,20 +1781,20 @@ orc_table_view make_orc_table_view(table_view const& table,
       return orc_column.orc_kind();
     });
 
-  #if 0 //: FIXME: HIP/AMD: no matching constructor for initialization of 'rmm::device_uvector<orc_column_device_view>'
+  #if 0 //: FIXME(HIP/AMD): no matching constructor for initialization of 'rmm::device_uvector<orc_column_device_view>'
   auto const d_type_kinds = cudf::detail::make_device_uvector_async(
     type_kinds, stream, rmm::mr::get_current_device_resource());
-  #endif //: FIXME: HIP/AMD: no matching constructor for initialization of 'rmm::device_uvector<orc_column_device_view>'
+  #endif //: FIXME(HIP/AMD): no matching constructor for initialization of 'rmm::device_uvector<orc_column_device_view>'
 
-  #if 0 //: FIXME: HIP/AMD: device_uvector only supports types that are trivially copyable.
+  #if 0 //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
   rmm::device_uvector<orc_column_device_view> d_orc_columns(orc_columns.size(), stream);
-  #endif //: FIXME: HIP/AMD: device_uvector only supports types that are trivially copyable.
+  #endif //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
   using stack_value_type = thrust::pair<column_device_view const*, thrust::optional<uint32_t>>;
-  #if 0 //: FIXME: HIP/AMD: device_uvector only supports types that are trivially copyable.
+  #if 0 //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
   rmm::device_uvector<stack_value_type> stack_storage(orc_columns.size(), stream);
-  #endif //: FIXME: HIP/AMD: device_uvector only supports types that are trivially copyable.
+  #endif //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
 
-  #if 0 //: FIXME: HIP/AMD: no matching constructor for initialization of 'device_span<orc_column_device_view>';
+  #if 0 //: FIXME(HIP/AMD): no matching constructor for initialization of 'device_span<orc_column_device_view>';
   // pre-order append ORC device columns
   cudf::detail::device_single_thread(
     [d_orc_cols         = device_span<orc_column_device_view>{d_orc_columns},
@@ -1802,7 +1802,7 @@ orc_table_view make_orc_table_view(table_view const& table,
      d_table            = d_table,
      stack_storage      = stack_storage.data(),
      stack_storage_size = stack_storage.size()] __device__() {
-      device_stack stack(stack_storage, stack_storage_size); //: FIXME: HIP/AMD: use of undeclared identifier 'stack_storage_size'
+      device_stack stack(stack_storage, stack_storage_size); //: FIXME(HIP/AMD): use of undeclared identifier 'stack_storage_size'
 
       thrust::for_each(thrust::seq,
                        thrust::make_reverse_iterator(d_table.end()),
@@ -1835,7 +1835,7 @@ orc_table_view make_orc_table_view(table_view const& table,
       }
     },
     stream);
-  #endif //: FIXME: HIP/AMD: no matching constructor for initialization of 'device_span<orc_column_device_view>'
+  #endif //: FIXME(HIP/AMD): no matching constructor for initialization of 'device_span<orc_column_device_view>'
 
   return {std::move(orc_columns),
           #if 0 //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'd_orc_columns'; did you mean 'orc_columns'?

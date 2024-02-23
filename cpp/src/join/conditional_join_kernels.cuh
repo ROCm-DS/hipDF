@@ -211,7 +211,7 @@ __global__ void conditional_join(table_device_view left_table,
         found_match = true;
       }
 
-      //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+      //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
       // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
       // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly.
       hip_extensions::__syncwarp(activemask);
@@ -230,13 +230,13 @@ __global__ void conditional_join(table_device_view left_table,
                                                          join_shared_r,
                                                          join_output_l,
                                                          join_output_r);
-        //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+        //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
         // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
         // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
         hip_extensions::__syncwarp(flush_mask);
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
-      //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+      //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
       // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
       // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
       hip_extensions::__syncwarp(activemask);
@@ -260,7 +260,7 @@ __global__ void conditional_join(table_device_view left_table,
                         join_shared_r[warp_id]);
     }
 
-    //: TODO: HIP/AMD: We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
+    //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
     // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
     // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
     hip_extensions::__syncwarp(activemask);
