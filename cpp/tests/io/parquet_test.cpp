@@ -1381,7 +1381,8 @@ class custom_test_data_sink : public cudf::io::data_sink {
                                        size_t size,
                                        rmm::cuda_stream_view stream) override
   {
-    return std::async(std::launch::deferred, [=] {
+    // NOTE(HIP): adding "this" to the capture clauses fixes a compiler warning with clang
+    return std::async(std::launch::deferred, [=, this] {
       char* ptr = nullptr;
       CUDF_CUDA_TRY(hipHostMalloc(&ptr, size));
       CUDF_CUDA_TRY(hipMemcpyAsync(ptr, gpu_data, size, hipMemcpyDefault, stream.value()));
@@ -2436,7 +2437,8 @@ class custom_test_memmap_sink : public cudf::io::data_sink {
                                        size_t size,
                                        rmm::cuda_stream_view stream) override
   {
-    return std::async(std::launch::deferred, [=] {
+    // NOTE(HIP): adding "this" to the capture clauses fixes a compiler warning with clang
+    return std::async(std::launch::deferred, [=, this] {
       char* ptr = nullptr;
       CUDF_CUDA_TRY(hipHostMalloc(&ptr, size));
       CUDF_CUDA_TRY(hipMemcpyAsync(ptr, gpu_data, size, hipMemcpyDefault, stream.value()));
