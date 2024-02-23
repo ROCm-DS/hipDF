@@ -70,7 +70,21 @@ constexpr int max_delta_mini_block_size = 64;
 // batch of size `values_per_mb`. The largest value for values_per_miniblock among the
 // major writers seems to be 64, so 2 * 64 should be good. We save the first value separately
 // since it is not encoded in the first mini-block.
+
+// we decode one mini-block at a time. max mini-block size seen is 64.
+// NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
+// gpuDecodeLevels typically decodes more values per run
+// due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
+// (with batch size 32).
+// Some buffer space is needed to avoid that the rolling buffer
+// wraps around and overwrites values that haven't been consumed
+// yet (by the output warp/wavefront) which would result in failing decoding.
+//TODO(HIP/AMD): Revisit this size.
+#ifdef __HIP_PLATFORM_AMD__
+constexpr int delta_rolling_buf_size = 4 * max_delta_mini_block_size;
+#else
 constexpr int delta_rolling_buf_size = 2 * max_delta_mini_block_size;
+#endif
 
 /**
  * @brief Read a ULEB128 varint integer
