@@ -71,7 +71,7 @@ dependencies:
 - librdkafka>=1.9.0,<1.10.0a0
 #: - librmm==23.10.* provide as local paclage
 - make
-- mimesis>=4.1.0
+- mimesis>=4.1.0,<=13.0.0 # Parquet unit test requires age attribute which got removed in more recent mimesis releases
 - moto>=4.0.8
 - msgpack-python
 - myst-nb
