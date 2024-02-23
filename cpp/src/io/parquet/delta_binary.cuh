@@ -251,57 +251,72 @@ struct delta_binary_decoder {
 
     uint32_t const mb_bits = cur_bitwidths[cur_mb];
 
-    // need to do in multiple passes if values_per_mb != 32
-    uint32_t const num_pass = values_per_mb / warp_size;
+    // NOTE(HIP/AMD): Using a batch_len for batched processing here,
+    // as on AMD backend, 64 values_per_mb may be processed concurrently.
+    // Typically, values_per_mb is either 32 or 64.
+    uint32_t const batch_len = min(values_per_mb, warp_size);
 
+    // need to do in multiple passes if values_per_mb != batch_len
+    // NOTE(HIP/AMD): Pay extra attention to rounding up if 
+    // batch_len==64 (on AMD) and values_per_mb==32
+    uint32_t const num_pass = (values_per_mb + batch_len - 1) / batch_len;
+ 
     auto d_start = cur_mb_start;
 
-    for (int i = 0; i < num_pass; i++) {
-      // position at end of the current mini-block since the following calculates
-      // negative indexes
-      d_start += (warp_size * mb_bits) / 8;
+    // NOTE(HIP/AMD): On AMD, it may happen that batch_len==values_per_mb==32, so we need
+    // to mask out threads.
+    if(lane_id<batch_len) {
+      for (int i = 0; i < num_pass; i++) {
+        // position at end of the current mini-block since the following calculates
+        // negative indexes
+        d_start += (batch_len * mb_bits) / 8;
 
-      // unpack deltas. modified from version in gpuDecodeDictionaryIndices(), but
-      // that one only unpacks up to bitwidths of 24. simplified some since this
-      // will always do batches of 32.
-      // NOTE: because this needs to handle up to 64 bits, the branching used in the other
-      // implementation has been replaced with a loop. While this uses more registers, the
-      // looping version is just as fast and easier to read. Might need to revisit this when
-      // DELTA_BYTE_ARRAY is implemented.
-      zigzag128_t delta = 0;
-      if (lane_id + current_value_idx < value_count) {
-        int32_t ofs      = (lane_id - warp_size) * mb_bits;
-        uint8_t const* p = d_start + (ofs >> 3);
-        ofs &= 7;
-        if (p < block_end) {
-          uint32_t c = 8 - ofs;  // 0 - 7 bits
-          delta      = (*p++) >> ofs;
+        // unpack deltas. modified from version in gpuDecodeDictionaryIndices(), but
+        // that one only unpacks up to bitwidths of 24. simplified some since this
+        // will always do batches of warp_size.
+        // NOTE: because this needs to handle up to 64 bits, the branching used in the other
+        // implementation has been replaced with a loop. While this uses more registers, the
+        // looping version is just as fast and easier to read. Might need to revisit this when
+        // DELTA_BYTE_ARRAY is implemented.
+        zigzag128_t delta = 0;
+        if (lane_id + current_value_idx < value_count) {
+          int32_t ofs      = (lane_id - batch_len) * mb_bits;
+          uint8_t const* p = d_start + (ofs >> 3);
+          ofs &= 7;
+          if (p < block_end) {
+            uint32_t c = 8 - ofs;  // 0 - 7 bits
+            delta      = (*p++) >> ofs;
 
-          while (c < mb_bits && p < block_end) {
-            delta |= static_cast<zigzag128_t>(*p++) << c;
-            c += 8;
+            while (c < mb_bits && p < block_end) {
+              delta |= static_cast<zigzag128_t>(*p++) << c;
+              c += 8;
+            }
+            // NOTE(HIP/AMD): Need extra treatment for mb_bits==64, as shift operation is UB in this case
+            // zigzag128_t is currently a 64bit type (int64_t)
+            delta &= (mb_bits==64) ?  LANE_MASK_ALL : (static_cast<zigzag128_t>(1) << mb_bits) - 1;
           }
-          delta &= (static_cast<zigzag128_t>(1) << mb_bits) - 1;
+           
         }
+
+
+        // add min delta to get true delta
+        delta += cur_min_delta;
+
+        // do inclusive scan to get value - first_value at each position
+        __shared__ hipcub::WarpScan<int64_t>::TempStorage temp_storage;
+        hipcub::WarpScan<int64_t>(temp_storage).InclusiveSum(delta, delta);
+
+        // now add first value from header or last value from previous block to get true value
+        delta += last_value;
+        int const value_idx =
+          rolling_index<delta_rolling_buf_size>(current_value_idx + batch_len * i + lane_id);
+        value[value_idx] = delta;
+
+        // save value from last lane in warp. this will become the 'first value' added to the
+        // deltas calculated in the next iteration (or invocation).
+        if (lane_id ==  batch_len - 1) { last_value = delta; }
+        __syncwarp();
       }
-
-      // add min delta to get true delta
-      delta += cur_min_delta;
-
-      // do inclusive scan to get value - first_value at each position
-      __shared__ hipcub::WarpScan<int64_t>::TempStorage temp_storage;
-      hipcub::WarpScan<int64_t>(temp_storage).InclusiveSum(delta, delta);
-
-      // now add first value from header or last value from previous block to get true value
-      delta += last_value;
-      int const value_idx =
-        rolling_index<delta_rolling_buf_size>(current_value_idx + warp_size * i + lane_id);
-      value[value_idx] = delta;
-
-      // save value from last lane in warp. this will become the 'first value' added to the
-      // deltas calculated in the next iteration (or invocation).
-      if (lane_id == warp_size - 1) { last_value = delta; }
-      __syncwarp();
     }
   }
 
