@@ -270,11 +270,13 @@ __device__ void cooperative_load(T& destination, T const* source = nullptr)
 {
   using load_type = std::conditional_t<((sizeof(T) % sizeof(uint32_t)) == 0), uint32_t, uint8_t>;
   if (source == nullptr) {
-    for (auto i = threadIdx.x; i < (sizeof(T) / sizeof(load_type)); i += blockDim.x) {
+    //: TODO(HIP/AMD): type derivation with auto keyword (auto i) fails presently with hipcc/HIP AMD, causing
+    //: UB behaviour (the code is not copying the data correctly). See issue https://github.com/AMD-AI/hipdf/issues/85.
+    for (size_t i = threadIdx.x; i < (sizeof(T) / sizeof(load_type)); i += blockDim.x) {
       reinterpret_cast<load_type*>(&destination)[i] = load_type{0};
     }
   } else {
-    for (auto i = threadIdx.x; i < sizeof(T) / sizeof(load_type); i += blockDim.x) {
+    for (size_t i = threadIdx.x; i < sizeof(T) / sizeof(load_type); i += blockDim.x) {
       reinterpret_cast<load_type*>(&destination)[i] = reinterpret_cast<load_type const*>(source)[i];
     }
   }
@@ -375,8 +377,7 @@ __global__ void __launch_bounds__(block_size, 1)
                              statistics_chunk const* chunks_in,
                              statistics_merge_group const* groups)
 {
-  //extern __shared__ __align__(8) merge_state_s state[];
-  extern __shared__ merge_state_s state[];
+  extern __shared__ __align__(8) merge_state_s state[];
   __shared__ block_reduce_storage<block_size> storage;
 
   cooperative_load(state[0].group, &groups[blockIdx.x]);

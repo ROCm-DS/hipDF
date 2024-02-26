@@ -779,7 +779,7 @@ type_id to_cudf_decimal_type(host_span<std::string const> decimal128_columns,
                              int column_index)
 {
   if (metadata.get_col_type(column_index).kind != DECIMAL) { return type_id::EMPTY; }
-  //Todo(HIP): We dont support type DECIMAL128 for now. 
+  //TODO(HIP/AMD): We dont support type DECIMAL128 for now. 
   //if (std::find(decimal128_columns.begin(),
   //              decimal128_columns.end(),
   //              metadata.column_path(0, column_index)) != decimal128_columns.end()) {
@@ -790,7 +790,7 @@ type_id to_cudf_decimal_type(host_span<std::string const> decimal128_columns,
                            .precision.value_or(hip::std::numeric_limits<int64_t>::digits10);
   if (precision <= hip::std::numeric_limits<int32_t>::digits10) { return type_id::DECIMAL32; }
   if (precision <= hip::std::numeric_limits<int64_t>::digits10) { return type_id::DECIMAL64; }
-  //Todo(HIP): We dont support type DECIMAL128 for now.
+  //TODO(HIP/AMD): We dont support type DECIMAL128 for now.
   //return type_id::DECIMAL128;
 }
 
@@ -876,7 +876,7 @@ std::unique_ptr<column> create_empty_column(
 
     case orc::DECIMAL: {
       int32_t scale = 0;
-      //Todo(HIP): We dont support type DECIMAL128 for now.
+      //TODO(HIP/AMD): We dont support type DECIMAL128 for now.
       if (type == type_id::DECIMAL32 or type == type_id::DECIMAL64 /*or type == type_id::DECIMAL128*/) {
         scale = -static_cast<int32_t>(metadata.get_types()[orc_col_id].scale.value_or(0));
       }
@@ -1049,7 +1049,7 @@ cudf::io::table_with_metadata reader::impl::read(uint64_t skip_rows,
                                    _timestamp_type.id(),
                                    to_cudf_decimal_type(_decimal128_columns, _metadata, col.id));
       CUDF_EXPECTS(col_type != type_id::EMPTY, "Unknown type");
-      //Todo(HIP): We dont support type DECIMAL128 for now.
+      //TODO(HIP/AMD): We dont support type DECIMAL128 for now.
       if (col_type == type_id::DECIMAL32 or col_type == type_id::DECIMAL64 /*or
           col_type == type_id::DECIMAL128*/) {
         // sign of the scale is changed since cuDF follows c++ libraries like CNL

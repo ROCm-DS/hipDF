@@ -19,6 +19,8 @@
 #include <cudf/io/orc_types.hpp>
 #include <io/utilities/block_utils.cuh>
 
+#include <cudf/detail/utilities/cuda.cuh>
+
 #include <rmm/cuda_stream_view.hpp>
 
 namespace cudf {
@@ -26,7 +28,7 @@ namespace io {
 namespace orc {
 namespace gpu {
 
-constexpr unsigned int init_threads_per_group = 32;
+constexpr unsigned int init_threads_per_group = cudf::detail::warp_size;
 constexpr unsigned int init_groups_per_block  = 4;
 constexpr unsigned int init_threads_per_block = init_threads_per_group * init_groups_per_block;
 
@@ -124,10 +126,7 @@ struct stats_state_s {
   uint8_t* base;  ///< Output buffer start
   uint8_t* end;   ///< Output buffer end
   statistics_chunk chunk;
-  // Todo(HIP): Use statistics_merge_group_hip instead which does not have member col_dtype 
-  // Definition in: hipdf/cpp/src/io/statistics/statistics.cuh
-  // statistics_merge_group group; 
-  statistics_merge_group_hip group;
+  statistics_merge_group group;
   statistics_dtype stats_dtype;  //!< Statistics data type for this column
   // ORC stats
   uint64_t numberOfValues;
@@ -213,7 +212,7 @@ __device__ inline uint8_t* pb_put_fixed64(uint8_t* p, uint32_t id, void const* r
  *  optional bool hasNull = 10;
  * }
  */
-constexpr unsigned int encode_threads_per_chunk = 32;
+constexpr unsigned int encode_threads_per_chunk = cudf::detail::warp_size;
 constexpr unsigned int encode_chunks_per_block  = 4;
 constexpr unsigned int encode_threads_per_block =
   encode_threads_per_chunk * encode_chunks_per_block;
@@ -224,7 +223,8 @@ __global__ void __launch_bounds__(encode_threads_per_block)
                         statistics_chunk const* chunks,
                         uint32_t statistics_count)
 {
-  __shared__ __align__(8) stats_state_s state_g[encode_chunks_per_block];
+  //: TODO(HIP/AMD): This is a work around for "initialization is not supported for __shared__ variables"
+  extern __shared__ __align__(8) stats_state_s state_g[/*encode_chunks_per_block*/];
   auto t                 = threadIdx.x;
   auto idx               = blockIdx.x * encode_chunks_per_block + threadIdx.y;
   stats_state_s* const s = &state_g[threadIdx.y];
@@ -402,7 +402,7 @@ void orc_encode_statistics(uint8_t* blob_bfr,
   unsigned int num_blocks =
     (statistics_count + encode_chunks_per_block - 1) / encode_chunks_per_block;
   dim3 dim_block(encode_threads_per_chunk, encode_chunks_per_block);
-  gpu_encode_statistics<<<num_blocks, dim_block, 0, stream.value()>>>(
+  gpu_encode_statistics<<<num_blocks, dim_block, encode_chunks_per_block*sizeof(stats_state_s), stream.value()>>>(
     blob_bfr, groups, chunks, statistics_count);
 }
 

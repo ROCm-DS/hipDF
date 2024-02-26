@@ -121,22 +121,6 @@ struct statistics_merge_group {
   uint32_t num_chunks;           //!< Number of chunks in group
 };
 
-// Todo(HIP): hipdf/cpp/src/io/orc/stats_enc.hip:224:41: error: initialization is not supported for __shared__ variables.
-//  __shared__ __align__(8) stats_state_s state_g[encode_chunks_per_block];
-// Added this struct without col_dtype because it is the only member with a ctor 
-// and it is never used!
-struct statistics_merge_group_hip {
-  // data_type col_dtype;           //!< Column data type <- it is never used inside stats_enc
-  statistics_dtype stats_dtype;  //!< Statistics data type for this column
-  uint32_t start_chunk;          //!< Start chunk of this group
-  uint32_t num_chunks;           //!< Number of chunks in group
-  __host__ __device__
-  statistics_merge_group_hip& operator=(const statistics_merge_group& t){
-    stats_dtype = t.stats_dtype;
-    start_chunk = t.start_chunk;
-    num_chunks  = t.num_chunks;
-  }
-};
 
 template <typename T, std::enable_if_t<!std::is_same_v<T, statistics::byte_array_view>>* = nullptr>
 __device__ T get_element(column_device_view const& col, uint32_t row)

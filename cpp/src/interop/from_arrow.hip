@@ -198,6 +198,8 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<numeric::decimal128>
   rmm::cuda_stream_view stream,
   rmm::mr::device_memory_resource* mr)
 {
+  //: TODO(HIP/AMD): remove this warning when DECIMAL128 is available
+  printf("CAUTION: dispatching type numeric::decimal128 to a cudf column. DECIMAL128 is currently not supported in hipDF!");
   using DeviceType = __int128_t;
 
   auto data_buffer    = array.data()->buffers[1];
@@ -370,7 +372,7 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<cudf::struct_view>(
   }
 
   return make_structs_column(
-    array.length(), std::move(child_columns), array.null_count(), std::move(out_mask), stream, mr); //TODO(HIP): is std::move correct for child_columns?
+    array.length(), std::move(child_columns), array.null_count(), std::move(out_mask), stream, mr); //TODO(HIP/AMD): is std::move correct for child_columns?
 }
 
 template <>

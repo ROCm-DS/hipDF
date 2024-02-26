@@ -27,6 +27,8 @@
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/utilities/bit.hpp>
 
+#include <cudf/detail/utilities/cuda.cuh>
+
 #include <hipcub/hipcub.hpp>
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
@@ -53,7 +55,7 @@ constexpr bool zero_pll_war = true;
 struct byterle_enc_state_s {
   uint32_t literal_run;
   uint32_t repeat_run;
-  volatile uint32_t rpt_map[(512 / 32) + 1];
+  volatile bitmask_type rpt_map[(512 / cudf::detail::warp_size) + 1];
 };
 
 struct intrle_enc_state_s {
@@ -63,12 +65,12 @@ struct intrle_enc_state_s {
   uint32_t literal_w;
   uint32_t hdr_bytes;
   uint32_t pl_bytes;
-  volatile uint32_t delta_map[(512 / 32) + 1];
+  volatile bitmask_type delta_map[(512 / cudf::detail::warp_size) + 1];
 };
 
 struct strdata_enc_state_s {
   uint32_t char_count;
-  uint32_t lengths_red[(512 / 32)];
+  uint32_t lengths_red[(512 / cudf::detail::warp_size)];
   char const* str_data[512];
 };
 
@@ -83,7 +85,9 @@ struct orcenc_state_s {
   encoder_chunk_streams stream;
   EncChunk chunk;
   uint32_t strm_pos[CI_NUM_STREAMS];
-  uint8_t valid_buf[512];  // valid map bits
+  // TODO(HIP/AMD): need alignment here, as atomicAnd/atomicOr is executed on this buffer and 
+  // atomics on unaligned data cause crashes 
+  alignas(8) uint8_t valid_buf[512];  // valid map bits
   union {
     byterle_enc_state_s byterle;
     intrle_enc_state_s intrle;
@@ -183,9 +187,10 @@ static __device__ uint32_t ByteRLE(
   while (numvals > 0) {
     uint8_t v0       = (t < numvals) ? inbuf[(inpos + t) & inmask] : 0;
     uint8_t v1       = (t + 1 < numvals) ? inbuf[(inpos + t + 1) & inmask] : 0;
-    uint32_t rpt_map = ballot(t + 1 < numvals && v0 == v1), literal_run, repeat_run,
+    bitmask_type rpt_map = ballot(t + 1 < numvals && v0 == v1);
+    uint32_t literal_run, repeat_run,
              maxvals = min(numvals, 512);
-    if (!(t & 0x1f)) s->u.byterle.rpt_map[t >> 5] = rpt_map;
+    if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) s->u.byterle.rpt_map[t >> LOG2_WARPSIZE] = rpt_map;
     __syncthreads();
     if (t == 0) {
       // Find the start of an identical 3-byte sequence
@@ -193,17 +198,21 @@ static __device__ uint32_t ByteRLE(
       literal_run = 0;
       repeat_run  = 0;
       while (literal_run < maxvals) {
-        uint32_t next = s->u.byterle.rpt_map[(literal_run >> 5) + 1];
-        uint32_t mask = rpt_map & __funnelshift_r(rpt_map, next, 1);
+        bitmask_type next = s->u.byterle.rpt_map[(literal_run >> LOG2_WARPSIZE) + 1];
+#ifdef __HIP_PLATFORM_AMD__
+        bitmask_type mask = rpt_map & cudf::detail::__m_funnelshift_r(rpt_map, next, 1);
+#else
+        bitmask_type mask = rpt_map & __funnelshift_r(rpt_map, next, 1);
+#endif
         if (mask) {
           uint32_t literal_run_ofs = __FFS(mask) - 1;
           literal_run += literal_run_ofs;
           repeat_run = __FFS(~((rpt_map >> literal_run_ofs) >> 1));
-          if (repeat_run + literal_run_ofs == 32) {
-            while (next == ~0) {
-              uint32_t next_idx = ((literal_run + repeat_run) >> 5) + 1;
-              next              = (next_idx < 512 / 32) ? s->u.byterle.rpt_map[next_idx] : 0;
-              repeat_run += 32;
+          if (repeat_run + literal_run_ofs == cudf::detail::warp_size) {
+            while (next == LANE_MASK_ALL) {
+              uint32_t next_idx = ((literal_run + repeat_run) >> LOG2_WARPSIZE) + 1;
+              next              = (next_idx < 512 / cudf::detail::warp_size) ? s->u.byterle.rpt_map[next_idx] : 0;
+              repeat_run += cudf::detail::warp_size;
             }
             repeat_run += __FFS(~next) - 1;
           }
@@ -215,7 +224,7 @@ static __device__ uint32_t ByteRLE(
           break;
         }
         rpt_map = next;
-        literal_run += 32;
+        literal_run += cudf::detail::warp_size;
       }
       if (repeat_run >= 130) {
         // Limit large runs to multiples of 130
@@ -372,9 +381,10 @@ static __device__ uint32_t IntegerRLE(
     T v0               = (t < numvals) ? inbuf[(inpos + t) & inmask] : 0;
     T v1               = (t + 1 < numvals) ? inbuf[(inpos + t + 1) & inmask] : 0;
     T v2               = (t + 2 < numvals) ? inbuf[(inpos + t + 2) & inmask] : 0;
-    uint32_t delta_map = ballot(t + 2 < numvals && v1 - v0 == v2 - v1), maxvals = min(numvals, 512),
+    bitmask_type delta_map = ballot(t + 2 < numvals && v1 - v0 == v2 - v1);
+    uint32_t maxvals = min(numvals, 512),
              literal_run, delta_run;
-    if (!(t & 0x1f)) s->u.intrle.delta_map[t >> 5] = delta_map;
+    if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) s->u.intrle.delta_map[t >> LOG2_WARPSIZE] = delta_map;
     __syncthreads();
     if (!t) {
       // Find the start of the next delta run (2 consecutive values with the same delta)
@@ -384,20 +394,20 @@ static __device__ uint32_t IntegerRLE(
           uint32_t literal_run_ofs = __FFS(delta_map) - 1;
           literal_run += literal_run_ofs;
           delta_run = __FFS(~((delta_map >> literal_run_ofs) >> 1));
-          if (literal_run_ofs + delta_run == 32) {
+          if (literal_run_ofs + delta_run == cudf::detail::warp_size) {
             for (;;) {
-              uint32_t delta_idx = (literal_run + delta_run) >> 5;
-              delta_map          = (delta_idx < 512 / 32) ? s->u.intrle.delta_map[delta_idx] : 0;
-              if (delta_map != ~0) break;
-              delta_run += 32;
+              uint32_t delta_idx = (literal_run + delta_run) >> LOG2_WARPSIZE;
+              delta_map          = (delta_idx < 512 / cudf::detail::warp_size) ? s->u.intrle.delta_map[delta_idx] : 0;
+              if (delta_map != LANE_MASK_ALL) break;
+              delta_run += cudf::detail::warp_size;
             }
             delta_run += __FFS(~delta_map) - 1;
           }
           delta_run += 2;
           break;
         }
-        literal_run += 32;
-        delta_map = s->u.intrle.delta_map[(literal_run >> 5)];
+        literal_run += cudf::detail::warp_size;
+        delta_map = s->u.intrle.delta_map[(literal_run >> LOG2_WARPSIZE)];
       }
       literal_run             = min(literal_run, maxvals);
       s->u.intrle.literal_run = literal_run;
@@ -581,30 +591,31 @@ static __device__ void StoreStringData(uint8_t* dst,
 {
   // Start with summing up all the lengths
   uint32_t pos = len;
-  uint32_t wt  = t & 0x1f;
-  for (uint32_t n = 1; n < 32; n <<= 1) {
+  uint32_t wt  = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
+  for (uint64_t n = 1; n < cudf::detail::warp_size; n <<= 1) {
     uint32_t tmp = shuffle(pos, (wt & ~n) | (n - 1));
     pos += (wt & n) ? tmp : 0;
   }
-  if (wt == 0x1f) { strenc->lengths_red[t >> 5] = pos; }
+  if (wt == LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)) { strenc->lengths_red[t >> LOG2_WARPSIZE] = pos; }
   dst += pos - len;
   __syncthreads();
-  if (t < 32) {
-    uint32_t wlen = (wt < 16) ? strenc->lengths_red[wt] : 0;
+  constexpr int nwarps = (512 / cudf::detail::warp_size);
+  if (t < 2 * nwarps) {
+    uint32_t wlen = (wt < nwarps) ? strenc->lengths_red[wt] : 0;
     uint32_t wpos = wlen;
-    for (uint32_t n = 1; n < 16; n <<= 1) {
+    for (uint32_t n = 1; n < nwarps; n <<= 1) {
       uint32_t tmp = shuffle(wpos, (wt & ~n) | (n - 1));
       wpos += (wt & n) ? tmp : 0;
     }
-    if (wt < 16) { strenc->lengths_red[wt] = wpos - wlen; }
-    if (wt == 0xf) {
+    if (wt < nwarps) { strenc->lengths_red[wt] = wpos - wlen; }
+    if (wt == nwarps-1) {
       strenc->char_count = wpos;  // Update stream position
     }
   }
   __syncthreads();
   // TBD: Might be more efficient to loop over 4 strings and copy 8 consecutive character at a time
   // rather than have each thread to a memcpy
-  if (len > 0) { memcpy(dst + strenc->lengths_red[t >> 5], strenc->str_data[t], len); }
+  if (len > 0) { memcpy(dst + strenc->lengths_red[t >> LOG2_WARPSIZE], strenc->str_data[t], len); }
 }
 
 /**

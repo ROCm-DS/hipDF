@@ -154,7 +154,7 @@ constexpr orc::TypeKind to_orc_type(cudf::type_id id, bool list_column_as_map)
     case cudf::type_id::TIMESTAMP_NANOSECONDS: return TypeKind::TIMESTAMP;
     case cudf::type_id::STRING: return TypeKind::STRING;
     case cudf::type_id::DECIMAL32:
-    case cudf::type_id::DECIMAL64:
+    case cudf::type_id::DECIMAL64: return TypeKind::DECIMAL; //: TODO(HIP/AMD): move down when DECIMAL128 support has been added
     //case cudf::type_id::DECIMAL128: return TypeKind::DECIMAL; //TODO
     case cudf::type_id::LIST: return list_column_as_map ? TypeKind::MAP : TypeKind::LIST;
     case cudf::type_id::STRUCT: return TypeKind::STRUCT;
@@ -702,9 +702,7 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
     orc_table.num_columns() * segmentation.num_rowgroups(), stream);
   auto const d_pd_set_counts = device_2dspan<cudf::size_type>{
     d_pd_set_counts_data.data(), segmentation.num_rowgroups(), orc_table.num_columns()};
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   gpu::reduce_pushdown_masks(orc_table.d_columns, segmentation.rowgroups, d_pd_set_counts, stream);
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
 
   auto aligned_rgs = hostdevice_2dvector<rowgroup_rows>(
     segmentation.num_rowgroups(), orc_table.num_columns(), stream);
@@ -717,7 +715,6 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
     segmentation.stripes, stream, rmm::mr::get_current_device_resource());
 
   // One thread per column, per stripe
-  #if 0 //: FIXME(HIP/AMD): use of undeclared identifier 'columns'.
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator(0),
@@ -803,12 +800,12 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
           // Find word in which we finish the search for missing bits (guaranteed to be available)
           while (bits_to_borrow != 0) {
             auto const mask = cudf::detail::get_mask_offset_word(
-              parent_column.pushdown_mask, 0, borrow_end, borrow_end + 32);
+              parent_column.pushdown_mask, 0, borrow_end, borrow_end + cudf::detail::warp_size);
             auto const valid_in_word = __POPC(mask);
 
             if (valid_in_word > bits_to_borrow) break;
             bits_to_borrow -= valid_in_word;
-            borrow_end += 32;
+            borrow_end += cudf::detail::warp_size;
           }
 
           // Find the last of the missing bits (guaranteed to be available)
@@ -824,7 +821,6 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
         }
       }
     });
-  # endif //: FIXME(HIP/AMD): use of undeclared identifier 'columns'.
   aligned_rgs.device_to_host_sync(stream);
 
   std::vector<std::vector<rowgroup_rows>> h_aligned_rgs;
@@ -886,7 +882,6 @@ encoded_data encode_columns(orc_table_view const& orc_table,
   chunks.host_to_device_async(stream);
   // TODO (future): pass columns separately from chunks (to skip this step)
   // and remove info from chunks that is common for the entire column
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator(0ul),
@@ -897,7 +892,6 @@ encoded_data encode_columns(orc_table_view const& orc_table,
       auto const rg_idx              = idx % chunks.size().second;
       chunks[col_idx][rg_idx].column = &cols[col_idx];
     });
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
 
   auto validity_check_indices = [&](size_t col_idx) {
     std::vector<size_type> indices;
@@ -1020,7 +1014,6 @@ encoded_data encode_columns(orc_table_view const& orc_table,
   if (orc_table.num_rows() > 0) {
     if (orc_table.num_string_columns() != 0) {
       auto d_stripe_dict = orc_table.string_column(0).device_stripe_dicts();
-      #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
       gpu::EncodeStripeDictionaries(d_stripe_dict.data(),
                                     orc_table.d_columns,
                                     chunks,
@@ -1028,7 +1021,6 @@ encoded_data encode_columns(orc_table_view const& orc_table,
                                     segmentation.num_stripes(),
                                     chunk_streams,
                                     stream);
-      #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
     }
 
     gpu::EncodeOrcColumnData(chunks, chunk_streams, stream);
@@ -1240,10 +1232,8 @@ intermediate_statistics gather_statistic_blobs(statistics_freq const stats_freq,
   stat_desc.host_to_device_async(stream);
   rowgroup_merge.host_to_device_async(stream);
   stripe_merge.host_to_device_async(stream);
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   set_stat_desc_leaf_cols(orc_table.d_columns, stat_desc, stream);
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
-
+  
   // The rowgroup stat chunks are written out in each stripe. The stripe and file-level chunks are
   // written in the footer. To prevent persisting the rowgroup stat chunks across multiple write
   // calls in a chunked write situation, these allocations are split up so stripe data can persist
@@ -1680,16 +1670,13 @@ pushdown_null_masks init_pushdown_null_masks(orc_table_view& orc_table,
       // pushdown mask applies to child column(s); use the child column size
       pd_masks.emplace_back(num_bitmask_words(child_col.size()), stream);
       mask_ptrs.emplace_back(pd_masks.back().data());
-      #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
       pushdown_lists_null_mask(col, orc_table.d_columns, parent_pd_mask, pd_masks.back(), stream);
-      #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
     }
   }
 
   // Attach null masks to device column views (async)
   auto const d_mask_ptrs = cudf::detail::make_device_uvector_async(
     mask_ptrs, stream, rmm::mr::get_current_device_resource());
-  #if 0 //: FIXME(HIP/AMD): use of undeclared identifier 'cols'; did you mean 'cos'?
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator(0ul),
@@ -1698,7 +1685,6 @@ pushdown_null_masks init_pushdown_null_masks(orc_table_view& orc_table,
      ptrs = device_span<bitmask_type const* const>{d_mask_ptrs}] __device__(auto& idx) {
       cols[idx].pushdown_mask = ptrs[idx];
     });
-  #endif //: FIXME(HIP/AMD): use of undeclared identifier 'cols'; did you mean 'cos'?
 
   return {std::move(pd_masks), std::move(mask_ptrs)};
 }
@@ -1781,20 +1767,13 @@ orc_table_view make_orc_table_view(table_view const& table,
       return orc_column.orc_kind();
     });
 
-  #if 0 //: FIXME(HIP/AMD): no matching constructor for initialization of 'rmm::device_uvector<orc_column_device_view>'
   auto const d_type_kinds = cudf::detail::make_device_uvector_async(
     type_kinds, stream, rmm::mr::get_current_device_resource());
-  #endif //: FIXME(HIP/AMD): no matching constructor for initialization of 'rmm::device_uvector<orc_column_device_view>'
 
-  #if 0 //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
   rmm::device_uvector<orc_column_device_view> d_orc_columns(orc_columns.size(), stream);
-  #endif //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
   using stack_value_type = thrust::pair<column_device_view const*, thrust::optional<uint32_t>>;
-  #if 0 //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
   rmm::device_uvector<stack_value_type> stack_storage(orc_columns.size(), stream);
-  #endif //: FIXME(HIP/AMD): device_uvector only supports types that are trivially copyable.
 
-  #if 0 //: FIXME(HIP/AMD): no matching constructor for initialization of 'device_span<orc_column_device_view>';
   // pre-order append ORC device columns
   cudf::detail::device_single_thread(
     [d_orc_cols         = device_span<orc_column_device_view>{d_orc_columns},
@@ -1835,12 +1814,9 @@ orc_table_view make_orc_table_view(table_view const& table,
       }
     },
     stream);
-  #endif //: FIXME(HIP/AMD): no matching constructor for initialization of 'device_span<orc_column_device_view>'
 
   return {std::move(orc_columns),
-          #if 0 //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'd_orc_columns'; did you mean 'orc_columns'?
           std::move(d_orc_columns),
-          #endif //: TODO: HIP/AMD: knock-on: use of undeclared identifier 'd_orc_columns'; did you mean 'orc_columns'?
           str_col_indexes,
           cudf::detail::make_device_uvector_sync(
             str_col_indexes, stream, rmm::mr::get_current_device_resource())};
@@ -1855,7 +1831,6 @@ hostdevice_2dvector<rowgroup_rows> calculate_rowgroup_bounds(orc_table_view cons
 
   hostdevice_2dvector<rowgroup_rows> rowgroup_bounds(
     num_rowgroups, orc_table.num_columns(), stream);
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator(0ul),
@@ -1890,7 +1865,6 @@ hostdevice_2dvector<rowgroup_rows> calculate_rowgroup_bounds(orc_table_view cons
           }
         });
     });
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   rowgroup_bounds.device_to_host_sync(stream);
 
   return rowgroup_bounds;
@@ -1908,7 +1882,6 @@ encoder_decimal_info decimal_chunk_sizes(orc_table_view& orc_table,
       auto& current_sizes =
         elem_sizes.insert({orc_col.index(), rmm::device_uvector<uint32_t>(orc_col.size(), stream)})
           .first->second;
-      #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
       thrust::tabulate(rmm::exec_policy(stream),
                        current_sizes.begin(),
                        current_sizes.end(),
@@ -1934,7 +1907,6 @@ encoder_decimal_info decimal_chunk_sizes(orc_table_view& orc_table,
 
                          return varint_size(zigzaged_value);
                        });
-      #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
 
       // Compute element offsets within each row group
       thrust::for_each_n(rmm::exec_policy(stream),
@@ -2029,13 +2001,11 @@ auto set_rowgroup_char_counts(orc_table_view& orc_table,
 
   auto counts         = rmm::device_uvector<size_type>(num_str_cols * num_rowgroups, stream);
   auto counts_2d_view = device_2dspan<size_type>(counts.data(), num_str_cols, num_rowgroups);
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   gpu::rowgroup_char_counts(counts_2d_view,
                             orc_table.d_columns,
                             rowgroup_bounds,
                             orc_table.d_string_column_indices,
                             stream);
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
 
   auto const h_counts = cudf::detail::make_std_vector_sync(counts, stream);
 
@@ -2114,9 +2084,7 @@ stripe_dictionaries build_dictionaries(orc_table_view& orc_table,
   stripe_dicts.host_to_device_async(stream);
 
   gpu::initialize_dictionary_hash_maps(stripe_dicts, stream);
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   gpu::populate_dictionary_hash_maps(stripe_dicts, orc_table.d_columns, stream);
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   // Copy the entry counts and char counts from the device to the host
   stripe_dicts.device_to_host_sync(stream);
 
@@ -2163,9 +2131,7 @@ stripe_dictionaries build_dictionaries(orc_table_view& orc_table,
   stripe_dicts.host_to_device_async(stream);
 
   gpu::collect_map_entries(stripe_dicts, stream);
-  #if 0 //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
   gpu::get_dictionary_indices(stripe_dicts, orc_table.d_columns, stream);
-  #endif //: TODO: HIP/AMD: no member named 'd_columns' in 'cudf::io::detail::orc::orc_table_view'
 
   // Clear map slots; hash map storage is deallocated at the end of this function
   auto device_dicts_flat = stripe_dicts.device_view().flat_view();

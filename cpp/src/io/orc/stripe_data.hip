@@ -16,6 +16,7 @@
 
 #include "orc_gpu.hpp"
 
+#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/io/orc_types.hpp>
 #include <io/utilities/block_utils.cuh>
 
@@ -35,8 +36,8 @@ constexpr int bytestream_buffer_size = 512 * 8 * 2;
 constexpr int bytestream_buffer_mask = (bytestream_buffer_size - 1) >> 2;
 
 // TODO: Should be more efficient with 512 threads per block and circular queue for values
-constexpr int num_warps  = 32;
-constexpr int block_size = 32 * num_warps;
+constexpr int num_warps  = 32 / (cudf::detail::warp_size/32); //: NOTE(HIP/AMD): On AMD, we use half the number of warps as too large block sizes would consume too much LDS.
+constexpr int block_size = 32 * num_warps * (cudf::detail::warp_size/32); //: NOTE(HIP/AMD): On AMD, we multiply by warpSize/32 to ensure that we have 1024 threads
 // Add some margin to look ahead to future rows in case there are many zeroes
 constexpr int row_decoder_buffer_size = block_size + 128;
 inline __device__ uint8_t is_rlev1(uint8_t encoding_mode) { return encoding_mode < DIRECT_V2; }
@@ -449,11 +450,8 @@ inline __device__ int decode_base128_varint(volatile orc_bytestream_s* bs, int p
 inline __device__ __int128_t decode_varint128(volatile orc_bytestream_s* bs, int pos)
 {
   auto byte                  = bytestream_readbyte(bs, pos++);
-  // Todo(HIP): fatal error: error in backend: unsupported libcall legalization
-  // converted type of sign_mask and value to auto (__int128_t -> auto)
-  // https://github.com/AMD-AI/hipdf/issues/3 
-  auto const sign_mask = -(int32_t)(byte & 1);
-  auto value           = (byte >> 1) & 0x3f;
+  __int128_t const sign_mask = -(int32_t)(byte & 1);
+  __int128_t value           = (byte >> 1) & 0x3f;
   uint32_t bitpos            = 6;
   while (byte & 0x80 && bitpos < 128) {
     byte = bytestream_readbyte(bs, pos++);
@@ -583,15 +581,15 @@ static __device__ uint32_t Integer_RLEv1(
   // Expand the runs
   numruns = rle->num_runs;
   if (numruns > 0) {
-    int r  = t >> 5;
-    int tr = t & 0x1f;
+    int r  = t >> LOG2_WARPSIZE;
+    int tr = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
     for (uint32_t run = r; run < numruns; run += num_warps) {
       int32_t run_data = rle->run_data[run];
       int n            = (run_data >> 16) & 0xff;
       int delta        = run_data >> 24;
       uint32_t base    = run_data & 0x3ff;
       uint32_t pos     = vals[base] & 0xffff;
-      for (int i = 1 + tr; i < n; i += 32) {
+      for (int i = 1 + tr; i < n; i += cudf::detail::warp_size) {
         vals[base + i] = ((delta * i) << 16) | pos;
       }
     }
@@ -713,8 +711,8 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
   __syncthreads();
   // Process the runs, 1 warp per run
   auto const numruns = rle->num_runs;
-  auto const r       = t >> 5;
-  auto const tr      = t & 0x1f;
+  auto const r       = t >> LOG2_WARPSIZE;
+  auto const tr      = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
   for (uint32_t run = r; run < numruns; run += num_warps) {
     uint32_t base, pos, w, n;
     int mode;
@@ -786,7 +784,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
     n    = shuffle(n);
     w    = shuffle(w);
     hip_extensions::__syncwarp();  // Not required, included to fix the racecheck warning
-    for (uint32_t i = tr; i < n; i += 32) {
+    for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
       if constexpr (sizeof(T) <= 4) {
         if (mode == 0) {
           vals[base + i] = rle->baseval.u32[r];
@@ -860,7 +858,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
       T baseval;
       for (uint32_t i = 1; i < n; i <<= 1) {
         hip_extensions::__syncwarp();
-        for (uint32_t j = tr; j < n; j += 32) {
+        for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
           if (j & i) vals[base + j] += vals[base + ((j & ~i) | (i - 1))];
         }
       }
@@ -868,7 +866,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         baseval = rle->baseval.u32[r];
       else
         baseval = rle->baseval.u64[r];
-      for (uint32_t j = tr; j < n; j += 32) {
+      for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
         vals[base + j] += baseval;
       }
     }
@@ -945,8 +943,8 @@ static __device__ uint32_t Byte_RLE(orc_bytestream_s* bs,
   }
   __syncthreads();
   numruns = rle->num_runs;
-  r       = t >> 5;
-  tr      = t & 0x1f;
+  r       = t >> LOG2_WARPSIZE;
+  tr      = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
   for (int run = r; run < numruns; run += num_warps) {
     uint32_t pos = rle->runs_pos[run];
     uint32_t loc = rle->runs_loc[run];
@@ -959,7 +957,7 @@ static __device__ uint32_t Byte_RLE(orc_bytestream_s* bs,
       literal_mask = ~0;
       n            = 0x100 - n;
     }
-    for (uint32_t i = tr; i < n; i += 32) {
+    for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
       vals[loc + i] = bytestream_readbyte(bs, pos + (i & literal_mask));
     }
   }
@@ -1037,7 +1035,7 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
     }
     __syncthreads();
     uint32_t num_vals_to_read = scratch->num_vals;
-#if 0 //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+
     if (t >= num_vals_read and t < num_vals_to_read) {
       auto const pos = static_cast<int>(vals.i64[2 * t]);
       __int128_t v   = decode_varint128(bs, pos);
@@ -1051,7 +1049,10 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
           return (v * kPow5i[abs_scale]) << abs_scale;
         } else {
           auto const abs_scale = min(-scale, 27);
+#if 0 //: TODO(HIP/AMD): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
           return (v / kPow5i[abs_scale]) >> abs_scale;
+#endif //: TODO(HIP/AMD): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+          printf("Error: Trying to decode a decimal using int128_t division, which is not supported with hipclang yet. See https://ontrack-internal.amd.com/browse/SWDEV-426193\n");
         }
       }();
       if (dtype_id == type_id::DECIMAL32) {
@@ -1062,7 +1063,6 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
         vals.i128[t] = scaled_value;
       }
     }
-#endif //: TODO(HIP): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
     // There is nothing to read, so break
     if (num_vals_read == num_vals_to_read) break;
 
@@ -1108,7 +1108,7 @@ __global__ void __launch_bounds__(block_size)
   using warp_reduce  = hipcub::WarpReduce<uint32_t>;
   using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ union {
-    typename warp_reduce::TempStorage wr_storage[block_size / 32];
+    typename warp_reduce::TempStorage wr_storage[block_size / cudf::detail::warp_size];
     typename block_reduce::TempStorage bk_storage;
   } temp_storage;
 
@@ -1172,7 +1172,7 @@ __global__ void __launch_bounds__(block_size)
         int64_t dst_pos   = max(dst_row, (int64_t)0);
         uint32_t startbit = -static_cast<int32_t>(min(dst_row, (int64_t)0));
         uint32_t nbits    = nrows - min(startbit, nrows);
-        cudf::bitmask_type* valid   = s->chunk.valid_map_base + (dst_pos >> 5);
+        uint32_t* valid   = reinterpret_cast<uint32_t*>(s->chunk.valid_map_base) + (dst_pos >> 5);
         uint32_t bitpos   = static_cast<uint32_t>(dst_pos) & 0x1f;
         if ((size_t)(dst_pos + nbits) > max_num_rows) {
           nbits = static_cast<uint32_t>(max_num_rows - min((size_t)dst_pos, max_num_rows));
@@ -1208,17 +1208,17 @@ __global__ void __launch_bounds__(block_size)
       }
       // We may have some valid values that are not decoded below first_row -> count these in
       // skip_count, so that subsequent kernel can infer the correct row position
-      if (row_in < first_row && t < 32) {
+      if (row_in < first_row && t < cudf::detail::warp_size) {
         uint32_t skippedrows = min(static_cast<uint32_t>(first_row - row_in), nrows);
         uint32_t skip_count  = 0;
-        for (thread_index_type i = t * 32; i < skippedrows; i += 32 * 32) {
+        for (thread_index_type i = t * 32; i < skippedrows; i += cudf::detail::warp_size * 32) {
           // Need to arrange the bytes to apply mask properly.
           uint32_t bits = (i + 32 <= skippedrows) ? s->vals.u32[i >> 5]
                                                   : (__byte_perm(s->vals.u32[i >> 5], 0, 0x0123) &
                                                      (0xffff'ffffu << (0x20 - skippedrows + i)));
           skip_count += __POPC(bits);
         }
-        skip_count = warp_reduce(temp_storage.wr_storage[t / 32]).Sum(skip_count);
+        skip_count = warp_reduce(temp_storage.wr_storage[t / cudf::detail::warp_size]).Sum(skip_count);
         if (t == 0) { s->chunk.skip_count += skip_count; }
       }
       __syncthreads();
@@ -1700,7 +1700,7 @@ __global__ void __launch_bounds__(block_size)
         if (row < max_num_rows) {
           void* data_out = s->chunk.column_data_base;
           switch (s->chunk.type_kind) {
-            // Todo(HIP): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION' 
+            // TODO(HIP/AMD): error: enumeration values 'INVALID_TYPE_KIND', 'STRUCT', and 'UNION' 
             // not handled in switch [-Werror,-Wswitch]
             case INVALID_TYPE_KIND: 
             case STRUCT: 
