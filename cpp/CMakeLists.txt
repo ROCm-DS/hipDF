@@ -285,7 +285,7 @@ add_library(
   src/aggregation/result_cache.cpp
   src/ast/expression_parser.cpp
   src/ast/expressions.cpp
-  src/binaryop/binaryop.cpp  #TODO(HIP/AMD): fix jitify issues
+  src/binaryop/binaryop.cpp
   src/binaryop/compiled/ATan2.hip
   src/binaryop/compiled/Add.hip
   src/binaryop/compiled/BitwiseAnd.hip
@@ -548,7 +548,7 @@ add_library(
   src/reshape/byte_cast.hip
   src/reshape/interleave_columns.hip
   src/reshape/tile.hip
-  src/rolling/detail/optimized_unbounded_window.cpp # TODO(HIP/AMD): JIT
+  src/rolling/detail/optimized_unbounded_window.cpp
   src/rolling/detail/rolling_collect_list.hip
   src/rolling/detail/rolling_fixed_window.hip
   src/rolling/detail/rolling_variable_window.hip
@@ -849,6 +849,7 @@ if(HIPDF_BUILD_TESTUTIL)
     tests/io/metadata_utilities.cpp
     tests/utilities/base_fixture.cpp
     tests/utilities/column_utilities.hip
+    tests/utilities/jit_amd_utilities.cpp
     tests/utilities/table_utilities.hip
     tests/utilities/tdigest_utilities.hip
   )

@@ -22,6 +22,8 @@
 #include <tests/binaryop/util/operation.h>
 #include <tests/binaryop/util/runtime_support.h>
 
+#include <cudf_test/jit_amd_utilities.hpp>
+
 #include <cudf/types.hpp>
 #include <cudf/binaryop.hpp>
 
@@ -36,7 +38,7 @@ struct BinaryOperationGenericPTXTest : public BinaryOperationTest {
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_FP32_FP32_FP32)
 {
   // c = a*a*a + b 
-  char const* amd_llvm_ir = 
+  std::string amd_llvm_ir_str = 
     R"'''(
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {
@@ -99,6 +101,10 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !12 = !{!"float", !9, i64 0}
 	)'''";
 
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+  char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b
   char const* ptx =
@@ -160,7 +166,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT32)
 {
   // c = a*a*a + b 
-  char const* amd_llvm_ir = 
+  std::string amd_llvm_ir_str = 
     R"'''(
 ; Function Attrs: cold noreturn nounwind
 declare void @llvm.trap() #1
@@ -219,6 +225,11 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !13 = !{!14, !14, i64 0}
 !14 = !{!"long", !9, i64 0}
     )'''";
+
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+  char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b
   char const* ptx =
@@ -280,7 +291,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 TEST_F(BinaryOperationGenericPTXTest, CAdd_Vector_Vector_INT64_INT32_INT64)
 {
   // c = a*a*a + b*b
-  char const* amd_llvm_ir = 
+  std::string amd_llvm_ir_str = 
     R"'''(
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {
@@ -347,6 +358,11 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !13 = !{!14, !14, i64 0}
 !14 = !{!"long", !9, i64 0}
 	)'''";
+
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+  char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b*b
   char const* ptx =
