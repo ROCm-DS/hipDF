@@ -85,7 +85,7 @@ struct page_enc_state_s {
   uint32_t rle_rpt_count;
   uint32_t page_start_val;
   uint32_t chunk_start_val;
-  volatile uint32_t rpt_map[4];
+  volatile bitmask_type rpt_map[4];  //one per warp
   volatile uint32_t scratch_red[32];
   EncPage page;
   EncColumnChunk ck;
@@ -308,16 +308,15 @@ __global__ void __launch_bounds__(block_size)
   if (t == 0) { frag[blockIdx.x] = s->frag; }
 }
 
-// blockDim {128,1,1}
+// blockDim {4 * cudf::detail::warp_size,1,1}
 __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitFragmentStats(device_span<statistics_group> groups,
                        device_span<PageFragment const> fragments)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
-  int idx = thread_idx_shrink(threadIdx.x);
+  int idx = threadIdx.x;
   uint32_t const lane_id = idx & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (idx / 32);
+  uint32_t const frag_id = blockIdx.x * 4 + (idx / cudf::detail::warp_size);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
@@ -331,7 +330,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   }
 }
 
-// blockDim {128,1,1}
+// blockDim {4 * cudf::detail::warp_size,1,1}
 __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitPages(device_2dspan<EncColumnChunk> chunks,
                device_span<gpu::EncPage> pages,
@@ -346,7 +345,6 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
                uint32_t page_align,
                bool write_v2_headers)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   // TODO: All writing seems to be done by thread 0. Could be replaced by thrust foreach
   __shared__ __align__(8) parquet_column_device_view col_g;
@@ -354,9 +352,9 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   __shared__ __align__(8) PageFragment frag_g;
   __shared__ __align__(8) EncPage page_g;
   //extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
-  extern __shared__ statistics_merge_group pagestats_g[];
+  extern __shared__ __align__(8) statistics_merge_group pagestats_g[];
 
-  uint32_t const t          = thread_idx_shrink(threadIdx.x);
+  uint32_t const t          = threadIdx.x;
   auto const data_page_type = write_v2_headers ? PageType::DATA_PAGE_V2 : PageType::DATA_PAGE;
 
   if (t == 0) {
@@ -365,7 +363,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
     page_g = {};
   }
   __syncthreads();
-  if (t < 32) {
+  if (t < cudf::detail::warp_size) {
     uint32_t fragments_in_chunk  = 0;
     uint32_t rows_in_page        = 0;
     uint32_t values_in_page      = 0;
@@ -726,7 +724,7 @@ inline __device__ void PackLiteralsRoundRobin(
   // Scratch space to temporarily write to. Needed because we will use atomics to write 32 bit
   // words but the destination mem may not be a multiple of 4 bytes.
   // TODO (dm): This assumes blockdim = 128. Reduce magic numbers.
-  constexpr uint32_t NUM_THREADS  = 128;  // this needs to match gpuEncodePages block_size parameter
+  constexpr uint32_t NUM_THREADS  = 4 * cudf::detail::warp_size; // this needs to match gpuEncodePages block_size parameter
   constexpr uint32_t NUM_BYTES    = (NUM_THREADS * MAX_DICT_BITS) >> 3;
   constexpr uint32_t SCRATCH_SIZE = NUM_BYTES / sizeof(uint32_t);
   __shared__ uint32_t scratch[SCRATCH_SIZE];
@@ -797,7 +795,7 @@ inline __device__ void PackLiterals(
  * @param[in] numvals Total count of input values
  * @param[in] nbits number of bits per symbol (1..16)
  * @param[in] flush nonzero if last batch in block
- * @param[in] t thread id (0..127)
+ * @param[in] t thread id (0.. 4 * cudf::detail::warp_size -1)
  */
 static __device__ void RleEncode(
   page_enc_state_s* s, uint32_t numvals, uint32_t nbits, uint32_t flush, uint32_t t)
@@ -809,20 +807,20 @@ static __device__ void RleEncode(
     uint32_t pos = rle_pos + t;
     if (rle_run > 0 && !(rle_run & 1)) {
       // Currently in a long repeat run
-      uint32_t mask = ballot(pos < numvals && s->vals[pos & (rle_buffer_size - 1)] == s->run_val);
+      bitmask_type mask = ballot(pos < numvals && s->vals[pos & (rle_buffer_size - 1)] == s->run_val);
       uint32_t rle_rpt_count, max_rpt_count;
-      if (!(t & 0x1f)) { s->rpt_map[t >> 5] = mask; }
+      if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { s->rpt_map[t >> LOG2_WARPSIZE] = mask; }
       __syncthreads();
-      if (t < 32) {
-        uint32_t c32 = ballot(t >= 4 || s->rpt_map[t] != 0xffff'ffffu);
+      if (t < cudf::detail::warp_size) {
+        bitmask_type c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
         if (!t) {
           uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
-            last_idx * 32 + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
+            last_idx * cudf::detail::warp_size + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
         }
       }
       __syncthreads();
-      max_rpt_count = min(numvals - rle_pos, 128);
+      max_rpt_count = min(numvals - rle_pos, 4 * cudf::detail::warp_size);
       rle_rpt_count = s->rle_rpt_count;
       rle_run += rle_rpt_count << 1;
       rle_pos += rle_rpt_count;
@@ -841,34 +839,36 @@ static __device__ void RleEncode(
       // New run or in a literal run
       uint32_t v0      = s->vals[pos & (rle_buffer_size - 1)];
       uint32_t v1      = s->vals[(pos + 1) & (rle_buffer_size - 1)];
-      uint32_t mask    = ballot(pos + 1 < numvals && v0 == v1);
-      uint32_t maxvals = min(numvals - rle_pos, 128);
+      bitmask_type mask    = ballot(pos + 1 < numvals && v0 == v1);
+      uint32_t maxvals = min(numvals - rle_pos, 4 * cudf::detail::warp_size);
       uint32_t rle_lit_count, rle_rpt_count;
-      if (!(t & 0x1f)) { s->rpt_map[t >> 5] = mask; }
+      if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { s->rpt_map[t >> LOG2_WARPSIZE] = mask; }
       __syncthreads();
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         // Repeat run can only start on a multiple of 8 values
-        uint32_t idx8        = (t * 8) >> 5;
-        uint32_t pos8        = (t * 8) & 0x1f;
-        uint32_t m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
-        uint32_t m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
+        uint32_t idx8        = (t * 8) >> LOG2_WARPSIZE;
+        uint32_t pos8        = (t * 8) & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
+        bitmask_type m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
+        bitmask_type m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
         uint32_t needed_mask = kRleRunMask[nbits - 1];
-        mask                 = ballot((__funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
+        //: TODO(HIP/AMD): make this portable for CUDA backend
+        mask                 = ballot((::cudf::detail::__m_funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
         if (!t) {
           uint32_t rle_run_start = (mask != 0) ? min((__FFS(mask) - 1) * 8, maxvals) : maxvals;
           uint32_t rpt_len       = 0;
           if (rle_run_start < maxvals) {
-            uint32_t idx_cur = rle_run_start >> 5;
-            uint32_t idx_ofs = rle_run_start & 0x1f;
+            uint32_t idx_cur = rle_run_start >> LOG2_WARPSIZE;
+            uint32_t idx_ofs = rle_run_start & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
             while (idx_cur < 4) {
               m0   = (idx_cur < 4) ? s->rpt_map[idx_cur] : 0;
               m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
-              mask = ~__funnelshift_r(m0, m1, idx_ofs);
+              //: TODO(HIP/AMD): make this portable for CUDA backend
+              mask = ~::cudf::detail::__m_funnelshift_r(m0, m1, idx_ofs);
               if (mask != 0) {
                 rpt_len += __FFS(mask) - 1;
                 break;
               }
-              rpt_len += 32;
+              rpt_len += cudf::detail::warp_size;
               idx_cur++;
             }
           }
@@ -1012,7 +1012,6 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
                  device_span<compression_result> comp_results,
                  bool write_v2_headers)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   __shared__ __align__(8) page_enc_state_s state_g;
   using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
@@ -1023,7 +1022,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   } temp_storage;
 
   page_enc_state_s* const s = &state_g;
-  auto const t              = thread_idx_shrink(threadIdx.x);
+  auto const t              = threadIdx.x;
 
   if (t == 0) {
     state_g = page_enc_state_s{};
@@ -1061,7 +1060,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
       __syncthreads();
       while (s->rle_numvals < s->page.num_rows) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nrows       = min(s->page.num_rows - rle_numvals, 128);
+        uint32_t nrows       = min(s->page.num_rows - rle_numvals, cudf::detail::warp_size * 4);
         auto row             = s->page.start_row + rle_numvals + t;
         // Definition level encodes validity. Checks the valid map and if it is valid, then sets the
         // def_lvl accordingly and sets it in s->vals which is then given to RleEncode to encode
@@ -1097,7 +1096,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
         RleEncode(s, rle_numvals, def_lvl_bits, (rle_numvals == s->page.num_rows), t);
         __syncthreads();
       }
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur       = s->cur;
         uint8_t* const rle_out   = s->rle_out;
         uint32_t const rle_bytes = static_cast<uint32_t>(rle_out - cur) - (is_v2 ? 0 : 4);
@@ -1130,7 +1129,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
       size_type col_last_val_idx   = s->col.level_offsets[s->col.num_rows];
       while (s->rle_numvals < s->page.num_values) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nvals       = min(s->page.num_values - rle_numvals, 128);
+        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * cudf::detail::warp_size);
         uint32_t idx         = page_first_val_idx + rle_numvals + t;
         uint32_t lvl_val =
           (rle_numvals + t < s->page.num_values && idx < col_last_val_idx) ? lvl_val_data[idx] : 0;
@@ -1140,7 +1139,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
         RleEncode(s, rle_numvals, nbits, (rle_numvals == s->page.num_values), t);
         __syncthreads();
       }
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur       = s->cur;
         uint8_t* const rle_out   = s->rle_out;
         uint32_t const rle_bytes = static_cast<uint32_t>(rle_out - cur) - (is_v2 ? 0 : 4);
@@ -1194,7 +1193,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   __syncthreads();
   uint32_t num_valid = 0;
   for (uint32_t cur_val_idx = 0; cur_val_idx < s->page.num_leaf_values;) {
-    uint32_t nvals = min(s->page.num_leaf_values - cur_val_idx, 128);
+    uint32_t nvals = min(s->page.num_leaf_values - cur_val_idx, 4 * cudf::detail::warp_size);
     uint32_t len, pos;
 
     auto [is_valid, val_idx] = [&]() {
@@ -1405,7 +1404,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   uint32_t const valid_count = block_reduce(temp_storage.reduce_storage).Sum(num_valid);
 
   // save RLE length if necessary
-  if (s->rle_len_pos != nullptr && t < 32) {
+  if (s->rle_len_pos != nullptr && t < cudf::detail::warp_size) {
     // size doesn't include the 4 bytes for the length
     auto const rle_size = static_cast<uint32_t>(s->cur - s->rle_len_pos) - RLE_LENGTH_FIELD_LEN;
     if (t < RLE_LENGTH_FIELD_LEN) { s->rle_len_pos[t] = rle_size >> (t * 8); }
@@ -2283,7 +2282,8 @@ void InitFragmentStatistics(device_span<statistics_group> groups,
                             rmm::cuda_stream_view stream)
 {
   int const num_fragments = fragments.size();
-  int const dim = util::div_rounding_up_safe(num_fragments, 128 / 32);
+  // divisor = 4, but leave here to show relationship to block size
+  int const dim = util::div_rounding_up_safe(num_fragments, cudf::detail::warp_size * 4 / cudf::detail::warp_size);
   gpuInitFragmentStats<<<dim, 4 * cudf::detail::warp_size, 0, stream.value()>>>(groups, fragments);
 }
 
@@ -2327,6 +2327,8 @@ void EncodePages(device_span<gpu::EncPage> pages,
   auto num_pages = pages.size();
   // A page is part of one column. This is launching 1 block per page. 1 block will exclusively
   // deal with one datatype.
+
+  //: TODO(HIP/AMD): decrease this to 128 threads like on CUDA for better performance?
   gpuEncodePages<4 * cudf::detail::warp_size><<<num_pages, 4 * cudf::detail::warp_size, 0, stream.value()>>>(
     pages, comp_in, comp_out, comp_results, write_v2_headers);
 }

@@ -31,9 +31,15 @@ namespace gpu {
 
 namespace {
 
-constexpr int decode_block_size = 256;
-constexpr int rolling_buf_size  = decode_block_size;
-
+constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
+// NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
+// gpuDecodeLevels typically decodes more values per run
+// due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
+// (with batch size 32).
+// Some buffer space is needed to avoid that the rolling buffer
+// wraps around and overwrites values that haven't been consumed
+// yet (by the output warp/wavefront) which would result in failing decoding.
+constexpr int rolling_buf_size  = (cudf::detail::warp_size/32) * decode_block_size;
 /**
  * @brief Output a string descriptor
  *
@@ -436,7 +442,6 @@ template <int lvl_buf_size, typename level_t>
 __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   //extern __shared__ __align__(16) page_state_s state_g[];
   extern __shared__ page_state_s state_g[];
@@ -447,7 +452,7 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int page_idx          = blockIdx.x;
-  int t                 = cudf::thread_idx_shrink(threadIdx.x);
+  int t                 = threadIdx.x;
   int out_thread0;
   [[maybe_unused]] null_count_back_copier _{s, t};
 
@@ -459,13 +464,13 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
   bool const has_repetition = s->col.max_level[level_type::REPETITION] > 0;
 
   if (s->dict_base) {
-    out_thread0 = (s->dict_bits > 0) ? 64 : 32;
+    out_thread0 = (s->dict_bits > 0) ? 2 * cudf::detail::warp_size  : cudf::detail::warp_size;
   } else {
     switch (s->col.data_type & 7) {
       case BOOLEAN: [[fallthrough]];
       case BYTE_ARRAY: [[fallthrough]];
-      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 64; break;
-      default: out_thread0 = 32;
+      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 2 * cudf::detail::warp_size; break;
+      default: out_thread0 = cudf::detail::warp_size;
     }
   }
 
@@ -485,10 +490,10 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
                        s->nz_count + (decode_block_size - out_thread0));
     } else {
       target_pos = min(s->nz_count, src_pos + decode_block_size - out_thread0);
-      if (out_thread0 > 32) { target_pos = min(target_pos, s->dict_pos); }
+      if (out_thread0 > cudf::detail::warp_size) { target_pos = min(target_pos, s->dict_pos); }
     }
     __syncthreads();
-    if (t < 32) {
+    if (t < cudf::detail::warp_size) {
       // decode repetition and definition levels.
       // - update validity vectors
       // - updates offsets (for nested columns)
@@ -500,14 +505,14 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
 
       // WARP1: Decode dictionary indices, booleans or string positions
       if (s->dict_base) {
-        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & 0x1f).first;
+        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)).first;
       } else if ((s->col.data_type & 7) == BOOLEAN) {
-        src_target_pos = gpuDecodeRleBooleans(s, sb, src_target_pos, t & 0x1f);
+        src_target_pos = gpuDecodeRleBooleans(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       } else if ((s->col.data_type & 7) == BYTE_ARRAY or
                  (s->col.data_type & 7) == FIXED_LEN_BYTE_ARRAY) {
-        gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & 0x1f);
+        gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       }
-      if (t == 32) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
+      if (t == cudf::detail::warp_size) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
     } else {
       // WARP1..WARP3: Decode values
       int const dtype = s->col.data_type & 7;

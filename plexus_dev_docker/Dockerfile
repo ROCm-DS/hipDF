@@ -1,4 +1,4 @@
-FROM rocm/dev-ubuntu-22.04:6.0-complete
+FROM rocm/dev-ubuntu-22.04:6.0.2-complete
 
 SHELL ["/bin/bash", "-c"]
 
@@ -46,7 +46,7 @@ RUN . /opt/conda/etc/profile.d/conda.sh &&  conda activate cupy_dev \
    && python3 setup.py bdist_wheel
 
 #clone hipdf
-RUN git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/AMD-AI/hipdf.git && cd hipdf && git checkout upgrade_to_rocm_6.0
+RUN git clone https://${GITHUB_USER}:${GITHUB_PASS}@github.com/AMD-AI/hipdf.git && cd hipdf && git checkout dev
 
 #prepare conda environment for hipdf build
 RUN cd /build/hipdf && conda env create --name cudf_dev --file conda/environments/all_rocm_arch-x86_64.yaml 

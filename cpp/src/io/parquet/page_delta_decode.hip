@@ -31,12 +31,11 @@ namespace {
 // Decode page data that is DELTA_BINARY_PACKED encoded. This encoding is
 // only used for int32 and int64 physical types (and appears to only be used
 // with V2 page headers; see https://www.mail-archive.com/dev@parquet.apache.org/msg11826.html).
-// this kernel only needs 96 threads (3 warps)(for now).
+// this kernel only needs 3 warps/wavefronts (for now).
 template <typename level_t>
 __global__ void __launch_bounds__(cudf::detail::warp_size * 3) gpuDecodeDeltaBinary(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
   using cudf::detail::warp_size;
   __shared__ __align__(16) delta_binary_decoder db_state;
@@ -47,7 +46,7 @@ __global__ void __launch_bounds__(cudf::detail::warp_size * 3) gpuDecodeDeltaBin
   page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int const page_idx    = blockIdx.x;
-  int const t           = cudf::thread_idx_shrink(threadIdx.x);
+  int const t           = threadIdx.x;
   int const lane_id     = t % warp_size;
   auto* const db        = &db_state;
   [[maybe_unused]] null_count_back_copier _{s, t};
@@ -113,8 +112,8 @@ __global__ void __launch_bounds__(cudf::detail::warp_size * 3) gpuDecodeDeltaBin
       // nesting level that is storing actual leaf values
       int const leaf_level_index = s->col.max_nesting_depth - 1;
 
-      // process the mini-block in batches of 32
-      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += 32) {
+      // process the mini-block in batches of warp_size
+      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += cudf::detail::warp_size) {
         // the position in the output column/buffer
         int32_t dst_pos = sb->nz_idx[rolling_index<delta_rolling_buf_size>(sp)];
 
@@ -145,7 +144,7 @@ __global__ void __launch_bounds__(cudf::detail::warp_size * 3) gpuDecodeDeltaBin
         }
       }
 
-      if (lane_id == 0) { s->src_pos = src_pos + batch_size; }
+      if (lane_id == 0) { *(volatile int32_t*)&s->src_pos = src_pos + batch_size; }
     }
     __syncthreads();
   }

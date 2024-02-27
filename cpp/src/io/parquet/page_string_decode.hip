@@ -29,9 +29,9 @@ namespace gpu {
 namespace {
 
 constexpr int preprocess_block_size = 512;
-constexpr int block_shrink = cudf::detail::warp_size == 64 ? 2 : 1;
-constexpr int decode_block_size     = 128;
-constexpr int rolling_buf_size      = decode_block_size * (2 / block_shrink);
+//: TODO(HIP/AMD): Investigate if it makes sense to use 128 threads on AMD backend like on CUDA
+constexpr int decode_block_size     = 4 * cudf::detail::warp_size;
+constexpr int rolling_buf_size      = decode_block_size;
 constexpr int preproc_buf_size      = LEVEL_DECODE_BUF_SIZE;
 
 /**
@@ -588,19 +588,17 @@ __global__ void __launch_bounds__(preprocess_block_size) gpuComputePageStringSiz
  * @tparam level_t Type used to store decoded repetition and definition levels
  */
 template <typename level_t>
-__global__ void __launch_bounds__(decode_block_size * block_shrink) gpuDecodeStringPageData(
+__global__ void __launch_bounds__(decode_block_size) gpuDecodeStringPageData(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  if (threadIdx.x % cudf::detail::warp_size >= 32) return;
 
-  //extern __shared__ __align__(16) page_state_s state_g[];
-  extern __shared__ page_state_s state_g[];
+  extern __shared__  __align__(16) page_state_s state_g[];
   __shared__ __align__(4) size_type last_offset;
   __shared__ __align__(16)
     page_state_buffers_s<rolling_buf_size, rolling_buf_size, rolling_buf_size>
       state_buffers;
 
-  page_state_s* const s = &state_g[8];
+  page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
@@ -617,7 +615,7 @@ __global__ void __launch_bounds__(decode_block_size * block_shrink) gpuDecodeStr
   if (t == 0) { last_offset = 0; }
   __syncthreads();
 
-  int const out_thread0                          = s->dict_base && s->dict_bits == 0 ? 32 : 64;
+  int const out_thread0                          = s->dict_base && s->dict_bits == 0 ? cudf::detail::warp_size : cudf::detail::warp_size * 2;
   int const leaf_level_index                     = s->col.max_nesting_depth - 1;
   PageNestingDecodeInfo* const nesting_info_base = s->nesting_info;
 
@@ -635,10 +633,10 @@ __global__ void __launch_bounds__(decode_block_size * block_shrink) gpuDecodeStr
                        s->nz_count + (decode_block_size - out_thread0));
     } else {
       target_pos = min(s->nz_count, src_pos + decode_block_size - out_thread0);
-      if (out_thread0 > 32) { target_pos = min(target_pos, s->dict_pos); }
+      if (out_thread0 > cudf::detail::warp_size) { target_pos = min(target_pos, s->dict_pos); }
     }
     __syncthreads();
-    if (t < 32) {
+    if (t < cudf::detail::warp_size) {
       // decode repetition and definition levels.
       // - update validity vectors
       // - updates offsets (for nested columns)
@@ -650,11 +648,11 @@ __global__ void __launch_bounds__(decode_block_size * block_shrink) gpuDecodeStr
 
       // WARP1: Decode dictionary indices, booleans or string positions
       if (s->dict_base) {
-        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & 0x1f).first;
+        src_target_pos = gpuDecodeDictionaryIndices<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)).first;
       } else {
-        gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & 0x1f);
+        gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       }
-      if (t == 32) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
+      if (t == cudf::detail::warp_size) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
     } else {
       int const me = t - out_thread0;
 
@@ -788,7 +786,7 @@ void __host__ DecodeStringPageData(cudf::detail::hostdevice_vector<PageInfo>& pa
 {
   CUDF_EXPECTS(pages.size() > 0, "There is no page to decode");
 
-  dim3 dim_block(decode_block_size * block_shrink, 1);
+  dim3 dim_block(decode_block_size, 1);
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
