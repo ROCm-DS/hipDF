@@ -46,6 +46,7 @@
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_wrapper.hpp>
 #include <cudf_test/random.hpp>
+#include <cudf_test/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/detail/iterator.cuh>
@@ -83,9 +84,9 @@ __device__ inline void    fdsf   (
 }
 )***";
 
-  std::string const amd_llvm_ir = 
+  std::string amd_llvm_ir_str = 
     R"'''(
-define hidden void @GENERIC_UNARY_OP(ptr %0, float %1) #2 {
+define hidden void @GENERIC_UNARY_OP(ptr %0, float %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca float, align 4, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
@@ -105,8 +106,6 @@ define hidden void @GENERIC_UNARY_OP(ptr %0, float %1) #2 {
 }
 
 attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #1 = { cold noreturn nounwind }
-attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
 
 !llvm.module.flags = !{!0, !1, !2, !3, !4}
 !llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
@@ -126,6 +125,11 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !11 = !{!12, !12, i64 0}
 !12 = !{!"float", !9, i64 0}
     )'''";
+
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+  const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   std::string const ptx =
     R"***(
@@ -180,9 +184,9 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
   std::string const cuda =
     "__device__ inline void f(int* output,int input){*output = input*input - input;}";
 
-  std::string const amd_llvm_ir = 
+  std::string amd_llvm_ir_str = 
     R"'''(
-define hidden void @GENERIC_UNARY_OP(ptr %0, i32 %1) #2 {
+define hidden void @GENERIC_UNARY_OP(ptr %0, i32 %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca i32, align 4, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
@@ -200,8 +204,6 @@ define hidden void @GENERIC_UNARY_OP(ptr %0, i32 %1) #2 {
 }
 
 attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #1 = { cold noreturn nounwind }
-attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
 
 !llvm.module.flags = !{!0, !1, !2, !3, !4}
 !llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
@@ -221,6 +223,11 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !11 = !{!12, !12, i64 0}
 !12 = !{!"int", !9, i64 0}
     )'''";
+
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+  const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   std::string const ptx =
     R"***(
@@ -270,9 +277,9 @@ __device__ inline void f(
 }
 )***";
 
-  std::string const amd_llvm_ir = 
+  std::string amd_llvm_ir_str = 
     R"'''(
-define hidden void @GENERIC_UNARY_OP(ptr %0, i8 signext %1) #2 {
+define hidden void @GENERIC_UNARY_OP(ptr %0, i8 signext %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca i8, align 1, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
@@ -310,8 +317,6 @@ define hidden void @GENERIC_UNARY_OP(ptr %0, i8 signext %1) #2 {
 }
 
 attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #1 = { cold noreturn nounwind }
-attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
 
 !llvm.module.flags = !{!0, !1, !2, !3, !4}
 !llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
@@ -330,6 +335,11 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !10 = !{!"Simple C++ TBAA"}
 !11 = !{!9, !9, i64 0} 
     )'''";
+
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+  const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   std::string const ptx =
     R"***(

@@ -43,6 +43,7 @@
 #include <cudf_test/column_wrapper.hpp>
 #include <cudf_test/iterator_utilities.hpp>
 #include <cudf_test/type_lists.hpp>
+#include <cudf_test/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
@@ -355,6 +356,10 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                  following_window,
                  min_periods,
                  *cudf::make_row_number_aggregation<cudf::rolling_aggregation>());
+
+#ifdef __HIP_PLATFORM_AMD__
+    amd_llvm_ir_func = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_func);
+#endif
 
     // >>> test UDFs <<<
     if (input.type() == cudf::data_type{cudf::type_id::INT32} && !input.has_nulls()) {

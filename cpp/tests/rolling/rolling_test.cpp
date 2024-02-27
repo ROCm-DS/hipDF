@@ -45,6 +45,7 @@
 #include <cudf_test/random.hpp>
 #include <cudf_test/testing_main.hpp>
 #include <cudf_test/type_lists.hpp>
+#include <cudf_test/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
@@ -1247,7 +1248,7 @@ struct RollingTestUdf : public cudf::test::BaseFixture {
       }
     )***"};
 
-  const std::string amd_llvm_ir_func= 
+  std::string amd_llvm_ir_str = 
     R"'''(
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {
@@ -1468,9 +1469,13 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
+#ifdef __HIP_PLATFORM_AMD__
+  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
+#endif
+
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-    cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_func : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
+    cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
 
   output = cudf::rolling_window(input, 2, 2, 4, *ptx_udf_agg);
 
@@ -1519,7 +1524,7 @@ TEST_F(RollingTestUdf, DynamicWindow)
 
   // Test PTX UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
-    cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_func : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
+    cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
   output = cudf::rolling_window(input, preceding, following, 2, *ptx_udf_agg);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
