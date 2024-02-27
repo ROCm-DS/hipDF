@@ -4,7 +4,7 @@ import numba
 import numpy as np
 import pandas as pd
 import pytest
-from numba import cuda
+from numba import hip as cuda
 from numba.core.typing import signature as nb_signature
 from numba.types import CPointer, void
 

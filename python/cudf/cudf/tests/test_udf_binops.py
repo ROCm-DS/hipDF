@@ -2,7 +2,7 @@
 
 import numpy as np
 import pytest
-from numba.cuda import compile_ptx
+from numba.hip import compile_ptx
 from numba.np import numpy_support
 
 import rmm
