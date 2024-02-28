@@ -41,6 +41,12 @@ from cudf.utils.gpu_utils import validate_setup
 _setup_numba()
 validate_setup()
 
+try:
+    from numba import hip
+    hip.pose_as_cuda()
+except ImportError:
+    pass
+
 import cupy
 from numba import config as numba_config, cuda
 
