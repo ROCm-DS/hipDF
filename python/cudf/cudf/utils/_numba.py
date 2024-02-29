@@ -29,13 +29,13 @@ def _get_ptx_file(path, prefix):
         # cc=60 ptx is always built
         cc = int(os.environ.get("STRINGS_UDF_CC", "60"))
     else:
-        import numba.roc as cuda #TODO(HIP): adapted for AMD
+        import numba.cuda as cuda
 
         dev = cuda.get_current_device()
 
         # Load the highest compute capability file available that is less than
         # the current device's.
-        cc = int("".join(str(x) for x in dev.compute_capability))
+        cc = int(dev.amdgpu_arch.strip("gfx").rstrip(":sramecc+:xnack-"))
     files = glob.glob(os.path.join(path, f"{prefix}*.ptx"))
     if len(files) == 0:
         raise RuntimeError(f"Missing PTX files for cc={cc}")

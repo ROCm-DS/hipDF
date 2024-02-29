@@ -2,7 +2,7 @@
 from typing import Any, Dict
 
 import numba
-from numba import roc as cuda, types #: HIP/AMD modification
+from numba import cuda, types
 from numba.core.extending import (
     make_attribute_wrapper,
     models,
@@ -105,11 +105,10 @@ call_cuda_functions: Dict[Any, Any] = {}
 
 
 def _register_cuda_binary_reduction_caller(funcname, lty, rty, retty):
-    # TODO(HIP): add support declare_device to rocnumba
-    # cuda_func = cuda.declare_device(
-    #     f"Block{funcname}_{lty}_{rty}",
-    #     retty(types.CPointer(lty), types.CPointer(rty), group_size_type),
-    # )
+    cuda_func = cuda.declare_device(
+        f"Block{funcname}_{lty}_{rty}",
+        retty(types.CPointer(lty), types.CPointer(rty), group_size_type),
+    )
 
     def caller(lhs, rhs, size):
         return cuda_func(lhs, rhs, size)
@@ -121,11 +120,10 @@ def _register_cuda_binary_reduction_caller(funcname, lty, rty, retty):
 
 
 def _register_cuda_unary_reduction_caller(funcname, inputty, retty):
-    # TODO(HIP): add support declare_device to rocnumba
-    # cuda_func = cuda.declare_device(
-    #     f"Block{funcname}_{inputty}",
-    #     retty(types.CPointer(inputty), group_size_type),
-    # )
+    cuda_func = cuda.declare_device(
+        f"Block{funcname}_{inputty}",
+        retty(types.CPointer(inputty), group_size_type),
+    )
 
     def caller(data, size):
         return cuda_func(data, size)
@@ -137,15 +135,14 @@ def _register_cuda_unary_reduction_caller(funcname, inputty, retty):
 
 
 def _register_cuda_idx_reduction_caller(funcname, inputty):
-    # TODO(HIP): add support declare_device to rocnumba
-    # cuda_func = cuda.declare_device(
-    #     f"Block{funcname}_{inputty}",
-    #     types.int64(
-    #         types.CPointer(inputty),
-    #         types.CPointer(index_default_type),
-    #         group_size_type,
-    #     ),
-    # )
+    cuda_func = cuda.declare_device(
+        f"Block{funcname}_{inputty}",
+        types.int64(
+            types.CPointer(inputty),
+            types.CPointer(index_default_type),
+            group_size_type,
+        ),
+    )
 
     def caller(data, index, size):
         return cuda_func(data, index, size)

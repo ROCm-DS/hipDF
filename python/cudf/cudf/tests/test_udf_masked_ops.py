@@ -4,8 +4,7 @@ import operator
 
 import numpy as np
 import pytest
-import numba.roc as cuda #TODO(HIP): adapted for HIP
-
+from numba import cuda
 import cudf
 from cudf.core.missing import NA
 from cudf.core.udf._ops import (
@@ -15,8 +14,7 @@ from cudf.core.udf._ops import (
     unary_ops,
 )
 from cudf.core.udf.api import Masked
-# TODO(HIP): fix this UDF-related import
-#from cudf.core.udf.utils import precompiled
+from cudf.core.udf.utils import precompiled
 from cudf.testing._utils import (
     _decimal_series,
     assert_eq,

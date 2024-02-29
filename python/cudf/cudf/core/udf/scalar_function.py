@@ -1,6 +1,6 @@
 # Copyright (c) 2020-2023, NVIDIA CORPORATION.
 
-from numba import roc as cuda #: HIP/AMD modification
+from numba import cuda
 from numba.np import numpy_support
 
 from cudf.core.udf.api import Masked, pack_return
