@@ -47,7 +47,7 @@ struct rolling_udf_ptx {
   __device__ static OutType operate(InType const* in_col, cudf::size_type start, cudf::size_type count)
   {
     OutType ret;
-    rolling_udf(&ret, 0, 0, 0, 0, &in_col[start], count, sizeof(InType));
+    rolling_udf(&ret, nullptr, nullptr, 0, 0, &in_col[start], count, sizeof(InType));
     return ret;
   }
 };

@@ -1274,16 +1274,29 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
 
   std::string hash = "prog_rolling." + std::to_string(std::hash<std::string>{}(udf_agg._source));
 
+  std::unique_ptr<column> output = make_numeric_column(
+    udf_agg._output_type, input.size(), cudf::mask_state::UNINITIALIZED, stream, mr);
+
+  auto output_view = output->mutable_view();
+  rmm::device_scalar<size_type> device_valid_count{0, stream};
+
   std::string cuda_source;
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
-      if(HIP_PLATFORM_AMD)
-        cuda_source = "extern \"C\" __device__ void rolling_udf(long long*, int, int, int, int, const int*, int, int);";
-      else
+      if(HIP_PLATFORM_AMD) {
+        cuda_source = "extern \"C\" __device__ void rolling_udf("
+             + cudf::type_to_jitsafe_name(output->type()) + "*,"
+             + "void*, void*, long long, long long, "
+             + "const " + cudf::type_to_jitsafe_name(input.type()) + "*,"
+             + "long long, long long);";
+        std::cout<<cuda_source<<std::endl;
+      }
+      else {
         cuda_source += cudf::jit::parse_single_function_ptx(udf_agg._source,
                                                             udf_agg._function_name,
                                                             cudf::type_to_name(udf_agg._output_type),
-                                                            {0, 5});  // args 0 and 5 are pointers.                                                      
+                                                            {0, 5});  // args 0 and 5 are pointers.     
+      }                                                 
       break;
     case aggregation::Kind::CUDA:
       cuda_source += cudf::jit::parse_single_function_cuda(udf_agg._source, udf_agg._function_name);
@@ -1291,11 +1304,6 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
     default: CUDF_FAIL("Unsupported UDF type.");
   }
 
-  std::unique_ptr<column> output = make_numeric_column(
-    udf_agg._output_type, input.size(), cudf::mask_state::UNINITIALIZED, stream, mr);
-
-  auto output_view = output->mutable_view();
-  cudf::detail::device_scalar<size_type> device_valid_count{0, stream};
 
   //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
   std::string kernel_name =
