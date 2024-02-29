@@ -205,7 +205,8 @@ cdef class RollingAggregation:
         # Handling UDF type
         nb_type = numpy_support.from_dtype(kwargs['dtype'])
         type_signature = (nb_type[:],)
-        compiled_op = cudautils.compile_udf(op, type_signature)
+        # TODO(HIP/AMD): the Jitify backend currently expects the function name to be "rolling_udf", to be resolved in the future
+        compiled_op = cudautils.compile_udf(op, type_signature, name="rolling_udf")
         output_np_dtype = cudf.dtype(compiled_op[1])
         cpp_str = compiled_op[0].encode('UTF-8')
         if output_np_dtype not in SUPPORTED_NUMPY_TO_LIBCUDF_TYPES:
