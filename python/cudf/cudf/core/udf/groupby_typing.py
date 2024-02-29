@@ -1,33 +1,10 @@
 # Copyright (c) 2020-2024, NVIDIA CORPORATION.
-
-# MIT License
-#
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 from __future__ import annotations
 
 from typing import Any
 
 import numba
-from numba import roc as cuda, types #: HIP/AMD modification
+from numba import cuda, types
 from numba.core.extending import (
     make_attribute_wrapper,
     models,
@@ -153,11 +130,10 @@ call_cuda_functions: dict[Any, Any] = {}
 
 
 def _register_cuda_binary_reduction_caller(funcname, lty, rty, retty):
-    # TODO(HIP): add support declare_device to rocnumba
-    # cuda_func = cuda.declare_device(
-    #     f"Block{funcname}_{lty}_{rty}",
-    #     retty(types.CPointer(lty), types.CPointer(rty), group_size_type),
-    # )
+    cuda_func = cuda.declare_device(
+        f"Block{funcname}_{lty}_{rty}",
+        retty(types.CPointer(lty), types.CPointer(rty), group_size_type),
+    )
 
     def caller(lhs, rhs, size):
         return cuda_func(lhs, rhs, size)
@@ -169,11 +145,10 @@ def _register_cuda_binary_reduction_caller(funcname, lty, rty, retty):
 
 
 def _register_cuda_unary_reduction_caller(funcname, inputty, retty):
-    # TODO(HIP): add support declare_device to rocnumba
-    # cuda_func = cuda.declare_device(
-    #     f"Block{funcname}_{inputty}",
-    #     retty(types.CPointer(inputty), group_size_type),
-    # )
+    cuda_func = cuda.declare_device(
+        f"Block{funcname}_{inputty}",
+        retty(types.CPointer(inputty), group_size_type),
+    )
 
     def caller(data, size):
         return cuda_func(data, size)
@@ -185,15 +160,14 @@ def _register_cuda_unary_reduction_caller(funcname, inputty, retty):
 
 
 def _register_cuda_idx_reduction_caller(funcname, inputty):
-    # TODO(HIP): add support declare_device to rocnumba
-    # cuda_func = cuda.declare_device(
-    #     f"Block{funcname}_{inputty}",
-    #     types.int64(
-    #         types.CPointer(inputty),
-    #         types.CPointer(index_default_type),
-    #         group_size_type,
-    #     ),
-    # )
+    cuda_func = cuda.declare_device(
+        f"Block{funcname}_{inputty}",
+        types.int64(
+            types.CPointer(inputty),
+            types.CPointer(index_default_type),
+            group_size_type,
+        ),
+    )
 
     def caller(data, index, size):
         return cuda_func(data, index, size)

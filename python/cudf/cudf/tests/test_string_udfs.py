@@ -79,9 +79,6 @@ def get_kernels(func, dtype, size):
 
     # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
     def udf_string_kernel(input_strings, output_col):
-        # test the string function with a udf_string as input
-        id = cuda.grid(1)
-        if id < size:
             st = input_strings[id]
             st = sv_to_udf_str(st)
             result = func(st)
