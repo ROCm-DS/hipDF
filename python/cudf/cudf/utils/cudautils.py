@@ -106,7 +106,7 @@ def make_cache_key(udf, sig):
     return names, constants, codebytes, cvarbytes, sig
 
 
-def compile_udf(udf, type_signature):
+def compile_udf(udf, type_signature, **options):
     """Compile ``udf`` with `numba`
 
     Compile a python callable function ``udf`` with
@@ -145,9 +145,16 @@ def compile_udf(udf, type_signature):
 
     # We haven't compiled a function like this before, so need to fall back to
     # compilation with Numba
-    ptx_code, return_type = cuda.compile_ptx_for_current_device(
-        udf, type_signature, device=True
-    )
+    # TODO(HIP/AMD): On AMD backend, we need to give LLVM IR UDF function a specific name.
+    # This kind of postprocessing could also be done in libcudf.
+    if 'name' in options:
+        ptx_code, return_type = cuda.compile_ptx_for_current_device(
+          udf, type_signature, device=True, name=options['name']
+        )
+    else:   
+        ptx_code, return_type = cuda.compile_ptx_for_current_device(
+          udf, type_signature, device=True
+        )
     if not isinstance(return_type, cudf.core.udf.masked_typing.MaskedType):
         output_type = numpy_support.as_dtype(return_type).type
     else:
