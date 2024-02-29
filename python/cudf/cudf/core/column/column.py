@@ -25,7 +25,7 @@ import cupy
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-from numba import roc as cuda #: HIP/AMD modification
+from numba import cuda
 from typing_extensions import Self
 
 import rmm

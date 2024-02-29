@@ -8,7 +8,7 @@ import cupy as cp
 import llvmlite.binding as ll
 import numpy as np
 from cuda import cudart
-from numba import roc as cuda, typeof #: HIP/AMD modification
+from numba import cuda, typeof
 from numba.core.datamodel import default_manager, models
 from numba.core.errors import TypingError
 from numba.core.extending import register_model
