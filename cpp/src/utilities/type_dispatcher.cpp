@@ -50,14 +50,30 @@ std::string type_to_jitsafe_name(data_type type) {
     // the mapping between mangled/demangled names.
     // Please see SWDEV-379212 and the doxygen documentation of this function
     // for more details.
-    if(result == "int32_t") {
+    
+    if(result == "int8_t") {
+      result = "signed char";
+    }
+    else if(result == "int16_t") {
+      result = "short";
+    }
+    else if(result == "int32_t") {
       result = "int";
     }
     else if(result == "int64_t") {
       result = "long long";
     }
-    else if(result == "int8_t") {
-      result = "signed char";
+    else if(result == "uint8_t") {
+      result = "unsigned char";
+    }
+    else if(result == "uint16_t") {
+      result = "unsigned short";
+    }
+    else if(result == "uint32_t") {
+      result = "unsigned int";
+    }
+    else if(result == "uint64_t") {
+      result = "unsigned long long";
     }
     else if(result == "cudf::timestamp_us") {
       result = "cuda::std::__4::chrono::time_point<cuda::std::__4::chrono::system_clock, cuda::std::__4::chrono::duration<long long, cuda::std::__4::ratio<1ll, 1000000ll> > >";
