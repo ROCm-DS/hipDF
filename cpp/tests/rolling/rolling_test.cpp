@@ -1250,6 +1250,10 @@ struct RollingTestUdf : public cudf::test::BaseFixture {
 
   std::string amd_llvm_ir_str = 
     R"'''(
+source_filename = "device_func.hip"
+target datalayout = "e-p:64:64-p1:64:64-p2:32:32-p3:32:32-p4:64:64-p5:32:32-p6:32:32-i64:64-v16:16-v24:32-v32:32-v48:64-v96:128-v192:256-v256:256-v512:512-v1024:1024-v2048:2048-n32:64-S32-A5-G1-ni:7"
+target triple = "amdgcn-amd-amdhsa"
+
 ; Function Attrs: convergent mustprogress noreturn nounwind
 define weak void @__cxa_pure_virtual() #0 {
   call void @llvm.trap()
@@ -1266,15 +1270,15 @@ define weak void @__cxa_deleted_virtual() #0 {
 }
 
 ; Function Attrs: convergent mustprogress nounwind
-define hidden void @rolling_udf(ptr %0, i32 %1, i32 %2, i32 %3, i32 %4, ptr %5, i32 %6, i32 %7) #2 {
+define hidden void @rolling_udf(ptr %0, ptr %1, ptr %2, i64 %3, i64 %4, ptr %5, i64 %6, i64 %7) #2 {
   %9 = alloca ptr, align 8, addrspace(5)
-  %10 = alloca i32, align 4, addrspace(5)
-  %11 = alloca i32, align 4, addrspace(5)
-  %12 = alloca i32, align 4, addrspace(5)
-  %13 = alloca i32, align 4, addrspace(5)
+  %10 = alloca ptr, align 8, addrspace(5)
+  %11 = alloca ptr, align 8, addrspace(5)
+  %12 = alloca i64, align 8, addrspace(5)
+  %13 = alloca i64, align 8, addrspace(5)
   %14 = alloca ptr, align 8, addrspace(5)
-  %15 = alloca i32, align 4, addrspace(5)
-  %16 = alloca i32, align 4, addrspace(5)
+  %15 = alloca i64, align 8, addrspace(5)
+  %16 = alloca i64, align 8, addrspace(5)
   %17 = alloca i64, align 8, addrspace(5)
   %18 = alloca i32, align 4, addrspace(5)
   %19 = alloca i32, align 4, addrspace(5)
@@ -1289,51 +1293,52 @@ define hidden void @rolling_udf(ptr %0, i32 %1, i32 %2, i32 %3, i32 %4, ptr %5, 
   %28 = addrspacecast ptr addrspace(5) %17 to ptr
   %29 = addrspacecast ptr addrspace(5) %18 to ptr
   store ptr %0, ptr %20, align 8, !tbaa !7
-  store i32 %1, ptr %21, align 4, !tbaa !11
-  store i32 %2, ptr %22, align 4, !tbaa !11
-  store i32 %3, ptr %23, align 4, !tbaa !11
-  store i32 %4, ptr %24, align 4, !tbaa !11
+  store ptr %1, ptr %21, align 8, !tbaa !7
+  store ptr %2, ptr %22, align 8, !tbaa !7
+  store i64 %3, ptr %23, align 8, !tbaa !11
+  store i64 %4, ptr %24, align 8, !tbaa !11
   store ptr %5, ptr %25, align 8, !tbaa !7
-  store i32 %6, ptr %26, align 4, !tbaa !11
-  store i32 %7, ptr %27, align 4, !tbaa !11
+  store i64 %6, ptr %26, align 8, !tbaa !11
+  store i64 %7, ptr %27, align 8, !tbaa !11
   call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) %17) #4
-  store i64 0, ptr %28, align 8, !tbaa !13
+  store i64 0, ptr %28, align 8, !tbaa !11
   call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) %18) #4
-  store i32 0, ptr %29, align 4, !tbaa !11
+  store i32 0, ptr %29, align 4, !tbaa !13
   br label %30
 
-30:                                               ; preds = %44, %8
-  %31 = load i32, ptr %29, align 4, !tbaa !11
-  %32 = load i32, ptr %26, align 4, !tbaa !11
-  %33 = icmp slt i32 %31, %32
-  br i1 %33, label %35, label %34
-
-34:                                               ; preds = %30
-  call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) %18) #4
-  br label %47
+30:                                               ; preds = %45, %8
+  %31 = load i32, ptr %29, align 4, !tbaa !13
+  %32 = sext i32 %31 to i64
+  %33 = load i64, ptr %26, align 8, !tbaa !11
+  %34 = icmp slt i64 %32, %33
+  br i1 %34, label %36, label %35
 
 35:                                               ; preds = %30
-  %36 = load ptr, ptr %25, align 8, !tbaa !7
-  %37 = load i32, ptr %29, align 4, !tbaa !11
-  %38 = sext i32 %37 to i64
-  %39 = getelementptr inbounds i32, ptr %36, i64 %38
-  %40 = load i32, ptr %39, align 4, !tbaa !11
-  %41 = sext i32 %40 to i64
-  %42 = load i64, ptr %28, align 8, !tbaa !13
-  %43 = add nsw i64 %42, %41
-  store i64 %43, ptr %28, align 8, !tbaa !13
-  br label %44
+  call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) %18) #4
+  br label %48
 
-44:                                               ; preds = %35
-  %45 = load i32, ptr %29, align 4, !tbaa !11
-  %46 = add nsw i32 %45, 1
-  store i32 %46, ptr %29, align 4, !tbaa !11
+36:                                               ; preds = %30
+  %37 = load ptr, ptr %25, align 8, !tbaa !7
+  %38 = load i32, ptr %29, align 4, !tbaa !13
+  %39 = sext i32 %38 to i64
+  %40 = getelementptr inbounds i32, ptr %37, i64 %39
+  %41 = load i32, ptr %40, align 4, !tbaa !13
+  %42 = sext i32 %41 to i64
+  %43 = load i64, ptr %28, align 8, !tbaa !11
+  %44 = add nsw i64 %43, %42
+  store i64 %44, ptr %28, align 8, !tbaa !11
+  br label %45
+
+45:                                               ; preds = %36
+  %46 = load i32, ptr %29, align 4, !tbaa !13
+  %47 = add nsw i32 %46, 1
+  store i32 %47, ptr %29, align 4, !tbaa !13
   br label %30, !llvm.loop !15
 
-47:                                               ; preds = %34
-  %48 = load i64, ptr %28, align 8, !tbaa !13
-  %49 = load ptr, ptr %20, align 8, !tbaa !7
-  store i64 %48, ptr %49, align 8, !tbaa !13
+48:                                               ; preds = %35
+  %49 = load i64, ptr %28, align 8, !tbaa !11
+  %50 = load ptr, ptr %20, align 8, !tbaa !7
+  store i64 %49, ptr %50, align 8, !tbaa !11
   call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) %17) #4
   ret void
 }
@@ -1359,19 +1364,19 @@ attributes #4 = { nounwind }
 !2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
 !3 = !{i32 1, !"wchar_size", i32 4}
 !4 = !{i32 8, !"PIC Level", i32 2}
-!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.0 23483 7208e8d15fbf218deb74483ea8c549c67ca4985e)"}
+!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.2 24012 af27734ed982b52a9f1be0f035ac91726fc697e4)"}
 !6 = !{i32 2, i32 0}
 !7 = !{!8, !8, i64 0}
 !8 = !{!"any pointer", !9, i64 0}
 !9 = !{!"omnipotent char", !10, i64 0}
 !10 = !{!"Simple C++ TBAA"}
 !11 = !{!12, !12, i64 0}
-!12 = !{!"int", !9, i64 0}
+!12 = !{!"long long", !9, i64 0}
 !13 = !{!14, !14, i64 0}
-!14 = !{!"long long", !9, i64 0}
+!14 = !{!"int", !9, i64 0}
 !15 = distinct !{!15, !16}
 !16 = !{!"llvm.loop.mustprogress"}
-    )'''";
+   )'''";
 
   const std::string ptx_func{
     R"***(
