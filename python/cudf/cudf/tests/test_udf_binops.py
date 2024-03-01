@@ -38,8 +38,9 @@ def test_generic_ptx(dtype):
     nb_type = numpy_support.from_dtype(cudf.dtype(dtype))
     type_signature = (nb_type, nb_type)
 
+    # TODO(HIP/AMD): name parameter only works on AMD backend, remove hardcoding of function name
     ptx_code, output_type = compile_ptx(
-        generic_function, type_signature, device=True
+        generic_function, type_signature, device=True, name="GENERIC_BINARY_OP"
     )
 
     dtype = numpy_support.as_dtype(output_type).type
