@@ -361,14 +361,16 @@ def _post_process_output_col(col, retty):
         )
     return as_column(col, retty)
 
-
-# The only supported data layout in NVVM.
-# See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout
-_nvvm_data_layout = (
-    "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-"
-    "i128:128:128-f32:32:32-f64:64:64-v16:16:16-v32:32:32-"
-    "v64:64:64-v128:128:128-n16:32:64"
-)
+try:
+    from numba.hip.amdgcn import DATA_LAYOUT as _nvvm_data_layout #: if this succeeds, we assume HIP/AMD build
+except ImportError:
+    # The only supported data layout in NVVM.
+    # See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout
+    _nvvm_data_layout = (
+        "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-"
+        "i128:128:128-f32:32:32-f64:64:64-v16:16:16-v32:32:32-"
+        "v64:64:64-v128:128:128-n16:32:64"
+    )
 
 
 def _get_extensionty_size(ty):
