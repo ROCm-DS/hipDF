@@ -1289,7 +1289,6 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
              + "void*, void*, long long, long long, "
              + "const " + cudf::type_to_jitsafe_name(input.type()) + "*,"
              + "long long, long long);";
-        std::cout<<cuda_source<<std::endl;
       }
       else {
         cuda_source += cudf::jit::parse_single_function_ptx(udf_agg._source,
