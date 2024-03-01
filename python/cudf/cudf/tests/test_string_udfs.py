@@ -4,7 +4,7 @@ import numba
 import numpy as np
 import pandas as pd
 import pytest
-from numba import roc as cuda
+from numba import hip as cuda
 from numba.core.typing import signature as nb_signature
 from numba.types import CPointer, void
 
@@ -45,7 +45,7 @@ def get_kernels(func, dtype, size):
         outty = numba.np.numpy_support.from_dtype(dtype)[::1]
     sig = nb_signature(void, CPointer(string_view), outty)
 
-    # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
     def string_view_kernel(input_strings, output_col):
         id = cuda.grid(1)
         if id < size:
@@ -53,7 +53,7 @@ def get_kernels(func, dtype, size):
             result = func(st)
             output_col[id] = result
 
-    # @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler]) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
     def udf_string_kernel(input_strings, output_col):
             st = input_strings[id]
             st = sv_to_udf_str(st)
