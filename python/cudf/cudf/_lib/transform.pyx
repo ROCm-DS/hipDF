@@ -100,7 +100,8 @@ def transform(Column input, op):
 
     nb_type = numpy_support.from_dtype(input.dtype)
     nb_signature = (nb_type,)
-    compiled_op = cudautils.compile_udf(op, nb_signature)
+    # TODO(HIP/AMD): avoid hardcoding of name of generated UDF
+    compiled_op = cudautils.compile_udf(op, nb_signature, name="GENERIC_UNARY_OP")
     c_str = compiled_op[0].encode('UTF-8')
     np_dtype = cudf.dtype(compiled_op[1])
 
