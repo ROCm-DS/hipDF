@@ -96,11 +96,11 @@ def test_compile_masked_unary(op, ty):
 @pytest.mark.parametrize("op", arith_ops)
 @pytest.mark.parametrize("ty", number_types, ids=number_ids)
 def test_execute_masked_binary(op, ty):
-    # @cuda.jit(device=True) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit(device=True)
     def func(x, y):
         return op(x, y)
 
-    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit
     def test_kernel(x, y, err):
         # Reference result with unmasked value
         u = func(x, y)
@@ -226,7 +226,7 @@ def test_is_na(fn):
 
     device_fn = cuda.jit(device=True)(fn)
 
-    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit
     def test_kernel(err):
         valid_is_na = device_fn(valid)
         invalid_is_na = device_fn(invalid)
@@ -312,7 +312,7 @@ na_comparison_funcs = (
 def test_na_masked_comparisons(fn, ty):
     device_fn = cuda.jit(device=True)(fn)
 
-    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit
     def test_kernel(err):
         unmasked = ty(1)
         valid_masked = Masked(unmasked, True)
@@ -340,7 +340,7 @@ def test_na_masked_comparisons(fn, ty):
 def test_na_scalar_comparisons(fn, ty):
     device_fn = cuda.jit(device=True)(fn)
 
-    # @cuda.jit #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+    @cuda.jit
     def test_kernel(err):
         unmasked = ty(1)
 
