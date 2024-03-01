@@ -138,7 +138,7 @@ else()
   # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
   # safely queried through a context
   list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a")
-  list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
+  # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
   list(SORT CMAKE_HIP_ARCHITECTURES)
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
   
