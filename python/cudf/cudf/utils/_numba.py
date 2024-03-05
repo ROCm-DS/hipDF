@@ -174,7 +174,7 @@ def _get_ptx_file(path, prefix):
     files = glob.glob(os.path.join(path, f"{prefix}.ll"))
     if len(files) == 0:
         raise RuntimeError(f"LLVM file {prefix}.ll is missing")
-    elif len(files) == 1:
+    elif len(files) > 1:
         raise RuntimeError(
             f"More than one LLVM file found for path '{path}' and prefix '{prefix}'."
         )
