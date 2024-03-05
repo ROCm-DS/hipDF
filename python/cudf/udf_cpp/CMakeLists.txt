@@ -109,14 +109,14 @@ if(CUDA_BACKEND)
 
   list(SORT CMAKE_HIP_ARCHITECTURES)
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES)
-  
+
   foreach(arch IN LISTS CMAKE_HIP_ARCHITECTURES)
     set(tgt shim_${arch})
 
     add_library(${tgt} OBJECT shim.cu)
 
     set_target_properties(${tgt} PROPERTIES CUDA_ARCHITECTURES ${arch} CUDA_PTX_COMPILATION ON)
-    
+
     target_include_directories(
       ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
     )
