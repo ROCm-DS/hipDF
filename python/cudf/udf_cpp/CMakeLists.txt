@@ -155,6 +155,6 @@ else()
   install(
     FILES $<TARGET_OBJECTS:${tgt}>
     DESTINATION ./cudf/core/udf/
-    RENAME ${tgt}.ptx
+    RENAME ${tgt}.ll
   )
 endif()
