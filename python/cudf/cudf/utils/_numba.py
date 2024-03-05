@@ -158,6 +158,22 @@ def _setup_numba():
             else:
                 numba_config.CUDA_ENABLE_PYNVJITLINK = True
 
+# HIP implementation
+
+
+del _setup_numba
+
+
+def _setup_numba():
+    """HIP implementation does nothing.
+
+    TODO:
+        Put code that delegates `numba.cuda` to
+        `numba.hip` here.
+    """
+    from numba import hip
+
+    hip.pose_as_cuda()
 
 # Avoids using contextlib.contextmanager due to additional overhead
 class _CUDFNumbaConfig:
