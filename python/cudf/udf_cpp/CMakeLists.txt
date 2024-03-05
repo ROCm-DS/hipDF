@@ -154,7 +154,7 @@ else()
   #copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)
   install(
     FILES $<TARGET_OBJECTS:${tgt}>
-    DESTINATION cudf/core/udf/
-    RENAME ${tgt}.ptx
+    DESTINATION ./cudf/core/udf/
+    RENAME ${tgt}.ll
   )
 endforeach()
