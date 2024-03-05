@@ -150,25 +150,8 @@ else()
   target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIP_HIP_FLAGS}>")
   target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
-    set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES ${arch}) 
-
-    target_include_directories(
-      ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>"
-    )
-
-    target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_CUDA_FLAGS}>")
-
-    target_link_libraries(${tgt} PUBLIC cudf::cudf)
-
-if(CUDA_BACKEND)
-  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:CUDA>:${SHIM_CUDA_FLAGS}>")
-else()
-  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_CUDA_FLAGS}>")
-endif()
-
-  target_link_libraries(${tgt} PUBLIC cudf::cudf)
-
-  #TODO(HIP/AMD): rename sufficx ptx -> ll
+  #TODO(HIP/AMD): copy *.ptx -> *.ll
+  #copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)
   install(
     FILES $<TARGET_OBJECTS:${tgt}>
     DESTINATION cudf/core/udf/
