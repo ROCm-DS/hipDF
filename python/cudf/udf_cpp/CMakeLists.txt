@@ -151,7 +151,8 @@ else()
   target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIP_HIP_FLAGS}>")
   target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
-  copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)install(
+  copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)
+  install(
     FILES $<TARGET_OBJECTS:${tgt}>
     DESTINATION ./cudf/core/udf/
     RENAME ${tgt}.ptx
