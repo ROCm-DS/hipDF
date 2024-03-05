@@ -182,6 +182,24 @@ def _get_cuda_version_from_ptx_file(path):
     return cuda_ver
 
 
+# HIP implementation
+
+
+del _setup_numba
+
+
+def _setup_numba():
+    """HIP implementation does nothing.
+
+    TODO:
+        Put code that delegates `numba.cuda` to
+        `numba.hip` here.
+    """
+    from numba import hip
+
+    hip.pose_as_cuda()
+
+
 class _CUDFNumbaConfig:
     def __enter__(self):
         self.enter_val = numba_config.CUDA_LOW_OCCUPANCY_WARNINGS
