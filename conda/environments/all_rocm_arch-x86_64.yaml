@@ -52,7 +52,7 @@ dependencies:
 - dask>=2023.7.1
 - distributed>=2023.7.1
 # - dlpack>=0.5,<0.6.0a0
-- dlpack>=0.6,<0.7.0a0 # HIP/AMD: need v0.6 to have kDLROCMHost
+- dlpack>=0.6,<0.7.0a0 #: TODO(HIP/AMD): upgrade to v0.8?
 - doxygen=1.9.1
 - fastavro>=0.22.9
 - fmt>=9.1.0,<10
