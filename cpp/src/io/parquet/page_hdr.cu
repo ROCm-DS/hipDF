@@ -574,6 +574,7 @@ void __launch_bounds__(4 * cudf::detail::warp_size) gpuDecodePageHeaders(ColumnC
 CUDF_KERNEL void __launch_bounds__(128)
   gpuBuildStringDictionaryIndex(ColumnChunkDesc* chunks, int32_t num_chunks)
 {
+  // __shared__ ColumnChunkDesc chunk_g[4];
   extern __shared__ ColumnChunkDesc chunk_g[];
 
   int lane_id               = threadIdx.x % 32;
@@ -626,7 +627,7 @@ void __host__ DecodePageHeaders(ColumnChunkDesc* chunks,
                                 rmm::cuda_stream_view stream)
 {
   //: TODO(HIP/AMD): does it make sense to use less warps/threads on AMD backend?
-  dim3 dim_block(4 * cudf::detail::warp_size, 1);
+  dim3 dim_block(4 * warpSize, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
 
   gpuDecodePageHeaders<<<dim_grid, dim_block, sizeof(byte_stream_s) * 4, stream.value()>>>(

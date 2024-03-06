@@ -232,8 +232,8 @@ static __device__ void gpuUpdatePageSizes(page_state_s* s,
   // max nesting depth of the column
   int const max_depth = s->col.max_nesting_depth;
 
-  constexpr int num_warps      = preprocess_block_size / cudf::detail::warp_size;
-  constexpr int max_batch_size = num_warps * cudf::detail::warp_size;
+  constexpr int num_warps      = preprocess_block_size / warpSize;
+  constexpr int max_batch_size = num_warps * warpSize;
 
   using block_reduce = hipcub::BlockReduce<int, preprocess_block_size>;
   using block_scan   = hipcub::BlockScan<int, preprocess_block_size>;

@@ -398,6 +398,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
                              statistics_chunk const* chunks_in,
                              statistics_merge_group const* groups)
 {
+  // __shared__ __align__(8) merge_state_s state;
   extern __shared__ __align__(8) merge_state_s state[];
   __shared__ block_reduce_storage<block_size> storage;
 

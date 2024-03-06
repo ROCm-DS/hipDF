@@ -647,7 +647,7 @@ struct PdaSymbolToSymbolGroupId {
       symbol == delimiter
         ? static_cast<int32_t>(newline)
         : (symbol == newline ? static_cast<int32_t>(whitespace) : static_cast<int32_t>(symbol));
-    // HIP: It is possible that for some characters (e.g., ʒ), the cast to int32_t is negative.
+    // NOTE(HIP/AMD): It is possible that for some characters (e.g., ʒ), the cast to int32_t is negative.
     // In CUDA, For such cases, the negative index into array tos_sg_to_pda_sgid return always 0 (luck?).
     // We need this check and set symbol_grid to 0 for such cases.
     PdaSymbolGroupIdT symbol_gid;

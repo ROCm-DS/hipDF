@@ -49,7 +49,6 @@
 #include <cudf/io/datasource.hpp>
 #include <cudf/types.hpp>
 #include <cudf/utilities/span.hpp>
-#include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>

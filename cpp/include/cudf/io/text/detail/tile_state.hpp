@@ -68,7 +68,7 @@ struct scan_tile_state_view {
   __device__ inline void set_status(cudf::size_type tile_idx, scan_tile_status status)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
-    tile_status[offset].store(status, hip::memory_order_relaxed);
+    tile_status[offset].store(status, cuda::memory_order_relaxed);
   }
 
   __device__ inline void set_partial_prefix(cudf::size_type tile_idx, T value)
@@ -90,7 +90,7 @@ struct scan_tile_state_view {
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
 
-    while ((status = tile_status[offset].load(hip::memory_order_relaxed)) ==
+    while ((status = tile_status[offset].load(cuda::memory_order_relaxed)) ==
            scan_tile_status::invalid) {}
 
     //: TODO(HIP/AMD): This threadfence is necessary, as the subsequent ThreadLoad

@@ -114,7 +114,7 @@ class row_is_valid {
 /**
  * @brief Device functor to determine if two pairs are identical.
  *
- * This equality comparator is designed for use with hipco::static_multimap's
+ * This equality comparator is designed for use with cuco::static_multimap's
  * pair* APIs, which will compare equality based on comparing (key, value)
  * pairs. In the context of joins, these pairs are of the form
  * (row_hash, row_id). A hash probe hit indicates that hash of a probe row's hash is
@@ -136,7 +136,7 @@ class pair_equality {
   }
 
   // The parameters are build/probe rather than left/right because the operator
-  // is called by hipco's kernels with parameters in this order (note that this
+  // is called by cuco's kernels with parameters in this order (note that this
   // is an implementation detail that we should eventually stop relying on by
   // defining operators with suitable heterogeneous typing). Rather than
   // converting to left/right semantics, we can operate directly on build/probe

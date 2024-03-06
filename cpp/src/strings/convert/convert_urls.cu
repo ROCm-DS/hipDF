@@ -258,7 +258,7 @@ CUDF_KERNEL void url_decode_char_counter(column_device_view const in_strings,
       // filled in to make sure the last two characters of the string are not the start of an
       // escaped sequence.
       for (auto char_idx = warp_lane; char_idx < string_length_block + halo_size;
-           char_idx += cudf::detail::warp_size) {
+           char_idx += warpSize) {
         auto const in_idx         = block_idx * char_block_size + char_idx;
         in_chars_shared[char_idx] = in_idx < string_length ? in_chars[in_idx] : 0;
       }
@@ -267,7 +267,7 @@ CUDF_KERNEL void url_decode_char_counter(column_device_view const in_strings,
 
       // `char_idx_start` represents the start character index of the current warp.
       for (size_type char_idx_start = 0; char_idx_start < string_length_block;
-           char_idx_start += cudf::detail::warp_size) {
+           char_idx_start += warpSize) {
         auto const char_idx = char_idx_start + warp_lane;
         int8_t const is_ichar_escape_char =
           (char_idx < string_length_block && is_escape_char(in_chars_shared + char_idx)) ? 1 : 0;
@@ -332,7 +332,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
     auto const nblocks       = cudf::util::div_rounding_up_unsafe(string_length, char_block_size);
 
     // Use the last thread of the warp to initialize `out_idx` to 0.
-    if (warp_lane == cudf::detail::warp_size - 1) { out_idx[local_warp_id] = 0; }
+    if (warp_lane == warpSize - 1) { out_idx[local_warp_id] = 0; }
 
     for (size_type block_idx = 0; block_idx < nblocks; block_idx++) {
       auto const string_length_block =
@@ -343,7 +343,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
       // whether the current location as well as the previous two locations are escape characters,
       // without branches.
       for (auto char_idx = warp_lane; char_idx < string_length_block + halo_size * 2;
-           char_idx += cudf::detail::warp_size) {
+           char_idx += warpSize) {
         auto const in_idx         = block_idx * char_block_size + char_idx - halo_size;
         in_chars_shared[char_idx] = in_idx >= 0 && in_idx < string_length ? in_chars[in_idx] : 0;
       }
@@ -352,7 +352,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
 
       // `char_idx_start` represents the start character index of the current warp.
       for (size_type char_idx_start = 0; char_idx_start < string_length_block;
-           char_idx_start += cudf::detail::warp_size) {
+           char_idx_start += warpSize) {
         auto const char_idx = char_idx_start + warp_lane;
         // If the current character is part of an escape sequence starting at the previous two
         // locations, the thread with the starting location should output the escaped character, and
@@ -382,7 +382,7 @@ CUDF_KERNEL void url_decode_char_replacer(column_device_view const in_strings,
           out_chars_string[out_idx[local_warp_id] + out_offset] = ch;
         }
 
-        if (warp_lane == cudf::detail::warp_size - 1) {
+        if (warp_lane == warpSize - 1) {
           out_idx[local_warp_id] += (out_offset + out_size);
         }
 
@@ -403,7 +403,7 @@ std::unique_ptr<column> url_decode(strings_column_view const& strings,
   if (strings_count == 0) return make_empty_column(type_id::STRING);
 
   constexpr size_type num_warps_per_threadblock = 4;
-  constexpr size_type threadblock_size = num_warps_per_threadblock * cudf::detail::warp_size;
+  constexpr size_type threadblock_size = num_warps_per_threadblock * warpSize;
   constexpr size_type char_block_size  = 256;
   auto const num_threadblocks =
     std::min(65536, cudf::util::div_rounding_up_unsafe(strings_count, num_warps_per_threadblock));

@@ -62,7 +62,7 @@ using row_equality = cudf::experimental::row::equality::strong_index_comparator_
   cudf::experimental::row::equality::device_row_comparator<false, cudf::nullate::DYNAMIC>>;
 
 /**
- * @brief Equality comparator for use with hipco map methods that require expression evaluation.
+ * @brief Equality comparator for use with cuco map methods that require expression evaluation.
  *
  * This class just defines the construction of the class and the necessary
  * attributes, specifically the equality operator for the non-conditional parts
@@ -89,9 +89,9 @@ struct expression_equality {
 };
 
 /**
- * @brief Equality comparator for hipco::static_map queries.
+ * @brief Equality comparator for cuco::static_map queries.
  *
- * This equality comparator is designed for use with hipco::static_map's APIs. A
+ * This equality comparator is designed for use with cuco::static_map's APIs. A
  * probe hit indicates that the hashes of the keys are equal, at which point
  * this comparator checks whether the keys themselves are equal (using the
  * provided equality_probe) and then evaluates the conditional expression
@@ -101,7 +101,7 @@ struct single_expression_equality : expression_equality<has_nulls> {
   using expression_equality<has_nulls>::expression_equality;
 
   // The parameters are build/probe rather than left/right because the operator
-  // is called by hipco's kernels with parameters in this order (note that this
+  // is called by cuco's kernels with parameters in this order (note that this
   // is an implementation detail that we should eventually stop relying on by
   // defining operators with suitable heterogeneous typing). Rather than
   // converting to left/right semantics, we can operate directly on build/probe
@@ -120,7 +120,7 @@ struct single_expression_equality : expression_equality<has_nulls> {
     // 1. The contents of the columns involved in the equality condition are equal.
     // 2. The predicate evaluated on the relevant columns (already encoded in the evaluator)
     // evaluates to true.
-    if (this->equality_probe(lhs_index_type(probe_row_index), rhs_index_type(build_row_index))) {
+    if (this->equality_probe(lhs_index_type{probe_row_index}, rhs_index_type{build_row_index})) {
       auto const lrow_idx = this->swap_tables ? build_row_index : probe_row_index;
       auto const rrow_idx = this->swap_tables ? probe_row_index : build_row_index;
       this->evaluator.evaluate(output_dest,
@@ -135,9 +135,9 @@ struct single_expression_equality : expression_equality<has_nulls> {
 };
 
 /**
- * @brief Equality comparator for hipco::static_multimap queries.
+ * @brief Equality comparator for cuco::static_multimap queries.
  *
- * This equality comparator is designed for use with hipco::static_multimap's
+ * This equality comparator is designed for use with cuco::static_multimap's
  * pair* APIs, which will compare equality based on comparing (key, value)
  * pairs. In the context of joins, these pairs are of the form
  * (row_hash, row_id). A hash probe hit indicates that hash of a probe row's hash is
@@ -153,7 +153,7 @@ struct pair_expression_equality : public expression_equality<has_nulls> {
   using expression_equality<has_nulls>::expression_equality;
 
   // The parameters are build/probe rather than left/right because the operator
-  // is called by hipco's kernels with parameters in this order (note that this
+  // is called by cuco's kernels with parameters in this order (note that this
   // is an implementation detail that we should eventually stop relying on by
   // defining operators with suitable heterogeneous typing). Rather than
   // converting to left/right semantics, we can operate directly on build/probe

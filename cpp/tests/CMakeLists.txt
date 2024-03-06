@@ -11,10 +11,9 @@
 # or implied. See the License for the specific language governing permissions and limitations under
 # the License.
 # =============================================================================
-
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +32,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+# =============================================================================
 
 # ##################################################################################################
 # enable testing ################################################################################
@@ -65,33 +65,17 @@ function(ConfigureTest CMAKE_TEST_NAME)
 
   add_executable(${CMAKE_TEST_NAME} ${_CUDF_TEST_UNPARSED_ARGUMENTS})
 
-  if (CUDA_BACKEND)
-    set_target_properties(
-      ${CMAKE_TEST_NAME}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
+  set_target_properties(
+    ${CMAKE_TEST_NAME}
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
                 INSTALL_RPATH "\$ORIGIN/../../../lib"
-                CXX_STANDARD 17
+                CXX_STANDARD 20
                 CXX_STANDARD_REQUIRED ON
                 # For std:: support of __int128_t. Can be removed once using cuda::std
                 CXX_EXTENSIONS ON
-                CUDA_STANDARD 17
-                CUDA_STANDARD_REQUIRED ON
-    )
-    target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "CUDA_BACKEND" "RMM_USE_CUDA")
-  else ()
-    set_target_properties(
-      ${CMAKE_TEST_NAME}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
-                  INSTALL_RPATH "\$ORIGIN/../../../lib"
-                  CXX_STANDARD 20
-                  CXX_STANDARD_REQUIRED ON
-                  # For std:: support of __int128_t. Can be removed once using cuda::std
-                  CXX_EXTENSIONS ON
-                  HIP_STANDARD 20
-                  HIP_STANDARD_REQUIRED ON
-    )
-    target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "HIP_BACKEND" "RMM_USE_HIP")
-  endif()
+                HIP_STANDARD 20
+                HIP_STANDARD_REQUIRED ON
+  )
 
   target_link_libraries(
     ${CMAKE_TEST_NAME}

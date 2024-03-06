@@ -811,12 +811,12 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
           // Find word in which we finish the search for missing bits (guaranteed to be available)
           while (bits_to_borrow != 0) {
             auto const mask = cudf::detail::get_mask_offset_word(
-              parent_column.pushdown_mask, 0, borrow_end, borrow_end + cudf::detail::warp_size);
+              parent_column.pushdown_mask, 0, borrow_end, borrow_end + warpSize);
             auto const valid_in_word = __POPC(mask);
 
             if (valid_in_word > bits_to_borrow) break;
             bits_to_borrow -= valid_in_word;
-            borrow_end += cudf::detail::warp_size;
+            borrow_end += warpSize;
           }
 
           // Find the last of the missing bits (guaranteed to be available)
@@ -832,6 +832,11 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
         }
       }
     });
+
+  aligned_rgs.device_to_host_sync(stream);
+
+  std::vector<std::vector<rowgroup_rows>> h_aligned_rgs;
+  h_aligned_rgs.reserve(segmentation.num_rowgroups());
   std::transform(thrust::make_counting_iterator(0ul),
                  thrust::make_counting_iterator(segmentation.num_rowgroups()),
                  std::back_inserter(h_aligned_rgs),
@@ -1107,7 +1112,7 @@ std::vector<StripeInformation> gather_stripes(size_t num_index_streams,
   }
 
   strm_desc->host_to_device_async(stream);
-  // TODO: use hipcub::DeviceMemcpy::Batched
+  // TODO: use cub::DeviceMemcpy::Batched
   gpu::CompactOrcDataStreams(*strm_desc, enc_data->streams, stream);
   strm_desc->device_to_host_async(stream);
   enc_data->streams.device_to_host_sync(stream);
@@ -1244,7 +1249,7 @@ intermediate_statistics gather_statistic_blobs(statistics_freq const stats_freq,
   rowgroup_merge.host_to_device_async(stream);
   stripe_merge.host_to_device_async(stream);
   set_stat_desc_leaf_cols(orc_table.d_columns, stat_desc, stream);
-  
+
   // The rowgroup stat chunks are written out in each stripe. The stripe and file-level chunks are
   // written in the footer. To prevent persisting the rowgroup stat chunks across multiple write
   // calls in a chunked write situation, these allocations are split up so stripe data can persist
@@ -1810,7 +1815,6 @@ orc_table_view make_orc_table_view(table_view const& table,
     orc_columns.cbegin(), orc_columns.cend(), std::back_inserter(type_kinds), [](auto& orc_column) {
       return orc_column.orc_kind();
     });
-
   auto const d_type_kinds = cudf::detail::make_device_uvector_async(
     type_kinds, stream, cudf::get_current_device_resource_ref());
 
@@ -1825,7 +1829,7 @@ orc_table_view make_orc_table_view(table_view const& table,
      d_table            = d_table,
      stack_storage      = stack_storage.data(),
      stack_storage_size = stack_storage.size()] __device__() {
-      device_stack stack(stack_storage, stack_storage_size); //: FIXME(HIP/AMD): use of undeclared identifier 'stack_storage_size'
+      device_stack stack(stack_storage, stack_storage_size);
 
       thrust::for_each(thrust::seq,
                        thrust::make_reverse_iterator(d_table.end()),

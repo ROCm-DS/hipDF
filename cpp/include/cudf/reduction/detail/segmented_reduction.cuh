@@ -180,7 +180,7 @@ void segmented_reduce(InputIterator d_in,
 
   // Allocate temporary storage
   size_t temp_storage_bytes = 0;
-  (void) hipcub::DeviceSegmentedReduce::Reduce(nullptr,
+  (void)hipcub::DeviceSegmentedReduce::Reduce(nullptr,
                                      temp_storage_bytes,
                                      d_in,
                                      intermediate_result.data(),

@@ -794,7 +794,7 @@ struct datetime_formatter_fn {
    */
   __device__ int32_t modulo_time(int64_t time, int64_t base) const
   {
-// HIP: We need to distinguish between debug and release modes
+// NOTE(HIP/AMD): We need to distinguish between debug and release modes
 // The original code (i.e., ifdef part) works in release mode, but not in debug mode
 #ifdef NDEBUG
     return static_cast<int32_t>(((time % base) + base) % base);
@@ -1072,7 +1072,7 @@ struct datetime_formatter_fn {
           copy_value = day_of_week == 0 && item.value == 'u' ? 7 : day_of_week;
           break;
         }
-          // clang-format off
+        // clang-format off
         case 'U': {  // week of year: first week includes the first Sunday of the year
           copy_value = get_week_of_year(days, cuda::std::chrono::sys_days{
             cuda::std::chrono::Sunday[1]/cuda::std::chrono::January/ymd.year()});

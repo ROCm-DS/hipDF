@@ -251,7 +251,7 @@ struct delta_binary_decoder {
   // called by all threads in a warp, currently only one warp supported.
   inline __device__ void calc_mini_block_values(int lane_id)
   {
-    using cudf::detail::warp_size;
+    using warpSize;
     if (current_value_idx >= value_count) { return; }
 
     // need to account for the first value from header on first pass
@@ -308,10 +308,8 @@ struct delta_binary_decoder {
             // NOTE(HIP/AMD): Need extra treatment for mb_bits==64, as shift operation is UB in this case
             // zigzag128_t is currently a 64bit type (int64_t)
             delta &= (mb_bits==64) ?  LANE_MASK_ALL : (static_cast<zigzag128_t>(1) << mb_bits) - 1;
-          }
-           
+          }           
         }
-
 
         // add min delta to get true delta
         delta += cur_min_delta;
@@ -338,7 +336,7 @@ struct delta_binary_decoder {
   // called by all threads in a thread block.
   inline __device__ void skip_values(int skip)
   {
-    using cudf::detail::warp_size;
+    using warpSize;
     int const t       = threadIdx.x;
     int const lane_id = t % warp_size;
 
@@ -398,7 +396,7 @@ struct delta_binary_decoder {
   // a single warp.
   inline __device__ void decode_batch()
   {
-    using cudf::detail::warp_size;
+    using warpSize;
     int const t       = threadIdx.x;
     int const lane_id = t % warp_size;
 

@@ -75,8 +75,8 @@ struct string_to_integer_check_fn {
   // TODO(HIP/AMD): It seems that the compiler optimizes the operator overloading.
   // Added __attribute__((optnone)) as a workaround for now.
   // internal issue 50
-  __attribute__((optnone)) __device__ bool operator()(
-    thrust::pair<string_view, bool> const& p) const
+  __attribute__((optnone)) 
+  __device__ bool operator()(thrust::pair<string_view, bool> const& p) const
   {
     if (!p.second || p.first.empty()) { return false; }
 
@@ -100,7 +100,7 @@ struct string_to_integer_check_fn {
       if (chr < '0' || chr > '9') { return false; }
 
       // Check for underflow and overflow:
-      auto const digit = static_cast<IntegerType>(chr - '0');
+      auto const digit       = static_cast<IntegerType>(chr - '0');
       // TODO(HIP/AMD): error: constant expression evaluates to 10 which cannot be narrowed to type
       // 'bool' [-Wc++11-narrowing] auto const bound_check = (bound_val - sign * digit) /
       // IntegerType{10} * sign;

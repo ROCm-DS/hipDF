@@ -316,30 +316,30 @@ struct bitfield_warp {
   static constexpr auto UNICODE_LOOK_BACK{5};
   // 5 because for skipping unicode hex chars, look back up to 5 chars are needed.
   // 5+32 for each warp.
-  bool is_slash[num_warps][UNICODE_LOOK_BACK + cudf::detail::warp_size];
+  bool is_slash[num_warps][UNICODE_LOOK_BACK + warpSize];
 
   /// Sets all bits to 0
   __device__ void reset(unsigned warp_id)
   {
-    if (threadIdx.x % cudf::detail::warp_size < UNICODE_LOOK_BACK) {
-      is_slash[warp_id][threadIdx.x % cudf::detail::warp_size] = 0;
+    if (threadIdx.x % warpSize < UNICODE_LOOK_BACK) {
+      is_slash[warp_id][threadIdx.x % warpSize] = 0;
     }
-    is_slash[warp_id][threadIdx.x % cudf::detail::warp_size + UNICODE_LOOK_BACK] = 0;
+    is_slash[warp_id][threadIdx.x % warpSize + UNICODE_LOOK_BACK] = 0;
   }
 
   /// Shifts UNICODE_LOOK_BACK bits to the left to hold the previous UNICODE_LOOK_BACK bits
   __device__ void shift(unsigned warp_id)
   {
-    if (threadIdx.x % cudf::detail::warp_size < UNICODE_LOOK_BACK)
-      is_slash[warp_id][threadIdx.x % cudf::detail::warp_size] =
-        is_slash[warp_id][cudf::detail::warp_size + threadIdx.x % cudf::detail::warp_size];
+    if (threadIdx.x % warpSize < UNICODE_LOOK_BACK)
+      is_slash[warp_id][threadIdx.x % warpSize] =
+        is_slash[warp_id][warpSize + threadIdx.x % warpSize];
     __syncwarp();
   }
 
   /// Each thread in a warp sets its own bit.
   __device__ void set_bits(unsigned warp_id, bool is_escaping_backslash)
   {
-    is_slash[warp_id][UNICODE_LOOK_BACK + threadIdx.x % cudf::detail::warp_size] =
+    is_slash[warp_id][UNICODE_LOOK_BACK + threadIdx.x % warpSize] =
       is_escaping_backslash;
     __syncwarp();
   }
@@ -362,7 +362,7 @@ struct bitfield_block {
   static constexpr auto UNICODE_LOOK_BACK{5};
   // 5 because for skipping unicode hex chars, look back up to 5 chars are needed.
   // 5 + num_warps*32 for entire block
-  bool is_slash[UNICODE_LOOK_BACK + num_warps * cudf::detail::warp_size];
+  bool is_slash[UNICODE_LOOK_BACK + num_warps * warpSize];
 
   /// Sets all bits to 0
   __device__ void reset(unsigned warp_id)
@@ -375,7 +375,7 @@ struct bitfield_block {
   __device__ void shift(unsigned warp_id)
   {
     if (threadIdx.x < UNICODE_LOOK_BACK)
-      is_slash[threadIdx.x] = is_slash[num_warps * cudf::detail::warp_size + threadIdx.x];
+      is_slash[threadIdx.x] = is_slash[num_warps * warpSize + threadIdx.x];
     __syncthreads();
   }
 
@@ -457,7 +457,7 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
                                           char* d_chars)
 {
   constexpr auto BLOCK_SIZE =
-    is_warp ? cudf::detail::warp_size : cudf::detail::warp_size * num_warps;
+    is_warp ? warpSize : warpSize * num_warps;
   size_type lane = is_warp ? (threadIdx.x % BLOCK_SIZE) : threadIdx.x;
 
   // get 1-string index per warp/block
@@ -539,7 +539,7 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
     };
 
     // for backslash scan calculation: is_previous_escaping_backslash
-    [[maybe_unused]] auto warp_id = threadIdx.x / cudf::detail::warp_size;
+    [[maybe_unused]] auto warp_id = threadIdx.x / warpSize;
     bool init_state_reg;
     __shared__ bool init_state_shared;
     size_type last_offset_reg;
@@ -850,7 +850,7 @@ static std::unique_ptr<column> parse_string(string_view_pair_it str_tuples,
                      single_thread_fn);
 
   constexpr auto warps_per_block  = 8;
-  constexpr int threads_per_block = cudf::detail::warp_size * warps_per_block;
+  constexpr int threads_per_block = warpSize * warps_per_block;
   auto num_blocks                 = cudf::util::div_rounding_up_safe(col_size, warps_per_block);
   auto str_counter                = cudf::numeric_scalar(size_type{0}, true, stream);
 

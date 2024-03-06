@@ -49,7 +49,7 @@ namespace cudf::io::parquet::detail {
 template <int num_threads>
 __device__ constexpr int rle_stream_required_run_buffer_size()
 {
-  constexpr int num_rle_stream_decode_warps = (num_threads / cudf::detail::warp_size) - 1;
+  constexpr int num_rle_stream_decode_warps = (num_threads / warpSize) - 1;
   return (num_rle_stream_decode_warps * 2);
 }
 
@@ -192,7 +192,7 @@ struct rle_stream {
   // - warp 0 would be filling in batches of runs to be processed
   // - warps 1-15 would be decoding the previous batch of runs generated
   static constexpr int num_rle_stream_decode_warps =
-    (num_rle_stream_decode_threads / cudf::detail::warp_size) - 1;
+    (num_rle_stream_decode_threads / warpSize) - 1;
 
   static constexpr int run_buffer_size = rle_stream_required_run_buffer_size<decode_threads>();
 
@@ -300,9 +300,9 @@ struct rle_stream {
     }
 
     // otherwise, full decode.
-    int const warp_id        = t / cudf::detail::warp_size;
+    int const warp_id        = t / warpSize;
     int const warp_decode_id = warp_id - 1;
-    int const warp_lane      = t % cudf::detail::warp_size;
+    int const warp_lane      = t % warpSize;
 
     __shared__ int values_processed_shared;
     __shared__ int decode_index_shared;

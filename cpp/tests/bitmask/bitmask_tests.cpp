@@ -78,11 +78,11 @@ TEST_F(BitmaskUtilitiesTest, BitmaskAllocationSize)
   EXPECT_EQ(128u, cudf::bitmask_allocation_size_bytes(1024));
   EXPECT_EQ(192u, cudf::bitmask_allocation_size_bytes(1025));
 }
-// This test has been modified to fit the warpsize of 64
 TEST_F(BitmaskUtilitiesTest, NumBitmaskWords)
 {
   EXPECT_EQ(0, cudf::num_bitmask_words(0));
   EXPECT_EQ(1, cudf::num_bitmask_words(1));
+  // NOTE(HIP/AMD): This test has been modified to fit the warpsize of 64
   EXPECT_EQ(1, cudf::num_bitmask_words(cudf::bitmask_size_in_bits-1));
   EXPECT_EQ(1, cudf::num_bitmask_words(cudf::bitmask_size_in_bits));
   EXPECT_EQ(2, cudf::num_bitmask_words(cudf::bitmask_size_in_bits+1));
@@ -116,9 +116,8 @@ rmm::device_uvector<cudf::bitmask_type> make_mask(cudf::size_type size, bool fil
       size, cudf::get_default_stream(), cudf::get_current_device_resource_ref());
   } else {
     auto ret = rmm::device_uvector<cudf::bitmask_type>(size, cudf::get_default_stream());
-    uint64_t init_value=0;
     CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(),
-                                  ~cudf::bitmask_type{init_value},
+                                  ~cudf::bitmask_type{0},
                                   size * sizeof(cudf::bitmask_type),
                                   cudf::get_default_stream().value()));
     return ret;

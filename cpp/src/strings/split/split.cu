@@ -157,7 +157,7 @@ std::unique_ptr<table> split_fn(strings_column_view const& input,
       return static_cast<size_type>(d_offsets[idx + 1] - d_offsets[idx]);
     }),
     0,
-    thrust::maximum<size_type>{});
+    thrust::maximum<size_type>{}); // TODO(HIP/AMD): thrust::maximum{}
 
   // build strings columns for each token position
   for (size_type col = 0; col < columns_count; ++col) {
@@ -368,7 +368,7 @@ std::unique_ptr<table> whitespace_split_fn(size_type strings_count,
 
   // column count is the maximum number of tokens for any string
   size_type const columns_count = thrust::reduce(
-    rmm::exec_policy(stream), token_counts.begin(), token_counts.end(), 0, thrust::maximum<size_type>{});
+    rmm::exec_policy(stream), token_counts.begin(), token_counts.end(), 0, thrust::maximum<size_type>{}); // TODO(HIP/AMD): thrust::maximum{}
 
   std::vector<std::unique_ptr<column>> results;
   // boundary case: if no columns, return one null column (issue #119)

@@ -41,7 +41,6 @@
 #include <cudf/column/column_view.hpp>
 #include <cudf/detail/offsets_iterator.cuh>
 #include <cudf/detail/utilities/alignment.hpp>
-#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/fixed_point/fixed_point.hpp>
 #include <cudf/lists/list_view.hpp>
 #include <cudf/strings/string_view.cuh>
@@ -1247,7 +1246,7 @@ __device__ inline uint64_t rotater64 (const uint64_t a, const int n)
 // HIP funnelshift implementation using shift and rotate
 __device__ inline bitmask_type __m_funnelshift_r(bitmask_type lo, bitmask_type hi, unsigned int shift)
 {
-    shift = shift % cudf::detail::warp_size;
+    shift = shift % warpSize;
     bitmask_type _lo      = (bitmask_type)lo >> (bitmask_type)shift;
     bitmask_type _hi      = hi & GENERATE_BITMASK(uint64_t, shift);
     bitmask_type _r       = _lo | rotater64(_hi, shift);
@@ -1313,7 +1312,7 @@ struct value_accessor {
    * @param[in] i index of element
    * @return value of element at index `i`
    */
-   __device__ T operator()(cudf::size_type i) const { return col.element<T>(i); }
+  __device__ T operator()(cudf::size_type i) const { return col.element<T>(i); }
 };
 
 /**

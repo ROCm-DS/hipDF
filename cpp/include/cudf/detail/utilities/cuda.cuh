@@ -52,7 +52,7 @@
 namespace cudf {
 namespace detail {
 /**
- * @brief Size of a warp in a HIP kernel.
+ * @brief Size of a warp in a CUDA kernel.
  */
 #if defined(__HIP_PLATFORM_AMD__)
 static constexpr size_type warp_size{64};

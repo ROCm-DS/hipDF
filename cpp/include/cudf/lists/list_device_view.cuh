@@ -59,8 +59,8 @@ class list_device_view {
   using lists_column_device_view = cudf::detail::lists_column_device_view;
 
  public:
- //TODO(HIP/AMD)
-  list_device_view() ;
+ // TODO(HIP/AMD): The original caused error
+  list_device_view();
 //  list_device_view() = default;
 
   /**
@@ -279,7 +279,7 @@ class list_device_view {
    *
    * @tparam T The element-type of the list row
    */
-  //TODO(HIP/AMD)
+  // TODO(HIP/AMD): Without public keyword, hipcc gives error
   public:
   template <typename T>
   struct pair_accessor {
