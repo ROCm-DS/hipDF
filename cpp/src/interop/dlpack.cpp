@@ -162,8 +162,8 @@ std::unique_ptr<table> from_dlpack(DLManagedTensor const* managed_tensor,
 
   // We can copy from host or device pointers
   #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
-  CUDF_EXPECTS(tensor.device.device_type == kDLCPU || tensor.device.device_type == kDLROCM ||
-                 tensor.device.device_type == kDLROCMHost ||
+  CUDF_EXPECTS(tensor.device.device_type == kDLCPU || tensor.device.device_type == kDLROCM || 
+                 tensor.device.device_type == kDLROCMHost,
                "DLTensor device type must be CPU, ROCM or ROCMHost");
 
   #else
