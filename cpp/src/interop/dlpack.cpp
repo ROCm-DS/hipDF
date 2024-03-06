@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/interop.hpp>
 #include <cudf/detail/nvtx/ranges.hpp>
@@ -138,10 +161,17 @@ std::unique_ptr<table> from_dlpack(DLManagedTensor const* managed_tensor,
   auto const& tensor = managed_tensor->dl_tensor;
 
   // We can copy from host or device pointers
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  CUDF_EXPECTS(tensor.device.device_type == kDLCPU || tensor.device.device_type == kDLROCM ||
+                 tensor.device.device_type == kDLROCMHost ||
+               "DLTensor device type must be CPU, ROCM or ROCMHost");
+
+  #else
   CUDF_EXPECTS(tensor.device.device_type == kDLCPU || tensor.device.device_type == kDLCUDA ||
                  tensor.device.device_type == kDLCUDAHost,
                "DLTensor device type must be CPU, CUDA or CUDAHost");
 
+  #endif
   // Make sure the current device ID matches the Tensor's device ID
   if (tensor.device.device_type != kDLCPU) {
     int device_id = 0;
@@ -255,7 +285,11 @@ DLManagedTensor* to_dlpack(table_view const& input,
   }
 
   CUDF_CUDA_TRY(cudaGetDevice(&tensor.device.device_id));
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  tensor.device.device_type = kDLROCM;
+  #else
   tensor.device.device_type = kDLCUDA;
+  #endif
 
   // If there is only one column, then a 1D tensor can just copy the pointer
   // to the data in the column, and the deleter should not delete the original
