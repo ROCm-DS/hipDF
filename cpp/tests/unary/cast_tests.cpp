@@ -988,7 +988,7 @@ TYPED_TEST(FixedPointTests, ValidateCastRescalePrecision)
   // that are powers of ten show this error more readily than non-powers of 10
   // because the rescaling factor is a power of 10, meaning that errors in
   // division are more visible.
-  constexpr auto min_scale = -cuda::std::numeric_limits<RepType>::digits10;
+  constexpr auto min_scale = -hip::std::numeric_limits<RepType>::digits10;
   for (int input_scale = 0; input_scale >= min_scale; --input_scale) {
     for (int result_scale = 0; result_scale >= min_scale; --result_scale) {
       RepType input_value = 1;

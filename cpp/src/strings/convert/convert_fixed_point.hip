@@ -212,8 +212,8 @@ struct from_fixed_point_fn {
     auto const value = d_decimals.element<DecimalType>(idx);
     auto const scale = d_decimals.type().scale();
     char* d_buffer   = d_chars + d_offsets[idx];
-
-    fixed_point_to_string(value, scale, d_buffer);
+    // TODO(HIP/AMD): Enable when we have support for 128 type
+    // fixed_point_to_string(value, scale, d_buffer);
   }
 
   __device__ void operator()(size_type idx)
@@ -224,9 +224,11 @@ struct from_fixed_point_fn {
     }
     if (d_chars != nullptr) {
       fixed_point_element_to_string(idx);
-    } else {
-      d_offsets[idx] =
-        fixed_point_string_size(d_decimals.element<DecimalType>(idx), d_decimals.type().scale());
+    } else { 
+      // TODO(HIP/AMD): Enable when we have support for 128 type
+      // d_offsets[idx] =
+      //   fixed_point_string_size(d_decimals.element<DecimalType>(idx), d_decimals.type().scale());
+      return;
     }
   }
 };

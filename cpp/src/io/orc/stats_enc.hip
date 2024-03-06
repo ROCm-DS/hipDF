@@ -36,7 +36,9 @@ __global__ void __launch_bounds__(init_threads_per_block)
                              stats_column_desc const* cols,
                              device_2dspan<rowgroup_rows const> rowgroup_bounds)
 {
-  __shared__ __align__(4) statistics_group group_g[init_groups_per_block];
+  // TODO(HIP/AMD): This is a work around for "initialization is not supported for __shared__ variables"
+  // __shared__ __align__(4) statistics_group group_g[init_groups_per_block];
+  extern __shared__ __align__(4) statistics_group group_g[/*init_groups_per_block*/];
   auto const col_id        = blockIdx.y;
   auto const chunk_id      = (blockIdx.x * init_groups_per_block) + threadIdx.y;
   auto const t             = threadIdx.x;
@@ -104,14 +106,16 @@ __global__ void __launch_bounds__(block_size, 1)
           stats_len = pb_fldlen_common + pb_fld_hdrlen + 3 * (pb_fld_hdrlen + pb_fldlen_float64);
           break;
         case dtype_decimal64:
-        case dtype_decimal128: {
-          auto const scale    = groups[idx].col_dtype.scale();
-          auto const min_size = fixed_point_string_size(chunks[idx].min_value.d128_val, scale);
-          auto const max_size = fixed_point_string_size(chunks[idx].max_value.d128_val, scale);
-          auto const sum_size = fixed_point_string_size(chunks[idx].sum.d128_val, scale);
-          // common + total field length + encoded string lengths + strings
-          stats_len = pb_fldlen_common + pb_fld_hdrlen32 + 3 * (pb_fld_hdrlen + pb_fld_hdrlen32) +
-                      min_size + max_size + sum_size;
+        case dtype_decimal128: 
+        {
+          // TODO(HIP/AMD): Enable when we have support for 128 type
+          // auto const scale    = groups[idx].col_dtype.scale();
+          // auto const min_size = fixed_point_string_size(chunks[idx].min_value.d128_val, scale);
+          // auto const max_size = fixed_point_string_size(chunks[idx].max_value.d128_val, scale);
+          // auto const sum_size = fixed_point_string_size(chunks[idx].sum.d128_val, scale);
+          // // common + total field length + encoded string lengths + strings
+          // stats_len = pb_fldlen_common + pb_fld_hdrlen32 + 3 * (pb_fld_hdrlen + pb_fld_hdrlen32) +
+          //             min_size + max_size + sum_size;
         } break;
         case dtype_string:
           stats_len = pb_fldlen_common + pb_fld_hdrlen32 + 3 * (pb_fld_hdrlen + pb_fld_hdrlen32) +
@@ -208,8 +212,8 @@ __device__ inline uint8_t* pb_put_fixed64(uint8_t* p, uint32_t id, void const* r
 // Splits a nanosecond timestamp into milliseconds and nanoseconds
 __device__ std::pair<int64_t, int32_t> split_nanosecond_timestamp(int64_t nano_count)
 {
-  auto const ns           = cuda::std::chrono::nanoseconds(nano_count);
-  auto const ms_floor     = cuda::std::chrono::floor<cuda::std::chrono::milliseconds>(ns);
+  auto const ns           = hip::std::chrono::nanoseconds(nano_count);
+  auto const ms_floor     = hip::std::chrono::floor<hip::std::chrono::milliseconds>(ns);
   auto const ns_remainder = ns - ms_floor;
   return {ms_floor.count(), ns_remainder.count()};
 }

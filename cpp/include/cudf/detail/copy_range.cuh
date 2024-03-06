@@ -47,7 +47,7 @@ __global__ void copy_range_kernel(SourceValueIterator source_value_begin,
                                   cudf::size_type target_end,
                                   cudf::size_type* __restrict__ const null_count)
 {
-  using warpSize;
+  using cudf::detail::warp_size;
 
   static_assert(block_size <= 1024, "copy_range_kernel assumes block_size is not larger than 1024");
   static_assert(warp_size == cudf::detail::size_in_bits<cudf::bitmask_type>(),

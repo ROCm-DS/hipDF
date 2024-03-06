@@ -22,51 +22,26 @@
 
 #include <rmm/device_uvector.hpp>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 #include <nvtx3/nvToolsExt.h>
-
-/**
- * @brief Reserve CUDA malloc heap size
- *
- * Call this function to change the CUDA malloc heap size limit.
- * This value depends on the total size of all the malloc()
- * calls needed for redact_kernel.
- *
- * @param heap_size Number of bytes to reserve
- *                  Default is 1GB
- */
-void set_malloc_heap_size(size_t heap_size = 1073741824)  // 1GB
-{
-  size_t max_malloc_heap_size = 0;
-  cudaDeviceGetLimit(&max_malloc_heap_size, cudaLimitMallocHeapSize);
-  if (max_malloc_heap_size < heap_size) {
-    max_malloc_heap_size = heap_size;
-    if (cudaDeviceSetLimit(cudaLimitMallocHeapSize, max_malloc_heap_size) != cudaSuccess) {
-      fprintf(stderr, "could not set malloc heap size to %ldMB\n", (heap_size / (1024 * 1024)));
-      throw std::runtime_error("");
-    }
-  }
-}
 
 /**
  * @brief Builds the output for each row
  *
  * This thread is called once per row in d_names.
  *
- * Note: This uses malloc() in a device kernel which works great
- * but is not very efficient. This can be useful for prototyping
- * on functions where performance is not yet important.
- * All calls to malloc() must have a corresponding free() call.
- * The separate free_kernel is launched for this purpose.
- *
  * @param d_names Column of names
  * @param d_visibilities Column of visibilities
  * @param redaction Redacted string replacement
+ * @param working_memory Output memory for all rows
+ * @param d_offsets Byte offset in `d_chars` for each row
  * @param d_output Output array of string_view objects
  */
 __global__ void redact_kernel(cudf::column_device_view const d_names,
                               cudf::column_device_view const d_visibilities,
                               cudf::string_view redaction,
+                              char* working_memory,
+                              cudf::size_type const* d_offsets,
                               cudf::string_view* d_output)
 {
   // The row index is resolved from the CUDA thread/block objects
@@ -84,7 +59,7 @@ __global__ void redact_kernel(cudf::column_device_view const d_names,
     auto const last_initial = name.substr(space_idx + 1, 1);
     auto const output_size  = first.size_bytes() + last_initial.size_bytes() + 1;
 
-    char* output_ptr = static_cast<char*>(malloc(output_size));
+    char* output_ptr = working_memory + d_offsets[index];
     d_output[index]  = cudf::string_view{output_ptr, output_size};
 
     // build output string
@@ -98,31 +73,20 @@ __global__ void redact_kernel(cudf::column_device_view const d_names,
 }
 
 /**
- * @brief Frees the temporary individual string objects created in the
- * redact_kernel
+ * @brief Redacts each name per the corresponding visibility entry
  *
- * Like malloc(), free() is not very efficient but must be called for
- * each malloc() to return the memory to the CUDA malloc heap.
+ * This implementation builds the individual strings into a fixed memory buffer
+ * and then calls a factory function to gather them into a strings column.
  *
- * @param redaction Redacted string replacement (not to be freed)
- * @param d_output Output array of string_view objects to free
+ * @param names Column of names
+ * @param visibilities Column of visibilities
+ * @return Redacted column of names
  */
-__global__ void free_kernel(cudf::string_view redaction, cudf::string_view* d_output, int count)
-{
-  auto index = threadIdx.x + blockIdx.x * blockDim.x;
-  if (index >= count) return;
-
-  auto ptr = const_cast<char*>(d_output[index].data());
-  if (ptr != redaction.data()) { free(ptr); }
-}
-
 std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
                                              cudf::column_view const& visibilities)
 {
   // all device memory operations and kernel functions will run on this stream
   auto stream = rmm::cuda_stream_default;
-
-  set_malloc_heap_size();  // to illustrate adjusting the malloc heap
 
   auto const d_names        = cudf::column_device_view::create(names, stream);
   auto const d_visibilities = cudf::column_device_view::create(visibilities, stream);
@@ -133,22 +97,26 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
 
   nvtxRangePushA("redact_strings");
 
+  auto const scv     = cudf::strings_column_view(names);
+  auto const offsets = scv.offsets_begin();
+
+  // create working memory to hold the output of each string
+  auto working_memory = rmm::device_uvector<char>(scv.chars_size(), stream);
   // create a vector for the output strings' pointers
-  auto str_ptrs = new rmm::device_uvector<cudf::string_view>(names.size(), stream);
+  auto str_ptrs = rmm::device_uvector<cudf::string_view>(names.size(), stream);
 
-  auto result = [&] {
-    // build the output strings
-    redact_kernel<<<blocks, block_size, 0, stream.value()>>>(
-      *d_names, *d_visibilities, d_redaction.value(), str_ptrs->data());
-    // create strings column from the string_view vector
-    // this copies all the individual strings into a single output column
-    return cudf::make_strings_column(*str_ptrs, cudf::string_view{nullptr, 0}, stream);
-  }();
+  // build the output strings
+  redact_kernel<<<blocks, block_size, 0, stream.value()>>>(*d_names,
+                                                           *d_visibilities,
+                                                           d_redaction.value(),
+                                                           working_memory.data(),
+                                                           offsets,
+                                                           str_ptrs.data());
 
-  // free the individual temporary memory pointers
-  free_kernel<<<blocks, block_size, 0, stream.value()>>>(
-    d_redaction.value(), str_ptrs->data(), names.size());
-  delete str_ptrs;
+  // create strings column from the string_pairs;
+  // this copies all the individual strings into a single output column
+  auto result = cudf::make_strings_column(str_ptrs, cudf::string_view{nullptr, 0}, stream);
+  // temporary memory cleanup cost here for str_ptrs and working_memory
 
   // wait for all of the above to finish
   stream.synchronize();

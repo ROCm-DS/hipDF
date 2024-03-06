@@ -33,14 +33,14 @@ namespace {
 // with V2 page headers; see https://www.mail-archive.com/dev@parquet.apache.org/msg11826.html).
 // this kernel only needs 3 warps/wavefronts (for now).
 template <typename level_t>
-__global__ void __launch_bounds__(warpSize * 3) 
+__global__ void __launch_bounds__(cudf::detail::warp_size * 3) 
   gpuDecodeDeltaBinary(PageInfo* pages,
                        device_span<ColumnChunkDesc const> chunks,
                        size_t min_row,
                        size_t num_rows,
                        int32_t* error_code)
 {
-  using warpSize;
+  using cudf::detail::warp_size;
   __shared__ __align__(16) delta_binary_decoder db_state;
   //extern __shared__ __align__(16) page_state_s state_g[];
   extern __shared__ page_state_s state_g[];
@@ -117,7 +117,7 @@ __global__ void __launch_bounds__(warpSize * 3)
       int const leaf_level_index = s->col.max_nesting_depth - 1;
 
       // process the mini-block in batches of warp_size
-      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += warpSize) {
+      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += cudf::detail::warp_size) {
         // the position in the output column/buffer
         int32_t dst_pos = sb->nz_idx[rolling_index<delta_rolling_buf_size>(sp)];
 
@@ -174,7 +174,7 @@ void __host__ DecodeDeltaBinary(cudf::detail::hostdevice_vector<PageInfo>& pages
 {
   CUDF_EXPECTS(pages.size() > 0, "There is no page to decode");
 
-  dim3 dim_block(warpSize * 3, 1);
+  dim3 dim_block(cudf::detail::warp_size * 3, 1);
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {

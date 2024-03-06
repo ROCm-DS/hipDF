@@ -390,7 +390,7 @@ TYPED_TEST(FixedPointUnaryTests, ValidateCeilFloorPrecision)
   // 10^32, 10^36. See https://godbolt.org/z/cP1MddP8P for a derivation. For
   // completeness and to ensure that we are not missing any other cases, we
   // test all scales representable in the range of each decimal type.
-  constexpr auto min_scale = -cuda::std::numeric_limits<RepType>::digits10;
+  constexpr auto min_scale = -hip::std::numeric_limits<RepType>::digits10;
   for (int input_scale = 0; input_scale >= min_scale; --input_scale) {
     RepType input_value = 1;
     for (int k = 0; k > input_scale; --k) {

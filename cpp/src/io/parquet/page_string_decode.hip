@@ -30,7 +30,7 @@ namespace {
 
 constexpr int preprocess_block_size = 512;
 //: TODO(HIP/AMD): Investigate if it makes sense to use 128 threads on AMD backend like on CUDA
-constexpr int decode_block_size     = 4 * warpSize;
+constexpr int decode_block_size     = 4 * cudf::detail::warp_size;
 constexpr int rolling_buf_size      = decode_block_size;
 constexpr int preproc_buf_size      = LEVEL_DECODE_BUF_SIZE;
 
@@ -618,7 +618,7 @@ __global__ void __launch_bounds__(decode_block_size)
   if (t == 0) { last_offset = 0; }
   __syncthreads();
 
-  int const out_thread0                          = s->dict_base && s->dict_bits == 0 ? warpSize : warpSize * 2;
+  int const out_thread0                          = s->dict_base && s->dict_bits == 0 ? cudf::detail::warp_size : cudf::detail::warp_size * 2;
   int const leaf_level_index                     = s->col.max_nesting_depth - 1;
   PageNestingDecodeInfo* const nesting_info_base = s->nesting_info;
 
@@ -637,10 +637,10 @@ __global__ void __launch_bounds__(decode_block_size)
                        s->nz_count + (decode_block_size - out_thread0));
     } else {
       target_pos = min(s->nz_count, src_pos + decode_block_size - out_thread0);
-      if (out_thread0 > warpSize) { target_pos = min(target_pos, s->dict_pos); }
+      if (out_thread0 > cudf::detail::warp_size) { target_pos = min(target_pos, s->dict_pos); }
     }
     __syncthreads();
-    if (t < warpSize) {
+    if (t < cudf::detail::warp_size) {
       // decode repetition and definition levels.
       // - update validity vectors
       // - updates offsets (for nested columns)
@@ -656,7 +656,7 @@ __global__ void __launch_bounds__(decode_block_size)
       } else {
         gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       }
-      if (t == warpSize) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
+      if (t == cudf::detail::warp_size) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
     } else {
       int const me = t - out_thread0;
 
@@ -681,7 +681,7 @@ __global__ void __launch_bounds__(decode_block_size)
 
       // need to do this before we branch on src_pos/dst_pos so we don't deadlock
       // choose a character parallel string copy when the average string is longer than a warp
-      using warpSize;
+      using cudf::detail::warp_size;
       auto const use_char_ll =
         s->page.num_valids > 0 && (s->page.str_bytes / s->page.num_valids) >= warp_size;
 
@@ -755,8 +755,8 @@ __global__ void __launch_bounds__(decode_block_size)
   block_excl_sum<decode_block_size>(offptr, value_count, s->page.str_offset);
 
   if (t == 0 and s->error != 0) {
-    cuda::atomic_ref<int32_t, cuda::thread_scope_device> ref{*error_code};
-    ref.fetch_or(s->error, cuda::std::memory_order_relaxed);
+    hip::atomic_ref<int32_t, hip::thread_scope_device> ref{*error_code};
+    ref.fetch_or(s->error, hip::std::memory_order_relaxed);
   }
 }
 

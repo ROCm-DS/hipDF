@@ -25,7 +25,7 @@
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/tuple.h>
 
-#include <cuda/atomic>
+#include <hip/atomic>
 
 #include <optional>
 
@@ -61,8 +61,8 @@ struct reduce_fn : cudf::detail::reduce_by_row_fn_base<MapView, KeyHasher, KeyEq
   {
     auto const increment = d_partial_output ? d_partial_output[idx] : CountType{1};
     auto const count =
-      cuda::atomic_ref<CountType, cuda::thread_scope_device>(*this->get_output_ptr(idx));
-    count.fetch_add(increment, cuda::std::memory_order_relaxed);
+      hip::atomic_ref<CountType, hip::thread_scope_device>(*this->get_output_ptr(idx));
+    count.fetch_add(increment, hip::std::memory_order_relaxed);
   }
 };
 
@@ -164,8 +164,8 @@ compute_row_frequencies(table_view const& input,
 
   auto map = cudf::detail::hash_map_type{
     compute_hash_table_size(input.num_rows()),
-    cuco::empty_key{-1},
-    cuco::empty_value{std::numeric_limits<size_type>::min()},
+    hipco::empty_key{-1},
+    hipco::empty_value{std::numeric_limits<size_type>::min()},
     cudf::detail::hash_table_allocator_type{default_allocator<char>{}, stream},
     stream.value()};
 
@@ -178,7 +178,7 @@ compute_row_frequencies(table_view const& input,
   auto const row_comp   = cudf::experimental::row::equality::self_comparator(preprocessed_input);
 
   auto const pair_iter = cudf::detail::make_counting_transform_iterator(
-    size_type{0}, [] __device__(size_type const i) { return cuco::make_pair(i, i); });
+    size_type{0}, [] __device__(size_type const i) { return hipco::make_pair(i, i); });
 
   // Always compare NaNs as equal.
   using nan_equal_comparator =
