@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -49,10 +49,14 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 #: from nvtx import annotate #: TODO: HIP/AMD use roctx
-def annotate(*args,**kwargs):
-    def inner(func):
+import contextlib
+class annotate(contextlib.nullcontext):
+     def __init__(self, *args, **kwargs):
+         super().__init__()
+
+     def __call__(self, func):
         return func
-    return inner
+
 from packaging import version
 from pandas.io.formats import console
 from pandas.io.formats.printing import pprint_thing
