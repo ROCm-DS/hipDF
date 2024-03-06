@@ -106,9 +106,7 @@ class parquet_field_bool : public parquet_field {
 struct parquet_field_bool_list : public parquet_field_list<bool> {
   parquet_field_bool_list(int f, std::vector<bool>& v) : parquet_field_list(f, v, ST_FLD_TRUE)
   {
-    // NOTE(HIP/AMD): We need to pass v to the lambda. 
-    // Otherwise we get a segfault/wrong results.
-    auto const read_value = [this, v](uint32_t i, CompactProtocolReader* cpr) {
+    auto const read_value = [this](uint32_t i, CompactProtocolReader* cpr) {
       auto const current_byte = cpr->getb();
       if (current_byte != ST_FLD_TRUE && current_byte != ST_FLD_FALSE) { return true; }
       this->val[i] = current_byte == ST_FLD_TRUE;
@@ -159,9 +157,7 @@ template <typename T, FieldType EXPECTED_TYPE>
 struct parquet_field_int_list : public parquet_field_list<T> {
   parquet_field_int_list(int f, std::vector<T>& v) : parquet_field_list<T>(f, v, EXPECTED_TYPE)
   {
-    // NOTE(HIP/AMD): We need to pass v to the lambda. 
-    // Otherwise we get a segfault/wrong results.
-    auto const read_value = [this, v](uint32_t i, CompactProtocolReader* cpr) {
+    auto const read_value = [this](uint32_t i, CompactProtocolReader* cpr) {
       this->val[i] = cpr->get_zigzag<T>();
       return false;
     };
@@ -207,9 +203,7 @@ struct parquet_field_string_list : public parquet_field_list<std::string> {
   parquet_field_string_list(int f, std::vector<std::string>& v)
     : parquet_field_list(f, v, ST_FLD_BINARY)
   {
-    // NOTE(HIP/AMD): We need to pass v to the lambda. 
-    // Otherwise we get a segfault/wrong results.
-    auto const read_value = [this, v](uint32_t i, CompactProtocolReader* cpr) {
+    auto const read_value = [this](uint32_t i, CompactProtocolReader* cpr) {
       auto const l = cpr->get_u32();
       if (l < static_cast<size_t>(cpr->m_end - cpr->m_cur)) {
         this->val[i].assign(reinterpret_cast<char const*>(cpr->m_cur), l);
@@ -251,9 +245,7 @@ template <typename Enum>
 struct parquet_field_enum_list : public parquet_field_list<Enum> {
   parquet_field_enum_list(int f, std::vector<Enum>& v) : parquet_field_list<Enum>(f, v, ST_FLD_I32)
   {
-    // NOTE(HIP/AMD): We need to pass v to the lambda. 
-    // Otherwise we get a segfault/wrong results.
-    auto const read_value = [this, v](uint32_t i, CompactProtocolReader* cpr) {
+    auto const read_value = [this](uint32_t i, CompactProtocolReader* cpr) {
       this->val[i] = static_cast<Enum>(cpr->get_i32());
       return false;
     };
@@ -443,9 +435,7 @@ struct parquet_field_binary_list : public parquet_field_list<std::vector<uint8_t
   parquet_field_binary_list(int f, std::vector<std::vector<uint8_t>>& v)
     : parquet_field_list(f, v, ST_FLD_BINARY)
   {
-    // NOTE(HIP/AMD): We need to pass v to the lambda. 
-    // Otherwise we get a segfault/wrong results.
-    auto const read_value = [this, v](uint32_t i, CompactProtocolReader* cpr) {
+    auto const read_value = [this](uint32_t i, CompactProtocolReader* cpr) {
       auto const l = cpr->get_u32();
       if (l <= static_cast<size_t>(cpr->m_end - cpr->m_cur)) {
         val[i].resize(l);
