@@ -50,7 +50,7 @@ struct Mul {
     return has_common_type_v<TypeLhs, TypeRhs> or
            // FIXME: without the following line, compilation error
            // _deps/libcudacxx-src/include/cuda/std/detail/libcxx/include/chrono(917): error:
-           // identifier "hip::std::__3::ratio<(long)86400000000l, (long)1l> ::num" is undefined in
+           // identifier "cuda::std::__3::ratio<(long)86400000000l, (long)1l> ::num" is undefined in
            // device code
            (is_duration<TypeLhs>() and std::is_integral<TypeRhs>()) or
            (std::is_integral<TypeLhs>() and is_duration<TypeRhs>()) or

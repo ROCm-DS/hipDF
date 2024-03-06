@@ -85,9 +85,9 @@ __global__ void gather_chars_fn_string_parallel(StringIterator strings_begin,
   constexpr size_t in_datatype_size  = sizeof(uint);
 
   int global_thread_id = blockIdx.x * blockDim.x + threadIdx.x;
-  int global_warp_id   = global_thread_id / cudf::detail::warp_size;
-  int warp_lane        = global_thread_id % cudf::detail::warp_size;
-  int nwarps           = gridDim.x * blockDim.x / cudf::detail::warp_size;
+  int global_warp_id   = global_thread_id / warpSize;
+  int warp_lane        = global_thread_id % warpSize;
+  int nwarps           = gridDim.x * blockDim.x / warpSize;
 
   auto const alignment_offset = reinterpret_cast<std::uintptr_t>(out_chars) % out_datatype_size;
   uint4* out_chars_aligned    = reinterpret_cast<uint4*>(out_chars - alignment_offset);
@@ -117,7 +117,7 @@ __global__ void gather_chars_fn_string_parallel(StringIterator strings_begin,
 
     for (size_type ichar = out_start_aligned + warp_lane * out_datatype_size;
          ichar < out_end_aligned;
-         ichar += cudf::detail::warp_size * out_datatype_size) {
+         ichar += warpSize * out_datatype_size) {
       *(out_chars_aligned + (ichar + alignment_offset) / out_datatype_size) =
         load_uint4(in_start + ichar - out_start);
     }
@@ -128,7 +128,7 @@ __global__ void gather_chars_fn_string_parallel(StringIterator strings_begin,
       // In this case, `[out_start_aligned, out_end_aligned)` is an empty set, and we copy the
       // entire string.
       for (int32_t ichar = out_start + warp_lane; ichar < out_end;
-           ichar += cudf::detail::warp_size) {
+           ichar += warpSize) {
         out_chars[ichar] = in_start[ichar - out_start];
       }
     } else {
@@ -248,14 +248,14 @@ std::unique_ptr<cudf::column> gather_chars(StringIterator strings_begin,
     gather_chars_fn_string_parallel<<<
       min((static_cast<int>(output_count) + warps_per_threadblock - 1) / warps_per_threadblock,
           max_threadblocks),
-      warps_per_threadblock * cudf::detail::warp_size,
+      warps_per_threadblock * warpSize,
       0,
       stream.value()>>>(strings_begin, d_chars, offsets, map_begin, output_count);
   } else {
     constexpr int strings_per_threadblock = 32;
     gather_chars_fn_char_parallel<strings_per_threadblock>
       <<<(output_count + strings_per_threadblock - 1) / strings_per_threadblock,
-         warps_per_threadblock * cudf::detail::warp_size,
+         warps_per_threadblock * warpSize,
          0,
          stream.value()>>>(strings_begin, d_chars, offsets, map_begin, output_count);
   }

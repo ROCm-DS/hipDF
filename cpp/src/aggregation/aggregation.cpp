@@ -65,6 +65,12 @@ std::vector<std::unique_ptr<aggregation>> simple_aggregations_collector::visit(
 }
 
 std::vector<std::unique_ptr<aggregation>> simple_aggregations_collector::visit(
+  data_type col_type, histogram_aggregation const& agg)
+{
+  return visit(col_type, static_cast<aggregation const&>(agg));
+}
+
+std::vector<std::unique_ptr<aggregation>> simple_aggregations_collector::visit(
   data_type col_type, any_aggregation const& agg)
 {
   return visit(col_type, static_cast<aggregation const&>(agg));
@@ -197,6 +203,12 @@ std::vector<std::unique_ptr<aggregation>> simple_aggregations_collector::visit(
 }
 
 std::vector<std::unique_ptr<aggregation>> simple_aggregations_collector::visit(
+  data_type col_type, merge_histogram_aggregation const& agg)
+{
+  return visit(col_type, static_cast<aggregation const&>(agg));
+}
+
+std::vector<std::unique_ptr<aggregation>> simple_aggregations_collector::visit(
   data_type col_type, covariance_aggregation const& agg)
 {
   return visit(col_type, static_cast<aggregation const&>(agg));
@@ -243,6 +255,10 @@ void aggregation_finalizer::visit(max_aggregation const& agg)
 }
 
 void aggregation_finalizer::visit(count_aggregation const& agg)
+{
+  visit(static_cast<aggregation const&>(agg));
+}
+void aggregation_finalizer::visit(histogram_aggregation const& agg)
 {
   visit(static_cast<aggregation const&>(agg));
 }
@@ -357,6 +373,11 @@ void aggregation_finalizer::visit(merge_m2_aggregation const& agg)
   visit(static_cast<aggregation const&>(agg));
 }
 
+void aggregation_finalizer::visit(merge_histogram_aggregation const& agg)
+{
+  visit(static_cast<aggregation const&>(agg));
+}
+
 void aggregation_finalizer::visit(covariance_aggregation const& agg)
 {
   visit(static_cast<aggregation const&>(agg));
@@ -459,6 +480,16 @@ template std::unique_ptr<groupby_aggregation> make_count_aggregation<groupby_agg
   null_policy null_handling);
 template std::unique_ptr<groupby_scan_aggregation> make_count_aggregation<groupby_scan_aggregation>(
   null_policy null_handling);
+
+/// Factory to create a HISTOGRAM aggregation
+template <typename Base>
+std::unique_ptr<Base> make_histogram_aggregation()
+{
+  return std::make_unique<detail::histogram_aggregation>();
+}
+template std::unique_ptr<aggregation> make_histogram_aggregation<aggregation>();
+template std::unique_ptr<groupby_aggregation> make_histogram_aggregation<groupby_aggregation>();
+template std::unique_ptr<reduce_aggregation> make_histogram_aggregation<reduce_aggregation>();
 
 /// Factory to create a ANY aggregation
 template <typename Base>
@@ -764,6 +795,17 @@ std::unique_ptr<Base> make_merge_m2_aggregation()
 template std::unique_ptr<aggregation> make_merge_m2_aggregation<aggregation>();
 template std::unique_ptr<groupby_aggregation> make_merge_m2_aggregation<groupby_aggregation>();
 
+/// Factory to create a MERGE_HISTOGRAM aggregation
+template <typename Base>
+std::unique_ptr<Base> make_merge_histogram_aggregation()
+{
+  return std::make_unique<detail::merge_histogram_aggregation>();
+}
+template std::unique_ptr<aggregation> make_merge_histogram_aggregation<aggregation>();
+template std::unique_ptr<groupby_aggregation>
+make_merge_histogram_aggregation<groupby_aggregation>();
+template std::unique_ptr<reduce_aggregation> make_merge_histogram_aggregation<reduce_aggregation>();
+
 /// Factory to create a COVARIANCE aggregation
 template <typename Base>
 std::unique_ptr<Base> make_covariance_aggregation(size_type min_periods, size_type ddof)
@@ -834,16 +876,12 @@ struct is_valid_aggregation_impl {
 // Return target data_type for the given source_type and aggregation
 data_type target_type(data_type source, aggregation::Kind k)
 {
-  //TODO(HIP/AMD)-
-  // return source;
   return dispatch_type_and_aggregation(source, k, target_type_functor{source});
 }
 
 // Verifies the aggregation `k` is valid on the type `source`
 bool is_valid_aggregation(data_type source, aggregation::Kind k)
 {
-  //TODO(HIP/AMD)-
-  // return true;
   return dispatch_type_and_aggregation(source, k, is_valid_aggregation_impl{});
 }
 }  // namespace detail

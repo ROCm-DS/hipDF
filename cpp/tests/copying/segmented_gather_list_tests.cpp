@@ -165,7 +165,7 @@ TYPED_TEST(SegmentedGatherTest, GatherNested)
     auto const gather_map = LCW<int>{{0, -2, -2}, {1}, {1, 0, -1, -5}};
     auto const results    = cudf::lists::segmented_gather(cudf::lists_column_view{list}, cudf::lists_column_view{gather_map});
     auto const expected   = LCW<T>{{{2, 3}, {2, 3}, {2, 3}},
-                                   LCW<T>({{9, 10, 11}}), /*: {{9, 10, 11}}, */
+                                   LCW<T>({{9, 10, 11}}), /*: {{9, 10, 11}}, */ // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
                                    {{17, 18}, {15, 16}, {-17, -18}, {15, 16}}};
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(results->view(), expected);
     // clang-format on

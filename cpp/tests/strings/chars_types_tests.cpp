@@ -50,17 +50,17 @@ TEST_P(CharsTypes, AllTypes)
                                      "\t\r\n\f "};
 
   bool expecteds[] = {false, false, false, false, false, false, false, false,
-                      false, false, false, false, false, true,  false, false,   // decimal
+                      false, false, false, false, false, true,  false, false,  // decimal
                       false, false, false, false, false, false, false, false,
-                      false, true,  false, true,  false, true,  false, false,   // numeric
+                      false, true,  false, true,  false, true,  false, false,  // numeric
                       false, false, false, false, false, false, false, false,
-                      false, false, false, true,  false, true,  false, false,   // digit
+                      false, false, false, true,  false, true,  false, false,  // digit
                       true,  true,  false, true,  false, false, false, false,
-                      false, false, false, false, false, false, true,  false,   // alpha
+                      false, false, false, false, false, false, true,  false,  // alpha
                       false, false, false, false, false, false, false, false,
-                      false, false, false, false, false, false, false, true,    // space
+                      false, false, false, false, false, false, false, true,  // space
                       false, false, false, true,  false, false, false, false,
-                      false, false, false, false, false, false, false, false,   // upper
+                      false, false, false, false, false, false, false, false,  // upper
                       false, true,  false, false, false, false, false, false,
                       false, false, false, false, false, false, true,  false};  // lower
 
@@ -88,7 +88,7 @@ TEST_P(CharsTypes, AllTypes)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
 }
 
-INSTANTIATE_TEST_SUITE_P(StringsCharsTest,
+INSTANTIATE_TEST_CASE_P(StringsCharsTest,
                         CharsTypes,
                         testing::ValuesIn(std::array<cudf::strings::string_character_types, 7>{
                           cudf::strings::string_character_types::DECIMAL,

@@ -25,7 +25,7 @@ namespace cudf::io::parquet::gpu {
 // copies from src to dst in 16B chunks per thread.
 inline __device__ void wideStrcpy(uint8_t* dst, uint8_t const* src, size_t len, uint32_t lane_id)
 {
-  using cudf::detail::warp_size;
+  using warpSize;
   using cudf::strings::detail::load_uint4;
 
   constexpr size_t out_datatype_size = sizeof(uint4);
@@ -77,7 +77,7 @@ inline __device__ void wideStrcpy(uint8_t* dst, uint8_t const* src, size_t len, 
  */
 inline __device__ void ll_strcpy(uint8_t* dst, uint8_t const* src, size_t len, uint32_t lane_id)
 {
-  using cudf::detail::warp_size;
+  using warpSize;
   if (len > 64) {
     wideStrcpy(dst, src, len, lane_id);
   } else {

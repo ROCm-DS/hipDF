@@ -27,7 +27,7 @@
 namespace cudf::detail {
 
 /*! \p pinned_allocator is a CUDA-specific host memory allocator
- *  that employs \c hipHostMalloc for allocation.
+ *  that employs \c cudaMallocHost for allocation.
  *
  * This implementation is ported from the experimental/pinned_allocator
  * that Thrust used to provide.
@@ -38,7 +38,7 @@ template <typename T>
 class pinned_allocator;
 
 /*! \p pinned_allocator is a CUDA-specific host memory allocator
- *  that employs \c hipHostMalloc for allocation.
+ *  that employs \c cudaMallocHost for allocation.
  *
  * This implementation is ported from the experimental/pinned_allocator
  * that Thrust used to provide.
@@ -64,7 +64,7 @@ class pinned_allocator<void> {
 };
 
 /*! \p pinned_allocator is a CUDA-specific host memory allocator
- *  that employs \c hipHostMalloc for allocation.
+ *  that employs \c cudaMallocHost for allocation.
  *
  * This implementation is ported from the experimental/pinned_allocator
  * that Thrust used to provide.

@@ -244,6 +244,7 @@ TYPED_TEST(ListGetFixedWidthValueTest, NestedGetNonNullNonEmpty)
   using LCW = cudf::test::lists_column_wrapper<TypeParam, int32_t>;
 
   // clang-format off
+  // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
     //: LCW col{
     //:   LCW{LCW{1, 2}, LCW{34}},
     //:   LCW{},
@@ -272,7 +273,7 @@ TYPED_TEST(ListGetFixedWidthValueTest, NestedGetNonNullNonEmptyPreserveNull)
   LCW col{
     LCW{LCW{1, 2}, LCW{34}},
     LCW{},
-      //: LCW{LCW{1}},
+    // LCW{LCW{1}},
     LCW({LCW{1}}),
     LCW({LCW{42}, LCW{10}, LCW({1, 3, 2}, this->nth_valid(1))}, valid.begin())
   };

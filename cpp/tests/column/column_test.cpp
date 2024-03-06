@@ -544,8 +544,8 @@ TYPED_TEST(ListsColumnTest, ListsSlicedNonNestedEmpty)
   // Column of List<int>
   LCW list{{1, 2}, {}, {3, 4}, {8, 9}};
   // Column of 1 row, an empty List<int>
-  //TODO(HIP/AMD): the original code used LCW expect{LCW{}}; -> this resulted in the wrong constructor being called,
-  //so the object would not get initialized properly
+  // TODO(HIP/AMD): the original code used LCW expect{LCW{}}; -> this resulted in the wrong constructor being called,
+  // so the object would not get initialized properly
   LCW expect = LCW{std::initializer_list<LCW>{LCW{}}};
   
   auto sliced = cudf::slice(list, {1, 2}).front();
@@ -615,7 +615,6 @@ TYPED_TEST(ListsColumnTest, ListsSlicedZeroSliceLengthNonNested)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*expect, result->view());
 }
-
 
 TYPED_TEST(ListsColumnTest, ListsSlicedColumnViewConstructorWithNulls)
 {

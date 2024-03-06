@@ -37,11 +37,11 @@ using time_point_ms =
  * and `stop`.
  *
  * @tparam Rep The arithmetic type representing the number of ticks
- * @tparam Period A hip::std::ratio representing the tick period (i.e. the
+ * @tparam Period A cuda::std::ratio representing the tick period (i.e. the
  *number of seconds per tick)
  * @param count The number of timestamps to create
- * @param start The first timestamp as a hip::std::chrono::time_point
- * @param stop The last timestamp as a hip::std::chrono::time_point
+ * @param start The first timestamp as a cuda::std::chrono::time_point
+ * @param stop The last timestamp as a cuda::std::chrono::time_point
  */
 template <typename T, bool nullable = false>
 inline cudf::test::fixed_width_column_wrapper<T, int64_t> generate_timestamps(int32_t count,

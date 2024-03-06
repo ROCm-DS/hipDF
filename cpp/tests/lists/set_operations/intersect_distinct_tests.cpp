@@ -185,7 +185,7 @@ TEST_F(SetIntersectTest, StringTestsNonNull)
   {
     auto const lhs      = strings_lists{"this", "is", "a", "string"};
     auto const rhs      = strings_lists{"aha", "bear", "blow", "heat"};
-    //TODO: Workaround for HIP
+    // TODO(HIP/AMD): Workaround for HIP
     auto const expected = strings_lists{{strings_lists{}}};
 
     auto const results_sorted = set_intersect_sorted(lhs, rhs);
@@ -263,7 +263,7 @@ TEST_F(SetIntersectTest, StringTestsWithNullsUnequal)
       {"this", null, "is", "is", "is", "a", null, "string", null, "string"}, nulls_at({1, 6, 8})};
     auto const rhs =
       strings_lists{{"aha", null, "abc", null, "1111", null, "2222"}, nulls_at({1, 3, 5})};
-    //TODO: Workaround for HIP
+    // TODO(HIP/AMD): Workaround for HIP
     auto const expected = strings_lists{{strings_lists{}}};
 
     auto const results_sorted = set_intersect_sorted(lhs, rhs, NULL_UNEQUAL);
@@ -516,7 +516,7 @@ TEST_F(SetIntersectTest, InputListsOfNestedStructsHaveNull)
                                       null,  // end list1
                                       null,  // end list2
                                       null,
-                                      null   // end list3
+                                      null  // end list3
                                     },
                                     all_nulls()};
       auto grandchild2 = strings_col{{
@@ -524,7 +524,7 @@ TEST_F(SetIntersectTest, InputListsOfNestedStructsHaveNull)
                                        "Apple",      // end list1
                                        "" /*NULL*/,  // end list2
                                        "ÁÁÁ",
-                                       "ÉÉÉÉÉ"       // end list3
+                                       "ÉÉÉÉÉ"  // end list3
                                      },
                                      nulls_at({0, 2})};
       auto child1      = structs_col{{grandchild1, grandchild2}, null_at(0)};

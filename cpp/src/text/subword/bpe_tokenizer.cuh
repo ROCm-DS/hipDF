@@ -40,9 +40,9 @@ using hash_value_type    = uint32_t;
 using string_hasher_type = cudf::hashing::detail::MurmurHash3_x86_32<cudf::string_view>;
 
 /**
- * @brief Hasher function used for building and using the hipco static-map
+ * @brief Hasher function used for building and using the cuco static-map
  *
- * This takes advantage of heterogeneous lookup feature in hipco static-map which
+ * This takes advantage of heterogeneous lookup feature in cuco static-map which
  * allows inserting with one type (index) and looking up with a different type (string).
  */
 struct bpe_hasher {
@@ -58,9 +58,9 @@ struct bpe_hasher {
 };
 
 /**
- * @brief Equal function used for building and using the hipco static-map
+ * @brief Equal function used for building and using the cuco static-map
  *
- * This takes advantage of heterogeneous lookup feature in hipco static-map which
+ * This takes advantage of heterogeneous lookup feature in cuco static-map which
  * allows inserting with one type (index) and looking up with a different type (string).
  */
 struct bpe_equal {
@@ -97,6 +97,7 @@ using merge_pairs_map_type = hipco::experimental::static_map<cudf::size_type,
 using col_device_view = std::invoke_result_t<decltype(&cudf::column_device_view::create),
                                              cudf::column_view,
                                              rmm::cuda_stream_view>;
+
 struct bpe_merge_pairs::bpe_merge_pairs_impl {
   std::unique_ptr<cudf::column> const merge_pairs;
   col_device_view const d_merge_pairs;

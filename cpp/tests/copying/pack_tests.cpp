@@ -113,7 +113,7 @@ std::vector<std::unique_ptr<cudf::column>> generate_lists(bool include_validity)
     cudf::test::lists_column_wrapper<int> list0{{1, 2, 3},
                                                 {4, 5},
                                                 {6},
-                                                  //: {{7, 8}, valids},
+                                                  //: {{7, 8}, valids}, // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
                                                 LCW({7, 8}, valids),
                                                 {9, 10, 11},
                                                 LCW{},

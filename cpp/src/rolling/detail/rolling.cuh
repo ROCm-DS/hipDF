@@ -72,7 +72,22 @@ namespace cudf {
 
 namespace detail {
 
-namespace {  // anonymous
+/// Helper function to materialize preceding/following offsets.
+template <typename Calculator>
+std::unique_ptr<column> expand_to_column(Calculator const& calc,
+                                         size_type const& num_rows,
+                                         rmm::cuda_stream_view stream)
+{
+  auto window_column = cudf::make_numeric_column(
+    cudf::data_type{type_to_id<size_type>()}, num_rows, cudf::mask_state::UNALLOCATED, stream);
+
+  auto begin = cudf::detail::make_counting_transform_iterator(0, calc);
+
+  thrust::copy_n(
+    rmm::exec_policy(stream), begin, num_rows, window_column->mutable_view().data<size_type>());
+
+  return window_column;
+}
 
 /**
  * @brief Operator for applying a generic (non-specialized) rolling aggregation on a single window.
@@ -93,14 +108,14 @@ struct DeviceRolling {
 
   // operations we do support
   template <typename T = InputType, aggregation::Kind O = op>
-  DeviceRolling(size_type _min_periods, std::enable_if_t<is_supported<T, O>()>* = nullptr)
+  explicit DeviceRolling(size_type _min_periods, std::enable_if_t<is_supported<T, O>()>* = nullptr)
     : min_periods(_min_periods)
   {
   }
 
   // operations we don't support
   template <typename T = InputType, aggregation::Kind O = op>
-  DeviceRolling(size_type _min_periods, std::enable_if_t<!is_supported<T, O>()>* = nullptr)
+  explicit DeviceRolling(size_type _min_periods, std::enable_if_t<!is_supported<T, O>()>* = nullptr)
     : min_periods(_min_periods)
   {
     CUDF_FAIL("Invalid aggregation/type pair");
@@ -113,7 +128,7 @@ struct DeviceRolling {
                              mutable_column_device_view& output,
                              size_type start_index,
                              size_type end_index,
-                             size_type current_index)
+                             size_type current_index) const
   {
     using AggOp = typename corresponding_operator<op>::type;
     AggOp agg_op;
@@ -146,7 +161,7 @@ struct DeviceRolling {
 template <typename InputType, aggregation::Kind op>
 struct DeviceRollingArgMinMaxBase {
   size_type min_periods;
-  DeviceRollingArgMinMaxBase(size_type _min_periods) : min_periods(_min_periods) {}
+  explicit DeviceRollingArgMinMaxBase(size_type _min_periods) : min_periods(_min_periods) {}
 
   static constexpr bool is_supported()
   {
@@ -164,7 +179,7 @@ struct DeviceRollingArgMinMaxBase {
  */
 template <aggregation::Kind op>
 struct DeviceRollingArgMinMaxString : DeviceRollingArgMinMaxBase<cudf::string_view, op> {
-  DeviceRollingArgMinMaxString(size_type _min_periods)
+  explicit DeviceRollingArgMinMaxString(size_type _min_periods)
     : DeviceRollingArgMinMaxBase<cudf::string_view, op>(_min_periods)
   {
   }
@@ -463,8 +478,8 @@ struct agg_specific_empty_output {
   }
 };
 
-std::unique_ptr<column> empty_output_for_rolling_aggregation(column_view const& input,
-                                                             rolling_aggregation const& agg)
+static std::unique_ptr<column> empty_output_for_rolling_aggregation(column_view const& input,
+                                                                    rolling_aggregation const& agg)
 {
   // TODO:
   //  Ideally, for UDF aggregations, the returned column would match
@@ -1050,7 +1065,7 @@ __launch_bounds__(block_size) __global__
     cudf::bitmask_type const result_mask{hip_extensions::__ballot_sync(active_threads, output_is_valid)};
 
     // only one thread writes the mask
-    if (0 == threadIdx.x % cudf::detail::warp_size) {
+    if (0 == threadIdx.x % warpSize) {
       output.set_mask_word(cudf::word_index(i), result_mask);
       warp_valid_count += __POPC(result_mask);
     }
@@ -1216,8 +1231,6 @@ struct dispatch_rolling {
     return postprocessor.get_result();
   }
 };
-
-}  // namespace
 
 // Applies a user-defined rolling window function to the values in a column.
 template <typename PrecedingWindowIterator, typename FollowingWindowIterator>

@@ -1063,7 +1063,7 @@ struct dispatch_unary_operator_types {
     #ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("Invalid unary operation.");
 #else
-CUDF_UNREACHABLE("Invalid unary operation.");
+    CUDF_UNREACHABLE("Invalid unary operation.");
 #endif
   }
 };

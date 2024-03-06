@@ -142,6 +142,7 @@ TYPED_TEST(GatherTestListTyped, GatherNested)
 
   // List<List<List<T>>>
   {
+    // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
     LCW<T> list{{{{2, 3}, {4, 5}}, {{6, 7, 8}, {9, 10, 11}, {12, 13, 14}}}, LCW<T>({{{15, 16}, {17, 18}, {17, 18}, {17, 18}, {17, 18}}}), LCW<T>({LCW<T>({LCW<T>{0}})}), {{{10}, {20, 30, 40, 50}, {60, 70, 80}}, {{0, 1, 3}, {5}}, {{11, 12, 13, 14, 15}, {16, 17}, {0}}}, {LCW<T>({{10, 20}}), LCW<T>({LCW<T>{30}}), {{40, 50}, {60, 70, 80}}}};
     cudf::test::fixed_width_column_wrapper<int> gather_map{1, 2, 4};
 
@@ -185,6 +186,7 @@ TYPED_TEST(GatherTestListTyped, GatherNestedNulls)
 
   // List<List<T>>
   {
+    // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
     // LCW<T> list{{{{2, 3}, valids}, {4, 5}},
     //             {{{6, 7, 8}, {9, 10, 11}, {12, 13, 14}}, valids},
     //             {{15, 16}, {17, 18}, {17, 18}, {17, 18}, {17, 18}},

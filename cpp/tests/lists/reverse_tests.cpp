@@ -89,7 +89,7 @@ TYPED_TEST(ListsReverseTypedTest, SimpleInputNoNulls)
   }
 
   {
-    //TODO: Workaround for HIP
+    // TODO(HIP/AMD): Workaround for HIP
     auto const expected = lists_col{{lists_col{}}};
     auto const input    = cudf::slice(input_original, {2, 3})[0];
     auto const results  = cudf::lists::reverse(cudf::lists_column_view(input));
@@ -371,8 +371,8 @@ TYPED_TEST(ListsReverseTypedTest, InputListsOfStructsWithNulls)
                                          "Kiwi",
                                          "Cherry",
                                          "Banana",
-                                         "",        /*NULL*/
-                                         "",        /*NULL*/
+                                         "", /*NULL*/
+                                         "", /*NULL*/
                                          "Apple",
                                          "",        /*NULL*/
                                          "Banana",  // end list1
@@ -437,8 +437,8 @@ TYPED_TEST(ListsReverseTypedTest, InputListsOfStructsWithNulls)
                                          "Kiwi",
                                          "Cherry",
                                          "Banana",
-                                         "",        /*NULL*/
-                                         "",        /*NULL*/
+                                         "", /*NULL*/
+                                         "", /*NULL*/
                                          "Apple",
                                          "",        /*NULL*/
                                          "Banana",  // end list1

@@ -29,7 +29,6 @@
 #include <cstdint>
 #include <iterator>
 
-
 /**
  * @file
  * @brief Type declarations for libcudf.
@@ -350,9 +349,9 @@ enum class type_id : int32_t {
   LIST,                    ///< List elements
   DECIMAL32,               ///< Fixed-point type with int32_t
   DECIMAL64,               ///< Fixed-point type with int64_t
-			   // TODO(HIP/AMD): activate again when compiler issue with 128bit ints
-			   // (unsupported legalization) has been resolved
- // DECIMAL128,              ///< Fixed-point type with __int128_t
+  // TODO(HIP/AMD): activate again when compiler issue with 128bit ints
+  // (unsupported legalization) has been resolved
+  // DECIMAL128,              ///< Fixed-point type with __int128_t
   STRUCT,                  ///< Struct elements
   // `NUM_TYPE_IDS` must be last!
   NUM_TYPE_IDS  ///< Total number of type ids

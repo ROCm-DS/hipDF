@@ -433,6 +433,6 @@ TEST_P(FindParmsTest, Find)
   }
 }
 
-INSTANTIATE_TEST_SUITE_P(StringsFindTest,
+INSTANTIATE_TEST_CASE_P(StringsFindTest,
                         FindParmsTest,
                         testing::ValuesIn(std::array<cudf::size_type, 4>{0, 1, 2, 3}));

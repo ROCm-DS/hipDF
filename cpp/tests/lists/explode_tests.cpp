@@ -202,7 +202,7 @@ TEST_F(ExplodeTest, Nested)
   //    [[5, 6]]               200
   //    [[0, 3],[],[5],[2, 1]] 300
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a{LCW{LCW{1, 2}, LCW{7, 6, 5}}, LCW{{LCW{5, 6}}}, LCW{LCW{0, 3}, LCW{}, LCW{5}, LCW{2, 1}}};
   FCW b{100, 200, 300};
 
@@ -237,7 +237,7 @@ TEST_F(ExplodeTest, NestedNulls)
   auto always_valid =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return true; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW{1, 2}, LCW{7, 6, 5}}, LCW{{LCW{null}}}, LCW{LCW{0, 3}, LCW{5}, LCW{2, 1}}}, valids);
   FCW b({100, null, 300}, valids);
 
@@ -270,7 +270,7 @@ TEST_F(ExplodeTest, NullsInNested)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW({1, null}, valids), LCW{7, 6, 5}},
          LCW{{LCW{5, 6}}},
          LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)}});
@@ -306,7 +306,7 @@ TEST_F(ExplodeTest, NullsInNestedDoubleExplode)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a{LCW{LCW({1, null}, valids), LCW{}, LCW{7, 6, 5}},
         LCW{{LCW{5, 6}}},
         LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)}};
@@ -342,7 +342,7 @@ TEST_F(ExplodeTest, NestedStructs)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW({1, null}, valids), LCW{7, 6, 5}},
          LCW{{LCW{5, 6}}},
          LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)}});
@@ -510,7 +510,7 @@ TEST_F(ExplodeTest, SlicedList)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW({1, 2}, valids), LCW{7, 6, 5}},
          LCW{{LCW{5, 6}}},
          LCW{LCW{0, 3}, LCW{5}, LCW({2, 1}, valids)},
@@ -850,7 +850,7 @@ TEST_F(ExplodeOuterTest, Nested)
   //    [[5, 6]]               200
   //    [[0, 3],[],[5],[2, 1]] 300
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a{LCW{LCW{1, 2}, LCW{7, 6, 5}}, LCW{{LCW{5, 6}}}, LCW{LCW{0, 3}, LCW{}, LCW{5}, LCW{2, 1}}};
   FCW b{100, 200, 300};
 
@@ -883,7 +883,7 @@ TEST_F(ExplodeOuterTest, NestedNulls)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW{1, 2}, LCW{7, 6, 5}}, LCW{{LCW{null}}}, LCW{LCW{0, 3}, LCW{5}, LCW{2, 1}}}, valids);
   FCW b({100, 200, 300});
 
@@ -917,7 +917,7 @@ TEST_F(ExplodeOuterTest, NullsInNested)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW({1, null}, valids), LCW{7, 6, 5}},
          LCW{{LCW{5, 6}}},
          LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)}});
@@ -953,7 +953,7 @@ TEST_F(ExplodeOuterTest, NullsInNestedDoubleExplode)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a{LCW{LCW({1, null}, valids), LCW{}, LCW{7, 6, 5}},
         LCW{{LCW{5, 6}}},
         LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)}};
@@ -991,7 +991,7 @@ TEST_F(ExplodeOuterTest, NestedStructs)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW({1, null}, valids), LCW{7, 6, 5}},
          LCW{{LCW{5, 6}}},
          LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)}});
@@ -1161,7 +1161,7 @@ TEST_F(ExplodeOuterTest, SlicedList)
   auto valids =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 2 == 0; });
 
-  //TODO: Workaround for HIP
+  // TODO(HIP/AMD): Workaround for HIP
   LCW a({LCW{LCW({1, null}, valids), LCW{7, 6, 5}},
          LCW{{LCW{5, 6}}},
          LCW{LCW{0, 3}, LCW{5}, LCW({2, null}, valids)},

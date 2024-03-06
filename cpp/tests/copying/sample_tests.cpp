@@ -100,7 +100,7 @@ TEST_P(SampleBasicTest, CombinationOfParameters)
   EXPECT_EQ(out_table->num_rows(), n_samples);
 }
 
-INSTANTIATE_TEST_SUITE_P(
+INSTANTIATE_TEST_CASE_P(
   SampleTest,
   SampleBasicTest,
   ::testing::Values(std::make_tuple(0, cudf::sample_with_replacement::TRUE),

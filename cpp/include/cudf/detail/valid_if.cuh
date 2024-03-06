@@ -175,7 +175,6 @@ __global__ void valid_if_n_kernel(InputIterator1 begin1,
       auto const arg_1         = *(begin1 + mask_idx);
       auto const arg_2         = *(begin2 + thread_idx);
       auto const bit_is_valid  = thread_active && p(arg_1, arg_2);
-      //TODO(HIP/AMD)
       auto const warp_validity = hip_extensions::__ballot_sync(LANE_MASK_ALL, bit_is_valid);
       auto const mask_idx      = word_index(thread_idx);
 

@@ -126,7 +126,7 @@ TEST_F(NestedStructTest, SlicedStructsHaveListsNoNulls)
   // Input has equal elements, thus needs to be tested by stable sort.
   // The original input has 3 first elements repeated at the beginning and the end.
   auto const input_original = [] {
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     auto child0 = int32s_lists{
       {4, 2, 0}, {{}}, {5}, {4, 2, 0}, {{}}, {5}, {4, 1}, {4, 0}, {{}}, {{}}, {4, 2, 0}, {{}}, {5}};
     auto child1 = int32s_col{1, 2, 5, 1, 2, 5, 0, 3, 3, 4, 1, 2, 5};
@@ -425,7 +425,7 @@ TEST_F(NestedListTest, ListsOfListsOfStructsNoNulls)
                               get_structs().release(),
                               0,
                               {});
-     return cudf::make_lists_column(
+    return cudf::make_lists_column(
       8, int32s_col{0, 3, 4, 6, 6, 8, 10, 10, 13}.release(), std::move(lists_of_structs), 0, {});
   }();
 

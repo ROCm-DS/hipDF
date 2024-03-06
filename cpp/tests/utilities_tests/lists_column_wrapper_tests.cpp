@@ -487,7 +487,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, EmptyLists)
   // Children :
   {
     // equivalent to  {}
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{{LCW{}}};
 
     cudf::lists_column_view lcv(list);
@@ -557,7 +557,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, EmptyLists)
   //     1, 2, 3, 4, 5, 6, 7, 8
   {
     // equivalent to  { {{}}, {{1, 2}, {}, {3, 4}}, {{}, {5, 6, 7, 8}, {}} }
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{
       {{LCW{}}}, {{1, 2}, LCW{}, {3, 4}}, {LCW{}, {5, 6, 7, 8}, LCW{}}};
 
@@ -680,7 +680,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, EmptyListsWithValidity)
   //     5, 6, 7, 8
   {
     // equivalent to  { {{}}, NULL, {{}, {5, 6, 7, 8}, {}} }
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{
       {{{LCW{}}}, {{1, 2}, LCW{}, {3, 4}}, {LCW{}, {5, 6, 7, 8}, LCW{}}}, valids};
 
@@ -730,7 +730,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   //      Offsets : 0, 0
   //      Children :
   {
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{{{{LCW{}}}}, {{LCW{}}}, LCW{}};
 
     cudf::lists_column_view lcv(list);
@@ -776,7 +776,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   //       Offsets : 0, 0
   //       Children :
   {
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{LCW{}, {{LCW{}}}, {{{LCW{}}}}};
 
     cudf::lists_column_view lcv(list);
@@ -824,7 +824,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   //         1, 2, 3
   {
     // { {}, {{{1,2,3}}}, {{}} }
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{LCW{}, {{{1, 2, 3}}}, {{LCW{}}}};
 
     cudf::lists_column_view lcv(list);
@@ -876,7 +876,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   {
     // { {{{}}}, {{}}, null }
     std::vector<bool> valids{true, true, false};
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{{{{{LCW{}}}}, {{LCW{}}}, LCW{}}, valids.begin()};
 
     cudf::lists_column_view lcv(list);
@@ -924,7 +924,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   {
     // { {{{}}}, null, {} }
     std::vector<bool> valids{true, false, true};
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{{{{{LCW{}}}}, {{LCW{}}}, LCW{}}, valids.begin()};
 
     cudf::lists_column_view lcv(list);
@@ -968,7 +968,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   {
     // { null, {{}}, {} }
     std::vector<bool> valids{false, true, true};
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{{{{{LCW{}}}}, {{LCW{}}}, LCW{}}, valids.begin()};
 
     cudf::lists_column_view lcv(list);
@@ -1065,7 +1065,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
   {
     // { {null}, {{}}, {} }
     std::vector<bool> valids{false};
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{{{{{LCW{}}}}, valids.begin()}, {{LCW{}}}, LCW{}};
 
     cudf::lists_column_view lcv(list);
@@ -1108,7 +1108,7 @@ TYPED_TEST(ListColumnWrapperTestTyped, IncompleteHierarchies)
 
   {
     // { {{{1, 2, 3}, {4, 5}}}, {{}, {{}}}, {}, {{}, {}} }
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     cudf::test::lists_column_wrapper<T, int32_t> list{
       {{{1, 2, 3}, {4, 5}}}, {LCW{}, {{LCW{}}}}, LCW{}, {LCW{}, LCW{}}};
     cudf::lists_column_view lcv(list);
