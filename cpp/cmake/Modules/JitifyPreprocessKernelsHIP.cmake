@@ -32,9 +32,6 @@ function(jit_preprocess_files)
 
     # Note: need to pass _FILE_OFFSET_BITS=64 in COMMAND due to a limitation in how conda builds
     # glibc
-    # TODO(HIP/AMD): LD_PRELOADing the system libstdc++ here, as with more recent versions from the conda environment (6.0.32),
-    # a segfault happens (to be investigated)
-    # This is likely not portable to other OS.
     add_custom_command(
       OUTPUT ${ARG_OUTPUT}
       DEPENDS jitify_preprocess "${ARG_SOURCE_DIRECTORY}/${ARG_FILE}"
@@ -42,7 +39,7 @@ function(jit_preprocess_files)
       VERBATIM
       COMMAND ${CMAKE_COMMAND} -E make_directory "${jit_output_directory}"
       COMMAND
-      "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR} env LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6
+      "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR} 
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
 	      ${HIPDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
         -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ -I${HIPDF_SOURCE_DIR}/include
