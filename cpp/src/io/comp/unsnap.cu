@@ -328,7 +328,8 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
     // Wait for prefetcher
     if (t == 0) {
       s->q.prefetch_rdpos = cur;
-#pragma unroll(1)  // We don't want unrolling here
+// TODO(HIP/AMD): error: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Werror,-Wcuda-compat]
+#pragma unroll 1  // We don't want unrolling here 
       while (s->q.prefetch_wrpos < min(cur + 5 * batch_size, end)) {
         busy_wait(10);
       }
@@ -489,7 +490,8 @@ __device__ void snappy_decode_symbols(unsnap_state_s* s, uint32_t t)
           cur += blen;
           // Wait for prefetcher
           s->q.prefetch_rdpos = cur;
-#pragma unroll(1)  // We don't want unrolling here
+// TODO(HIP/AMD): error: argument to '#pragma unroll' should not be in parentheses in CUDA C/C++ [-Werror,-Wcuda-compat]
+#pragma unroll 1  // We don't want unrolling here
           while (s->q.prefetch_wrpos < min(cur + 5 * batch_size, end)) {
             busy_wait(10);
           }

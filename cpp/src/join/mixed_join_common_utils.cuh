@@ -120,7 +120,8 @@ struct single_expression_equality : expression_equality<has_nulls> {
     // 1. The contents of the columns involved in the equality condition are equal.
     // 2. The predicate evaluated on the relevant columns (already encoded in the evaluator)
     // evaluates to true.
-    if (this->equality_probe(lhs_index_type{probe_row_index}, rhs_index_type{build_row_index})) {
+    // TODO(HIP/AMD): error: non-constant-expression cannot be narrowed from type 'hash_value_type' (aka 'unsigned int') to 'lhs_index_type' in initializer list [-Wc++11-narrowing]
+    if (this->equality_probe(lhs_index_type(probe_row_index), rhs_index_type(build_row_index))) {
       auto const lrow_idx = this->swap_tables ? build_row_index : probe_row_index;
       auto const rrow_idx = this->swap_tables ? probe_row_index : build_row_index;
       this->evaluator.evaluate(output_dest,

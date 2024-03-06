@@ -65,7 +65,9 @@ CUDF_KERNEL void __launch_bounds__(init_threads_per_block)
                              stats_column_desc const* cols,
                              device_2dspan<rowgroup_rows const> rowgroup_bounds)
 {
-  __shared__ __align__(4) statistics_group group_g[init_groups_per_block];
+  // TODO(HIP/AMD): This is a work around for "initialization is not supported for __shared__ variables"
+  // __shared__ __align__(4) statistics_group group_g[init_groups_per_block];
+  extern __shared__ __align__(4) statistics_group group_g[/*init_groups_per_block*/];
   auto const col_id = blockIdx.x % rowgroup_bounds.size().second;
   auto const chunk_id =
     (blockIdx.x / rowgroup_bounds.size().second * init_groups_per_block) + threadIdx.y;
@@ -136,7 +138,8 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
           stats_len = pb_fldlen_common + pb_fld_hdrlen + 3 * (pb_fld_hdrlen + pb_fldlen_float64);
           break;
         case dtype_decimal64:
-        case dtype_decimal128: {
+        case dtype_decimal128: 
+        {
           auto const scale    = groups[idx].col_dtype.scale();
           auto const min_size = fixed_point_string_size(chunks[idx].min_value.d128_val, scale);
           auto const max_size = fixed_point_string_size(chunks[idx].max_value.d128_val, scale);

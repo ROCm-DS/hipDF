@@ -251,7 +251,7 @@ struct delta_binary_decoder {
   // called by all threads in a warp, currently only one warp supported.
   inline __device__ void calc_mini_block_values(int lane_id)
   {
-    using warpSize;
+    using cudf::detail::warp_size;
     if (current_value_idx >= value_count) { return; }
 
     // need to account for the first value from header on first pass
@@ -336,7 +336,7 @@ struct delta_binary_decoder {
   // called by all threads in a thread block.
   inline __device__ void skip_values(int skip)
   {
-    using warpSize;
+    using cudf::detail::warp_size;
     int const t       = threadIdx.x;
     int const lane_id = t % warp_size;
 
@@ -396,7 +396,7 @@ struct delta_binary_decoder {
   // a single warp.
   inline __device__ void decode_batch()
   {
-    using warpSize;
+    using cudf::detail::warp_size;
     int const t       = threadIdx.x;
     int const lane_id = t % warp_size;
 

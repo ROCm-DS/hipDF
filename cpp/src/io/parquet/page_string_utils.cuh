@@ -51,7 +51,7 @@ namespace cudf::io::parquet::detail {
 // copies from src to dst in 16B chunks per thread.
 inline __device__ void wideStrcpy(uint8_t* dst, uint8_t const* src, size_t len, uint32_t lane_id)
 {
-  using warpSize;
+  using cudf::detail::warp_size;
   using cudf::strings::detail::load_uint4;
 
   constexpr size_t out_datatype_size = sizeof(uint4);
