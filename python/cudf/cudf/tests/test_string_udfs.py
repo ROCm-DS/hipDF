@@ -79,6 +79,8 @@ def get_kernels(func, dtype, size):
 
     @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
     def udf_string_kernel(input_strings, output_col):
+        id = cuda.grid(1)
+        if id < size:
             st = input_strings[id]
             st = sv_to_udf_str(st)
             result = func(st)
