@@ -38,9 +38,9 @@ def test_generic_ptx(dtype):
     nb_type = numpy_support.from_dtype(cudf.dtype(dtype))
     type_signature = (nb_type, nb_type)
 
-    # TODO(HIP/AMD): name parameter only works on AMD backend, remove hardcoding of function name
+    # TODO(HIP/AMD): hardcoding this name because the hipdf backend will search for it to identify the UDF in the code
     ptx_code, output_type = compile_ptx(
-        generic_function, type_signature, device=True, name="GENERIC_BINARY_OP"
+        generic_function, type_signature, device=True, name="udf_funcname_from_numba_to_be_replaced_in_libhipdf"
     )
 
     dtype = numpy_support.as_dtype(output_type).type
