@@ -309,8 +309,7 @@ struct output_normalator : base_normalator<output_normalator<Integer>, Integer> 
    * @brief Indirection operator returns this iterator instance in order
    * to capture the `operator=(Integer)` calls.
    */
-  // TODO(HIP/AMD): Without optnone we get errors in dictionary and copying tests.
-  __attribute__((optnone)) __device__ inline output_normalator const& operator*() const { return *this; }
+  __device__ inline output_normalator const& operator*() const { return *this; }
 
   /**
    * @brief Array subscript operator returns an iterator instance at the specified `idx` position.
