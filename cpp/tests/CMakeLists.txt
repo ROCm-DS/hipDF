@@ -96,8 +96,7 @@ ConfigureTest(
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
 # TODO(HIP/AMD): Enable 
-ConfigureTest(SCALAR_TEST #scalar/scalar_test.cpp 
-scalar/scalar_device_view_test.hip)
+ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.hip)
 
 # ##################################################################################################
 # * timestamps tests ------------------------------------------------------------------------------
