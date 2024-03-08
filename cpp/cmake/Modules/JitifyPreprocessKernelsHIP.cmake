@@ -43,7 +43,7 @@ function(jit_preprocess_files)
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
 	      ${HIPDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
         -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ -I${HIPDF_SOURCE_DIR}/include
-	-I${HIPDF_SOURCE_DIR}/src ${libhipcxx_includes} -I${libhipcxx_SOURCE_DIR}/include -I${HIP_INCLUDE_DIRS}
+	-I${HIPDF_SOURCE_DIR}/src ${libhipcxx_includes} -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
         --no-replace-pragma-once
       COMMENT "Custom command to JIT-compile files."
     )
