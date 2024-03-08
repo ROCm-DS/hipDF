@@ -77,7 +77,7 @@ define weak void @__cxa_deleted_virtual() #0 {
 }
 
 ; Function Attrs: convergent mustprogress nounwind
-define hidden void @GENERIC_BINARY_OP(ptr %0, float %1, float %2) #2 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1, float %2) #2 {
   %4 = alloca ptr, align 8, addrspace(5)
   %5 = alloca float, align 4, addrspace(5)
   %6 = alloca float, align 4, addrspace(5)
@@ -199,7 +199,7 @@ define weak void @__cxa_deleted_virtual() #0 {
 }
 
 ; Function Attrs: convergent mustprogress nounwind
-define hidden void @GENERIC_BINARY_OP(ptr %0, i32 %1, i32 %2) #2 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i32 %1, i32 %2) #2 {
   %4 = alloca ptr, align 8, addrspace(5)
   %5 = alloca i32, align 4, addrspace(5)
   %6 = alloca i32, align 4, addrspace(5)
@@ -330,7 +330,7 @@ define weak void @__cxa_deleted_virtual() #0 {
 }
 
 ; Function Attrs: convergent mustprogress nounwind
-define hidden void @GENERIC_BINARY_OP(ptr %0, i32 %1, i64 %2) #2 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i32 %1, i64 %2) #2 {
   %4 = alloca ptr, align 8, addrspace(5)
   %5 = alloca i32, align 4, addrspace(5)
   %6 = alloca i64, align 8, addrspace(5)

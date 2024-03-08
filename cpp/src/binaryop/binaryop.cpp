@@ -159,12 +159,12 @@ namespace jit {
 void binary_operation(mutable_column_view& out,
                       column_view const& lhs,
                       column_view const& rhs,
-                      std::string const& ptx,
+                      std::string const& udf,
                       rmm::cuda_stream_view stream)
 {
   std::string const output_type_name = cudf::type_to_jitsafe_name(out.type());
   std::string cuda_source;
-
+  std::string parsed_llvm_ir;
   if(HIP_PLATFORM_AMD) {
     cuda_source = "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
                 + output_type_name +"*"
@@ -173,9 +173,10 @@ void binary_operation(mutable_column_view& out,
                 + ","
                 + cudf::type_to_jitsafe_name(rhs.type())
                 + ");"; 
+    parsed_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_BINARY_OP");
   }
   else {
-    cuda_source = cudf::jit::parse_single_function_ptx(ptx, "GENERIC_BINARY_OP", output_type_name);
+    cuda_source = cudf::jit::parse_single_function_ptx(udf, "GENERIC_BINARY_OP", output_type_name);
   }
 
   //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
@@ -191,7 +192,7 @@ void binary_operation(mutable_column_view& out,
   // need to use preprocessor here, as jitify2 API extension is not available with CUDA
 #if defined(__HIP_PLATFORM_AMD__) 
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &ptx); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    
+      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    
 #else
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    

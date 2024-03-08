@@ -1281,6 +1281,8 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   rmm::device_scalar<size_type> device_valid_count{0, stream};
 
   std::string cuda_source;
+  std::string parsed_udf_llvm_ir;
+
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
       if(HIP_PLATFORM_AMD) {
@@ -1289,6 +1291,9 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
              + "void*, void*, long long, long long, "
              + "const " + cudf::type_to_jitsafe_name(input.type()) + "*,"
              + "long long, long long);";
+        
+        parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf_agg._source,
+                                                                      udf_agg._function_name);
       }
       else {
         cuda_source += cudf::jit::parse_single_function_ptx(udf_agg._source,
@@ -1304,7 +1309,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   }
 
 
-  //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
+  //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_name =
     jitify2::reflection::Template("cudf::rolling::jit::gpu_rolling_new")  //
       .instantiate(cudf::type_to_jitsafe_name(input.type()),  // list of template arguments
@@ -1317,11 +1322,11 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   jitify2::Kernel kernel;   
 
   if(udf_agg.kind==aggregation::Kind::PTX) {
-    // CAUTION: We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
+    // CAUTION(HIP/AMD): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
     // need to use preprocessor here, as API extension to jitify2 is not available on CUDA backend
 #if defined(__HIP_PLATFORM_AMD__)
     kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
-       .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &udf_agg._source);
+       .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir);
 #else 
     kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});

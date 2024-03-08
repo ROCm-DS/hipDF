@@ -69,21 +69,26 @@ void unary_operation(mutable_column_view output,
                    cudf::type_to_jitsafe_name(input.type()));
 
   std::string cuda_source; 
+  std::string parsed_udf_llvm_ir;
   
-  if(is_ptx && HIP_PLATFORM_AMD)
+  if(is_ptx && HIP_PLATFORM_AMD) {
     cuda_source = "extern \"C\" __device__ void GENERIC_UNARY_OP(" 
                 + cudf::type_to_jitsafe_name(output.type()) +"*"
                 + ","
                 + cudf::type_to_jitsafe_name(input.type())
-                + ");"; 
-  else if(is_ptx && !HIP_PLATFORM_AMD)
+                + ");";
+    parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_UNARY_OP");
+  }
+  else if(is_ptx && !HIP_PLATFORM_AMD) {
     cuda_source = cudf::jit::parse_single_function_ptx(udf,  //
                                           "GENERIC_UNARY_OP",
                                           cudf::type_to_name(output_type),
                                           {0});
-  else 
+  }
+  else { 
     cuda_source = cudf::jit::parse_single_function_cuda(udf,  //
                                                    "GENERIC_UNARY_OP");
+  }
 
   std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
   jitify2::Kernel kernel;   
@@ -93,7 +98,7 @@ void unary_operation(mutable_column_view output,
 #if defined(__HIP_PLATFORM_AMD__)
     kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
       .get_kernel(
-        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &udf); 
+        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir); 
 #else
     kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
       .get_kernel(

@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "parser.hpp"
 
 #include <cudf/utilities/error.hpp>
@@ -23,6 +45,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <regex>
 
 namespace cudf {
 namespace jit {
@@ -428,6 +451,21 @@ std::string parse_single_function_cuda(std::string const& src, std::string const
   no_comments.replace(start, stop - start, function_name);
 
   return no_comments;
+}
+
+std::string parse_single_function_llvm_ir(std::string const& src, std::string const& function_name)
+{
+  // CAUTION(HIP/AMD): In lack of a better method, the function name of the UDF from Numba needs 
+  // to be "udf_funcname_from_numba_to_be_replaced_in_libcudf", so that we can 
+  // match against it and replace it with the ones expected by the Jitified kernels.
+  std::regex pattern_func_sig("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libcudf");
+  std::regex pattern_func_name("udf_funcname_from_numba_to_be_replaced_in_libcudf");
+
+  CUDF_EXPECTS(std::regex_search(src, pattern_func_sig),
+              "Could not identify UDF in NUMBA's input LLVM IR. The expected function "
+              "name is \"udf_funcname_from_numba_to_be_replaced_in_libcudf\"\n");
+  
+  return std::regex_replace(src, pattern_func_name, function_name);
 }
 
 }  // namespace jit

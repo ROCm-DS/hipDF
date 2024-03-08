@@ -1270,7 +1270,7 @@ define weak void @__cxa_deleted_virtual() #0 {
 }
 
 ; Function Attrs: convergent mustprogress nounwind
-define hidden void @rolling_udf(ptr %0, ptr %1, ptr %2, i64 %3, i64 %4, ptr %5, i64 %6, i64 %7) #2 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, ptr %1, ptr %2, i64 %3, i64 %4, ptr %5, i64 %6, i64 %7) #2 {
   %9 = alloca ptr, align 8, addrspace(5)
   %10 = alloca ptr, align 8, addrspace(5)
   %11 = alloca ptr, align 8, addrspace(5)
