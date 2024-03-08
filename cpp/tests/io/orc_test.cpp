@@ -1556,7 +1556,7 @@ TEST_F(OrcReaderTest, DecimalOptions)
 
 TEST_F(OrcWriterTest, DecimalOptionsNested)
 {
-
+// TODO(HIP/AMD): Disable when we have support for 128 type
 #ifdef __HIP_PLATFORM_AMD__
   GTEST_SKIP() << "Support for DECIMAL128 is required";
 #endif

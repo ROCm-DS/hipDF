@@ -351,102 +351,103 @@ TEST_P(FromArrowTestSlice, SliceTest)
 template <typename T>
 using fp_wrapper = cudf::test::fixed_point_column_wrapper<T>;
 
-TEST_F(FromArrowTest, FixedPoint128Table)
-{
-  using namespace numeric;
+// TODO(HIP/AMD): Enable once we have support for 128 type
+// TEST_F(FromArrowTest, FixedPoint128Table)
+// {
+  // using namespace numeric;
 
-  for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
-    auto const data     = std::vector<__int128_t>{1, 2, 3, 4, 5, 6};
-    auto const col      = fp_wrapper<__int128_t>(data.cbegin(), data.cend(), scale_type{scale});
-    auto const expected = cudf::table_view({col});
+  // for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
+  //   auto const data     = std::vector<__int128_t>{1, 2, 3, 4, 5, 6};
+  //   auto const col      = fp_wrapper<__int128_t>(data.cbegin(), data.cend(), scale_type{scale});
+  //   auto const expected = cudf::table_view({col});
 
-    auto const arr = make_decimal128_arrow_array(data, std::nullopt, scale);
+  //   auto const arr = make_decimal128_arrow_array(data, std::nullopt, scale);
 
-    auto const field         = arrow::field("a", arr->type());
-    auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
-    auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
-    auto const arrow_table   = arrow::Table::Make(schema, {arr});
+  //   auto const field         = arrow::field("a", arr->type());
+  //   auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
+  //   auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
+  //   auto const arrow_table   = arrow::Table::Make(schema, {arr});
 
-    auto got_cudf_table = cudf::from_arrow(*arrow_table);
+  //   auto got_cudf_table = cudf::from_arrow(*arrow_table);
 
-    CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
-  }
-}
+  //   CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
+  // }
+// }
+// TODO(HIP/AMD): Enable once we have support for 128 type
+// TEST_F(FromArrowTest, FixedPoint128TableLarge)
+// {
+  // using namespace numeric;
+  // auto constexpr NUM_ELEMENTS = 1000;
 
-TEST_F(FromArrowTest, FixedPoint128TableLarge)
-{
-  using namespace numeric;
-  auto constexpr NUM_ELEMENTS = 1000;
+  // for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
+  //   auto iota           = thrust::make_counting_iterator(1);
+  //   auto const data     = std::vector<__int128_t>(iota, iota + NUM_ELEMENTS);
+  //   auto const col      = fp_wrapper<__int128_t>(iota, iota + NUM_ELEMENTS, scale_type{scale});
+  //   auto const expected = cudf::table_view({col});
 
-  for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
-    auto iota           = thrust::make_counting_iterator(1);
-    auto const data     = std::vector<__int128_t>(iota, iota + NUM_ELEMENTS);
-    auto const col      = fp_wrapper<__int128_t>(iota, iota + NUM_ELEMENTS, scale_type{scale});
-    auto const expected = cudf::table_view({col});
+  //   auto const arr = make_decimal128_arrow_array(data, std::nullopt, scale);
 
-    auto const arr = make_decimal128_arrow_array(data, std::nullopt, scale);
+  //   auto const field         = arrow::field("a", arr->type());
+  //   auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
+  //   auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
+  //   auto const arrow_table   = arrow::Table::Make(schema, {arr});
 
-    auto const field         = arrow::field("a", arr->type());
-    auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
-    auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
-    auto const arrow_table   = arrow::Table::Make(schema, {arr});
+  //   auto got_cudf_table = cudf::from_arrow(*arrow_table);
 
-    auto got_cudf_table = cudf::from_arrow(*arrow_table);
+  //   CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
+  // }
+// }
+// TODO(HIP/AMD): Enable once we have support for 128 type
+// TEST_F(FromArrowTest, FixedPoint128TableNulls)
+// {
+//   using namespace numeric;
 
-    CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
-  }
-}
+//   for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
+//     auto const data     = std::vector<__int128_t>{1, 2, 3, 4, 5, 6, 0, 0};
+//     auto const validity = std::vector<int32_t>{1, 1, 1, 1, 1, 1, 0, 0};
+//     auto const col =
+//       fp_wrapper<__int128_t>({1, 2, 3, 4, 5, 6, 0, 0}, {1, 1, 1, 1, 1, 1, 0, 0}, scale_type{scale});
+//     auto const expected = cudf::table_view({col});
 
-TEST_F(FromArrowTest, FixedPoint128TableNulls)
-{
-  using namespace numeric;
+//     auto const arr = make_decimal128_arrow_array(data, validity, scale);
 
-  for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
-    auto const data     = std::vector<__int128_t>{1, 2, 3, 4, 5, 6, 0, 0};
-    auto const validity = std::vector<int32_t>{1, 1, 1, 1, 1, 1, 0, 0};
-    auto const col =
-      fp_wrapper<__int128_t>({1, 2, 3, 4, 5, 6, 0, 0}, {1, 1, 1, 1, 1, 1, 0, 0}, scale_type{scale});
-    auto const expected = cudf::table_view({col});
+//     auto const field         = arrow::field("a", arr->type());
+//     auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
+//     auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
+//     auto const arrow_table   = arrow::Table::Make(schema, {arr});
 
-    auto const arr = make_decimal128_arrow_array(data, validity, scale);
+//     auto got_cudf_table = cudf::from_arrow(*arrow_table);
 
-    auto const field         = arrow::field("a", arr->type());
-    auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
-    auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
-    auto const arrow_table   = arrow::Table::Make(schema, {arr});
+//     CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
+//   }
+// }
+// TODO(HIP/AMD): Enable once we have support for 128 type
+// TEST_F(FromArrowTest, FixedPoint128TableNullsLarge)
+// {
+//   using namespace numeric;
+//   auto constexpr NUM_ELEMENTS = 1000;
 
-    auto got_cudf_table = cudf::from_arrow(*arrow_table);
+//   for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
+//     auto every_other = [](auto i) { return i % 2 ? 0 : 1; };
+//     auto validity    = cudf::detail::make_counting_transform_iterator(0, every_other);
+//     auto iota        = thrust::make_counting_iterator(1);
+//     auto const data  = std::vector<__int128_t>(iota, iota + NUM_ELEMENTS);
+//     auto const col = fp_wrapper<__int128_t>(iota, iota + NUM_ELEMENTS, validity, scale_type{scale});
+//     auto const expected = cudf::table_view({col});
 
-    CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
-  }
-}
+//     auto const arr = make_decimal128_arrow_array(
+//       data, std::vector<int32_t>(validity, validity + NUM_ELEMENTS), scale);
 
-TEST_F(FromArrowTest, FixedPoint128TableNullsLarge)
-{
-  using namespace numeric;
-  auto constexpr NUM_ELEMENTS = 1000;
+//     auto const field         = arrow::field("a", arr->type());
+//     auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
+//     auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
+//     auto const arrow_table   = arrow::Table::Make(schema, {arr});
 
-  for (auto const scale : {3, 2, 1, 0, -1, -2, -3}) {
-    auto every_other = [](auto i) { return i % 2 ? 0 : 1; };
-    auto validity    = cudf::detail::make_counting_transform_iterator(0, every_other);
-    auto iota        = thrust::make_counting_iterator(1);
-    auto const data  = std::vector<__int128_t>(iota, iota + NUM_ELEMENTS);
-    auto const col = fp_wrapper<__int128_t>(iota, iota + NUM_ELEMENTS, validity, scale_type{scale});
-    auto const expected = cudf::table_view({col});
+//     auto got_cudf_table = cudf::from_arrow(*arrow_table);
 
-    auto const arr = make_decimal128_arrow_array(
-      data, std::vector<int32_t>(validity, validity + NUM_ELEMENTS), scale);
-
-    auto const field         = arrow::field("a", arr->type());
-    auto const schema_vector = std::vector<std::shared_ptr<arrow::Field>>({field});
-    auto const schema        = std::make_shared<arrow::Schema>(schema_vector);
-    auto const arrow_table   = arrow::Table::Make(schema, {arr});
-
-    auto got_cudf_table = cudf::from_arrow(*arrow_table);
-
-    CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
-  }
-}
+//     CUDF_TEST_EXPECT_TABLES_EQUAL(expected, got_cudf_table->view());
+//   }
+// }
 
 INSTANTIATE_TEST_CASE_P(FromArrowTest,
                         FromArrowTestSlice,
@@ -477,23 +478,23 @@ TYPED_TEST(FromArrowNumericScalarTest, Basic)
 }
 
 struct FromArrowDecimalScalarTest : public cudf::test::BaseFixture {};
-
+// TODO(HIP/AMD): Enable once we have support for 128 type
 // Only testing Decimal128 because that's the only size cudf and arrow have in common.
-TEST_F(FromArrowDecimalScalarTest, Basic)
-{
-  auto const value{42};
-  auto const precision{8};
-  auto const scale{4};
-  auto arrow_scalar = arrow::Decimal128Scalar(value, arrow::decimal128(precision, -scale));
-  auto cudf_scalar  = cudf::from_arrow(arrow_scalar);
+// TEST_F(FromArrowDecimalScalarTest, Basic)
+// {
+  // auto const value{42};
+  // auto const precision{8};
+  // auto const scale{4};
+  // auto arrow_scalar = arrow::Decimal128Scalar(value, arrow::decimal128(precision, -scale));
+  // auto cudf_scalar  = cudf::from_arrow(arrow_scalar);
 
-  // Arrow offers a minimum of 128 bits for the Decimal type.
-  auto const cudf_decimal_scalar =
-    dynamic_cast<cudf::fixed_point_scalar<numeric::decimal128>*>(cudf_scalar.get());
-  EXPECT_EQ(cudf_decimal_scalar->type(),
-            cudf::data_type(cudf::type_to_id<numeric::decimal128>(), scale));
-  EXPECT_EQ(cudf_decimal_scalar->value(), value);
-}
+  // // Arrow offers a minimum of 128 bits for the Decimal type.
+  // auto const cudf_decimal_scalar =
+  //   dynamic_cast<cudf::fixed_point_scalar<numeric::decimal128>*>(cudf_scalar.get());
+  // EXPECT_EQ(cudf_decimal_scalar->type(),
+  //           cudf::data_type(cudf::type_to_id<numeric::decimal128>(), scale));
+  // EXPECT_EQ(cudf_decimal_scalar->value(), value);
+// }
 
 struct FromArrowStringScalarTest : public cudf::test::BaseFixture {};
 

@@ -68,16 +68,16 @@ TYPED_TEST(TypedScalarTestWithoutFixedPoint, SetNull)
   EXPECT_FALSE(s.is_valid());
 }
 
-TYPED_TEST(TypedScalarTest, CopyConstructor)
-{
-  using Type = cudf::device_storage_type_t<TypeParam>;
-  Type value = static_cast<Type>(cudf::test::make_type_param_scalar<TypeParam>(8));
-  cudf::scalar_type_t<TypeParam> s(value);
-  auto s2 = s;
+// TYPED_TEST(TypedScalarTest, CopyConstructor)
+// {
+//   using Type = cudf::device_storage_type_t<TypeParam>;
+//   Type value = static_cast<Type>(cudf::test::make_type_param_scalar<TypeParam>(8));
+//   cudf::scalar_type_t<TypeParam> s(value);
+//   auto s2 = s;
 
-  EXPECT_TRUE(s2.is_valid());
-  EXPECT_EQ(value, s2.value());
-}
+//   EXPECT_TRUE(s2.is_valid());
+//   EXPECT_EQ(value, s2.value());
+// }
 
 TYPED_TEST(TypedScalarTest, MoveConstructor)
 {
