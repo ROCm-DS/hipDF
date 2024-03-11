@@ -49,7 +49,9 @@
 #include <jit/parser.hpp>
 #include <jit/util.hpp>
 
+#ifdef HIPDF_ENABLE_UDF_WITH_JITIFY
 #include <jit_preprocessed_files/rolling/jit/kernel.hip.jit.hpp>
+#endif
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_scalar.hpp>
@@ -1229,6 +1231,9 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
                                            rmm::cuda_stream_view stream,
                                            rmm::mr::device_memory_resource* mr)
 {
+#ifndef HIPDF_ENABLE_UDF_WITH_JITIFY
+  CUDF_FAIL("UDF support with Jitify has not been enabled at build time (option HIPDF_ENABLE_UDF_WITH_JITIFY). It requires an internal patched hipRTC on AMD backend\n");
+#else
   static_assert(warp_size == cudf::detail::size_in_bits<cudf::bitmask_type>(),
                 "bitmask_type size does not match CUDA warp size");
 
@@ -1322,6 +1327,7 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   CUDF_CHECK_CUDA(stream.value());
 
   return output;
+#endif // HIPDF_ENABLE_UDF_WITH_JITIFY
 }
 
 /**

@@ -340,6 +340,9 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
     amd_llvm_ir_func = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_func);
 #endif
 
+// TODO(HIP/AMD): Skipping these tests if UDF support is not enabled during build (an internal patched hipRTC is needed).
+// Ideally, we could use gtest's skipping facilities here, but this would disable the prior tests, too.
+#ifdef HIPDF_ENABLE_UDF_WITH_JITIFY
     // >>> test UDFs <<<
     if (input.type() == cudf::data_type{cudf::type_id::INT32} && !input.has_nulls()) {
       auto cuda_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
@@ -361,6 +364,7 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                    min_periods,
                    *ptx_udf_agg); 
     }
+#endif //HIPDF_ENABLE_UDF_WITH_JITIFY
   }
 
  private:

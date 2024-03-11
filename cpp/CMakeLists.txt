@@ -61,6 +61,7 @@ option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
+option(HIPDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
 option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
 mark_as_advanced(HIPDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
@@ -233,9 +234,11 @@ endif()
 if(CUDA_BACKEND)
   include(cmake/Modules/JitifyPreprocessKernels.cmake)
 else()
-  # TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
-  # header conflicts during jitify preprocessing
+  if(HIPDF_ENABLE_UDF_WITH_JITIFY)
+  # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
+  # see https://ontrack-internal.amd.com/browse/SWDEV-444584
   include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
+  endif()
 endif()
 
 if(CUDA_BACKEND)
@@ -722,6 +725,10 @@ target_include_directories(
   INTERFACE "$<INSTALL_INTERFACE:include>"
 )
 
+if(HIPDF_ENABLE_UDF_WITH_JITIFY)
+target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_UDF_WITH_JITIFY")
+endif()
+
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(hipdf PRIVATE "JITIFY_PRINT_LOG=0")
 
@@ -771,9 +778,11 @@ target_compile_definitions(hipdf PRIVATE "RMM_LOGGING_LEVEL=LIBHIPDF_LOGGING_LEV
 target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBHIPDF_LOGGING_LEVEL}")
 
 # Compile stringified JIT sources first
-# TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
-# header conflicts during jitify preprocessing
+if(HIPDF_ENABLE_UDF_WITH_JITIFY)
+  # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
+  # see https://ontrack-internal.amd.com/browse/SWDEV-444584
 add_dependencies(hipdf jitify_preprocess_run)
+endif()
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
@@ -855,6 +864,12 @@ if(HIPDF_BUILD_TESTUTIL)
   )
 
   set_hipdftestutil_target()
+
+  # TODO(HIP/AMD): This activates UDF-related unit tests if UDF/Jitify support 
+  # is enabled (requires patched hipRTC)
+  if(HIPDF_ENABLE_UDF_WITH_JITIFY)
+    target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_UDF_WITH_JITIFY")
+  endif()
 
   if(CUDA_BACKEND)
     target_compile_options(

@@ -55,5 +55,19 @@ namespace test {
   */
   std::string adapt_llvmir_attributes_for_current_arch(const std::string& llvm_ir);
 
+  /**
+   * @brief Indicates whether hipDF was built with support for UDFs through jitify
+   * which requires a patched hipRTC (see https://ontrack-internal.amd.com/browse/SWDEV-444584).
+   * 
+   * @return True if hipDF was built with support for UDFs through jitify, false otherwise.
+  */
+  inline bool has_udf_jitify_support()
+  {
+    bool udf_enabled = false;
+  #ifdef HIPDF_ENABLE_UDF_WITH_JITIFY
+    udf_enabled = true;
+  #endif
+    return udf_enabled;
+  }
 }  // namespace test
 }  // namespace cudf
