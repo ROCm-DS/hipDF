@@ -30,7 +30,13 @@
 #include <cudf/transform.hpp>
 
 namespace transformation {
-struct UnaryOperationIntegrationTest : public cudf::test::BaseFixture {};
+struct UnaryOperationIntegrationTest : public cudf::test::BaseFixture {
+ protected:
+  void SetUp() override
+  {
+    if (!cudf::test::has_udf_jitify_support()) { GTEST_SKIP() << "Skipping tests that require support for UDFs with Jitify (patched hipRTC needed, enable support during build of hipDF!)."; }
+  }  
+};
 
 template <class dtype, class Op, class Data>
 void test_udf(char const udf[], Op op, Data data_init, cudf::size_type size, bool is_ptx)

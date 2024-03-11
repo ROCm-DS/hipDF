@@ -23,7 +23,9 @@
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
+#ifdef HIPDF_ENABLE_UDF_WITH_JITIFY
 #include <jit_preprocessed_files/transform/jit/kernel.hip.jit.hpp>
+#endif
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
@@ -42,6 +44,9 @@ void unary_operation(mutable_column_view output,
                      bool is_ptx,
                      rmm::cuda_stream_view stream)
 {
+#ifndef HIPDF_ENABLE_UDF_WITH_JITIFY
+  CUDF_FAIL("UDF support with Jitify has not been enabled at build time (option HIPDF_ENABLE_UDF_WITH_JITIFY). It requires an internal patched hipRTC on AMD backend\n");
+#else
   std::string kernel_name =
     jitify2::reflection::Template("cudf::transformation::jit::kernel")  //
       .instantiate(cudf::type_to_jitsafe_name(output.type()),  // list of template arguments
@@ -93,6 +98,7 @@ void unary_operation(mutable_column_view output,
         ->launch(output.size(),                                                                 //
               cudf::jit::get_data_ptr(output),
               cudf::jit::get_data_ptr(input));    
+#endif // HIPDF_ENABLE_UDF_WITH_JITIFY
 }
 
 }  // namespace jit
