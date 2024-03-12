@@ -61,7 +61,7 @@ function(jit_preprocess_files)
       VERBATIM
       COMMAND ${CMAKE_COMMAND} -E make_directory "${jit_output_directory}"
       COMMAND
-      "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR} 
+       "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR}
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
 	      ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
         -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ -I${CUDF_SOURCE_DIR}/include
