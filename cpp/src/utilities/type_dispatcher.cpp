@@ -46,7 +46,7 @@ std::string type_to_jitsafe_name(data_type type) {
     std::string result = type_to_name(type);
 
 #ifdef __HIP_PLATFORM_AMD__ 
-    //TODO: HIP/AMD: make substitutions here to account for the way in which hiprtc/comgr internally calls/keeps track of 
+    // TODO(HIP/AMD): make substitutions here to account for the way in which hiprtc/comgr internally calls/keeps track of 
     // the mapping between mangled/demangled names.
     // Please see SWDEV-379212 and the doxygen documentation of this function
     // for more details.
@@ -78,7 +78,7 @@ std::string type_to_jitsafe_name(data_type type) {
     else if(result == "cudf::timestamp_us") {
       result = "cuda::std::__4::chrono::time_point<cuda::std::__4::chrono::system_clock, cuda::std::__4::chrono::duration<long long, cuda::std::__4::ratio<1ll, 1000000ll> > >";
     }
-    //TODO: HIP/AMD: Are there any other substitutions that need to be made?
+    //TODO(HIP/AMD): Are there any other substitutions that need to be made?
 #endif
     return result;
 }

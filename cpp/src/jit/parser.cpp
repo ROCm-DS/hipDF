@@ -457,7 +457,7 @@ std::string parse_single_function_llvm_ir(std::string const& src, std::string co
 {
   // CAUTION(HIP/AMD): In lack of a better method, the function name of the UDF from Numba needs 
   // to be "udf_funcname_from_numba_to_be_replaced_in_libcudf", so that we can 
-  // match against it and replace it with the ones expected by the Jitified kernels.
+  // match against it and replace it with the ones expected by the jitified kernels.
   std::regex pattern_func_sig("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libcudf");
   std::regex pattern_func_name("udf_funcname_from_numba_to_be_replaced_in_libcudf");
 

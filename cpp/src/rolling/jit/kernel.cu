@@ -78,7 +78,6 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
 
   cudf::size_type warp_valid_count{0};
 
-
   //auto active_threads = __ballot_sync(0xffff'ffffu, i < nrows);
   //TODO(HIP/AMD): is this WAR for missing __ballot_sync correct?
   auto active_threads = __ballot(i < nrows);
