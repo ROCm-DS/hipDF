@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
@@ -436,8 +458,9 @@ TYPED_TEST(TypedStructColumnWrapperTest, ListOfStructOfList)
 
   auto list_of_struct_of_list_validity =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
+  // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
   auto [null_mask, null_count] =
-    detail::make_null_mask(list_of_struct_of_list_validity, list_of_struct_of_list_validity + 5);
+    cudf::test::detail::make_null_mask(list_of_struct_of_list_validity, list_of_struct_of_list_validity + 5);
   auto list_of_struct_of_list =
     cudf::make_lists_column(5,
                             fixed_width_column_wrapper<size_type>{0, 2, 4, 6, 8, 10}.release(),
@@ -456,8 +479,9 @@ TYPED_TEST(TypedStructColumnWrapperTest, ListOfStructOfList)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(cudf::lists_column_view(*list_of_struct_of_list).child(),
                                  *expected_level2_struct);
 
+    // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
   std::tie(null_mask, null_count) =
-    detail::make_null_mask(list_of_struct_of_list_validity, list_of_struct_of_list_validity + 5);
+    cudf::test::detail::make_null_mask(list_of_struct_of_list_validity, list_of_struct_of_list_validity + 5);
   auto expected_level3_list =
     cudf::make_lists_column(5,
                             fixed_width_column_wrapper<size_type>{0, 0, 2, 4, 4, 6}.release(),
@@ -486,7 +510,8 @@ TYPED_TEST(TypedStructColumnWrapperTest, StructOfListOfStruct)
 
   auto list_validity =
     cudf::detail::make_counting_transform_iterator(0, [](auto i) { return i % 3; });
-  auto [null_mask, null_count] = detail::make_null_mask(list_validity, list_validity + 5);
+    // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"  
+  auto [null_mask, null_count] = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
 
   auto lists_col =
     cudf::make_lists_column(5,
@@ -507,7 +532,8 @@ TYPED_TEST(TypedStructColumnWrapperTest, StructOfListOfStruct)
   auto expected_structs_col =
     structs_column_wrapper{{expected_ints_col}, {1, 1, 1, 1, 1, 1, 0, 0, 0, 0}}.release();
 
-  std::tie(null_mask, null_count) = detail::make_null_mask(list_validity, list_validity + 5);
+    // TODO(HIP/AMD): war for namespace conflict with hipcub "/opt/rocm-6.1.0/include/hipcub/config.hpp:49:11: note: candidate found by name lookup is 'detail'"
+  std::tie(null_mask, null_count) = cudf::test::detail::make_null_mask(list_validity, list_validity + 5);
 
   auto expected_lists_col =
     cudf::make_lists_column(5,
