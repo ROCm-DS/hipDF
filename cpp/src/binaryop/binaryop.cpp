@@ -192,10 +192,10 @@ void binary_operation(mutable_column_view& out,
   // need to use preprocessor here, as jitify2 API extension is not available with CUDA
 #if defined(__HIP_PLATFORM_AMD__) 
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    
+      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);   
 #else
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
-      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}); //: TODO : HIP/AMD : On CUDA, we need to change this flag to -arch=sm_.    
+      .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});
 #endif
     kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
       ->launch(out.size(),
