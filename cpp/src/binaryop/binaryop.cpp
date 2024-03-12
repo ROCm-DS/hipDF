@@ -161,7 +161,7 @@ void binary_operation(mutable_column_view& out,
     cuda_source = cudf::jit::parse_single_function_ptx(udf, "GENERIC_BINARY_OP", output_type_name);
   }
 
-  //: TODO : HIP/AMD : use type_to_name once hipRTC has been fixed
+  //TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
                               .instantiate(output_type_name,  // list of template arguments
                                            cudf::type_to_jitsafe_name(lhs.type()),
@@ -382,8 +382,6 @@ std::unique_ptr<column> binary_operation(column_view const& lhs,
                                          rmm::cuda_stream_view stream,
                                          rmm::mr::device_memory_resource* mr)
 {
-
-
   // Check for datatype
   auto is_type_supported_ptx = [](data_type type) -> bool {
     return is_fixed_width(type) and not is_fixed_point(type) and
