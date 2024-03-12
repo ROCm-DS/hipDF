@@ -19,7 +19,7 @@ function(find_and_configure_jitify)
   rapids_cpm_find(
     jitify 2.0.0
     GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/jitify
-    GIT_TAG dev 
+    GIT_TAG dev
     GIT_SHALLOW TRUE
     DOWNLOAD_ONLY TRUE
   )
