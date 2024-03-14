@@ -288,7 +288,7 @@ using ListTypes = cudf::test::Types<list_view>;
  * ```
  */
 using FixedPointTypes =
-  cudf::test::Types<numeric::decimal32, numeric::decimal64>; //TODO(HIP/AMD): re-enable tests for numeric::decimal128
+  cudf::test::Types<numeric::decimal32, numeric::decimal64, numeric::decimal128>;
 
 /**
  * @brief Provides a list of all fixed-width element types for use in GTest

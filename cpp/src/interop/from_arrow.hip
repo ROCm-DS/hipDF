@@ -80,10 +80,8 @@ data_type arrow_to_cudf_type(arrow::DataType const& arrow_type)
     case arrow::Type::DICTIONARY: return data_type(type_id::DICTIONARY32);
     case arrow::Type::LIST: return data_type(type_id::LIST);
     case arrow::Type::DECIMAL: {
-      // auto const type = static_cast<arrow::Decimal128Type const*>(&arrow_type);
-      // return data_type{type_id::DECIMAL128, -type->scale()};
-      auto const type = static_cast<arrow::DecimalType const*>(&arrow_type);
-      return data_type{type_id::DECIMAL64, -type->scale()};
+      auto const type = static_cast<arrow::Decimal128Type const*>(&arrow_type);
+      return data_type{type_id::DECIMAL128, -type->scale()};
     }
     case arrow::Type::STRUCT: return data_type(type_id::STRUCT);
     default: CUDF_FAIL("Unsupported type_id conversion to cudf");
@@ -198,8 +196,6 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<numeric::decimal128>
   rmm::cuda_stream_view stream,
   rmm::mr::device_memory_resource* mr)
 {
-  //: TODO(HIP/AMD): remove this warning when DECIMAL128 is available
-  printf("CAUTION: dispatching type numeric::decimal128 to a cudf column. DECIMAL128 is currently not supported in hipDF!");
   using DeviceType = __int128_t;
 
   auto data_buffer    = array.data()->buffers[1];

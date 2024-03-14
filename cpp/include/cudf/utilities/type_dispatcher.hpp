@@ -129,7 +129,7 @@ constexpr bool type_id_matches_device_storage_type(type_id id)
   //TODO(HIP/AMD): activate again when underlying compiler issue with 128bit ints has been resolved
   return (id == type_id::DECIMAL32 && std::is_same_v<T, int32_t>) ||
          (id == type_id::DECIMAL64 && std::is_same_v<T, int64_t>) ||
-         /*(id == type_id::DECIMAL128 && std::is_same_v<T, __int128_t>) ||*/ id == type_to_id<T>();
+         (id == type_id::DECIMAL128 && std::is_same_v<T, __int128_t>) || id == type_to_id<T>();
 }
 
 /**
@@ -184,7 +184,7 @@ CUDF_TYPE_MAPPING(cudf::string_view, type_id::STRING)
 CUDF_TYPE_MAPPING(cudf::list_view, type_id::LIST)
 CUDF_TYPE_MAPPING(numeric::decimal32, type_id::DECIMAL32)
 CUDF_TYPE_MAPPING(numeric::decimal64, type_id::DECIMAL64)
-//CUDF_TYPE_MAPPING(numeric::decimal128, type_id::DECIMAL128)
+CUDF_TYPE_MAPPING(numeric::decimal128, type_id::DECIMAL128)
 CUDF_TYPE_MAPPING(cudf::struct_view, type_id::STRUCT)
 
 /**
@@ -525,9 +525,9 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
     case type_id::DECIMAL64:
        return f.template operator()<typename IdTypeMap<type_id::DECIMAL64>::type>(
          std::forward<Ts>(args)...);
-    //case type_id::DECIMAL128:
-    //   return f.template operator()<typename IdTypeMap<type_id::DECIMAL128>::type>(
-    //     std::forward<Ts>(args)...);
+    case type_id::DECIMAL128:
+      return f.template operator()<typename IdTypeMap<type_id::DECIMAL128>::type>(
+        std::forward<Ts>(args)...);
     case type_id::STRUCT:
        return f.template operator()<typename IdTypeMap<type_id::STRUCT>::type>(
          std::forward<Ts>(args)...);
