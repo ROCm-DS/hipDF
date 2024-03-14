@@ -82,8 +82,9 @@ class union_member {
     return val.u_val;
   }
 
+  // NOTE(HIP/AMD): The check for !std::is_same_v<T, __int128_t> was added to resolve compiler error (ambiguity when selecing correct template)
   template <typename T, typename U>
-  __device__ static std::enable_if_t<std::is_integral_v<T> and std::is_signed_v<T>, type<T, U>> get(
+  __device__ static std::enable_if_t<!std::is_same_v<T, __int128_t> and std::is_integral_v<T> and std::is_signed_v<T>, type<T, U>> get(
     U& val)
   {
     return val.i_val;
