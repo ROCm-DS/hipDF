@@ -28,6 +28,7 @@
 #include <cudf/strings/strings_column_view.hpp>
 #include <cudf/utilities/default_stream.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
+#include <cudf/utilities/error.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
@@ -126,6 +127,30 @@ struct string_to_decimal_check_fn {
                       static_cast<DecimalType>(exp10(static_cast<double>(exp_ten - scale))));
   }
 };
+
+// TODO(HIP/AMD): remove this specialization that avoids that unsupported code for int128_t is compiled.
+// Type conversion between floating point values and int128_t is currently not supported.
+// See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
+// compiler errors at build time.
+template <>
+struct string_to_decimal_check_fn<__int128_t> {
+  column_device_view const d_strings;
+  int32_t const scale;
+
+  string_to_decimal_check_fn(column_device_view const& d_strings, int32_t scale)
+    : d_strings{d_strings}, scale{scale}
+  {
+    CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
+                       "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
+  }
+
+  __device__ bool operator()(size_type idx) const
+  {
+     CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
+                        "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
+  }
+};
+
 
 /**
  * @brief The dispatch function for converting strings column to fixed-point column.
