@@ -19,6 +19,7 @@
 #include <cudf/detail/utilities/assert.cuh>
 #include <cudf/fixed_point/temporary.hpp>
 #include <cudf/types.hpp>
+#include <cudf/utilities/error.hpp>
 
 #include <hip/std/limits>
 #include <hip/std/type_traits>
@@ -57,6 +58,17 @@ constexpr inline auto is_supported_representation_type()
   return hip::std::is_same_v<T, int32_t> ||  //
          hip::std::is_same_v<T, int64_t> ||  //
          hip::std::is_same_v<T, __int128_t>;
+}
+
+// TODO(HIP/AMD): When constructing from floating point values, do not support rep type __int128_t.
+// Type conversion/construction from floating point values to int128_t is currently not supported.
+// See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
+// compiler errors at build time.
+template <typename T>
+constexpr inline auto is_supported_representation_type_float()
+{
+  return hip::std::is_same_v<T, int32_t> ||  //
+         hip::std::is_same_v<T, int64_t>;
 }
 
 /**
@@ -224,10 +236,24 @@ class fixed_point {
    */
   template <typename T,
             typename hip::std::enable_if_t<hip::std::is_floating_point<T>() &&
-                                            is_supported_representation_type<Rep>()>* = nullptr>
+                                            is_supported_representation_type_float<Rep>()>* = nullptr> // TODO(HIP/AMD): Limits to 32bit and 64bit Rep types only. This is a workaround to prevent invalid libcall legalization 
+                                                                                                       // compiler errors at build time.
   CUDF_HOST_DEVICE inline explicit fixed_point(T const& value, scale_type const& scale)
     : _value{static_cast<Rep>(detail::shift<Rep, Rad>(value, scale))}, _scale{scale}
   {
+  }
+
+  // TODO(HIP/AMD): Type conversion/construction from floating point values to int128_t is currently not supported.
+  // see issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
+  // compiler errors at build time.
+  template <typename T,
+            typename hip::std::enable_if_t<hip::std::is_floating_point<T>() &&
+                                           hip::std::is_same_v<Rep, __int128_t>>* = nullptr>
+  CUDF_HOST_DEVICE inline explicit fixed_point(T const& value, scale_type const& scale)
+    : _value{0}, _scale{scale}
+  {
+    CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
+                       "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3).\n");
   }
 
   /**
@@ -258,6 +284,9 @@ class fixed_point {
   {
   }
 
+  // TODO(HIP/AMD): Type conversion/construction from floating point values to int128_t is currently not supported.
+  // see issue https://github.com/AMD-AI/hipdf/issues/3. These specializatons are a workaround to prevent invalid libcall legalization 
+  // compiler errors at build time.
   /**
    * @brief "Scale-less" constructor that constructs `fixed_point` number with a specified
    * value and scale of zero
@@ -266,10 +295,23 @@ class fixed_point {
    * @param value The value that will be constructed from
    */
   template <typename T,
-            typename hip::std::enable_if_t<is_supported_construction_value_type<T>()>* = nullptr>
+            typename hip::std::enable_if_t<is_supported_construction_value_type<T>()
+                                        && (hip::std::is_integral<T>()
+                                        || !hip::std::is_same_v<__int128_t, Rep>)>* = nullptr>
   CUDF_HOST_DEVICE inline fixed_point(T const& value)
     : _value{static_cast<Rep>(value)}, _scale{scale_type{0}}
   {
+  }
+
+  template <typename T,
+            typename hip::std::enable_if_t<is_supported_construction_value_type<T>()
+                                        && hip::std::is_floating_point<T>()
+                                        && hip::std::is_same_v<__int128_t, Rep>>* = nullptr>
+  CUDF_HOST_DEVICE inline fixed_point(T const& value)
+    : _value{0}, _scale{scale_type{0}}
+  {
+    CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
+                       "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
   }
 
   /**
@@ -285,10 +327,25 @@ class fixed_point {
    * @return The `fixed_point` number in base 10 (aka human readable format)
    */
   template <typename U,
-            typename hip::std::enable_if_t<hip::std::is_floating_point_v<U>>* = nullptr>
+            typename hip::std::enable_if_t<hip::std::is_floating_point_v<U>
+            && !hip::std::is_same_v<Rep,__int128_t>>* = nullptr> // TODO(HIP/AMD): Limits to 32bit and 64bit Rep types only. This is a workaround to prevent invalid libcall legalization 
+                                                                 // compiler errors at build time.
   explicit constexpr operator U() const
   {
     return detail::shift<Rep, Rad>(static_cast<U>(_value), scale_type{-_scale});
+  }
+
+  // TODO(HIP/AMD): This specialization satisifies the compiler/linker but should not be called.
+  // See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
+  // compiler errors at build time.
+  template <typename U,
+            typename hip::std::enable_if_t<hip::std::is_floating_point_v<U>
+            && hip::std::is_same_v<Rep,__int128_t>>* = nullptr>
+  explicit constexpr operator U() const
+  {
+    CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
+                       "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
+    return U{};
   }
 
   /**
