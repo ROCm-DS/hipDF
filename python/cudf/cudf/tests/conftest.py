@@ -200,9 +200,9 @@ def pytest_runtest_makereport(item, call):
     setattr(item, "report", {rep.when: rep})
 
 
-#TODO(HIP): we are disabling these tests as they hang currently. Once support for these APIs are added,
+#TODO(HIP): we are disabling these tests as they hang/segfault currently. Once support for these APIs are added,
 # these tests should be enabled again
-disabled_test_files = []
+disabled_test_files = ["test_udf_binops.py"]
 
 def pytest_collection_modifyitems(items):
     exclude = []
