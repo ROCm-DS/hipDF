@@ -151,8 +151,6 @@ TEST_F(SparkMurmurHashTest, MultiValueNulls)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(spark_output1->view(), spark_output2->view());
 }
 
-// TODO(HIP/AMD): This test seems to use 128bit which we do not support currently. Enable commented
-// parts once we have the support
 TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
 {
   // The hash values were determined by running the following Scala code in Apache Spark.
@@ -246,11 +244,10 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
     {933211791, 751823303, -1080202046, 1110053733, 1135925485});
   cudf::test::fixed_width_column_wrapper<int32_t> const hash_bools_expected(
     {933211791, -559580957, -559580957, -559580957, 933211791});
-  // TODO(HIP/AMD): We do not support 128 bit type. Disable for now.
-  // cudf::test::fixed_width_column_wrapper<int32_t> const hash_decimal128_expected(
-  //   {-783713497, -295670906, 1398487324, -52622807, -1359749815});
-  // cudf::test::fixed_width_column_wrapper<int32_t> const hash_combined_expected(
-  //   {401603227, 588162166, 552160517, 1132537411, -326043017});
+  cudf::test::fixed_width_column_wrapper<int32_t> const hash_decimal128_expected(
+    {-783713497, -295670906, 1398487324, -52622807, -1359749815});
+  cudf::test::fixed_width_column_wrapper<int32_t> const hash_combined_expected(
+    {401603227, 588162166, 552160517, 1132537411, -326043017});
 
   using double_limits = std::numeric_limits<double>;
   using long_limits   = std::numeric_limits<int64_t>;
@@ -291,14 +288,13 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
   cudf::test::fixed_width_column_wrapper<int8_t> const bytes_col({0, 100, -100, -128, 127});
   cudf::test::fixed_width_column_wrapper<bool> const bools_col1({0, 1, 1, 1, 0});
   cudf::test::fixed_width_column_wrapper<bool> const bools_col2({0, 1, 2, 255, 0});
-  // TODO(HIP/AMD): We do not support 128 bit type. Disable for now.
-  // cudf::test::fixed_point_column_wrapper<__int128_t> const decimal128_col(
-  //   {static_cast<__int128>(0),
-  //    static_cast<__int128>(100),
-  //    static_cast<__int128>(-1),
-  //    (static_cast<__int128>(0xFFFF'FFFF'FCC4'D1C3u) << 64 | 0x602F'7FC3'1800'0001u),
-  //    (static_cast<__int128>(0x0785'EE10'D5DA'46D9u) << 64 | 0x00F4'369F'FFFF'FFFFu)},
-  //   numeric::scale_type{-11});
+  cudf::test::fixed_point_column_wrapper<__int128_t> const decimal128_col(
+    {static_cast<__int128>(0),
+     static_cast<__int128>(100),
+     static_cast<__int128>(-1),
+     (static_cast<__int128>(0xFFFF'FFFF'FCC4'D1C3u) << 64 | 0x602F'7FC3'1800'0001u),
+     (static_cast<__int128>(0x0785'EE10'D5DA'46D9u) << 64 | 0x00F4'369F'FFFF'FFFFu)},
+    numeric::scale_type{-11});
 
   auto const hash_structs =
     cudf::hashing::spark_murmurhash3_x86_32(cudf::table_view({structs_col}), 42);
@@ -327,9 +323,8 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
     cudf::hashing::spark_murmurhash3_x86_32(cudf::table_view({bools_col1}), 42);
   auto const hash_bools2 =
     cudf::hashing::spark_murmurhash3_x86_32(cudf::table_view({bools_col2}), 42);
-  // TODO(HIP/AMD): We do not support 128 bit type. Disable for now.
-  // auto const hash_decimal128 =
-  //   cudf::hashing::spark_murmurhash3_x86_32(cudf::table_view({decimal128_col}), 42);
+  auto const hash_decimal128 =
+    cudf::hashing::spark_murmurhash3_x86_32(cudf::table_view({decimal128_col}), 42);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_structs, hash_structs_expected, verbosity);
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_strings, hash_strings_expected, verbosity);
@@ -345,28 +340,26 @@ TEST_F(SparkMurmurHashTest, MultiValueWithSeeds)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_bytes, hash_bytes_expected, verbosity);
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_bools1, hash_bools_expected, verbosity);
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_bools2, hash_bools_expected, verbosity);
-  // TODO(HIP/AMD): We do not support 128 bit type. Disable for now.
-  // CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_decimal128, hash_decimal128_expected, verbosity);
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_decimal128, hash_decimal128_expected, verbosity);
 
-  // TODO(HIP/AMD): We do not support 128 bit type. Disable for now.
-  // auto const combined_table = cudf::table_view({
-  //   structs_col,
-  //   strings_col,
-  //   doubles_col,
-  //   timestamps_col,
-  //   decimal64_col,
-  //   longs_col,
-  //   floats_col,
-  //   dates_col,
-  //   decimal32_col,
-  //   ints_col,
-  //   shorts_col,
-  //   bytes_col,
-  //   bools_col2
-  //   ,decimal128_col
-  // });
-  // auto const hash_combined  = cudf::hashing::spark_murmurhash3_x86_32(combined_table, 42);
-  // CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_combined, hash_combined_expected, verbosity);
+  auto const combined_table = cudf::table_view({
+    structs_col,
+    strings_col,
+    doubles_col,
+    timestamps_col,
+    decimal64_col,
+    longs_col,
+    floats_col,
+    dates_col,
+    decimal32_col,
+    ints_col,
+    shorts_col,
+    bytes_col,
+    bools_col2
+    ,decimal128_col
+  });
+  auto const hash_combined  = cudf::hashing::spark_murmurhash3_x86_32(combined_table, 42);
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(*hash_combined, hash_combined_expected, verbosity);
 }
 
 TEST_F(SparkMurmurHashTest, StringsWithSeed)
