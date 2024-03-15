@@ -315,8 +315,11 @@ cudf::data_type get_appropriate_type()
   return cudf::data_type{cudf::type_to_id<T>()};
 }
 
+// TODO(HIP/AMD): Testing only fixed point types that do not use int128_t as representation type
+// due to https://github.com/AMD-AI/hipdf/issues/3.
+// Disabling int128_t tests as they would result in excessive output of error messages.
 using PercentileApproxTypes =
-  cudf::test::Concat<cudf::test::NumericTypes, cudf::test::FixedPointTypes>;
+  cudf::test::Concat<cudf::test::NumericTypes, cudf::test::FixedPointTypesNoInt128_t>;
 
 template <typename T>
 struct PercentileApproxInputTypesTest : public cudf::test::BaseFixture {};
