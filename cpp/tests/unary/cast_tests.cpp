@@ -830,21 +830,21 @@ TYPED_TEST(FixedPointTests, Decimal64ToDecimalXX)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-// TYPED_TEST(FixedPointTests, Decimal128ToDecimalXX)
-// {
-//   using namespace numeric;
-//   using decimalXX      = TypeParam;
-//   using RepTypeFrom    = __int128_t;
-//   using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
-//   using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
-//   using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
+TYPED_TEST(FixedPointTests, Decimal128ToDecimalXX)
+{
+  using namespace numeric;
+  using decimalXX      = TypeParam;
+  using RepTypeFrom    = __int128_t;
+  using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
+  using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
+  using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
 
-//   auto const input    = fp_wrapperFrom{{1729, 17290, 172900, 1729000}, scale_type{-3}};
-//   auto const expected = fp_wrapperTo{{1729, 17290, 172900, 1729000}, scale_type{-3}};
-//   auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(-3));
+  auto const input    = fp_wrapperFrom{{1729, 17290, 172900, 1729000}, scale_type{-3}};
+  auto const expected = fp_wrapperTo{{1729, 17290, 172900, 1729000}, scale_type{-3}};
+  auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(-3));
 
-//   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
-// }
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
+}
 
 TYPED_TEST(FixedPointTests, Decimal32ToDecimalXXWithSmallerScale)
 {
@@ -878,21 +878,21 @@ TYPED_TEST(FixedPointTests, Decimal64ToDecimalXXWithSmallerScale)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-// TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithSmallerScale)
-// {
-//   using namespace numeric;
-//   using decimalXX      = TypeParam;
-//   using RepTypeFrom    = __int128_t;
-//   using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
-//   using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
-//   using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
+TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithSmallerScale)
+{
+  using namespace numeric;
+  using decimalXX      = TypeParam;
+  using RepTypeFrom    = __int128_t;
+  using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
+  using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
+  using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
 
-//   auto const input    = fp_wrapperFrom{{1729, 17290, 172900, 1729000}, scale_type{-3}};
-//   auto const expected = fp_wrapperTo{{172900, 1729000, 17290000, 172900000}, scale_type{-5}};
-//   auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(-5));
+  auto const input    = fp_wrapperFrom{{1729, 17290, 172900, 1729000}, scale_type{-3}};
+  auto const expected = fp_wrapperTo{{172900, 1729000, 17290000, 172900000}, scale_type{-5}};
+  auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(-5));
 
-//   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
-// }
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
+}
 
 TYPED_TEST(FixedPointTests, Decimal32ToDecimalXXWithLargerScale)
 {
@@ -951,21 +951,21 @@ TEST_F(FixedPointTestSingleType, AvoidOverflowDecimal32ToInt64)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-// TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScale)
-// {
-//   using namespace numeric;
-//   using decimalXX      = TypeParam;
-//   using RepTypeFrom    = __int128_t;
-//   using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
-//   using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
-//   using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
+TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScale)
+{
+  using namespace numeric;
+  using decimalXX      = TypeParam;
+  using RepTypeFrom    = __int128_t;
+  using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
+  using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
+  using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
 
-//   auto const input    = fp_wrapperFrom{{1729, 17290, 172900, 1729000}, scale_type{-3}};
-//   auto const expected = fp_wrapperTo{{1, 17, 172, 1729}, scale_type{0}};
-//   auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(0));
+  auto const input    = fp_wrapperFrom{{1729, 17290, 172900, 1729000}, scale_type{-3}};
+  auto const expected = fp_wrapperTo{{1, 17, 172, 1729}, scale_type{0}};
+  auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(0));
 
-//   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
-// }
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
+}
 
 TYPED_TEST(FixedPointTests, Decimal32ToDecimalXXWithLargerScaleAndNullMask)
 {
@@ -1001,22 +1001,22 @@ TYPED_TEST(FixedPointTests, Decimal64ToDecimalXXWithLargerScaleAndNullMask)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-// TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScaleAndNullMask)
-// {
-//   using namespace numeric;
-//   using decimalXX      = TypeParam;
-//   using RepTypeFrom    = __int128_t;
-//   using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
-//   using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
-//   using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
+TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScaleAndNullMask)
+{
+  using namespace numeric;
+  using decimalXX      = TypeParam;
+  using RepTypeFrom    = __int128_t;
+  using RepTypeTo      = cudf::device_storage_type_t<decimalXX>;
+  using fp_wrapperFrom = cudf::test::fixed_point_column_wrapper<RepTypeFrom>;
+  using fp_wrapperTo   = cudf::test::fixed_point_column_wrapper<RepTypeTo>;
 
-//   auto const vec      = std::vector{1729, 17290, 172900, 1729000};
-//   auto const input    = fp_wrapperFrom{vec.cbegin(), vec.cend(), {1, 1, 1, 0}, scale_type{-3}};
-//   auto const expected = fp_wrapperTo{{1, 17, 172, 1729000}, {1, 1, 1, 0}, scale_type{0}};
-//   auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(0));
+  auto const vec      = std::vector{1729, 17290, 172900, 1729000};
+  auto const input    = fp_wrapperFrom{vec.cbegin(), vec.cend(), {1, 1, 1, 0}, scale_type{-3}};
+  auto const expected = fp_wrapperTo{{1, 17, 172, 1729000}, {1, 1, 1, 0}, scale_type{0}};
+  auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(0));
 
-//   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
-// }
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
+}
 
 TYPED_TEST(FixedPointTests, DecimalRescaleOverflowAndNullMask)
 {
