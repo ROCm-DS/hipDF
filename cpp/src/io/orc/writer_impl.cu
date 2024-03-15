@@ -158,8 +158,8 @@ constexpr orc::TypeKind to_orc_type(cudf::type_id id, bool list_column_as_map)
     case cudf::type_id::TIMESTAMP_NANOSECONDS: return TypeKind::TIMESTAMP;
     case cudf::type_id::STRING: return TypeKind::STRING;
     case cudf::type_id::DECIMAL32:
-    case cudf::type_id::DECIMAL64: return TypeKind::DECIMAL; //: TODO(HIP/AMD): move down when DECIMAL128 support has been added
-    //case cudf::type_id::DECIMAL128: return TypeKind::DECIMAL; //TODO
+    case cudf::type_id::DECIMAL64:
+    case cudf::type_id::DECIMAL128: return TypeKind::DECIMAL;
     case cudf::type_id::LIST: return list_column_as_map ? TypeKind::MAP : TypeKind::LIST;
     case cudf::type_id::STRUCT: return TypeKind::STRUCT;
     default: return TypeKind::INVALID_TYPE_KIND;
