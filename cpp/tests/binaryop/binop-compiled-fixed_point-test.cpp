@@ -809,39 +809,37 @@ struct FixedPointTest_64_128_Reps : public cudf::test::BaseFixture {};
 using Decimal64And128Types = cudf::test::Types<numeric::decimal64, numeric::decimal128>;
 TYPED_TEST_SUITE(FixedPointTest_64_128_Reps, Decimal64And128Types);
 
-//TODO(HIP/AMD): we presently do not support 128bit fixed point integers, so we deactivate this 
-//test until the fundamental issue has been addressed
-// TYPED_TEST(FixedPointTest_64_128_Reps, FixedPoint_64_128_ComparisonTests)
-// {
-//   using namespace numeric;
-//   using decimalXX = TypeParam;
-//   using RepType   = cudf::device_storage_type_t<decimalXX>;
+TYPED_TEST(FixedPointTest_64_128_Reps, FixedPoint_64_128_ComparisonTests)
+{
+  using namespace numeric;
+  using decimalXX = TypeParam;
+  using RepType   = cudf::device_storage_type_t<decimalXX>;
 
-//   for (auto const rhs_value : {10000000000000000, 100000000000000000}) {
-//     auto const lhs       = fp_wrapper<RepType>{{33041, 97290, 36438, 25379, 48473}, scale_type{2}};
-//     auto const rhs       = cudf::make_fixed_point_scalar<decimalXX>(rhs_value, scale_type{0});
-//     auto const trues     = wrapper<bool>{{1, 1, 1, 1, 1}};
-//     auto const falses    = wrapper<bool>{{0, 0, 0, 0, 0}};
-//     auto const bool_type = cudf::data_type{cudf::type_id::BOOL8};
+  for (auto const rhs_value : {10000000000000000, 100000000000000000}) {
+    auto const lhs       = fp_wrapper<RepType>{{33041, 97290, 36438, 25379, 48473}, scale_type{2}};
+    auto const rhs       = cudf::make_fixed_point_scalar<decimalXX>(rhs_value, scale_type{0});
+    auto const trues     = wrapper<bool>{{1, 1, 1, 1, 1}};
+    auto const falses    = wrapper<bool>{{0, 0, 0, 0, 0}};
+    auto const bool_type = cudf::data_type{cudf::type_id::BOOL8};
 
-//     auto const a = cudf::binary_operation(lhs, *rhs, cudf::binary_operator::LESS, bool_type);
-//     auto const b = cudf::binary_operation(lhs, *rhs, cudf::binary_operator::LESS_EQUAL, bool_type);
-//     auto const c = cudf::binary_operation(lhs, *rhs, cudf::binary_operator::GREATER, bool_type);
-//     auto const d =
-//       cudf::binary_operation(lhs, *rhs, cudf::binary_operator::GREATER_EQUAL, bool_type);
-//     auto const e = cudf::binary_operation(*rhs, lhs, cudf::binary_operator::GREATER, bool_type);
-//     auto const f =
-//       cudf::binary_operation(*rhs, lhs, cudf::binary_operator::GREATER_EQUAL, bool_type);
-//     auto const g = cudf::binary_operation(*rhs, lhs, cudf::binary_operator::LESS, bool_type);
-//     auto const h = cudf::binary_operation(*rhs, lhs, cudf::binary_operator::LESS_EQUAL, bool_type);
+    auto const a = cudf::binary_operation(lhs, *rhs, cudf::binary_operator::LESS, bool_type);
+    auto const b = cudf::binary_operation(lhs, *rhs, cudf::binary_operator::LESS_EQUAL, bool_type);
+    auto const c = cudf::binary_operation(lhs, *rhs, cudf::binary_operator::GREATER, bool_type);
+    auto const d =
+      cudf::binary_operation(lhs, *rhs, cudf::binary_operator::GREATER_EQUAL, bool_type);
+    auto const e = cudf::binary_operation(*rhs, lhs, cudf::binary_operator::GREATER, bool_type);
+    auto const f =
+      cudf::binary_operation(*rhs, lhs, cudf::binary_operator::GREATER_EQUAL, bool_type);
+    auto const g = cudf::binary_operation(*rhs, lhs, cudf::binary_operator::LESS, bool_type);
+    auto const h = cudf::binary_operation(*rhs, lhs, cudf::binary_operator::LESS_EQUAL, bool_type);
 
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(a->view(), trues);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(b->view(), trues);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(c->view(), falses);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(d->view(), falses);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(e->view(), trues);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(f->view(), trues);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(g->view(), falses);
-//     CUDF_TEST_EXPECT_COLUMNS_EQUAL(h->view(), falses);
-//   }
-// }
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(a->view(), trues);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(b->view(), trues);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(c->view(), falses);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(d->view(), falses);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(e->view(), trues);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(f->view(), trues);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(g->view(), falses);
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(h->view(), falses);
+  }
+}

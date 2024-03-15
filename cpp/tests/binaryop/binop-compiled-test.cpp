@@ -115,13 +115,13 @@ using Add_types =
                     cudf::test::Types<cudf::timestamp_s, cudf::timestamp_s, cudf::duration_s>,
                     cudf::test::Types<cudf::timestamp_ns, cudf::duration_ms, cudf::timestamp_us>,
                     cudf::test::Types<cudf::duration_us, cudf::duration_us, cudf::duration_D>,
-                    // cudf::test::Types<duration_s, int16_t, int64_t>, //valid
+                    // cudf::test::Types<cudf::duration_s, int16_t, int64_t>, //valid
                     cudf::test::Types<decimal32, decimal32, decimal32>,
                     cudf::test::Types<decimal64, decimal64, decimal64>,
-                    //cudf::test::Types<decimal128, decimal128, decimal128>, //TODO
+                    cudf::test::Types<decimal128, decimal128, decimal128>, //TODO
                     cudf::test::Types<int, decimal32, decimal32>,
                     cudf::test::Types<int, decimal64, decimal64>,
-                    //cudf::test::Types<int, decimal128, decimal128>, //TODO
+                    cudf::test::Types<int, decimal128, decimal128>, //TODO
                     // Extras
                     cudf::test::Types<cudf::duration_D, cudf::duration_D, cudf::duration_D>,
                     cudf::test::Types<cudf::timestamp_D, cudf::timestamp_D, cudf::duration_D>,
