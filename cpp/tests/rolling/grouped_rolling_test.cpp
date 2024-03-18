@@ -356,9 +356,7 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                  min_periods,
                  *cudf::make_row_number_aggregation<cudf::rolling_aggregation>());
 
-#ifdef __HIP_PLATFORM_AMD__
-    amd_llvm_ir_func = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_func);
-#endif
+    if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_func = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_func);
 
     // >>> test UDFs <<<
     if (input.type() == cudf::data_type{cudf::type_id::INT32} && !input.has_nulls()) {

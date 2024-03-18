@@ -1474,9 +1474,7 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
-#ifdef __HIP_PLATFORM_AMD__
-  amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
-#endif
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvmir_attributes_for_current_arch(amd_llvm_ir_str);
 
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(

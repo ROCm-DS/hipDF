@@ -189,19 +189,18 @@ void binary_operation(mutable_column_view& out,
   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
   jitify2::Kernel kernel; 
   // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
-  // need to use preprocessor here, as jitify2 API extension is not available with CUDA
-#if defined(__HIP_PLATFORM_AMD__) 
+  if constexpr(HIP_PLATFORM_AMD) {
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);   
-#else
+  } else {
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});
-#endif
-    kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
-      ->launch(out.size(),
-              cudf::jit::get_data_ptr(out),
-              cudf::jit::get_data_ptr(lhs),
-              cudf::jit::get_data_ptr(rhs));
+  }
+  kernel->configure_1d_max_occupancy(0, 0, nullptr, stream.value())
+    ->launch(out.size(),
+            cudf::jit::get_data_ptr(out),
+            cudf::jit::get_data_ptr(lhs),
+            cudf::jit::get_data_ptr(rhs));
 }
 }  // namespace jit
 

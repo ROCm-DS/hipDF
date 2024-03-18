@@ -94,16 +94,16 @@ void unary_operation(mutable_column_view output,
   jitify2::Kernel kernel;   
 
   if(is_ptx) {
-    // need to use preprocessor here, as API extension is not available in CUDA's jitify
-#if defined(__HIP_PLATFORM_AMD__)
-    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-      .get_kernel(
-        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir); 
-#else
-    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-      .get_kernel(
-        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
-#endif
+    if constexpr(HIP_PLATFORM_AMD) {
+      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+        .get_kernel(
+          kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir); 
+    }
+    else {
+      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
+        .get_kernel(
+          kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
+    }
   }
   else {
     kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
