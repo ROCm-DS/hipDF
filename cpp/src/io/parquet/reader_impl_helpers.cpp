@@ -115,10 +115,8 @@ type_id to_type_id(SchemaElement const& schema,
         if (schema.type_length <= static_cast<int32_t>(sizeof(int64_t))) {
           return type_id::DECIMAL64;
         }
-        //: TODO(HIP/AMD): Deactivated because of https://github.com/AMD-AI/hipdf/issues/3
         if (schema.type_length <= static_cast<int32_t>(sizeof(__int128_t))) {
-          CUDF_FAIL("Invalid type length. DECIMAL128 is not supported yet!");
-          //return type_id::DECIMAL128;
+          return type_id::DECIMAL128;
         }
       }
       if (physical == parquet::BYTE_ARRAY) {
@@ -128,10 +126,8 @@ type_id to_type_id(SchemaElement const& schema,
         } else if (decimal_precision <= MAX_DECIMAL64_PRECISION) {
           return type_id::DECIMAL64;
         } 
-        //: TODO(HIP/AMD): Deactivated because of https://github.com/AMD-AI/hipdf/issues/3
         else {
-           CUDF_FAIL("Invalid decimal precision. DECIMAL128 is not supported yet!");
-        //   return type_id::DECIMAL128;
+           return type_id::DECIMAL128;
         }
       }
       CUDF_FAIL("Invalid representation of decimal type");

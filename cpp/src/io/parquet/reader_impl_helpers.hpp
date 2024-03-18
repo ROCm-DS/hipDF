@@ -48,8 +48,7 @@ using namespace cudf::io::parquet;
  */
 [[nodiscard]] inline data_type to_data_type(type_id t_id, SchemaElement const& schema)
 {
-  // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
-  return t_id == type_id::DECIMAL32 || t_id == type_id::DECIMAL64 /*|| t_id == type_id::DECIMAL128*/
+  return t_id == type_id::DECIMAL32 || t_id == type_id::DECIMAL64 || t_id == type_id::DECIMAL128
            ? data_type{t_id, numeric::scale_type{-schema.decimal_scale}}
            : data_type{t_id};
 }

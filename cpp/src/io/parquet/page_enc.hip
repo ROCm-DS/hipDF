@@ -98,10 +98,9 @@ struct page_enc_state_s {
  */
 constexpr uint32_t physical_type_len(Type physical_type, type_id id)
 {
-  // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
-  // if (physical_type == FIXED_LEN_BYTE_ARRAY and id == type_id::DECIMAL128) {
-  //   return sizeof(__int128_t);
-  // }
+  if (physical_type == FIXED_LEN_BYTE_ARRAY and id == type_id::DECIMAL128) {
+    return sizeof(__int128_t);
+  }
   switch (physical_type) {
     case INT96: return 12u;
     case INT64:
@@ -1381,16 +1380,15 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
             if (v != 0) memcpy(dst + pos + 4, bytes, v);
           } break;
           case FIXED_LEN_BYTE_ARRAY: {
-            // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
-            // if (type_id == type_id::DECIMAL128) {
-            //   // When using FIXED_LEN_BYTE_ARRAY for decimals, the rep is encoded in big-endian
-            //   auto const v = s->col.leaf_column->element<numeric::decimal128>(val_idx).value();
-            //   auto const v_char_ptr = reinterpret_cast<char const*>(&v);
-            //   thrust::copy(thrust::seq,
-            //                thrust::make_reverse_iterator(v_char_ptr + sizeof(v)),
-            //                thrust::make_reverse_iterator(v_char_ptr),
-            //                dst + pos);
-            // }
+            if (type_id == type_id::DECIMAL128) {
+              // When using FIXED_LEN_BYTE_ARRAY for decimals, the rep is encoded in big-endian
+              auto const v = s->col.leaf_column->element<numeric::decimal128>(val_idx).value();
+              auto const v_char_ptr = reinterpret_cast<char const*>(&v);
+              thrust::copy(thrust::seq,
+                           thrust::make_reverse_iterator(v_char_ptr + sizeof(v)),
+                           thrust::make_reverse_iterator(v_char_ptr),
+                           dst + pos);
+            }
           } break;
           // TODO(HIP/AMD): error: enumeration values 'UNDEFINED_TYPE' and 'BOOLEAN' not handled in switch [-Werror,-Wswitch]
           default:
