@@ -59,9 +59,9 @@ class union_member {
   {
     return val.u_val;
   }
-
+  // TODO(HIP/AMD): hipcc gives error "ambiguous call to get" if we don't add "!std::is_same_v<T, __int128_t>"
   template <typename T, typename U>
-  __device__ static std::enable_if_t<std::is_integral_v<T> and std::is_signed_v<T>, type<T, U>> get(
+  __device__ static std::enable_if_t<!std::is_same_v<T, __int128_t> and std::is_integral_v<T> and std::is_signed_v<T>, type<T, U>> get(
     U& val)
   {
     return val.i_val;
