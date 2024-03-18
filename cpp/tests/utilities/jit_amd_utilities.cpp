@@ -59,7 +59,7 @@ namespace cudf::test {
     return get_llvm_ir_target_features_for_arch(get_arch_name_of_current_device());
   }
 
-  std::string adapt_llvmir_attributes_for_current_arch(const std::string& llvm_ir) {
+  std::string adapt_llvm_ir_attributes_for_current_arch(const std::string& llvm_ir) {
     std::string target_features = get_llvm_ir_target_features_for_current_arch();
     std::string target_cpu = "\"target-cpu\"=\"" + get_arch_name_of_current_device();
 
