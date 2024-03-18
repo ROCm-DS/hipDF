@@ -129,3 +129,4 @@ CUDF_KERNEL void gpu_rolling_new(cudf::size_type nrows,
 }  // namespace jit
 }  // namespace rolling
 }  // namespace cudf
+//TODO(HIP/AMD): This new line appears to be needed as an "f" would otherwise be appended into the source code passed to jitify/hipdf with minification, see internal jitify issue #31
