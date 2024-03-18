@@ -379,30 +379,18 @@ struct DeviceRollingVariance {
         OutputType m{0}, m2{0};
         size_type running_count{0};
 
-        // TODO(HIP/AMD): remove these if constexpr's that avoid the code getting compiled for DeviceInputType==__int128_t.
-        // Type conversion between floating point values and int128_t is currently not supported.
-        // See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
-        // compiler errors at build time.
-        if constexpr (hip::std::is_same_v<DeviceInputType,__int128_t>) {
-          CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
-                             "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
-          return false;
+        for (size_type i = start_index; i < end_index; i++) {
+          if (has_nulls and input.is_null_nocheck(i)) { continue; }
+
+          OutputType const x = static_cast<OutputType>(input.element<DeviceInputType>(i));
+
+          running_count++;
+          OutputType const tmp1 = x - m;
+          m += tmp1 / running_count;
+          OutputType const tmp2 = x - m;
+          m2 += tmp1 * tmp2;
         }
-
-        if constexpr (!hip::std::is_same_v<DeviceInputType,__int128_t>) {
-          for (size_type i = start_index; i < end_index; i++) {
-            if (has_nulls and input.is_null_nocheck(i)) { continue; }
-
-            OutputType const x = static_cast<OutputType>(input.element<DeviceInputType>(i));
-
-            running_count++;
-            OutputType const tmp1 = x - m;
-            m += tmp1 / running_count;
-            OutputType const tmp2 = x - m;
-            m2 += tmp1 * tmp2;
-          }
-        }
-        if constexpr (is_fixed_point<InputType>() && !hip::std::is_same_v<InputType,__int128_t>) {
+        if constexpr (is_fixed_point<InputType>()) {
           // For fixed_point types, the previous computed value used unscaled rep-value,
           // the final result should be multiplied by the square of decimal `scale`.
           OutputType scaleby = exp10(static_cast<double>(input.type().scale()));
