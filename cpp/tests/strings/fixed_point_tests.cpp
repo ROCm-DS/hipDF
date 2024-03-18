@@ -82,94 +82,91 @@ TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVeryLarge)
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
 }
 
-// TODO(HIP/AMD): Enable once we have support for decimal 128 type
-// TEST_F(StringsConvertTest, ToFixedPointDecimal128)
-// {
-//   using namespace numeric;
-//   using RepType    = cudf::device_storage_type_t<decimal128>;
-//   using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
+TEST_F(StringsConvertTest, ToFixedPointDecimal128)
+{
+  using namespace numeric;
+  using RepType    = cudf::device_storage_type_t<decimal128>;
+  using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
 
-//   auto const strings = cudf::test::strings_column_wrapper(
-//     {"1234000000000000000000",
-//      "-876000000000000000000",
-//      "5432e+17",
-//      "-12E016",
-//      "250000000000000000",
-//      "-2800000000000000",
-//      "",
-//      "-0.0",
-//      "170141183460469231731687303715884105727",
-//      "17014118346046923173168730371588410572700000000000000000000"});
+  auto const strings = cudf::test::strings_column_wrapper(
+    {"1234000000000000000000",
+     "-876000000000000000000",
+     "5432e+17",
+     "-12E016",
+     "250000000000000000",
+     "-2800000000000000",
+     "",
+     "-0.0",
+     "170141183460469231731687303715884105727",
+     "17014118346046923173168730371588410572700000000000000000000"});
 
-//   auto const scale    = scale_type{20};
-//   auto const type     = cudf::data_type{cudf::type_to_id<decimal128>(), scale};
-//   auto const results  = cudf::strings::to_fixed_point(cudf::strings_column_view(strings), type);
-//   auto const max      = hip::std::numeric_limits<__int128_t>::max();
-//   auto const expected = fp_wrapper{{12, -8, 5, 0, 0, 0, 0, 0, 1701411834604692317, max}, scale};
+  auto const scale    = scale_type{20};
+  auto const type     = cudf::data_type{cudf::type_to_id<decimal128>(), scale};
+  auto const results  = cudf::strings::to_fixed_point(cudf::strings_column_view(strings), type);
+  auto const max      = hip::std::numeric_limits<__int128_t>::max();
+  auto const expected = fp_wrapper{{12, -8, 5, 0, 0, 0, 0, 0, 1701411834604692317, max}, scale};
 
-//   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
-// }
+  CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
+}
 
-// TODO(HIP/AMD): Enable once we have support for decimal 128 type
-// TEST_F(StringsConvertTest, ToFixedPointLargeScale)
-// {
-//   using namespace numeric;
-//   using RepType    = cudf::device_storage_type_t<decimal128>;
-//   using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
+TEST_F(StringsConvertTest, ToFixedPointLargeScale)
+{
+  using namespace numeric;
+  using RepType    = cudf::device_storage_type_t<decimal128>;
+  using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
 
-//   auto const strings = cudf::test::strings_column_wrapper({"0.05", "0.06", "0.50", "5.01"});
+  auto const strings = cudf::test::strings_column_wrapper({"0.05", "0.06", "0.50", "5.01"});
 
-//   auto const scale   = scale_type{-25};
-//   auto const type    = cudf::data_type{cudf::type_to_id<decimal128>(), scale};
-//   auto const results = cudf::strings::to_fixed_point(cudf::strings_column_view(strings), type);
+  auto const scale   = scale_type{-25};
+  auto const type    = cudf::data_type{cudf::type_to_id<decimal128>(), scale};
+  auto const results = cudf::strings::to_fixed_point(cudf::strings_column_view(strings), type);
 
-//   auto const expected = fp_wrapper{{5, 6, 50, 501}, scale_type{-2}};
-//   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
-// }
+  auto const expected = fp_wrapper{{5, 6, 50, 501}, scale_type{-2}};
+  CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
+}
 
-// TODO(HIP/AMD): Enable once we have support for decimal 128 type
-// TEST_F(StringsConvertTest, FromFixedPointDecimal128)
-// {
-//   using namespace numeric;
-//   using RepType    = cudf::device_storage_type_t<decimal128>;
-//   using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
+TEST_F(StringsConvertTest, FromFixedPointDecimal128)
+{
+  using namespace numeric;
+  using RepType    = cudf::device_storage_type_t<decimal128>;
+  using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
 
-//   auto constexpr max = hip::std::numeric_limits<__int128_t>::max();
+  auto constexpr max = hip::std::numeric_limits<__int128_t>::max();
 
-//   {
-//     auto const input = fp_wrapper{{110, max}, numeric::scale_type{-2}};
-//     auto results     = cudf::strings::from_fixed_point(input);
-//     auto const expected =
-//       cudf::test::strings_column_wrapper({"1.10", "1701411834604692317316873037158841057.27"});
+  {
+    auto const input = fp_wrapper{{110, max}, numeric::scale_type{-2}};
+    auto results     = cudf::strings::from_fixed_point(input);
+    auto const expected =
+      cudf::test::strings_column_wrapper({"1.10", "1701411834604692317316873037158841057.27"});
 
-//     CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
-//   }
+    CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
+  }
 
-//   {
-//     auto const input = fp_wrapper{{max}, numeric::scale_type{-38}};
-//     auto results     = cudf::strings::from_fixed_point(input);
-//     auto const expected =
-//       cudf::test::strings_column_wrapper({"1.70141183460469231731687303715884105727"});
+  {
+    auto const input = fp_wrapper{{max}, numeric::scale_type{-38}};
+    auto results     = cudf::strings::from_fixed_point(input);
+    auto const expected =
+      cudf::test::strings_column_wrapper({"1.70141183460469231731687303715884105727"});
 
-//     CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
-//   }
+    CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
+  }
 
-//   {
-//     auto const input = fp_wrapper({110, max}, numeric::scale_type{2});
-//     auto results     = cudf::strings::from_fixed_point(input);
-//     auto const expected =
-//       cudf::test::strings_column_wrapper({"11000", "17014118346046923173168730371588410572700"});
+  {
+    auto const input = fp_wrapper({110, max}, numeric::scale_type{2});
+    auto results     = cudf::strings::from_fixed_point(input);
+    auto const expected =
+      cudf::test::strings_column_wrapper({"11000", "17014118346046923173168730371588410572700"});
 
-//     CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
-//   }
+    CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
+  }
 
-//   {
-//     auto const input    = fp_wrapper({-222}, numeric::scale_type{0});
-//     auto results        = cudf::strings::from_fixed_point(input);
-//     auto const expected = cudf::test::strings_column_wrapper({"-222"});
-//     CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
-//   }
-// }
+  {
+    auto const input    = fp_wrapper({-222}, numeric::scale_type{0});
+    auto results        = cudf::strings::from_fixed_point(input);
+    auto const expected = cudf::test::strings_column_wrapper({"-222"});
+    CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
+  }
+}
 
 TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVerySmall)
 {
@@ -291,12 +288,11 @@ TEST_F(StringsConvertTest, IsFixedPoint)
     {true, true, true, true, true, false, false, false, false, false});
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64);
 
-  // TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/3
-  // results                = cudf::strings::is_fixed_point(cudf::strings_column_view(big_numbers),
-  //                                         cudf::data_type{cudf::type_id::DECIMAL128});
-  // auto const expected128 = cudf::test::fixed_width_column_wrapper<bool>(
-  //   {true, true, true, true, true, true, true, false, true, false});
-  // CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected128);
+  results                = cudf::strings::is_fixed_point(cudf::strings_column_view(big_numbers),
+                                          cudf::data_type{cudf::type_id::DECIMAL128});
+  auto const expected128 = cudf::test::fixed_width_column_wrapper<bool>(
+    {true, true, true, true, true, true, true, false, true, false});
+  CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected128);
 
   results = cudf::strings::is_fixed_point(
     cudf::strings_column_view(big_numbers),
@@ -320,30 +316,30 @@ TEST_F(StringsConvertTest, IsFixedPoint)
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64_scaled);
 }
 // TODO(HIP/AMD): Enable once we have support for decimal 128 type
-// #ifdef NDEBUG
-// TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
-// #else
-// TEST_F(StringsConvertTest, DISABLED_FixedPointStringConversionOperator)
-// #endif
-// {
-//   auto const max = hip::std::numeric_limits<__int128_t>::max();
+#ifdef NDEBUG
+TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
+#else
+TEST_F(StringsConvertTest, DISABLED_FixedPointStringConversionOperator)
+#endif
+{
+  auto const max = hip::std::numeric_limits<__int128_t>::max();
 
-//   auto const x = numeric::decimal128{max, numeric::scale_type{-10}};
-//   EXPECT_EQ(static_cast<std::string>(x), "17014118346046923173168730371.5884105727");
+  auto const x = numeric::decimal128{max, numeric::scale_type{-10}};
+  EXPECT_EQ(static_cast<std::string>(x), "17014118346046923173168730371.5884105727");
 
-//   auto const y = numeric::decimal128{max, numeric::scale_type{10}};
-//   EXPECT_EQ(static_cast<std::string>(y), "170141183460469231731687303710000000000");
+  auto const y = numeric::decimal128{max, numeric::scale_type{10}};
+  EXPECT_EQ(static_cast<std::string>(y), "170141183460469231731687303710000000000");
 
-//   auto const z = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{10}}};
-//   EXPECT_EQ(static_cast<std::string>(z), "1701411834604692317316873037158841057270000000000");
+  auto const z = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{10}}};
+  EXPECT_EQ(static_cast<std::string>(z), "1701411834604692317316873037158841057270000000000");
 
-//   auto const a = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{40}}};
-//   EXPECT_EQ(static_cast<std::string>(a),
-//             "1701411834604692317316873037158841057270000000000000000000000000000000000000000");
+  auto const a = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{40}}};
+  EXPECT_EQ(static_cast<std::string>(a),
+            "1701411834604692317316873037158841057270000000000000000000000000000000000000000");
 
-//   auto const b = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{-20}}};
-//   EXPECT_EQ(static_cast<std::string>(b), "1701411834604692317.31687303715884105727");
+  auto const b = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{-20}}};
+  EXPECT_EQ(static_cast<std::string>(b), "1701411834604692317.31687303715884105727");
 
-//   auto const c = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{-38}}};
-//   EXPECT_EQ(static_cast<std::string>(c), "1.70141183460469231731687303715884105727");
-// }
+  auto const c = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{-38}}};
+  EXPECT_EQ(static_cast<std::string>(c), "1.70141183460469231731687303715884105727");
+}
