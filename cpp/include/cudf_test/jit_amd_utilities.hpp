@@ -53,7 +53,7 @@ namespace test {
    * 
    * @return Adapted LLVM IR, which is ready to be compiled for the AMD gfx arch of the current device.
   */
-  std::string adapt_llvmir_attributes_for_current_arch(const std::string& llvm_ir);
+  std::string adapt_llvm_ir_attributes_for_current_arch(const std::string& llvm_ir);
 
   /**
    * @brief Indicates whether hipDF was built with support for UDFs through jitify
