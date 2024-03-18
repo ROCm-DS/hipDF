@@ -1046,7 +1046,6 @@ cudf::io::table_with_metadata reader::impl::read(uint64_t skip_rows,
                                    _timestamp_type.id(),
                                    to_cudf_decimal_type(_decimal128_columns, _metadata, col.id));
       CUDF_EXPECTS(col_type != type_id::EMPTY, "Unknown type");
-      //TODO(HIP/AMD): We dont support type DECIMAL128 for now.
       if (col_type == type_id::DECIMAL32 or col_type == type_id::DECIMAL64 or
           col_type == type_id::DECIMAL128) {
         // sign of the scale is changed since cuDF follows c++ libraries like CNL
