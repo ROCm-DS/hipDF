@@ -51,30 +51,6 @@ CUDF_HOST_DEVICE inline Result linear(T lhs, T rhs, double frac)
   return static_cast<Result>(one_minus_frac * dlhs + frac * drhs);
 }
 
-// TODO(HIP/AMD): revert these specializations.
-// Type conversion/construction from floating point values to int128_t is currently not supported.
-// See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
-// compiler errors at build time.
-template <>
-CUDF_HOST_DEVICE inline __int128_t linear(__int128_t lhs, __int128_t rhs, double frac)
-{
-  CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
-                    "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
-  return 0;
-}
-
-// TODO(HIP/AMD): revert these specializations.
-// Type conversion/construction from floating point values to int128_t is currently not supported.
-// See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
-// compiler errors at build time.
-template <>
-CUDF_HOST_DEVICE inline __int128_t linear(numeric::fixed_point<__int128_t, (numeric::Radix)10> lhs, numeric::fixed_point<__int128_t, (numeric::Radix)10> rhs, double frac)
-{
-  CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
-                    "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
-  return 0;
-}
-
 template <typename Result, typename T>
 CUDF_HOST_DEVICE inline Result midpoint(T lhs, T rhs)
 {
@@ -106,26 +82,6 @@ CUDF_HOST_DEVICE inline int64_t midpoint(int64_t lhs, int64_t rhs)
   result += (half < 0 && rest != 0) ? 1 : 0;
 
   return result;
-}
-
-// TODO(HIP/AMD): revert these specializations.
-// Type conversion between floating point values and int128_t is currently not supported.
-// See issue https://github.com/AMD-AI/hipdf/issues/3. This is a workaround to prevent invalid libcall legalization 
-// compiler errors at build time.
-template <>
-CUDF_HOST_DEVICE inline __int128_t midpoint(__int128_t lhs, __int128_t rhs)
-{
-  CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
-                    "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
-  return 0;
-}
-
-template <>
-CUDF_HOST_DEVICE inline __int128_t midpoint(numeric::fixed_point<__int128_t, (numeric::Radix)10> lhs, numeric::fixed_point<__int128_t, (numeric::Radix)10> rhs)
-{
-  CUDF_EXP_ON_DEVICE("ERROR: This code path is not supported on AMD backend yet, as it would require compiler support for converting"
-                    "between __int128 and floating point values (see https://github.com/AMD-AI/hipdf/issues/3)\n");
-  return 0;
 }
 
 }  // namespace interpolate
