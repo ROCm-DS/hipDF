@@ -8,7 +8,7 @@ import cupy as cp
 import llvmlite.binding as ll
 import numpy as np
 from cuda import cudart
-from numba import roc as cuda, typeof #: HIP/AMD modification
+from numba import cuda, typeof
 from numba.core.datamodel import default_manager, models
 from numba.core.errors import TypingError
 from numba.core.extending import register_model
@@ -62,7 +62,10 @@ MASK_BITSIZE = np.dtype("int32").itemsize * 8
 precompiled: cachetools.LRUCache = cachetools.LRUCache(maxsize=32)
 launch_arg_getters: Dict[Any, Any] = {}
 
-_PTX_FILE = _get_ptx_file(os.path.dirname(__file__), "shim_")
+try: #: TODO(HIP/AMD): enable this when string udfs are available
+    _PTX_FILE = _get_ptx_file(os.path.dirname(__file__), "shim_")
+except RuntimeError:
+    _PTX_FILE = None
 
 
 @_cudf_nvtx_annotate
@@ -320,14 +323,16 @@ def _post_process_output_col(col, retty):
         return column_from_udf_string_array(col)
     return as_column(col, retty)
 
-
-# The only supported data layout in NVVM.
-# See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout
-_nvvm_data_layout = (
-    "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-"
-    "i128:128:128-f32:32:32-f64:64:64-v16:16:16-v32:32:32-"
-    "v64:64:64-v128:128:128-n16:32:64"
-)
+try:
+    from numba.hip.amdgcn import DATA_LAYOUT as _nvvm_data_layout #: if this succeeds, we assume HIP/AMD build
+except ImportError:
+    # The only supported data layout in NVVM.
+    # See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout
+    _nvvm_data_layout = (
+        "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-"
+        "i128:128:128-f32:32:32-f64:64:64-v16:16:16-v32:32:32-"
+        "v64:64:64-v128:128:128-n16:32:64"
+    )
 
 
 def _get_extensionty_size(ty):

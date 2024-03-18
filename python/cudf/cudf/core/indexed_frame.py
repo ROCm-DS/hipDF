@@ -61,12 +61,12 @@ from cudf.core.index import Index, RangeIndex, _index_from_columns
 from cudf.core.missing import NA
 from cudf.core.multiindex import MultiIndex
 from cudf.core.resample import _Resampler
-#: from cudf.core.udf.utils import ( #: TODO: HIP/AMD: reenable when udf is enabled
-#:     _compile_or_get,
-#:     _get_input_args_from_frame,
-#:     _post_process_output_col,
-#:     _return_arr_from_dtype,
-#: )
+from cudf.core.udf.utils import (
+    _compile_or_get,
+    _get_input_args_from_frame,
+    _post_process_output_col,
+    _return_arr_from_dtype,
+)
 from cudf.utils import docutils
 from cudf.utils._numba import _CUDFNumbaConfig
 from cudf.utils.utils import _cudf_nvtx_annotate, _warn_no_dask_cudf

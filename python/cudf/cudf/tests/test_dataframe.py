@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pytest
-import numba.roc as cuda #TODO(HIP): adapted for AMD
+from numba import cuda
 from packaging import version
 
 import cudf
