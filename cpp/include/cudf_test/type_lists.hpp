@@ -290,11 +290,6 @@ using ListTypes = cudf::test::Types<list_view>;
 using FixedPointTypes =
   cudf::test::Types<numeric::decimal32, numeric::decimal64, numeric::decimal128>;
 
-// TODO(HIP/AMD): Workaround for some tests not being supported with numeric::decimal128 yet.
-// See https://github.com/AMD-AI/hipdf/issues/3
-using FixedPointTypesNoInt128_t =
-  cudf::test::Types<numeric::decimal32, numeric::decimal64>;
-
 /**
  * @brief Provides a list of all fixed-width element types for use in GTest
  * typed tests.
