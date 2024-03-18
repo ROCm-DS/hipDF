@@ -188,7 +188,7 @@ void binary_operation(mutable_column_view& out,
 
   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
   jitify2::Kernel kernel; 
-  // CAUTION: We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
+  // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
   // need to use preprocessor here, as jitify2 API extension is not available with CUDA
 #if defined(__HIP_PLATFORM_AMD__) 
     kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
