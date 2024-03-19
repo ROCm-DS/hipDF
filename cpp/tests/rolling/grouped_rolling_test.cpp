@@ -137,6 +137,9 @@ const std::string ptx_func{
   }
   )***"};
 
+// LLVM IR equivalent to CUDA func, "sum" reduction
+// NOTE(HIP/AMD): be aware of the difference in signature and the way in_col is accessed:
+// On CUDA, the index into in_col is computed as start + i, with NUMBA, the index is just i.
 std::string amd_llvm_ir_func{
     R"'''(
 source_filename = "device_func.hip"

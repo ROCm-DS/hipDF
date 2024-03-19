@@ -84,6 +84,7 @@ __device__ inline void    fdsf   (
 }
 )***";
 
+  // c = a*a*a*a
   std::string amd_llvm_ir_str = 
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1) #0 {
@@ -183,6 +184,7 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
   std::string const cuda =
     "__device__ inline void f(int* output,int input){*output = input*input - input;}";
 
+  // c = a * a - a
   std::string amd_llvm_ir_str = 
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i32 %1) #0 {
@@ -274,6 +276,7 @@ __device__ inline void f(
 }
 )***";
 
+  // LLVM IR equivalent to cuda UDF
   std::string amd_llvm_ir_str = 
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i8 signext %1) #0 {
