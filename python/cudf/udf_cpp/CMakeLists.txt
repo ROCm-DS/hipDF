@@ -134,7 +134,7 @@ if(CUDA_BACKEND)
   endforeach()
 else()
   # Create the shim library for each architecture.
-  set(SHIP_HIP_FLAGS -fgpu-rdc -S -emit-llvm)
+  set(SHIM_HIP_FLAGS -fgpu-rdc -S -emit-llvm)
 
   # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
   # safely queried through a context
@@ -148,7 +148,7 @@ else()
   set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES ${CMAKE_HIP_ARCHITECTURES})
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")
-  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIP_HIP_FLAGS}>")
+  target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_HIP_FLAGS}>")
   target_link_libraries(${tgt} PUBLIC cudf::cudf)
 
   copy_ptx_to_location(${tgt} "${CMAKE_CURRENT_BINARY_DIR}/../udf" ${tgt}.ll)
