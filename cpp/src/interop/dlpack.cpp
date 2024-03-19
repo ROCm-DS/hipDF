@@ -139,10 +139,17 @@ std::unique_ptr<table> from_dlpack(DLManagedTensor const* managed_tensor,
   auto const& tensor = managed_tensor->dl_tensor;
 
   // We can copy from host or device pointers
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  CUDF_EXPECTS(tensor.device.device_type == kDLCPU || tensor.device.device_type == kDLROCM || 
+                 tensor.device.device_type == kDLROCMHost,
+               "DLTensor device type must be CPU, ROCM or ROCMHost");
+
+  #else
   CUDF_EXPECTS(tensor.device.device_type == kDLCPU || tensor.device.device_type == kDLCUDA ||
                  tensor.device.device_type == kDLCUDAHost,
                "DLTensor device type must be CPU, CUDA or CUDAHost");
 
+  #endif
   // Make sure the current device ID matches the Tensor's device ID
   if (tensor.device.device_type != kDLCPU) {
     int device_id = 0;
@@ -256,7 +263,11 @@ DLManagedTensor* to_dlpack(table_view const& input,
   }
 
   CUDF_CUDA_TRY(hipGetDevice(&tensor.device.device_id));
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  tensor.device.device_type = kDLROCM;
+  #else
   tensor.device.device_type = kDLCUDA;
+  #endif
 
   // If there is only one column, then a 1D tensor can just copy the pointer
   // to the data in the column, and the deleter should not delete the original

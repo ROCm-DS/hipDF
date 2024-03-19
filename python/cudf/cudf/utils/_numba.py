@@ -182,6 +182,43 @@ def _get_cuda_version_from_ptx_file(path):
     return cuda_ver
 
 
+# HIP implementation
+
+del _get_ptx_file
+
+
+def _get_ptx_file(path, prefix):
+    """HIP implementation.
+
+    The HIP implementation uses a single LLVM bundle
+    for all supported architectures.
+    Hence the path-prefix combination must yield
+    a unique result.
+    """
+    files = glob.glob(os.path.join(path, f"{prefix}.ll"))
+    if len(files) == 0:
+        raise RuntimeError(f"LLVM file {prefix}.ll is missing")
+    elif len(files) > 1:
+        raise RuntimeError(
+            f"More than one LLVM file found for path '{path}' and prefix '{prefix}'."
+        )
+    return files[0]
+
+del _setup_numba
+
+
+def _setup_numba():
+    """HIP implementation does nothing.
+
+    TODO:
+        Put code that delegates `numba.cuda` to
+        `numba.hip` here.
+    """
+    from numba import hip
+
+    hip.pose_as_cuda()
+
+
 class _CUDFNumbaConfig:
     def __enter__(self):
         self.enter_val = numba_config.CUDA_LOW_OCCUPANCY_WARNINGS

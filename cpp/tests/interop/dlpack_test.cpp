@@ -82,7 +82,11 @@ TEST_F(DLPackUntypedTests, EmptyColsToDlpack)
   EXPECT_EQ(0, tensor->dl_tensor.strides[1]);
   EXPECT_EQ(0, tensor->dl_tensor.shape[0]);
   EXPECT_EQ(2, tensor->dl_tensor.shape[1]);
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  EXPECT_EQ(kDLROCM, tensor->dl_tensor.device.device_type);
+  #else
   EXPECT_EQ(kDLCUDA, tensor->dl_tensor.device.device_type);
+  #endif
   auto result = cudf::from_dlpack(tensor.get());
   CUDF_TEST_EXPECT_TABLES_EQUAL(input, result->view());
 }
@@ -365,7 +369,11 @@ TYPED_TEST(DLPackNumericTests, ToDlpack1D)
 
   auto const& tensor = result->dl_tensor;
   validate_dtype<TypeParam>(tensor.dtype);
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  EXPECT_EQ(kDLROCM, tensor.device.device_type);
+  #else
   EXPECT_EQ(kDLCUDA, tensor.device.device_type);
+  #endif
   EXPECT_EQ(1, tensor.ndim);
   EXPECT_EQ(uint64_t{0}, tensor.byte_offset);
   EXPECT_EQ(nullptr, tensor.strides);
@@ -401,7 +409,11 @@ TYPED_TEST(DLPackNumericTests, ToDlpack2D)
 
   auto const& tensor = result->dl_tensor;
   validate_dtype<TypeParam>(tensor.dtype);
+  #if defined(__HIP_PLATFORM_AMD__) || defined(__HIP_PLATFORM_HCC__)
+  EXPECT_EQ(kDLROCM, tensor.device.device_type);
+  #else
   EXPECT_EQ(kDLCUDA, tensor.device.device_type);
+  #endif
   EXPECT_EQ(2, tensor.ndim);
   EXPECT_EQ(uint64_t{0}, tensor.byte_offset);
 
