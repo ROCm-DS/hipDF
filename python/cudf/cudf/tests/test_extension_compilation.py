@@ -28,7 +28,7 @@ import cupy as cp
 import numpy as np
 import pytest
 from numba import cuda, types
-from numba.hip import compile_ptx
+from numba.cuda import compile_ptx
 from numba.np.numpy_support import from_dtype
 
 from cudf import NA

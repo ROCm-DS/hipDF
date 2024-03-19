@@ -25,7 +25,7 @@
 from pickle import dumps
 
 import cachetools
-from numba import hip as cuda
+from numba import cuda
 from numba.np import numpy_support
 
 from cudf.utils._numba import _CUDFNumbaConfig
