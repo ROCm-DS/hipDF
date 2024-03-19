@@ -62,7 +62,10 @@ MASK_BITSIZE = np.dtype("int32").itemsize * 8
 precompiled: cachetools.LRUCache = cachetools.LRUCache(maxsize=32)
 launch_arg_getters: Dict[Any, Any] = {}
 
-_PTX_FILE = _get_ptx_file(os.path.dirname(__file__), "shim_")
+try: #: TODO(HIP/AMD): enable this when string udfs are available
+    _PTX_FILE = _get_ptx_file(os.path.dirname(__file__), "shim_")
+except RuntimeError:
+    _PTX_FILE = None
 
 
 @_cudf_nvtx_annotate
