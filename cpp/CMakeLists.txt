@@ -749,13 +749,6 @@ if(CUDA_BACKEND)
   target_compile_definitions(hipdf PRIVATE "RMM_USE_CUDA")
 else()
   target_compile_definitions(hipdf PRIVATE "RMM_USE_HIP")
-
-  #: Specify offload arch for CXX compiler too (hipcc/AMD clang++).
-  #: TODO(HIP/AMD): assumes that the CXX Compiler is hipcc/AMD clang++.
-  set(_offload_arch_arg "--offload-arch=${AMDGPU_TARGETS}")
-  string(REPLACE ";"  "," offload_arch_arg "${_offload_arch_arg}")
-  target_compile_options(hipcomp PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
-  target_compile_options(hipdf PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
 endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of hipdf we are building so it can compute a cal-ver cache
