@@ -5,7 +5,7 @@ import datetime
 from typing import Any, Dict
 
 import numpy as np
-from numba import hip as cuda
+from numba import cuda
 
 import cudf
 from cudf.core.buffer import acquire_spill_lock
