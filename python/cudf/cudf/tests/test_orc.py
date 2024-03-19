@@ -904,7 +904,7 @@ def test_empty_string_columns(data):
 @pytest.mark.parametrize("scale", [-3, 0, 3])
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], # TODO(HIP/AMD): re-enable when DECIMAL128 is available
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
 )
 def test_orc_writer_decimal(tmpdir, scale, decimal_type):
     np.random.seed(0)
@@ -951,22 +951,18 @@ def test_orc_reader_multi_file_multi_stripe(datadir):
     pdf = pd.read_orc(path)
     assert_eq(pdf, gdf)
 
-# TODO(HIP/AMD): We need to disable these tests due to a lack of DECIMAL128 support:
-# Python decimal values can cover a range of integers that requires storing them
-# with 128 bit. Therefore, conversion of a dataframe that contains such decimals
-# to a hipDF dataframe currently fails in libhipdf.
-# def test_orc_string_stream_offset_issue():
-#     size = 30000
-#     vals = {
-#         str(x): [decimal.Decimal(1)] * size if x != 0 else ["XYZ"] * size
-#         for x in range(0, 5)
-#     }
-#     df = cudf.DataFrame(vals)
+def test_orc_string_stream_offset_issue():
+    size = 30000
+    vals = {
+        str(x): [decimal.Decimal(1)] * size if x != 0 else ["XYZ"] * size
+        for x in range(0, 5)
+    }
+    df = cudf.DataFrame(vals)
 
-#     buffer = BytesIO()
-#     df.to_orc(buffer)
+    buffer = BytesIO()
+    df.to_orc(buffer)
 
-#     assert_eq(df, cudf.read_orc(buffer))
+    assert_eq(df, cudf.read_orc(buffer))
 
 
 # Data is generated using pyorc module
@@ -1343,98 +1339,90 @@ def dec(num):
     return decimal.Decimal(str(num))
 
 
-# TODO(HIP/AMD): We need to disable these tests due to a lack of DECIMAL128 support:
-# Python decimal values can cover a range of integers that requires storing them
-# with 128 bit. Therefore, conversion of a dataframe that contains such decimals
-# to a hipDF dataframe currently fails in libhipdf.
-# @pytest.mark.parametrize(
-#     "data",
-#     [
-#         # basic + nested strings
-#         {
-#             "lls": [[["a"], ["bb"]] * 5 for i in range(12345)],
-#             "lls2": [[["ccc", "dddd"]] * 6 for i in range(12345)],
-#             "ls_dict": [["X"] * 7 for i in range(12345)],
-#             "ls_direct": [[str(i)] * 9 for i in range(12345)],
-#             "li": [[i] * 11 for i in range(12345)],
-#             "lf": [[i * 0.5] * 13 for i in range(12345)],
-#             "ld": [[dec(i / 2)] * 15 for i in range(12345)],
-#         },
-#         # with nulls
-#         {
-#             "ls": [
-#                 [str(i) if i % 5 else None, str(2 * i)] if i % 2 else None
-#                 for i in range(12345)
-#             ],
-#             "li": [[i, i * i, i % 2] if i % 3 else None for i in range(12345)],
-#             "ld": [
-#                 [dec(i), dec(i / 2) if i % 7 else None] if i % 5 else None
-#                 for i in range(12345)
-#             ],
-#         },
-#         # with empty elements
-#         {
-#             "ls": [
-#                 [str(i), str(2 * i)] if i % 2 else [] for i in range(12345)
-#             ],
-#             "lls": [
-#                 [[str(i), str(2 * i)]] if i % 2 else [[], []]
-#                 for i in range(12345)
-#             ],
-#             "li": [[i, i * i, i % 2] if i % 3 else [] for i in range(12345)],
-#             "lli": [
-#                 [[i], [i * i], [i % 2]] if i % 3 else [[]]
-#                 for i in range(12345)
-#             ],
-#             "ld": [
-#                 [dec(i), dec(i / 2)] if i % 5 else [] for i in range(12345)
-#             ],
-#         },
-#         # variable list lengths
-#         {
-#             "ls": [[str(i)] * i for i in range(123)],
-#             "li": [[i, i * i] * i for i in range(123)],
-#             "ld": [[dec(i), dec(i / 2)] * i for i in range(123)],
-#         },
-#         # many child elements (more that max_stripe_rows)
-#         {"li": [[i] * 1100 for i in range(11000)]},
-#     ],
-# )
-# def test_orc_writer_lists(data):
-#     pdf_in = pd.DataFrame(data)
+@pytest.mark.parametrize(
+    "data",
+    [
+        # basic + nested strings
+        {
+            "lls": [[["a"], ["bb"]] * 5 for i in range(12345)],
+            "lls2": [[["ccc", "dddd"]] * 6 for i in range(12345)],
+            "ls_dict": [["X"] * 7 for i in range(12345)],
+            "ls_direct": [[str(i)] * 9 for i in range(12345)],
+            "li": [[i] * 11 for i in range(12345)],
+            "lf": [[i * 0.5] * 13 for i in range(12345)],
+            "ld": [[dec(i / 2)] * 15 for i in range(12345)],
+        },
+        # with nulls
+        {
+            "ls": [
+                [str(i) if i % 5 else None, str(2 * i)] if i % 2 else None
+                for i in range(12345)
+            ],
+            "li": [[i, i * i, i % 2] if i % 3 else None for i in range(12345)],
+            "ld": [
+                [dec(i), dec(i / 2) if i % 7 else None] if i % 5 else None
+                for i in range(12345)
+            ],
+        },
+        # with empty elements
+        {
+            "ls": [
+                [str(i), str(2 * i)] if i % 2 else [] for i in range(12345)
+            ],
+            "lls": [
+                [[str(i), str(2 * i)]] if i % 2 else [[], []]
+                for i in range(12345)
+            ],
+            "li": [[i, i * i, i % 2] if i % 3 else [] for i in range(12345)],
+            "lli": [
+                [[i], [i * i], [i % 2]] if i % 3 else [[]]
+                for i in range(12345)
+            ],
+            "ld": [
+                [dec(i), dec(i / 2)] if i % 5 else [] for i in range(12345)
+            ],
+        },
+        # variable list lengths
+        {
+            "ls": [[str(i)] * i for i in range(123)],
+            "li": [[i, i * i] * i for i in range(123)],
+            "ld": [[dec(i), dec(i / 2)] * i for i in range(123)],
+        },
+        # many child elements (more that max_stripe_rows)
+        {"li": [[i] * 1100 for i in range(11000)]},
+    ],
+)
+def test_orc_writer_lists(data):
+    pdf_in = pd.DataFrame(data)
 
-#     buffer = BytesIO()
-#     cudf.from_pandas(pdf_in).to_orc(
-#         buffer, stripe_size_rows=2048, row_index_stride=512
-#     )
+    buffer = BytesIO()
+    cudf.from_pandas(pdf_in).to_orc(
+        buffer, stripe_size_rows=2048, row_index_stride=512
+    )
 
-#     pdf_out = pd.read_orc(buffer)
-#     assert_eq(pdf_out, pdf_in)
+    pdf_out = pd.read_orc(buffer)
+    assert_eq(pdf_out, pdf_in)
 
-# TODO(HIP/AMD): We need to disable these tests due to a lack of DECIMAL128 support:
-# Python decimal values can cover a range of integers that requires storing them
-# with 128 bit. Therefore, conversion of a dataframe that contains such decimals
-# to a hipDF dataframe currently fails in libhipdf.
-# def test_chunked_orc_writer_lists():
-#     num_rows = 12345
-#     pdf_in = pd.DataFrame(
-#         {
-#             "ls": [[str(i), str(2 * i)] for i in range(num_rows)],
-#             "ld": [[dec(i / 2)] * 5 for i in range(num_rows)],
-#         }
-#     )
+def test_chunked_orc_writer_lists():
+    num_rows = 12345
+    pdf_in = pd.DataFrame(
+        {
+            "ls": [[str(i), str(2 * i)] for i in range(num_rows)],
+            "ld": [[dec(i / 2)] * 5 for i in range(num_rows)],
+        }
+    )
 
-#     gdf = cudf.from_pandas(pdf_in)
-#     expect = pd.concat([pdf_in, pdf_in]).reset_index(drop=True)
+    gdf = cudf.from_pandas(pdf_in)
+    expect = pd.concat([pdf_in, pdf_in]).reset_index(drop=True)
 
-#     buffer = BytesIO()
-#     writer = ORCWriter(buffer)
-#     writer.write_table(gdf)
-#     writer.write_table(gdf)
-#     writer.close()
+    buffer = BytesIO()
+    writer = ORCWriter(buffer)
+    writer.write_table(gdf)
+    writer.write_table(gdf)
+    writer.close()
 
-#     got = pd.read_orc(buffer)
-#     assert_eq(expect, got)
+    got = pd.read_orc(buffer)
+    assert_eq(expect, got)
 
 
 def test_writer_timestamp_stream_size(datadir, tmpdir):

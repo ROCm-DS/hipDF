@@ -10,7 +10,7 @@ import pytest
 
 import cudf
 from cudf import Series
-from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype #, Decimal128Dtype TODO(HIP): enable again when Decimal128 is available
+from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype, Decimal128Dtype
 from cudf.testing import _utils as utils
 from cudf.testing._utils import (
     NUMERIC_TYPES,
@@ -61,8 +61,7 @@ def test_sum_string():
         Decimal64Dtype(10, 6),
         Decimal64Dtype(16, 7),
         Decimal32Dtype(6, 3),
-        # TODO(HIP): enable again when Decimal128 is available
-        #Decimal128Dtype(20, 7),
+        Decimal128Dtype(20, 7),
     ],
 )
 @pytest.mark.parametrize("nelem", params_sizes)
@@ -105,8 +104,7 @@ def test_product(dtype, nelem):
         Decimal64Dtype(8, 4),
         Decimal64Dtype(10, 5),
         Decimal32Dtype(6, 2),
-        # TODO(HIP): enable again when Decimal128 is available
-        # Decimal128Dtype(20, 5),
+        Decimal128Dtype(20, 5),
     ],
 )
 def test_product_decimal(dtype):
@@ -154,8 +152,7 @@ def test_sum_of_squares(dtype, nelem):
         Decimal64Dtype(6, 2),
         Decimal64Dtype(8, 4),
         Decimal64Dtype(10, 5),
-        # TODO(HIP): enable again when Decimal128 is available
-        # Decimal128Dtype(20, 7),
+        Decimal128Dtype(20, 7),
         Decimal32Dtype(6, 2),
     ],
 )
@@ -188,8 +185,7 @@ def test_min(dtype, nelem):
         Decimal64Dtype(10, 6),
         Decimal64Dtype(16, 7),
         Decimal32Dtype(6, 3),
-        # TODO(HIP): enable again when Decimal128 is available
-        # Decimal128Dtype(20, 7),
+        Decimal128Dtype(20, 7),
     ],
 )
 @pytest.mark.parametrize("nelem", params_sizes)
@@ -222,8 +218,7 @@ def test_max(dtype, nelem):
         Decimal64Dtype(10, 6),
         Decimal64Dtype(16, 7),
         Decimal32Dtype(6, 3),
-        # TODO(HIP): enable again when Decimal128 is available
-        # Decimal128Dtype(20, 7),
+        Decimal128Dtype(20, 7),
     ],
 )
 @pytest.mark.parametrize("nelem", params_sizes)

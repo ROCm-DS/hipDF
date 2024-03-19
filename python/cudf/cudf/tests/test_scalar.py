@@ -32,8 +32,7 @@ TEST_DECIMAL_TYPES = [
     cudf.Decimal64Dtype(4, 2),
     cudf.Decimal64Dtype(4, -2),
     cudf.Decimal32Dtype(3, 1),
-    # TODO(HIP): enable again when Decimal128 is available
-    # cudf.Decimal128Dtype(28, 3),
+    cudf.Decimal128Dtype(28, 3),
 ]
 
 SCALAR_VALUES = [
@@ -159,7 +158,7 @@ def test_scalar_device_initialization(value):
 @pytest.mark.parametrize("value", DECIMAL_VALUES)
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
 )
 def test_scalar_device_initialization_decimal(value, decimal_type):
     dtype = decimal_type._from_decimal(value)
@@ -265,32 +264,31 @@ def test_scalar_dtype_and_validity(dtype):
     assert s.is_valid() is True
 
 
-# TODO(HIP): enable again when Decimal128 is available
-# @pytest.mark.parametrize(
-#     "slr,dtype,expect",
-#     [
-#         (1, cudf.Decimal64Dtype(1, 0), Decimal("1")),
-#         (Decimal(1), cudf.Decimal64Dtype(1, 0), Decimal("1")),
-#         (Decimal("1.1"), cudf.Decimal64Dtype(2, 1), Decimal("1.1")),
-#         (Decimal("1.1"), cudf.Decimal64Dtype(4, 3), Decimal("1.100")),
-#         (Decimal("41.123"), cudf.Decimal32Dtype(5, 3), Decimal("41.123")),
-#         (
-#             Decimal("41345435344353535344373628492731234.123"),
-#             cudf.Decimal128Dtype(38, 3),
-#             Decimal("41345435344353535344373628492731234.123"),
-#         ),
-#         (Decimal("1.11"), cudf.Decimal64Dtype(2, 2), pa.lib.ArrowInvalid),
-#     ],
-# )
-# def test_scalar_dtype_and_validity_decimal(slr, dtype, expect):
-#     if expect is pa.lib.ArrowInvalid:
-#         with pytest.raises(expect):
-#             cudf.Scalar(slr, dtype=dtype)
-#         return
-#     else:
-#         result = cudf.Scalar(slr, dtype=dtype)
-#         assert result.dtype == dtype
-#         assert result.is_valid
+@pytest.mark.parametrize(
+    "slr,dtype,expect",
+    [
+        (1, cudf.Decimal64Dtype(1, 0), Decimal("1")),
+        (Decimal(1), cudf.Decimal64Dtype(1, 0), Decimal("1")),
+        (Decimal("1.1"), cudf.Decimal64Dtype(2, 1), Decimal("1.1")),
+        (Decimal("1.1"), cudf.Decimal64Dtype(4, 3), Decimal("1.100")),
+        (Decimal("41.123"), cudf.Decimal32Dtype(5, 3), Decimal("41.123")),
+        (
+            Decimal("41345435344353535344373628492731234.123"),
+            cudf.Decimal128Dtype(38, 3),
+            Decimal("41345435344353535344373628492731234.123"),
+        ),
+        (Decimal("1.11"), cudf.Decimal64Dtype(2, 2), pa.lib.ArrowInvalid),
+    ],
+)
+def test_scalar_dtype_and_validity_decimal(slr, dtype, expect):
+    if expect is pa.lib.ArrowInvalid:
+        with pytest.raises(expect):
+            cudf.Scalar(slr, dtype=dtype)
+        return
+    else:
+        result = cudf.Scalar(slr, dtype=dtype)
+        assert result.dtype == dtype
+        assert result.is_valid
 
 
 @pytest.mark.parametrize(
@@ -371,7 +369,7 @@ def test_scalar_invalid_implicit_conversion(cls, dtype):
 @pytest.mark.parametrize("value", SCALAR_VALUES + DECIMAL_VALUES)
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype] #, cudf.Decimal128Dtype], TODO(HIP): enable again when Decimal128 is available
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
 )
 def test_device_scalar_direct_construction(value, decimal_type):
     value = cudf.utils.dtypes.to_cudf_compatible_scalar(value)
@@ -386,7 +384,7 @@ def test_device_scalar_direct_construction(value, decimal_type):
 
     assert s.value == value or np.isnan(s.value) and np.isnan(value)
     if isinstance(
-        dtype, (cudf.Decimal64Dtype, cudf.Decimal32Dtype) #, cudf.Decimal32Dtype) TODO(HIP): enable again when Decimal128 is available
+        dtype, (cudf.Decimal64Dtype, cudf.Decimal32Dtype, cudf.Decimal32Dtype)
     ):
         assert s.dtype.precision == dtype.precision
         assert s.dtype.scale == dtype.scale

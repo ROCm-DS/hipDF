@@ -9,7 +9,7 @@ import pytest
 import cudf as gd
 from cudf.api.types import is_categorical_dtype
 from cudf.core._compat import PANDAS_GE_150, PANDAS_LT_140
-from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype  #, Decimal128Dtype Todo(HIP): enable when decimal128 is available
+from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype, Decimal128Dtype
 from cudf.testing._utils import assert_eq, assert_exceptions_equal
 
 
@@ -1384,8 +1384,7 @@ def test_concat_single_object(ignore_index, typ):
     [
         Decimal64Dtype(3, 2),
         Decimal64Dtype(8, 4),
-        # Todo(HIP): enable when decimal128 is available
-        # gd.Decimal128Dtype(3, 2),
+        gd.Decimal128Dtype(3, 2),
         gd.Decimal32Dtype(8, 4),
     ],
 )
@@ -1416,8 +1415,7 @@ def test_concat_decimal_dataframe(ltype, rtype):
         Decimal64Dtype(4, 3),
         Decimal64Dtype(10, 4),
         Decimal32Dtype(8, 3),
-        # Todo(HIP): enable when decimal128 is available
-        #Decimal128Dtype(18, 3),
+        Decimal128Dtype(18, 3),
     ],
 )
 def test_concat_decimal_series(ltype, rtype):
@@ -1436,123 +1434,119 @@ def test_concat_decimal_series(ltype, rtype):
 @pytest.mark.parametrize(
     "df1, df2, df3, expected",
     [ 
-        # TODO(HIP): investigate why these unit tests are failing
-        # Error: RuntimeError: CUDF failure at:/build/hipdf/cpp/src/interop/from_arrow.hip:133: Unsupported type in from_arrow.
-        # 
-        # (
-        #     gd.DataFrame(
-        #         {"val": [Decimal("42.5"), Decimal("8.7")]},
-        #         dtype=Decimal64Dtype(5, 2),
-        #     ),
-        #     gd.DataFrame(
-        #         {"val": [Decimal("9.23"), Decimal("-67.49")]},
-        #         dtype=Decimal64Dtype(6, 4),
-        #     ),
-        #     gd.DataFrame({"val": [8, -5]}, dtype="int32"),
-        #     gd.DataFrame(
-        #         {
-        #             "val": [
-        #                 Decimal("42.5"),
-        #                 Decimal("8.7"),
-        #                 Decimal("9.23"),
-        #                 Decimal("-67.49"),
-        #                 Decimal("8"),
-        #                 Decimal("-5"),
-        #             ]
-        #         },
-        #         dtype=Decimal32Dtype(7, 4),
-        #         index=[0, 1, 0, 1, 0, 1],
-        #     ),
-        # ),
-        # (
-        #     gd.DataFrame(
-        #         {"val": [Decimal("95.2"), Decimal("23.4")]},
-        #         dtype=Decimal64Dtype(5, 2),
-        #     ),
-        #     gd.DataFrame({"val": [54, 509]}, dtype="uint16"),
-        #     gd.DataFrame({"val": [24, -48]}, dtype="int32"),
-        #     gd.DataFrame(
-        #         {
-        #             "val": [
-        #                 Decimal("95.2"),
-        #                 Decimal("23.4"),
-        #                 Decimal("54"),
-        #                 Decimal("509"),
-        #                 Decimal("24"),
-        #                 Decimal("-48"),
-        #             ]
-        #         },
-        #         dtype=Decimal32Dtype(5, 2),
-        #         index=[0, 1, 0, 1, 0, 1],
-        #     ),
-        # ),
-        # (
-        #     gd.DataFrame(
-        #         {"val": [Decimal("36.56"), Decimal("-59.24")]},
-        #         dtype=Decimal64Dtype(9, 4),
-        #     ),
-        #     gd.DataFrame({"val": [403.21, 45.13]}, dtype="float32"),
-        #     gd.DataFrame({"val": [52.262, -49.25]}, dtype="float64"),
-        #     gd.DataFrame(
-        #         {
-        #             "val": [
-        #                 Decimal("36.56"),
-        #                 Decimal("-59.24"),
-        #                 Decimal("403.21"),
-        #                 Decimal("45.13"),
-        #                 Decimal("52.262"),
-        #                 Decimal("-49.25"),
-        #             ]
-        #         },
-        #         dtype=Decimal32Dtype(9, 4),
-        #         index=[0, 1, 0, 1, 0, 1],
-        #     ),
-        # ),
-        # (
-        #     gd.DataFrame(
-        #         {"val": [Decimal("9563.24"), Decimal("236.633")]},
-        #         dtype=Decimal64Dtype(9, 4),
-        #     ),
-        #     gd.DataFrame({"val": [5393, -95832]}, dtype="int64"),
-        #     gd.DataFrame({"val": [-29.234, -31.945]}, dtype="float64"),
-        #     gd.DataFrame(
-        #         {
-        #             "val": [
-        #                 Decimal("9563.24"),
-        #                 Decimal("236.633"),
-        #                 Decimal("5393"),
-        #                 Decimal("-95832"),
-        #                 Decimal("-29.234"),
-        #                 Decimal("-31.945"),
-        #             ]
-        #         },
-        #         dtype=Decimal32Dtype(9, 4),
-        #         index=[0, 1, 0, 1, 0, 1],
-        #     ),
-        # ),
-        # Todo(HIP): enable when decimal128 is available
-        # (
-        #     gd.DataFrame(
-        #         {"val": [Decimal("95633.24"), Decimal("236.633")]},
-        #         dtype=Decimal128Dtype(19, 4),
-        #     ),
-        #     gd.DataFrame({"val": [5393, -95832]}, dtype="int64"),
-        #     gd.DataFrame({"val": [-29.234, -31.945]}, dtype="float64"),
-        #     gd.DataFrame(
-        #         {
-        #             "val": [
-        #                 Decimal("95633.24"),
-        #                 Decimal("236.633"),
-        #                 Decimal("5393"),
-        #                 Decimal("-95832"),
-        #                 Decimal("-29.234"),
-        #                 Decimal("-31.945"),
-        #             ]
-        #         },
-        #         dtype=Decimal128Dtype(19, 4),
-        #         index=[0, 1, 0, 1, 0, 1],
-        #     ),
-        # ),
+        (
+            gd.DataFrame(
+                {"val": [Decimal("42.5"), Decimal("8.7")]},
+                dtype=Decimal64Dtype(5, 2),
+            ),
+            gd.DataFrame(
+                {"val": [Decimal("9.23"), Decimal("-67.49")]},
+                dtype=Decimal64Dtype(6, 4),
+            ),
+            gd.DataFrame({"val": [8, -5]}, dtype="int32"),
+            gd.DataFrame(
+                {
+                    "val": [
+                        Decimal("42.5"),
+                        Decimal("8.7"),
+                        Decimal("9.23"),
+                        Decimal("-67.49"),
+                        Decimal("8"),
+                        Decimal("-5"),
+                    ]
+                },
+                dtype=Decimal32Dtype(7, 4),
+                index=[0, 1, 0, 1, 0, 1],
+            ),
+        ),
+        (
+            gd.DataFrame(
+                {"val": [Decimal("95.2"), Decimal("23.4")]},
+                dtype=Decimal64Dtype(5, 2),
+            ),
+            gd.DataFrame({"val": [54, 509]}, dtype="uint16"),
+            gd.DataFrame({"val": [24, -48]}, dtype="int32"),
+            gd.DataFrame(
+                {
+                    "val": [
+                        Decimal("95.2"),
+                        Decimal("23.4"),
+                        Decimal("54"),
+                        Decimal("509"),
+                        Decimal("24"),
+                        Decimal("-48"),
+                    ]
+                },
+                dtype=Decimal32Dtype(5, 2),
+                index=[0, 1, 0, 1, 0, 1],
+            ),
+        ),
+        (
+            gd.DataFrame(
+                {"val": [Decimal("36.56"), Decimal("-59.24")]},
+                dtype=Decimal64Dtype(9, 4),
+            ),
+            gd.DataFrame({"val": [403.21, 45.13]}, dtype="float32"),
+            gd.DataFrame({"val": [52.262, -49.25]}, dtype="float64"),
+            gd.DataFrame(
+                {
+                    "val": [
+                        Decimal("36.56"),
+                        Decimal("-59.24"),
+                        Decimal("403.21"),
+                        Decimal("45.13"),
+                        Decimal("52.262"),
+                        Decimal("-49.25"),
+                    ]
+                },
+                dtype=Decimal32Dtype(9, 4),
+                index=[0, 1, 0, 1, 0, 1],
+            ),
+        ),
+        (
+            gd.DataFrame(
+                {"val": [Decimal("9563.24"), Decimal("236.633")]},
+                dtype=Decimal64Dtype(9, 4),
+            ),
+            gd.DataFrame({"val": [5393, -95832]}, dtype="int64"),
+            gd.DataFrame({"val": [-29.234, -31.945]}, dtype="float64"),
+            gd.DataFrame(
+                {
+                    "val": [
+                        Decimal("9563.24"),
+                        Decimal("236.633"),
+                        Decimal("5393"),
+                        Decimal("-95832"),
+                        Decimal("-29.234"),
+                        Decimal("-31.945"),
+                    ]
+                },
+                dtype=Decimal32Dtype(9, 4),
+                index=[0, 1, 0, 1, 0, 1],
+            ),
+        ),
+        (
+            gd.DataFrame(
+                {"val": [Decimal("95633.24"), Decimal("236.633")]},
+                dtype=Decimal128Dtype(19, 4),
+            ),
+            gd.DataFrame({"val": [5393, -95832]}, dtype="int64"),
+            gd.DataFrame({"val": [-29.234, -31.945]}, dtype="float64"),
+            gd.DataFrame(
+                {
+                    "val": [
+                        Decimal("95633.24"),
+                        Decimal("236.633"),
+                        Decimal("5393"),
+                        Decimal("-95832"),
+                        Decimal("-29.234"),
+                        Decimal("-31.945"),
+                    ]
+                },
+                dtype=Decimal128Dtype(19, 4),
+                index=[0, 1, 0, 1, 0, 1],
+            ),
+        ),
     ],
 )
 def test_concat_decimal_numeric_dataframe(df1, df2, df3, expected):
@@ -1645,33 +1639,32 @@ def test_concat_decimal_numeric_dataframe(df1, df2, df3, expected):
                 index=[0, 1, 0, 1, 0, 1],
             ),
         ),
-        # Todo(HIP): enable when decimal128 is available
-        # (
-        #     gd.Series(
-        #         [Decimal("492.204"), Decimal("-72824.455")],
-        #         dtype=Decimal64Dtype(10, 4),
-        #     ),
-        #     gd.Series(
-        #         [Decimal("8438"), Decimal("-27462")],
-        #         dtype=Decimal32Dtype(9, 4),
-        #     ),
-        #     gd.Series(
-        #         [Decimal("-40.292"), Decimal("49202.953")],
-        #         dtype=Decimal128Dtype(19, 4),
-        #     ),
-        #     gd.Series(
-        #         [
-        #             Decimal("492.204"),
-        #             Decimal("-72824.455"),
-        #             Decimal("8438"),
-        #             Decimal("-27462"),
-        #             Decimal("-40.292"),
-        #             Decimal("49202.953"),
-        #         ],
-        #         dtype=Decimal128Dtype(19, 4),
-        #         index=[0, 1, 0, 1, 0, 1],
-        #     ),
-        # ),
+        (
+            gd.Series(
+                [Decimal("492.204"), Decimal("-72824.455")],
+                dtype=Decimal64Dtype(10, 4),
+            ),
+            gd.Series(
+                [Decimal("8438"), Decimal("-27462")],
+                dtype=Decimal32Dtype(9, 4),
+            ),
+            gd.Series(
+                [Decimal("-40.292"), Decimal("49202.953")],
+                dtype=Decimal128Dtype(19, 4),
+            ),
+            gd.Series(
+                [
+                    Decimal("492.204"),
+                    Decimal("-72824.455"),
+                    Decimal("8438"),
+                    Decimal("-27462"),
+                    Decimal("-40.292"),
+                    Decimal("49202.953"),
+                ],
+                dtype=Decimal128Dtype(19, 4),
+                index=[0, 1, 0, 1, 0, 1],
+            ),
+        ),
     ],
 )
 def test_concat_decimal_numeric_series(s1, s2, s3, expected):

@@ -82,8 +82,7 @@ from cudf.api import types
         (cudf.CategoricalDtype, True),
         (cudf.ListDtype, False),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, False),
+        (cudf.Decimal128Dtype, False),
         (cudf.Decimal64Dtype, False),
         (cudf.Decimal32Dtype, False),
         (cudf.IntervalDtype, False),
@@ -91,8 +90,7 @@ from cudf.api import types
         (cudf.CategoricalDtype("a"), True),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),  
+        (cudf.Decimal128Dtype(5, 2), False),  
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
@@ -104,8 +102,7 @@ from cudf.api import types
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), True),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         # TODO: Currently creating an empty Series of list type ignores the
@@ -194,8 +191,7 @@ def test_is_categorical_dtype(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, False),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, True),
+        (cudf.Decimal128Dtype, True),
         (cudf.Decimal64Dtype, True),
         (cudf.Decimal32Dtype, True),
         (cudf.IntervalDtype, False),
@@ -203,8 +199,7 @@ def test_is_categorical_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), True),
+        (cudf.Decimal128Dtype(5, 2), True),
         (cudf.Decimal64Dtype(5, 2), True),
         (cudf.Decimal32Dtype(5, 2), True),
         (cudf.IntervalDtype(int), False),
@@ -216,8 +211,7 @@ def test_is_categorical_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), True),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), True),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), True),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), True),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
@@ -302,8 +296,7 @@ def test_is_numeric_dtype(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, False),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, False),
+        (cudf.Decimal128Dtype, False),
         (cudf.Decimal64Dtype, False),
         (cudf.Decimal32Dtype, False),
         (cudf.IntervalDtype, False),
@@ -311,8 +304,7 @@ def test_is_numeric_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
@@ -324,8 +316,7 @@ def test_is_numeric_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
@@ -410,8 +401,7 @@ def test_is_integer_dtype(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, False),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, False),
+        (cudf.Decimal128Dtype, False),
         (cudf.Decimal64Dtype, False),
         (cudf.Decimal32Dtype, False),
         (cudf.IntervalDtype, False),
@@ -419,8 +409,7 @@ def test_is_integer_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
@@ -432,8 +421,7 @@ def test_is_integer_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
@@ -519,8 +507,7 @@ def test_is_integer(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, False),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, False),
+        (cudf.Decimal128Dtype, False),
         (cudf.Decimal64Dtype, False),
         (cudf.Decimal32Dtype, False),
         (cudf.IntervalDtype, False),
@@ -528,8 +515,7 @@ def test_is_integer(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
@@ -541,8 +527,7 @@ def test_is_integer(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
@@ -635,8 +620,7 @@ def test_is_string_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
@@ -648,8 +632,7 @@ def test_is_string_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), True),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
@@ -734,8 +717,7 @@ def test_is_datetime_dtype(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, True),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, False),
+        (cudf.Decimal128Dtype, False),
         (cudf.Decimal64Dtype, False),
         (cudf.Decimal32Dtype, False),
         (cudf.IntervalDtype, False),
@@ -743,8 +725,7 @@ def test_is_datetime_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), True),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
@@ -756,8 +737,7 @@ def test_is_datetime_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         (cudf.Series([[1, 2], [3, 4, 5]]), True),
@@ -842,8 +822,7 @@ def test_is_list_dtype(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, False),
         (cudf.StructDtype, True),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, False),
+        (cudf.Decimal128Dtype, False),
         (cudf.Decimal64Dtype, False),
         (cudf.Decimal32Dtype, False),
         # (cudf.IntervalDtype, False),
@@ -851,8 +830,7 @@ def test_is_list_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), True),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), False),
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         # (cudf.IntervalDtype(int), False),
@@ -864,8 +842,7 @@ def test_is_list_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), False),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), False),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
@@ -953,8 +930,7 @@ def test_is_struct_dtype(obj, expect):
         (cudf.CategoricalDtype, False),
         (cudf.ListDtype, False),
         (cudf.StructDtype, False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype, True),
+        (cudf.Decimal128Dtype, True),
         (cudf.Decimal64Dtype, True),
         (cudf.Decimal32Dtype, True),
         (cudf.IntervalDtype, False),
@@ -962,8 +938,7 @@ def test_is_struct_dtype(obj, expect):
         (cudf.CategoricalDtype("a"), False),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Decimal128Dtype(5, 2), True),
+        (cudf.Decimal128Dtype(5, 2), True),
         (cudf.Decimal64Dtype(5, 2), True),
         (cudf.Decimal32Dtype(5, 2), True),
         (cudf.IntervalDtype(int), False),
@@ -975,8 +950,7 @@ def test_is_struct_dtype(obj, expect):
         (cudf.Series(dtype="datetime64[s]"), False),
         (cudf.Series(dtype="timedelta64[s]"), False),
         (cudf.Series(dtype="category"), False),
-        # TODO(HIP): add when decimal128 is available
-        #(cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), True),
+        (cudf.Series(dtype=cudf.Decimal128Dtype(5, 2)), True),
         (cudf.Series(dtype=cudf.Decimal64Dtype(5, 2)), True),
         (cudf.Series(dtype=cudf.Decimal32Dtype(5, 2)), True),
         (cudf.Series([[1, 2], [3, 4, 5]]), False),
