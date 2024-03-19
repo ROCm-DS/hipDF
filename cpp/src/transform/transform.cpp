@@ -23,9 +23,9 @@
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
-#if 0 //: TODO(HIP/AMD): 'jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp' file not found
-#include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
-#endif //: TODO(HIP/AMD): 'jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp' file not found
+#ifdef HIPDF_ENABLE_UDF_WITH_JITIFY
+#include <jit_preprocessed_files/transform/jit/kernel.hip.jit.hpp>
+#endif
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
@@ -44,28 +44,61 @@ void unary_operation(mutable_column_view output,
                      bool is_ptx,
                      rmm::cuda_stream_view stream)
 {
+#ifndef HIPDF_ENABLE_UDF_WITH_JITIFY
+  CUDF_FAIL("UDF support with Jitify has not been enabled at build time (option HIPDF_ENABLE_UDF_WITH_JITIFY). It requires an internal patched hipRTC on AMD backend\n");
+#else
   std::string kernel_name =
     jitify2::reflection::Template("cudf::transformation::jit::kernel")  //
-      .instantiate(cudf::type_to_name(output.type()),  // list of template arguments
-                   cudf::type_to_name(input.type()));
+      .instantiate(cudf::type_to_jitsafe_name(output.type()),  // list of template arguments
+                   cudf::type_to_jitsafe_name(input.type()));
 
-  std::string cuda_source =
-    is_ptx ? cudf::jit::parse_single_function_ptx(udf,  //
-                                                  "GENERIC_UNARY_OP",
-                                                  cudf::type_to_name(output_type),
-                                                  {0})
-           : cudf::jit::parse_single_function_cuda(udf,  //
+  std::string cuda_source; 
+  std::string parsed_udf_llvm_ir;
+  
+  if(is_ptx && HIP_PLATFORM_AMD) {
+    cuda_source = "extern \"C\" __device__ void GENERIC_UNARY_OP(" 
+                + cudf::type_to_jitsafe_name(output.type()) +"*"
+                + ","
+                + cudf::type_to_jitsafe_name(input.type())
+                + ");";
+    parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_UNARY_OP");
+  }
+  else if(is_ptx && !HIP_PLATFORM_AMD) {
+    cuda_source = cudf::jit::parse_single_function_ptx(udf,  //
+                                          "GENERIC_UNARY_OP",
+                                          cudf::type_to_name(output_type),
+                                          {0});
+  }
+  else { 
+    cuda_source = cudf::jit::parse_single_function_cuda(udf,  //
                                                    "GENERIC_UNARY_OP");
+  }
 
-  #if 0 //: TODO(HIP/AMD): knock-on: use of undeclared identifier 'transform_jit_kernel_cu_jit'
-  cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
-    .get_kernel(
-      kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {"-arch=sm_."})  //
-    ->configure_1d_max_occupancy(0, 0, 0, stream.value())                                   //
-    ->launch(output.size(),                                                                 //
-             cudf::jit::get_data_ptr(output),
-             cudf::jit::get_data_ptr(input));
-  #endif //: TODO(HIP/AMD): knock-on: use of undeclared identifier 'transform_jit_kernel_cu_jit'
+  std::string architecture_string = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
+  jitify2::Kernel kernel;   
+
+  if(is_ptx) {
+    if constexpr(HIP_PLATFORM_AMD) {
+      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_hip_jit)
+        .get_kernel(
+          kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir); 
+    }
+    else {
+      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_hip_jit)
+        .get_kernel(
+          kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
+    }
+  }
+  else {
+    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_hip_jit)
+      .get_kernel(
+        kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}); 
+  }
+  kernel->configure_1d_max_occupancy(0, 0, 0, stream.value())                                   //
+        ->launch(output.size(),                                                                 //
+              cudf::jit::get_data_ptr(output),
+              cudf::jit::get_data_ptr(input));    
+#endif // HIPDF_ENABLE_UDF_WITH_JITIFY
 }
 
 }  // namespace jit

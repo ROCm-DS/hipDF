@@ -1485,9 +1485,7 @@ TEST_F(OrcReaderTest, NestedColumnSelection)
 TEST_F(OrcReaderTest, DecimalOptions)
 {
 
-#ifdef __HIP_PLATFORM_AMD__
-  GTEST_SKIP() << "Support for DECIMAL128 is required";
-#endif
+  if constexpr(cudf::HIP_PLATFORM_AMD)  GTEST_SKIP() << "Support for DECIMAL128 is required";
 
   constexpr auto num_rows = 10;
   auto col_vals           = random_values<int64_t>(num_rows);
@@ -1518,9 +1516,7 @@ TEST_F(OrcReaderTest, DecimalOptions)
 TEST_F(OrcWriterTest, DecimalOptionsNested)
 {
 
-#ifdef __HIP_PLATFORM_AMD__
-  GTEST_SKIP() << "Support for DECIMAL128 is required";
-#endif
+  if constexpr(cudf::HIP_PLATFORM_AMD) GTEST_SKIP() << "Support for DECIMAL128 is required";
 
   auto const num_rows = 100;
 

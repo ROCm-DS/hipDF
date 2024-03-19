@@ -100,7 +100,8 @@ def transform(Column input, op):
 
     nb_type = numpy_support.from_dtype(input.dtype)
     nb_signature = (nb_type,)
-    compiled_op = cudautils.compile_udf(op, nb_signature)
+    # TODO(HIP/AMD): hardcoding this name because the hipdf backend will search for it to identify the UDF in the code
+    compiled_op = cudautils.compile_udf(op, nb_signature, name="udf_funcname_from_numba_to_be_replaced_in_libhipdf")
     c_str = compiled_op[0].encode('UTF-8')
     np_dtype = cudf.dtype(compiled_op[1])
 

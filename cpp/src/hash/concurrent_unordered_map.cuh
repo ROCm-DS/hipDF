@@ -24,6 +24,7 @@
 #include <cudf/hashing/detail/default_hash.cuh>
 #include <cudf/utilities/default_stream.hpp>
 #include <cudf/utilities/error.hpp>
+#include <cudf/types.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
 
@@ -547,12 +548,10 @@ class concurrent_unordered_map {
       // we have to expect hipErrorInvalidValue if we pass an unregistered host pointer or 
       // the nullptr to hipPointerGetAttributes.
       // In this case, we can safely ignore the error.
-#ifdef __HIP_PLATFORM_AMD__
-      if (status == hipErrorInvalidValue && m_hashtbl_values == nullptr) {
+      if (cudf::HIP_PLATFORM_AMD && status == hipErrorInvalidValue && m_hashtbl_values == nullptr) {
         // error is normal for non-device memory -- clear the error 
         static_cast<void>(hipGetLastError());
       }
-#endif
       if (hipSuccess == status && isPtrManaged(hashtbl_values_ptr_attributes)) {
         int dev_id = 0;
         CUDF_CUDA_TRY(hipGetDevice(&dev_id));

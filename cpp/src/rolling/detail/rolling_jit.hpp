@@ -23,7 +23,7 @@ namespace cudf {
 namespace detail {
 
 template <class T>
-T minimum(T a, T b)
+__device__ T minimum(T a, T b)
 {
   return b < a ? b : a;
 }
@@ -33,7 +33,7 @@ struct preceding_window_wrapper {
   cudf::size_type const* d_group_labels;
   cudf::size_type preceding_window;
 
-  cudf::size_type operator[](cudf::size_type idx)
+  __device__ cudf::size_type operator[](cudf::size_type idx)
   {
     auto group_label = d_group_labels[idx];
     auto group_start = d_group_offsets[group_label];
@@ -46,7 +46,7 @@ struct following_window_wrapper {
   cudf::size_type const* d_group_labels;
   cudf::size_type following_window;
 
-  cudf::size_type operator[](cudf::size_type idx)
+  __device__ cudf::size_type operator[](cudf::size_type idx)
   {
     auto group_label = d_group_labels[idx];
     auto group_end =

@@ -22,31 +22,22 @@ _CUDA_JIT128INT_SUPPORTED = (_driver_version >= 11050) and (
 @pytest.mark.parametrize(
     "dtype", sorted(list(dtypeutils.NUMERIC_TYPES - {"int8"}))
 )
-def test_generic_ptx(dtype):
+def test_generic_unary_op(dtype):
 
     size = 500
 
     lhs_arr = np.random.random(size).astype(dtype)
     lhs_col = Series(lhs_arr)._column
 
-    rhs_arr = np.random.random(size).astype(dtype)
-    rhs_col = Series(rhs_arr)._column
 
-    def generic_function(a, b):
-        return a**3 + b
+    def generic_function(a):
+        return a**3
 
     nb_type = numpy_support.from_dtype(cudf.dtype(dtype))
     type_signature = (nb_type, nb_type)
 
-    # TODO(HIP/AMD): hardcoding this name because the hipdf backend will search for it to identify the UDF in the code
-    ptx_code, output_type = compile_ptx(
-        generic_function, type_signature, device=True, name="udf_funcname_from_numba_to_be_replaced_in_libhipdf"
-    )
+    out_col = libcudf.transform.transform(lhs_col, generic_function)
 
-    dtype = numpy_support.as_dtype(output_type).type
-
-    out_col = libcudf.binaryop.binaryop_udf(lhs_col, rhs_col, ptx_code, dtype)
-
-    result = lhs_arr**3 + rhs_arr
+    result = lhs_arr**3
 
     np.testing.assert_almost_equal(result, out_col.values_host)
