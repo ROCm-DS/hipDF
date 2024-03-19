@@ -320,7 +320,7 @@ fi
 
 if buildAll || hasArg libcudf || hasArg pylibcudf || hasArg cudf || hasArg cudfjar; then
     if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
-        CUDF_CMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES:-gfx90a}" #TODO(HIP): native not working with rapids-cmake port of HIP
+        CUDF_CMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}"
         if [[ "$CUDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
             echo "Building for the architecture of the GPU in the system..."
         else
@@ -345,7 +345,6 @@ if buildAll || hasArg libcudf; then
           -DCMAKE_CXX_COMPILER=hipcc \
           -DCMAKE_C_COMPILER=hipcc \
           -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
-	  -DAMDGPU_TARGETS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
           -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \

@@ -35,7 +35,6 @@
 # SOFTWARE.
 
 cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
-set( AMDGPU_TARGETS "gfx90a" CACHE STRING "Compile for gfx90a only")
 include(../fetch_rapids.cmake)
 #include(../rapids_config.cmake) #TODO(HIP/AMD): is this the same file as fetch_rapids.cmake?
 include(rapids-cmake)
@@ -61,6 +60,11 @@ project(
 )
 
 if(CUDA_BACKEND)
+  project(
+    CUDF 
+    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+    LANGUAGES C CXX CUDA
+  )
   enable_language(CUDA)
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
     message(
@@ -71,7 +75,15 @@ if(CUDA_BACKEND)
 
   option(USE_NVTX "Build with NVTX support" ON)
 else()
+  project(
+    CUDF 
+    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+    LANGUAGES C CXX HIP
+  )
   enable_language(HIP)
+  # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
+  # This ensures that those packages are compiled with the same architecture flags.
+  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 endif()
 
 rapids_cmake_write_version_file(include/cudf/version_config.hpp)
