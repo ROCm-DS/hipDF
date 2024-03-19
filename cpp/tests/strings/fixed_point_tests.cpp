@@ -315,7 +315,6 @@ TEST_F(StringsConvertTest, IsFixedPoint)
     {true, true, true, false, false, false, false, false, false, false});
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64_scaled);
 }
-// TODO(HIP/AMD): Enable once we have support for decimal 128 type
 #ifdef NDEBUG
 TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
 #else
