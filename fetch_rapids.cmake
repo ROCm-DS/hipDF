@@ -13,7 +13,7 @@
 # =============================================================================
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/HIPDF_RAPIDS.cmake)
   # TODO(HIP/AMD): This rapids-cmake version uses a patched hipCo version which works around https://ontrack-internal.amd.com/browse/SWDEV-436805 & issue https://github.com/AMD-AI/hipdf/issues/72
-  file(DOWNLOAD https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@raw.githubusercontent.com/AMD-AI/rapids-cmake/hipdf-dev-parquet-patches/RAPIDS.cmake
+  file(DOWNLOAD https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@raw.githubusercontent.com/AMD-AI/rapids-cmake/hipdf-dev-rocm-6.0/RAPIDS.cmake
 	  ${CMAKE_CURRENT_BINARY_DIR}/HIPDF_RAPIDS.cmake
   )
 endif()
