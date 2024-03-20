@@ -177,7 +177,16 @@ CUDF_HOST_DEVICE inline constexpr T right_shift(T const& val, scale_type const& 
 template <typename Rep, Radix Rad, typename T>
 CUDF_HOST_DEVICE inline constexpr T left_shift(T const& val, scale_type const& scale)
 {
-  return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
+  if constexpr(cuda::std::is_same_v<T,__int128_t>) {
+    if(val == cuda::std::numeric_limits<__int128_t>::max()) {
+      return val;
+    } else {
+      return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
+    }
+  }
+  else  {
+     return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
+  }
 }
 
 /** @brief Function that performs a `right` or `left shift`
@@ -194,7 +203,7 @@ CUDF_HOST_DEVICE inline constexpr T left_shift(T const& val, scale_type const& s
  * @return Shifted value of type T
  */
 template <typename Rep, Radix Rad, typename T>
-CUDF_HOST_DEVICE inline constexpr T shift(T const& val, scale_type const& scale)
+CUDF_HOST_DEVICE inline /*constexpr*/ T shift(T const& val, scale_type const& scale)
 {
   if (scale == 0) { return val; }
   if (scale > 0) { return right_shift<Rep, Rad>(val, scale); }
