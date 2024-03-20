@@ -240,7 +240,7 @@ class Row(Record):
 register_model(Row)(models.RecordModel)
 
 
-# @cuda.jit(device=True) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+@cuda.jit(device=True)
 def _mask_get(mask, pos):
     """Return the validity of mask[pos] as a word."""
     return (mask[pos // MASK_BITSIZE] >> (pos % MASK_BITSIZE)) & 1
