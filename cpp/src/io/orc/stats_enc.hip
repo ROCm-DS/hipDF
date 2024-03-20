@@ -108,14 +108,14 @@ __global__ void __launch_bounds__(block_size, 1)
         case dtype_decimal64:
         case dtype_decimal128: 
         {
-          // TODO(HIP/AMD): Enable when we have support for 128 type
-          // auto const scale    = groups[idx].col_dtype.scale();
-          // auto const min_size = fixed_point_string_size(chunks[idx].min_value.d128_val, scale);
-          // auto const max_size = fixed_point_string_size(chunks[idx].max_value.d128_val, scale);
-          // auto const sum_size = fixed_point_string_size(chunks[idx].sum.d128_val, scale);
-          // // common + total field length + encoded string lengths + strings
-          // stats_len = pb_fldlen_common + pb_fld_hdrlen32 + 3 * (pb_fld_hdrlen + pb_fld_hdrlen32) +
-          //             min_size + max_size + sum_size;
+
+          auto const scale    = groups[idx].col_dtype.scale();
+          auto const min_size = fixed_point_string_size(chunks[idx].min_value.d128_val, scale);
+          auto const max_size = fixed_point_string_size(chunks[idx].max_value.d128_val, scale);
+          auto const sum_size = fixed_point_string_size(chunks[idx].sum.d128_val, scale);
+          // common + total field length + encoded string lengths + strings
+          stats_len = pb_fldlen_common + pb_fld_hdrlen32 + 3 * (pb_fld_hdrlen + pb_fld_hdrlen32) +
+                      min_size + max_size + sum_size;
         } break;
         case dtype_string:
           stats_len = pb_fldlen_common + pb_fld_hdrlen32 + 3 * (pb_fld_hdrlen + pb_fld_hdrlen32) +
@@ -359,35 +359,35 @@ __global__ void __launch_bounds__(encode_threads_per_block)
         //  optional string maximum = 2;
         //  optional string sum = 3;
         // }
-        // // TODO(HIP/AMD): Enable when we have support for 128 int type
-        // if (s->chunk.has_minmax or s->chunk.has_sum) {
-        //   auto const scale = s->group.col_dtype.scale();
+        
+        if (s->chunk.has_minmax or s->chunk.has_sum) {
+          auto const scale = s->group.col_dtype.scale();
 
-        //   uint32_t sz = 0;
-        //   auto const min_size =
-        //     s->chunk.has_minmax ? fixed_point_string_size(s->chunk.min_value.d128_val, scale) : 0;
-        //   auto const max_size =
-        //     s->chunk.has_minmax ? fixed_point_string_size(s->chunk.max_value.d128_val, scale) : 0;
-        //   if (s->chunk.has_minmax) {
-        //     // encoded string lengths, plus the strings
-        //     sz += (pb_put_uint(cur, 1, min_size) - cur) + min_size +
-        //           (pb_put_uint(cur, 1, max_size) - cur) + max_size;
-        //   }
-        //   auto const sum_size =
-        //     s->chunk.has_sum ? fixed_point_string_size(s->chunk.sum.d128_val, scale) : 0;
-        //   if (s->chunk.has_sum) { sz += (pb_put_uint(cur, 1, sum_size) - cur) + sum_size; }
+          uint32_t sz = 0;
+          auto const min_size =
+            s->chunk.has_minmax ? fixed_point_string_size(s->chunk.min_value.d128_val, scale) : 0;
+          auto const max_size =
+            s->chunk.has_minmax ? fixed_point_string_size(s->chunk.max_value.d128_val, scale) : 0;
+          if (s->chunk.has_minmax) {
+            // encoded string lengths, plus the strings
+            sz += (pb_put_uint(cur, 1, min_size) - cur) + min_size +
+                  (pb_put_uint(cur, 1, max_size) - cur) + max_size;
+          }
+          auto const sum_size =
+            s->chunk.has_sum ? fixed_point_string_size(s->chunk.sum.d128_val, scale) : 0;
+          if (s->chunk.has_sum) { sz += (pb_put_uint(cur, 1, sum_size) - cur) + sum_size; }
 
-        //   cur[0] = 6 * 8 + ProtofType::FIXEDLEN;
-        //   cur    = pb_encode_uint(cur + 1, sz);
+          cur[0] = 6 * 8 + ProtofType::FIXEDLEN;
+          cur    = pb_encode_uint(cur + 1, sz);
 
-        //   if (s->chunk.has_minmax) {
-        //     cur = pb_put_decimal(cur, 1, s->chunk.min_value.d128_val, scale, min_size);  //  minimum
-        //     cur = pb_put_decimal(cur, 2, s->chunk.max_value.d128_val, scale, max_size);  // maximum
-        //   }
-        //   if (s->chunk.has_sum) {
-        //     cur = pb_put_decimal(cur, 3, s->chunk.sum.d128_val, scale, sum_size);  // sum
-        //   }
-        // }
+          if (s->chunk.has_minmax) {
+            cur = pb_put_decimal(cur, 1, s->chunk.min_value.d128_val, scale, min_size);  //  minimum
+            cur = pb_put_decimal(cur, 2, s->chunk.max_value.d128_val, scale, max_size);  // maximum
+          }
+          if (s->chunk.has_sum) {
+            cur = pb_put_decimal(cur, 3, s->chunk.sum.d128_val, scale, sum_size);  // sum
+          }
+        }
         break;
       case dtype_date32:
         // dateStatistics = 7
@@ -445,7 +445,7 @@ void orc_init_statistics_groups(statistics_group* groups,
   dim3 dim_grid((rowgroup_bounds.size().first + init_groups_per_block - 1) / init_groups_per_block,
                 rowgroup_bounds.size().second);
   dim3 dim_block(init_threads_per_group, init_groups_per_block);
-  gpu_init_statistics_groups<<<dim_grid, dim_block, 0, stream.value()>>>(
+  gpu_init_statistics_groups<<<dim_grid, dim_block, init_groups_per_block*sizeof(statistics_group), stream.value()>>>(
     groups, cols, rowgroup_bounds);
 }
 
