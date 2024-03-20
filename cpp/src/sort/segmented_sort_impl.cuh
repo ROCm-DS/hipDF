@@ -50,7 +50,7 @@ struct column_fast_sort_fn {
   {
     return !col.has_nulls() and
            (cudf::is_integral(col.type()) ||
-            (cudf::is_fixed_point(col.type()))); // FIXME(HIP): add  "and (col.type().id() != type_id::DECIMAL128)))" when supported;
+            (cudf::is_fixed_point(col.type()) and (col.type().id() != type_id::DECIMAL128)));
   }
 
   /**
