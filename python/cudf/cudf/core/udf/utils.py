@@ -62,10 +62,7 @@ MASK_BITSIZE = np.dtype("int32").itemsize * 8
 precompiled: cachetools.LRUCache = cachetools.LRUCache(maxsize=32)
 launch_arg_getters: Dict[Any, Any] = {}
 
-try: #: TODO(HIP/AMD): enable this when string udfs are available
-    _PTX_FILE = _get_ptx_file(os.path.dirname(__file__), "shim_")
-except RuntimeError:
-    _PTX_FILE = None
+_PTX_FILE = _get_ptx_file(os.path.dirname(__file__), "shim_")
 
 
 @_cudf_nvtx_annotate
@@ -206,7 +203,7 @@ class Row(Record):
 register_model(Row)(models.RecordModel)
 
 
-# @cuda.jit(device=True) #: TODO: HIP/AMD: reenable when cuda.jit is enabled
+@cuda.jit(device=True)
 def _mask_get(mask, pos):
     """Return the validity of mask[pos] as a word."""
     return (mask[pos // MASK_BITSIZE] >> (pos % MASK_BITSIZE)) & 1

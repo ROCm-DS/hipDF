@@ -15,7 +15,6 @@ from cudf._lib.strings_udf import (
     column_from_udf_string_array,
     column_to_string_view_array,
 )
-
 from cudf.core.udf.strings_typing import (
     str_view_arg_handler,
     string_view,
@@ -23,7 +22,6 @@ from cudf.core.udf.strings_typing import (
 )
 # TODO(HIP): support this import
 from cudf.core.udf.utils import _PTX_FILE, _get_extensionty_size
-
 from cudf.testing._utils import assert_eq, sv_to_udf_str
 from cudf.utils._numba import _CUDFNumbaConfig
 
