@@ -81,7 +81,7 @@ def _get_ptx_file(path, prefix):
         file_name = os.path.basename(f)
         sm_number = file_name.rstrip(".ptx").lstrip(prefix)
         if sm_number.endswith("a"):
-            processed_sm_number = int(sm_number.strip("gfx").rstrip("a"))
+            processed_sm_number = int(sm_number.rstrip("a"))
             if processed_sm_number == cc:
                 return f
         else:
