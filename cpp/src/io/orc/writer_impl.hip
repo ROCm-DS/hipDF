@@ -1685,7 +1685,6 @@ pushdown_null_masks init_pushdown_null_masks(orc_table_view& orc_table,
      ptrs = device_span<bitmask_type const* const>{d_mask_ptrs}] __device__(auto& idx) {
       cols[idx].pushdown_mask = ptrs[idx];
     });
-
   return {std::move(pd_masks), std::move(mask_ptrs)};
 }
 

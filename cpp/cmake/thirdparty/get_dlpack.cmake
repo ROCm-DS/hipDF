@@ -36,6 +36,7 @@ function(find_and_configure_dlpack VERSION)
   endif()
 endfunction()
 
-set(CUDF_MIN_VERSION_dlpack 0.5)
+#: set(CUDF_MIN_VERSION_dlpack 0.5)
+set(CUDF_MIN_VERSION_dlpack 0.6) #: HIP/AMD: need v0.6 to have kDLROCMHost
 
 find_and_configure_dlpack(${CUDF_MIN_VERSION_dlpack})

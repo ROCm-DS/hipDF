@@ -9,14 +9,6 @@ from cudf.utils.gpu_utils import validate_setup
 _setup_numba()
 validate_setup()
 
-try:
-    # TODO(HIP/AMD): We need to investigate the above numba setup and validation and then potentially comment it or move this import before it.
-    from numba import hip
-    hip.pose_as_cuda()
-    del hip
-except ImportError:
-    pass
-
 import cupy
 from numba import config as numba_config, cuda
 

@@ -1,5 +1,7 @@
 # Copyright (c) 2018-2023, NVIDIA CORPORATION.
 
+# Modifications Copyright (C) 2023-2024 Advanced Micro Devices, Inc. All rights reserved.
+
 from __future__ import annotations
 
 import functools
@@ -31,10 +33,14 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 #: from nvtx import annotate #: TODO: HIP/AMD use roctx
-def annotate(*args,**kwargs):
-    def inner(func):
+import contextlib
+class annotate(contextlib.nullcontext):
+     def __init__(self, *args, **kwargs):
+         super().__init__()
+
+     def __call__(self, func):
         return func
-    return inner
+
 from packaging.version import Version
 from pandas._config import get_option
 from pandas.core.dtypes.common import is_float, is_integer
