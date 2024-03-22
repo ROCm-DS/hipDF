@@ -384,7 +384,7 @@ def test_device_scalar_direct_construction(value, decimal_type):
 
     assert s.value == value or np.isnan(s.value) and np.isnan(value)
     if isinstance(
-        dtype, (cudf.Decimal64Dtype, cudf.Decimal32Dtype, cudf.Decimal32Dtype)
+        dtype, (cudf.Decimal64Dtype, cudf.Decimal128Dtype, cudf.Decimal32Dtype)
     ):
         assert s.dtype.precision == dtype.precision
         assert s.dtype.scale == dtype.scale
