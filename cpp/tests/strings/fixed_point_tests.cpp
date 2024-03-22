@@ -288,11 +288,13 @@ TEST_F(StringsConvertTest, IsFixedPoint)
     {true, true, true, true, true, false, false, false, false, false});
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64);
 
+#ifdef HIPDF_ENABLE_DECIMAL128
   results                = cudf::strings::is_fixed_point(cudf::strings_column_view(big_numbers),
                                           cudf::data_type{cudf::type_id::DECIMAL128});
   auto const expected128 = cudf::test::fixed_width_column_wrapper<bool>(
     {true, true, true, true, true, true, true, false, true, false});
-  CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected128);
+  s(*results, expected128);
+#endif
 
   results = cudf::strings::is_fixed_point(
     cudf::strings_column_view(big_numbers),
@@ -315,6 +317,8 @@ TEST_F(StringsConvertTest, IsFixedPoint)
     {true, true, true, false, false, false, false, false, false, false});
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64_scaled);
 }
+
+#ifdef HIPDF_ENABLE_DECIMAL128
 #ifdef NDEBUG
 TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
 #else
@@ -342,3 +346,4 @@ TEST_F(StringsConvertTest, DISABLED_FixedPointStringConversionOperator)
   auto const c = numeric::decimal128{numeric::scaled_integer{max, numeric::scale_type{-38}}};
   EXPECT_EQ(static_cast<std::string>(c), "1.70141183460469231731687303715884105727");
 }
+#endif

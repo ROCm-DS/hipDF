@@ -1855,6 +1855,7 @@ TYPED_TEST(FixedPointTestAllReps, FixedPointReductionNthElement)
   }
 }
 
+#ifdef HIPDF_ENABLE_DECIMAL128
 struct Decimal128Only : public cudf::test::BaseFixture {};
 TEST_F(Decimal128Only, Decimal128ProductReduction)
 {
@@ -1917,7 +1918,9 @@ TEST_F(Decimal128Only, Decimal128ProductReduction2)
     EXPECT_EQ(init_result_scalar->fixed_point_value(), init_expected);
   }
 }
+#endif
 
+#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(Decimal128Only, Decimal128ProductReduction3)
 {
   using namespace numeric;
@@ -1946,6 +1949,7 @@ TEST_F(Decimal128Only, Decimal128ProductReduction3)
 
   EXPECT_EQ(init_result_scalar->fixed_point_value(), expected);
 }
+#endif
 
 TYPED_TEST(ReductionTest, NthElement)
 {

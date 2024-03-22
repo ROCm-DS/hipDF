@@ -215,7 +215,9 @@ typename fixed_point_scalar<T>::rep_type const* fixed_point_scalar<T>::data() co
  */
 template class fixed_point_scalar<numeric::decimal32>;
 template class fixed_point_scalar<numeric::decimal64>;
+#ifdef HIPDF_ENABLE_DECIMAL128
 template class fixed_point_scalar<numeric::decimal128>;
+#endif
 
 namespace detail {
 

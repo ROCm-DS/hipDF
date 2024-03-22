@@ -636,10 +636,12 @@ TEST_P(ParquetV2Test, MultiColumn)
   column_wrapper<double> col5{col5_data.begin(), col5_data.end(), validity};
   column_wrapper<numeric::decimal32> col6{col6_data, col6_data + num_rows, validity};
   column_wrapper<numeric::decimal64> col7{col7_data, col7_data + num_rows, validity};
-  //: TODO(HIP/AMD): enable this again when DECIMAL128 issue has been addressed (https://github.com/AMD-AI/hipdf/issues/3)
+#ifdef HIPDF_ENABLE_DECIMAL128
   column_wrapper<numeric::decimal128> col8{col8_data, col8_data + num_rows, validity};
-
   auto expected = table_view{{col1, col2, col3, col4, col5, col6, col7, col8}};
+#else
+  auto expected = table_view{{col1, col2, col3, col4, col5, col6, col7}};
+#endif
 
   cudf::io::table_input_metadata expected_metadata(expected);
   // expected_metadata.column_metadata[0].set_name( "bools");
@@ -650,8 +652,9 @@ TEST_P(ParquetV2Test, MultiColumn)
   expected_metadata.column_metadata[4].set_name("doubles");
   expected_metadata.column_metadata[5].set_name("decimal32s").set_decimal_precision(10);
   expected_metadata.column_metadata[6].set_name("decimal64s").set_decimal_precision(20);
-  //: TODO(HIP/AMD): enable this again when DECIMAL128 issue has been addressed (https://github.com/AMD-AI/hipdf/issues/3)
+#ifdef HIPDF_ENABLE_DECIMAL128
   expected_metadata.column_metadata[7].set_name("decimal128s").set_decimal_precision(40);
+#endif
 
   auto filepath = temp_env->get_temp_filepath("MultiColumn.parquet");
   cudf::io::parquet_writer_options out_opts =
@@ -3781,6 +3784,7 @@ TEST_F(ParquetWriterTest, CheckPageRowsTooSmall)
   EXPECT_EQ(ph.data_page_header.num_values, num_rows);
 }
 
+#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(ParquetWriterTest, Decimal128Stats)
 {
   // check that decimal128 min and max statistics are written in network byte order
@@ -3812,6 +3816,7 @@ TEST_F(ParquetWriterTest, Decimal128Stats)
   EXPECT_EQ(expected_min, stats.min_value);
   EXPECT_EQ(expected_max, stats.max_value);
 }
+#endif
 
 // =============================================================================
 // ---- test data for stats sort order tests
