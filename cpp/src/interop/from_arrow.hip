@@ -203,7 +203,7 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<numeric::decimal128>
 {
   using DeviceType = __int128_t;
 
-#ifdef HIPDF_ENABLE_DECIMAL128
+#ifndef HIPDF_ENABLE_DECIMAL128
   printf("CAUTION: dispatching type numeric::decimal128 to a cudf column. HipDF was not compiled with DECIMAL128 support!");
 #endif
 

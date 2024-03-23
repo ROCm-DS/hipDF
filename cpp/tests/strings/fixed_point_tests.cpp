@@ -293,7 +293,7 @@ TEST_F(StringsConvertTest, IsFixedPoint)
                                           cudf::data_type{cudf::type_id::DECIMAL128});
   auto const expected128 = cudf::test::fixed_width_column_wrapper<bool>(
     {true, true, true, true, true, true, true, false, true, false});
-  s(*results, expected128);
+  CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected128);
 #endif
 
   results = cudf::strings::is_fixed_point(

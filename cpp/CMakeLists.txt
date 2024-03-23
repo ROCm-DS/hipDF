@@ -876,6 +876,10 @@ if(HIPDF_BUILD_TESTUTIL)
     target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_UDF_WITH_JITIFY")
   endif()
 
+  if(HIPDF_ENABLE_DECIMAL128)
+    target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_DECIMAL128")
+  endif()
+
   if(CUDA_BACKEND)
     target_compile_options(
       hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
