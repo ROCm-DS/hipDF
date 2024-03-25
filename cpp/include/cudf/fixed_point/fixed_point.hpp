@@ -203,7 +203,7 @@ CUDF_HOST_DEVICE inline constexpr T left_shift(T const& val, scale_type const& s
  * @return Shifted value of type T
  */
 template <typename Rep, Radix Rad, typename T>
-CUDF_HOST_DEVICE inline /*constexpr*/ T shift(T const& val, scale_type const& scale)
+CUDF_HOST_DEVICE inline constexpr T shift(T const& val, scale_type const& scale)
 {
   if (scale == 0) { return val; }
   if (scale > 0) { return right_shift<Rep, Rad>(val, scale); }
