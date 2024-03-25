@@ -447,8 +447,8 @@ __global__ void __launch_bounds__(decode_block_size)
                     size_t num_rows,
                     int32_t* error_code)
 {
-  //extern __shared__ __align__(16) page_state_s state_g[];
-  extern __shared__ page_state_s state_g[];
+  // extern __shared__ page_state_s state_g[];
+  extern __shared__ __align__(16) page_state_s state_g[];
   __shared__ __align__(16)
     page_state_buffers_s<rolling_buf_size, rolling_buf_size, rolling_buf_size>
       state_buffers;
