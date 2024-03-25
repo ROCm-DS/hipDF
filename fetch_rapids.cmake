@@ -12,7 +12,7 @@
 # the License.
 # =============================================================================
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/HIPDF_RAPIDS.cmake)
-  file(DOWNLOAD https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@raw.githubusercontent.com/AMD-AI/rapids-cmake/feat/rocm-6-0-dev-cdna3/RAPIDS.cmake
+  file(DOWNLOAD https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@raw.githubusercontent.com/AMD-AI/rapids-cmake/feat/rocm-6-0-dev/RAPIDS.cmake
 	  ${CMAKE_CURRENT_BINARY_DIR}/HIPDF_RAPIDS.cmake
   )
 endif()
