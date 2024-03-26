@@ -137,14 +137,24 @@ else()
 
   # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
   # safely queried through a context
-  list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a")
-  # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
+  # TODO(HIP/AMD): Disallow short gfx specs like gfx90a and gfx942. We likely need to revise this/improve how the architecture is set.
+  foreach(arch ${CMAKE_HIP_ARCHITECTURES})
+    if(arch MATCHES "gfx90a|gfx942")
+      list(REMOVE_ITEM CMAKE_HIP_ARCHITECTURES ${arch})
+    endif()
+  endforeach()
+  list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a:xnack-:sramecc+")
+  list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx942:xnack-:sramecc+")
+  # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908:xnack-:sramecc+")
+  
+  
   list(SORT CMAKE_HIP_ARCHITECTURES)
+
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES) # TODO(HIP/AMD): User might specify 'gfx90a:xnack-:sramecc+'.
 
   set(tgt "shim_") # NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
   add_library(${tgt} OBJECT shim.cu)
-  set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES ${CMAKE_HIP_ARCHITECTURES})
+  set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")
   target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_HIP_FLAGS}>")
