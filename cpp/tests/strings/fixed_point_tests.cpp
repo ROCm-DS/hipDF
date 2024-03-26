@@ -82,6 +82,7 @@ TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVeryLarge)
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
 }
 
+#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(StringsConvertTest, ToFixedPointDecimal128)
 {
   using namespace numeric;
@@ -167,6 +168,7 @@ TEST_F(StringsConvertTest, FromFixedPointDecimal128)
     CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
   }
 }
+#endif
 
 TYPED_TEST(StringsFixedPointConvertTest, ToFixedPointVerySmall)
 {
