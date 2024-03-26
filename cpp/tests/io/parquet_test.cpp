@@ -622,9 +622,11 @@ TEST_P(ParquetV2Test, MultiColumn)
   auto col7_data = cudf::detail::make_counting_transform_iterator(0, [col7_vals](auto i) {
     return numeric::decimal64{col7_vals[i], numeric::scale_type{-5}};
   });
+#ifdef HIPDF_ENABLE_DECIMAL128
   auto col8_data = cudf::detail::make_counting_transform_iterator(0, [col8_vals](auto i) {
     return numeric::decimal128{col8_vals[i], numeric::scale_type{-6}};
   });
+#endif
   auto validity  = cudf::detail::make_counting_transform_iterator(0, [](auto i) { return true; });
 
   // column_wrapper<bool> col0{
@@ -3108,6 +3110,7 @@ TEST_F(ParquetReaderTest, SelectNestedColumn)
   }
 }
 
+#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(ParquetReaderTest, DecimalRead)
 {
   {
@@ -3493,6 +3496,7 @@ TEST_F(ParquetReaderTest, DecimalRead)
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(result.tbl->view().column(2), col2);
   }
 }
+#endif
 
 TEST_F(ParquetReaderTest, EmptyOutput)
 {

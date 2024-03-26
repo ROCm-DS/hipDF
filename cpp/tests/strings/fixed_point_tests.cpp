@@ -320,6 +320,12 @@ TEST_F(StringsConvertTest, IsFixedPoint)
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected64_scaled);
 }
 
+
+// TODO(HIP/AMD): To pass this test, we had to implement a workaround
+// in cpp/include/cudf/fixed_point/fixed_point.hpp, as a left shift
+// of the max variable does not result in the maximum int128_t value again
+// on AMD backend (it does, however, on CUDA backend).
+// This seems to be UB in the first place (overflow in signed integer).
 #ifdef HIPDF_ENABLE_DECIMAL128
 #ifdef NDEBUG
 TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
