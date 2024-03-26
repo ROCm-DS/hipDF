@@ -161,7 +161,7 @@ def test_typecast_from_float_to_decimal(request, data, from_dtype, to_dtype):
     [Decimal64Dtype(9, 3), Decimal64Dtype(11, 4), Decimal64Dtype(18, 9)],
 )
 def test_typecast_from_int_to_decimal(data, from_dtype, to_dtype):
-    # NOTE(HIP): On AMD backend, cast from negative float to unsigned integer
+    # NOTE(HIP/AMD): On AMD backend, cast from negative float to unsigned integer
     # results in large unsigned integers (on NVIDIA they happen to be casted to 0).
     # These large integers then do not fit into the Decimal64Dtypes used in this test.
     # This is UB so we take the abs value here if an unsigned integer is used as

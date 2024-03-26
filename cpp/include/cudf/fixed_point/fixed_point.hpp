@@ -177,7 +177,8 @@ CUDF_HOST_DEVICE inline constexpr T right_shift(T const& val, scale_type const& 
 template <typename Rep, Radix Rad, typename T>
 CUDF_HOST_DEVICE inline constexpr T left_shift(T const& val, scale_type const& scale)
 {
-  // TODO(HIP/AMD): We added this additional check to fix the unit test StringsConvertTest.FixedPointStringConversionOperator.
+  // TODO(HIP/AMD): We added this additional check to fix the unit test StringsConvertTest.FixedPointStringConversionOperator
+  // (cpp/tests/strings/fixed_point_tests.cpp).
   // This test produces an overflow by left shifting cuda::std::numeric_limits<__int128_t>::max().
   // On CUDA backend, this leaves the value unchanged, but it results in a different value on AMD backend.
   // This is likely UB (left shift a signed value out of range) which is why we require this workaround.
