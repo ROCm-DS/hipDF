@@ -137,15 +137,12 @@ else()
 
   # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
   # safely queried through a context
-  # TODO(HIP/AMD): Disallow short gfx specs like gfx90a and gfx942. We likely need to revise this/improve how the architecture is set.
-  foreach(arch ${CMAKE_HIP_ARCHITECTURES})
-    if(arch MATCHES "gfx90a|gfx942")
-      list(REMOVE_ITEM CMAKE_HIP_ARCHITECTURES ${arch})
-    endif()
-  endforeach()
-  list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a:xnack-:sramecc+")
-  list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx942:xnack-:sramecc+")
-  # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908:xnack-:sramecc+")
+  # TODO(HIP/AMD): We likely need to revise this/improve how the architecture is set.
+  # A problem would arise if CMAKE_HIP_ARCHITECTURES contains full arch specs 
+  # such as gfx90a:sramecc+:xnack-
+  list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a")
+  list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx942")
+  # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
   
   
   list(SORT CMAKE_HIP_ARCHITECTURES)
