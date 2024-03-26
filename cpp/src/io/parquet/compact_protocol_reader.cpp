@@ -333,8 +333,10 @@ template <typename T>
 struct parquet_field_struct_list : public parquet_field_list<T> {
   parquet_field_struct_list(int f, std::vector<T>& v) : parquet_field_list<T>(f, v, ST_FLD_STRUCT)
   {
-    // NOTE(HIP/AMD): We need to pass v to the lambda. 
-    // Otherwise we get a segfault/wrong results.
+    // NOTE(HIP/AMD): In this execution path, v is only read and the compiler optimizes it out. 
+    // We get a segfault because this->val[i] tries to read a value from a pointer that 
+    // does not exist (v is optimized out!). As a solution, we pass v to lambda explicitly
+    // to avoid the optimization. 
     auto const read_value = [this, v](uint32_t i, CompactProtocolReader* cpr) {
       if (not cpr->read(&this->val[i])) { return true; }
       return false;
