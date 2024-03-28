@@ -225,5 +225,9 @@ def _can_be_jitted(frame, func, args):
     try:
         _get_udf_return_type(dataframe_group_type, func, args)
         return True
-    except TypingError:
+    except (
+        TypingError,
+        KeyError,
+        # TODO(HIP/AMD): Adding 'KeyError' as temporary fix for https://github.com/rapidsai/cudf/issues/14160 that is caused by Numba 0.58+ related changes until we are up-to-date with cudf 24.02 (see PR: https://github.com/rapidsai/cudf/pull/13854)
+    ):
         return False
