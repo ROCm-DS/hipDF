@@ -16,7 +16,7 @@ ARGS=$*
 # NOTE: ensure all dir changes are relative to the location of this
 # script, and that this script resides in the repo dir!
 REPODIR=$(cd $(dirname $0); pwd)
-#TODO(HIP): add more options later
+#TODO(HIP/AMD): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
 VALIDARGS="clean libhipdf hipdf benchmarks -v -g -n -h"
 HELP="$0 [clean] [libhipdf] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
@@ -296,7 +296,7 @@ if buildAll || hasArg libhipdf; then
         sccache --zero-stats
     fi
 
-    #TODO(HIP): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
+    #TODO(HIP/AMD): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
     cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
           -DCMAKE_CXX_COMPILER=hipcc \
