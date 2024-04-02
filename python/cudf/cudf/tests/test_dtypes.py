@@ -12,8 +12,7 @@ from cudf.core.dtypes import (
     CategoricalDtype,
     Decimal32Dtype,
     Decimal64Dtype,
-# TODO(HIP): enable when Decimal128 type is available
-#    Decimal128Dtype,
+    Decimal128Dtype,
     IntervalDtype,
     ListDtype,
     StructDtype,
@@ -149,9 +148,7 @@ def test_struct_dtype_fields(fields):
 
 @pytest.mark.parametrize(
     "decimal_type",
-    # TODO(HIP): Enable when decimal128 is available
-    #[cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype],
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
 )
 def test_decimal_dtype_arrow_roundtrip(decimal_type):
     dt = decimal_type(4, 2)
@@ -164,8 +161,7 @@ def test_decimal_dtype_arrow_roundtrip(decimal_type):
     [
         (cudf.Decimal32Dtype, 9),
         (cudf.Decimal64Dtype, 18),
-        # TODO(HIP): Enable when decimal128 is available
-        #(cudf.Decimal128Dtype, 38),
+        (cudf.Decimal128Dtype, 38),
     ],
 )
 def test_max_precision(decimal_type, max_precision):
@@ -218,9 +214,7 @@ def assert_column_array_dtype_equal(column: ColumnBase, array: pa.array):
             for i, child in enumerate(column.base_children)
         )
     elif isinstance(
-        # TODO(HIP): enable when decimal128 is available
-        #column.dtype, (Decimal128Dtype, Decimal64Dtype, Decimal32Dtype)
-        column.dtype, (Decimal64Dtype, Decimal32Dtype)
+        column.dtype, (Decimal128Dtype, Decimal64Dtype, Decimal32Dtype)
     ):
         return array.type.equals(column.dtype.to_arrow())
     elif isinstance(column.dtype, CategoricalDtype):

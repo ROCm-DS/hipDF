@@ -139,7 +139,21 @@ CUDF_HOST_DEVICE inline constexpr T right_shift(T const& val, scale_type const& 
 template <typename Rep, Radix Rad, typename T>
 CUDF_HOST_DEVICE inline constexpr T left_shift(T const& val, scale_type const& scale)
 {
-  return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
+  // TODO(HIP/AMD): We added this additional check to fix the unit test StringsConvertTest.FixedPointStringConversionOperator
+  // (cpp/tests/strings/fixed_point_tests.cpp).
+  // This test produces an overflow by left shifting hip::std::numeric_limits<__int128_t>::max().
+  // On CUDA backend, this leaves the value unchanged, but it results in a different value on AMD backend.
+  // This is likely UB (left shift a signed value out of range) which is why we require this workaround.
+  if constexpr(hip::std::is_same_v<T,__int128_t>) {
+    if(val == hip::std::numeric_limits<__int128_t>::max()) {
+      return val;
+    } else {
+      return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
+    }
+  }
+  else  {
+     return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
+  }
 }
 
 /** @brief Function that performs a `right` or `left shift`

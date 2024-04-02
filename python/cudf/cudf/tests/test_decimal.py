@@ -130,6 +130,14 @@ def test_typecast_from_float_to_decimal(data, from_dtype, to_dtype):
     [Decimal64Dtype(9, 3), Decimal64Dtype(11, 4), Decimal64Dtype(18, 9)],
 )
 def test_typecast_from_int_to_decimal(data, from_dtype, to_dtype):
+    # NOTE(HIP/AMD): On AMD backend, cast from negative float to unsigned integer
+    # results in large unsigned integers (on NVIDIA they happen to be casted to 0).
+    # These large integers then do not fit into the Decimal64Dtypes used in this test.
+    # This is UB so we take the abs value here if an unsigned integer is used as
+    # from_dtype. See https://github.com/AMD-AI/hipdf/issues/106.
+    if(not(from_dtype in SIGNED_TYPES)):
+        data = data.abs()
+    
     got = data.astype(from_dtype)
 
     pa_arr = (
@@ -381,12 +389,11 @@ def test_decimal_invalid_precision():
         _ = cudf.Series([Decimal("300")], dtype=cudf.Decimal64Dtype(2, 1))
 
 
-# Todo(HIP): enable when decimal128 is available
-# def test_decimal_overflow():
-#     s = cudf.Series([Decimal("0.0009384233522166997927180531650178250")])
-#     result = s * s
-#     assert_eq(cudf.Decimal128Dtype(precision=38, scale=37), result.dtype)
+def test_decimal_overflow():
+    s = cudf.Series([Decimal("0.0009384233522166997927180531650178250")])
+    result = s * s
+    assert_eq(cudf.Decimal128Dtype(precision=38, scale=37), result.dtype)
 
-#     s = cudf.Series([1, 2], dtype=cudf.Decimal128Dtype(precision=38, scale=0))
-#     result = s * Decimal("1.0")
-#     assert_eq(cudf.Decimal128Dtype(precision=38, scale=1), result.dtype)
+    s = cudf.Series([1, 2], dtype=cudf.Decimal128Dtype(precision=38, scale=0))
+    result = s * Decimal("1.0")
+    assert_eq(cudf.Decimal128Dtype(precision=38, scale=1), result.dtype)

@@ -2571,9 +2571,7 @@ def test_quantile(q, numeric_only):
 @pytest.mark.parametrize("interpolation", ["higher", "lower", "nearest"])
 @pytest.mark.parametrize(
     "decimal_type",
-    [cudf.Decimal32Dtype, cudf.Decimal64Dtype],
-    # Todo(HIP): enable when decimal128 is available
-    #[cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
+    [cudf.Decimal32Dtype, cudf.Decimal64Dtype, cudf.Decimal128Dtype],
 )
 def test_decimal_quantile(q, interpolation, decimal_type):
     data = ["244.8", "32.24", "2.22", "98.14", "453.23", "5.45"]

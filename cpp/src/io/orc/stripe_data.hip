@@ -1049,10 +1049,11 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
           return (v * kPow5i[abs_scale]) << abs_scale;
         } else {
           auto const abs_scale = min(-scale, 27);
-#if 0 //: TODO(HIP/AMD): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
+#if HIPDF_ENABLE_DECIMAL128
           return (v / kPow5i[abs_scale]) >> abs_scale;
-#endif //: TODO(HIP/AMD): leads to invalid libcall legalization error, see https://ontrack-internal.amd.com/browse/SWDEV-426193
-          printf("Error: Trying to decode a decimal using int128_t division, which is not supported with hipclang yet. See https://ontrack-internal.amd.com/browse/SWDEV-426193\n");
+#else
+          printf("Error: Trying to decode a decimal using int128_t division, which requires hipDF to be built with DECIMAL128 support.\n");
+#endif
         }
       }();
       if (dtype_id == type_id::DECIMAL32) {

@@ -1147,13 +1147,12 @@ def is_decimal64_dtype(obj):
 
 
 def is_decimal128_dtype(obj):
-    return False #: TODO: HIP/AMD enable this dtype
-    #: return ( 
-    #:     type(obj) is cudf.core.dtypes.Decimal128Dtype
-    #:     or obj is cudf.core.dtypes.Decimal128Dtype
-    #:     or (
-    #:         isinstance(obj, str)
-    #:         and obj == cudf.core.dtypes.Decimal128Dtype.name
-    #:     )
-    #:     or (hasattr(obj, "dtype") and is_decimal128_dtype(obj.dtype))
-    #: )
+    return ( 
+        type(obj) is cudf.core.dtypes.Decimal128Dtype
+        or obj is cudf.core.dtypes.Decimal128Dtype
+        or (
+            isinstance(obj, str)
+            and obj == cudf.core.dtypes.Decimal128Dtype.name
+        )
+        or (hasattr(obj, "dtype") and is_decimal128_dtype(obj.dtype))
+    )

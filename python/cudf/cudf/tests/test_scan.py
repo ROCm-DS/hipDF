@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import cudf
-from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype #, Decimal128Dtype TODO(HIP): enable again when Decimal128 is available
+from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype, Decimal128Dtype
 from cudf.testing._utils import (
     INTEGER_TYPES,
     NUMERIC_TYPES,
@@ -76,8 +76,7 @@ def test_cumsum_masked():
         Decimal64Dtype(10, 5),
         Decimal64Dtype(12, 7),
         Decimal32Dtype(8, 5),
-        # TODO(HIP): enable again when Decimal128 is available
-        #Decimal128Dtype(13, 6),
+        Decimal128Dtype(13, 6),
     ],
 )
 def test_cumsum_decimal(dtype):
@@ -140,8 +139,7 @@ def test_cummin_masked():
         Decimal64Dtype(11, 6),
         Decimal64Dtype(14, 7),
         Decimal32Dtype(8, 4),
-        # TODO(HIP): enable again when Decimal128 is available
-        # Decimal128Dtype(11, 6),
+        Decimal128Dtype(11, 6),
     ],
 )
 def test_cummin_decimal(dtype):
@@ -204,8 +202,7 @@ def test_cummax_masked():
         Decimal64Dtype(11, 6),
         Decimal64Dtype(14, 7),
         Decimal32Dtype(8, 4),
-        # TODO(HIP): enable again when Decimal128 is available
-        # Decimal128Dtype(11, 6),
+        Decimal128Dtype(11, 6),
     ],
 )
 def test_cummax_decimal(dtype):

@@ -297,8 +297,13 @@ __device__ void gpuOutputByteArrayAsInt(char const* ptr, int32_t len, T* dst)
   }
   // Shift the unscaled value up and back down when it isn't all 8 bytes,
   // which sign extend the value for correctly representing negative numbers.
-  unscaled <<= (sizeof(T) - len) * 8;
-  unscaled >>= (sizeof(T) - len) * 8;
+  // TODO(HIP/AMD): This is a workaround for invalid results
+  // observed for a unit test, see https://github.com/AMD-AI/hipdf/issues/105.
+  // It appears to be a compiler issue which requires further investigation.
+  if(sizeof(T)!=len) {
+    unscaled <<= (sizeof(T) - len) * 8;
+    unscaled >>= (sizeof(T) - len) * 8;
+  }
   *dst = unscaled;
 }
 

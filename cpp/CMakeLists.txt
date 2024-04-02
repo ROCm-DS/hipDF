@@ -62,6 +62,7 @@ option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks
 option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(HIPDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
+option(HIPDF_ENABLE_DECIMAL128 "Enables support for DECIMAL128 datatype (requires patched ROCm!)" OFF)
 option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
 mark_as_advanced(HIPDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
@@ -729,6 +730,10 @@ if(HIPDF_ENABLE_UDF_WITH_JITIFY)
 target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_UDF_WITH_JITIFY")
 endif()
 
+if(HIPDF_ENABLE_DECIMAL128)
+target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_DECIMAL128")
+endif()
+
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(hipdf PRIVATE "JITIFY_PRINT_LOG=0")
 
@@ -869,6 +874,10 @@ if(HIPDF_BUILD_TESTUTIL)
   # is enabled (requires patched hipRTC)
   if(HIPDF_ENABLE_UDF_WITH_JITIFY)
     target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_UDF_WITH_JITIFY")
+  endif()
+
+  if(HIPDF_ENABLE_DECIMAL128)
+    target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_DECIMAL128")
   endif()
 
   if(CUDA_BACKEND)
