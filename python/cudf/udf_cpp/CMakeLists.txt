@@ -144,7 +144,6 @@ else()
   list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx942")
   # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
   
-  
   list(SORT CMAKE_HIP_ARCHITECTURES)
 
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES) # TODO(HIP/AMD): User might specify 'gfx90a:xnack-:sramecc+'.

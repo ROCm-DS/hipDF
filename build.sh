@@ -339,7 +339,7 @@ if buildAll || hasArg libcudf; then
         sccache --zero-stats
     fi
 
-    #TODO(HIP): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
+    #TODO(HIP/AMD): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
     cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
           -DCMAKE_CXX_COMPILER=hipcc \
