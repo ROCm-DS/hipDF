@@ -238,5 +238,17 @@ inline std::string parse_single_function_ptx(std::string const& src,
  */
 std::string parse_single_function_cuda(std::string const& src, std::string const& function_name);
 
+/**
+ * @brief In a piece of LLVM IR code that contains the implementation
+ * of a device function, locate the function and replace its function name
+ * with the specified one.
+ *
+ * @param src The input LLVM IR code.
+ * @param function_name The User defined function that the output LLVM IR function
+ * will have.
+ * @return The output LLVM IR device function
+ */
+std::string parse_single_function_llvm_ir(std::string const& src, std::string const& function_name);
+
 }  // namespace jit
 }  // namespace cudf

@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 import cudf
-from cudf.core.dtypes import CategoricalDtype, Decimal64Dtype #, Decimal128Dtype TODO(HIP): enable this when DECIMAL128 support is available
+from cudf.core.dtypes import CategoricalDtype, Decimal64Dtype, Decimal128Dtype
 from cudf.testing._utils import (
     INTEGER_TYPES,
     NUMERIC_TYPES,
@@ -1142,8 +1142,7 @@ def test_typecast_on_join_overflow_unsafe(dtypes):
         Decimal64Dtype(5, 2),
         Decimal64Dtype(7, 5),
         Decimal64Dtype(12, 7),
-        # TODO(HIP): enable again if Decimal128 is available
-        #Decimal128Dtype(20, 5),
+        Decimal128Dtype(20, 5),
     ],
 )
 def test_decimal_typecast_inner(dtype):
@@ -1184,8 +1183,7 @@ def test_decimal_typecast_inner(dtype):
         Decimal64Dtype(7, 3),
         Decimal64Dtype(9, 5),
         Decimal64Dtype(14, 10),
-        # TODO(HIP): enable again if Decimal128 is available
-        #Decimal128Dtype(21, 9),
+        Decimal128Dtype(21, 9),
     ],
 )
 def test_decimal_typecast_left(dtype):
@@ -1227,8 +1225,7 @@ def test_decimal_typecast_left(dtype):
         Decimal64Dtype(7, 3),
         Decimal64Dtype(10, 5),
         Decimal64Dtype(18, 9),
-        # TODO(HIP): enable again if Decimal128 is available
-        #Decimal128Dtype(22, 8),
+        Decimal128Dtype(22, 8),
     ],
 )
 def test_decimal_typecast_outer(dtype):

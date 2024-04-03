@@ -235,26 +235,26 @@ ConfigureTest(ROUND_TEST round/round_tests.cpp)
 
 # ##################################################################################################
 # * binary tests ----------------------------------------------------------------------------------
-ConfigureTest(
-  BINARYOP_TEST
-  binaryop/binop-verify-input-test.cpp
-  binaryop/binop-null-test.cpp
-  binaryop/binop-compiled-test.cpp
-  binaryop/binop-compiled-fixed_point-test.cpp
-#   binaryop/binop-generic-ptx-test.cpp
-)
+  ConfigureTest(
+    BINARYOP_TEST
+    binaryop/binop-verify-input-test.cpp
+    binaryop/binop-null-test.cpp
+    binaryop/binop-compiled-test.cpp
+    binaryop/binop-compiled-fixed_point-test.cpp
+    binaryop/binop-generic-ptx-test.cpp
+  )
 
 # # ##################################################################################################
 # # * unary transform tests -------------------------------------------------------------------------
-#ConfigureTest(
-#   TRANSFORM_TEST
-#   transform/integration/unary_transform_test.cpp
-#   transform/nans_to_null_test.cpp
-#   transform/mask_to_bools_test.cpp
-#   transform/bools_to_mask_test.cpp
-#   transform/row_bit_count_test.hip
-#   transform/one_hot_encode_tests.cpp
-# )
+ConfigureTest(
+  TRANSFORM_TEST
+  transform/integration/unary_transform_test.cpp
+  transform/nans_to_null_test.cpp
+  transform/mask_to_bools_test.cpp
+  transform/bools_to_mask_test.cpp
+  transform/row_bit_count_test.hip
+  transform/one_hot_encode_tests.cpp
+)
 
 # ##################################################################################################
 # * interop tests -------------------------------------------------------------------------
@@ -428,20 +428,19 @@ ConfigureTest(
 
 # # ##################################################################################################
 # # * rolling tests ---------------------------------------------------------------------------------
-#ConfigureTest(
-#   ROLLING_TEST
-#   rolling/collect_ops_test.cpp
-#   rolling/empty_input_test.cpp
-#   rolling/grouped_rolling_range_test.cpp
-#   rolling/grouped_rolling_test.cpp
-#   rolling/lead_lag_test.cpp
-#   rolling/nth_element_test.cpp
-#   rolling/offset_row_window_test.cpp # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
-#   rolling/range_comparator_test.hip
-#   rolling/range_rolling_window_test.cpp
-#   rolling/range_window_bounds_test.cpp
-#   rolling/rolling_test.cpp
-# )
+ConfigureTest(
+   ROLLING_TEST
+   rolling/collect_ops_test.cpp
+   rolling/empty_input_test.cpp
+   rolling/grouped_rolling_range_test.cpp
+   rolling/grouped_rolling_test.cpp
+   rolling/lead_lag_test.cpp
+   rolling/nth_element_test.cpp
+   rolling/range_comparator_test.hip
+   rolling/range_rolling_window_test.cpp
+   rolling/range_window_bounds_test.cpp
+   rolling/rolling_test.cpp
+ )
 
 # ##################################################################################################
 # * filling test ----------------------------------------------------------------------------------

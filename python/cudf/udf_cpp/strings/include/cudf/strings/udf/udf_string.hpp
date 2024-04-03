@@ -17,7 +17,7 @@
 
 #include <cudf/strings/string_view.hpp>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 
 // This header contains all class and function declarations so that it
 // can be included in a .cpp file which only has declaration requirements

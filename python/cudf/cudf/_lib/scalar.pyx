@@ -202,7 +202,7 @@ cdef class DeviceScalar:
         elif cdtype.id() in {
             libcudf_types.type_id.DECIMAL32,
             libcudf_types.type_id.DECIMAL64,
-            #: libcudf_types.type_id.DECIMAL128, #: TODO: HIP/AMD enable this dtype
+            libcudf_types.type_id.DECIMAL128
         }:
             raise TypeError(
                 "Must pass a dtype when constructing from a fixed-point scalar"
@@ -341,7 +341,7 @@ cdef _set_decimal_from_scalar(unique_ptr[scalar]& s,
                 <int32_t>np.int32(value), scale_type(-dtype.scale), valid
             )
         )
-    elif isinstance(dtype, cudf.Decimal128Dtype): #: TODO: HIP/AMD enable this dtype
+    elif isinstance(dtype, cudf.Decimal128Dtype):
          s.reset(
              new fixed_point_scalar[decimal128](
                  <libcudf_types.int128>value, scale_type(-dtype.scale), valid
@@ -483,10 +483,10 @@ cdef _get_py_decimal_from_fixed_point(unique_ptr[scalar]& s):
         rep_val = int((<fixed_point_scalar[decimal32]*>s_ptr)[0].value())
         scale = int((<fixed_point_scalar[decimal32]*>s_ptr)[0].type().scale())
         return decimal.Decimal(rep_val).scaleb(scale)
-    #: elif cdtype.id() == libcudf_types.type_id.DECIMAL128: #: TODO: HIP/AMD enable this dtype
-    #:     rep_val = int((<fixed_point_scalar[decimal128]*>s_ptr)[0].value())
-    #:     scale = int((<fixed_point_scalar[decimal128]*>s_ptr)[0].type().scale())
-    #:     return decimal.Decimal(rep_val).scaleb(scale)
+    elif cdtype.id() == libcudf_types.type_id.DECIMAL128:
+        rep_val = int((<fixed_point_scalar[decimal128]*>s_ptr)[0].value())
+        scale = int((<fixed_point_scalar[decimal128]*>s_ptr)[0].type().scale())
+        return decimal.Decimal(rep_val).scaleb(scale)
     else:
         raise ValueError("Could not convert cudf::scalar to numpy scalar")
 

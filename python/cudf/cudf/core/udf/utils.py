@@ -17,10 +17,10 @@ from numba.types import CPointer, Poison, Record, Tuple, boolean, int64, void
 
 import rmm
 
-#: from cudf._lib.strings_udf import ( #: TODO: HIP/AMD: reenable when udf is enabled
-#:     column_from_udf_string_array,
-#:     column_to_string_view_array,
-#: )
+from cudf._lib.strings_udf import (
+    column_from_udf_string_array,
+    column_to_string_view_array,
+)
 from cudf.api.types import is_scalar
 from cudf.core.column.column import as_column
 from cudf.core.dtypes import dtype
@@ -320,14 +320,16 @@ def _post_process_output_col(col, retty):
         return column_from_udf_string_array(col)
     return as_column(col, retty)
 
-
-# The only supported data layout in NVVM.
-# See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout
-_nvvm_data_layout = (
-    "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-"
-    "i128:128:128-f32:32:32-f64:64:64-v16:16:16-v32:32:32-"
-    "v64:64:64-v128:128:128-n16:32:64"
-)
+try:
+    from numba.hip.amdgcn import DATA_LAYOUT as _nvvm_data_layout #: if this succeeds, we assume HIP/AMD build
+except ImportError:
+    # The only supported data layout in NVVM.
+    # See: https://docs.nvidia.com/cuda/nvvm-ir-spec/index.html?#data-layout
+    _nvvm_data_layout = (
+        "e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-"
+        "i128:128:128-f32:32:32-f64:64:64-v16:16:16-v32:32:32-"
+        "v64:64:64-v128:128:128-n16:32:64"
+    )
 
 
 def _get_extensionty_size(ty):

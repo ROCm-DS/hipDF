@@ -72,7 +72,7 @@ from cudf.core.indexed_frame import (
 )
 from cudf.core.resample import SeriesResampler
 from cudf.core.single_column_frame import SingleColumnFrame
-#: from cudf.core.udf.scalar_function import _get_scalar_kernel #: TODO: HIP/AMD: renable when udf is enabled
+from cudf.core.udf.scalar_function import _get_scalar_kernel
 from cudf.utils import docutils
 from cudf.utils.docutils import copy_docstring
 from cudf.utils.dtypes import (

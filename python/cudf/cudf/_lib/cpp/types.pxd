@@ -83,7 +83,7 @@ cdef extern from "cudf/types.hpp" namespace "cudf" nogil:
         DURATION_NANOSECONDS
         DECIMAL32
         DECIMAL64
-        # DECIMAL128
+        DECIMAL128
 
     cdef cppclass data_type:
         data_type() except +

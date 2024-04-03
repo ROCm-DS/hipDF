@@ -59,7 +59,8 @@ class union_member {
   {
     return val.u_val;
   }
-  // TODO(HIP/AMD): hipcc gives error "ambiguous call to get" if we don't add "!std::is_same_v<T, __int128_t>"
+
+  // NOTE(HIP/AMD): The check for !std::is_same_v<T, __int128_t> was added to resolve compiler error (ambiguity when selecing correct template)
   template <typename T, typename U>
   __device__ static std::enable_if_t<!std::is_same_v<T, __int128_t> and std::is_integral_v<T> and std::is_signed_v<T>, type<T, U>> get(
     U& val)

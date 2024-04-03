@@ -9,7 +9,7 @@ import pytest
 
 import cudf
 from cudf.core._compat import PANDAS_GE_134, PANDAS_GE_150
-from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype #, Decimal128Dtype TODO(HIP): enable again when Decimal128 is available
+from cudf.core.dtypes import Decimal32Dtype, Decimal64Dtype, Decimal128Dtype
 from cudf.testing._utils import (
     INTEGER_TYPES,
     NUMERIC_TYPES,
@@ -376,10 +376,9 @@ def test_fillna_method_numerical(data, container, data_dtype, method, inplace):
         cudf.Series(
             [np.nan, "55.2498", np.nan, "-5.2965", "-28.9423", np.nan]
         ).astype(Decimal64Dtype(10, 4)),
-        # TODO(HIP): enable again when Decimal128 is available
-        # cudf.Series(
-        #     ["2.964", None, "54347.432", "-989.330", None, "56.444"]
-        # ).astype(Decimal128Dtype(20, 7)),
+        cudf.Series(
+            ["2.964", None, "54347.432", "-989.330", None, "56.444"]
+        ).astype(Decimal128Dtype(20, 7)),
     ],
 )
 @pytest.mark.parametrize(

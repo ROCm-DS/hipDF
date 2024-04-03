@@ -25,13 +25,13 @@ namespace rolling {
 namespace jit {
 
 template <typename WindowType>
-cudf::size_type __device__ get_window(WindowType window, cudf::thread_index_type index)
+__device__  cudf::size_type get_window(WindowType window, cudf::thread_index_type index)
 {
   return window[index];
 }
 
 template <>
-cudf::size_type __device__ get_window(cudf::size_type window, cudf::thread_index_type index)
+__device__  cudf::size_type get_window(cudf::size_type window, cudf::thread_index_type index)
 {
   return window;
 }
@@ -107,3 +107,4 @@ __global__ void gpu_rolling_new(cudf::size_type nrows,
 }  // namespace jit
 }  // namespace rolling
 }  // namespace cudf
+//TODO(HIP/AMD): This new line appears to be needed as an "f" would otherwise be appended into the source code passed to jitify/hipdf with minification, see https://github.com/AMD-AI/jitify/issues/31

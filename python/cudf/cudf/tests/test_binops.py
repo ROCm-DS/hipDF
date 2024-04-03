@@ -1984,16 +1984,24 @@ def test_binops_with_NA_consistent(dtype, op):
             ["3.75", "3.005"],
             cudf.Decimal64Dtype(scale=3, precision=5),
         ),
-        #(
-            # Todo(HIP): add when decimal128 is available
-            #operator.add,
-            #["100", "200"],
-            #cudf.Decimal64Dtype(scale=-2, precision=17),
-            #["0.1", "0.2"],
-            #cudf.Decimal64Dtype(scale=3, precision=4),
-            #["100.1", "200.2"],
-            #cudf.Decimal128Dtype(scale=3, precision=23),
-        #),
+        (
+            operator.add,
+            ["100", "200"],
+            cudf.Decimal64Dtype(scale=-2, precision=17),
+            ["0.1", "0.2"],
+            cudf.Decimal64Dtype(scale=3, precision=4),
+            ["100.1", "200.2"],
+            cudf.Decimal128Dtype(scale=3, precision=23),
+        ),
+        (
+            operator.sub,
+            ["1.5", "2.0"],
+            cudf.Decimal64Dtype(scale=1, precision=2),
+            ["2.25", "1.005"],
+            cudf.Decimal64Dtype(scale=3, precision=4),
+            ["-0.75", "0.995"],
+            cudf.Decimal64Dtype(scale=3, precision=5),
+        ),
         (
             operator.sub,
             ["1.5", "2.0"],
@@ -2005,23 +2013,13 @@ def test_binops_with_NA_consistent(dtype, op):
         ),
         (
             operator.sub,
-            ["1.5", "2.0"],
-            cudf.Decimal64Dtype(scale=1, precision=2),
-            ["2.25", "1.005"],
-            cudf.Decimal64Dtype(scale=3, precision=4),
-            ["-0.75", "0.995"],
-            cudf.Decimal64Dtype(scale=3, precision=5),
+            ["100", "200"],
+            cudf.Decimal64Dtype(scale=-2, precision=10),
+            ["0.1", "0.2"],
+            cudf.Decimal64Dtype(scale=6, precision=10),
+            ["99.9", "199.8"],
+            cudf.Decimal128Dtype(scale=6, precision=19),
         ),
-        #(
-            # Todo(HIP): add when decimal128 is available
-            # operator.sub,
-            # ["100", "200"],
-            # cudf.Decimal64Dtype(scale=-2, precision=10),
-            # ["0.1", "0.2"],
-            # cudf.Decimal64Dtype(scale=6, precision=10),
-            # ["99.9", "199.8"],
-            # cudf.Decimal128Dtype(scale=6, precision=19),
-        #),
         (
             operator.sub,
             2,
@@ -2085,26 +2083,24 @@ def test_binops_with_NA_consistent(dtype, op):
             ["1000.0", "1000.0"],
             cudf.Decimal64Dtype(scale=6, precision=12),
         ),
-        #(
-            # Todo(HIP): add when decimal128 is available
-            # operator.truediv,
-            # ["132.86", "15.25"],
-            # cudf.Decimal64Dtype(scale=4, precision=14),
-            # ["2.34", "8.50"],
-            # cudf.Decimal64Dtype(scale=2, precision=8),
-            # ["56.77", "1.79"],
-            # cudf.Decimal128Dtype(scale=13, precision=25),
-        #),
-        #(
-             # Todo(HIP): add when decimal128 is available
-            # operator.truediv,
-            # 20,
-            # cudf.Decimal128Dtype(scale=2, precision=6),
-            # ["20", "20"],
-            # cudf.Decimal128Dtype(scale=2, precision=6),
-            # ["1.0", "1.0"],
-            # cudf.Decimal128Dtype(scale=9, precision=15),
-        #),
+        (
+            operator.truediv,
+            ["132.86", "15.25"],
+            cudf.Decimal64Dtype(scale=4, precision=14),
+            ["2.34", "8.50"],
+            cudf.Decimal64Dtype(scale=2, precision=8),
+            ["56.77", "1.79"],
+            cudf.Decimal128Dtype(scale=13, precision=25),
+        ),
+        (
+            operator.truediv,
+            20,
+            cudf.Decimal128Dtype(scale=2, precision=6),
+            ["20", "20"],
+            cudf.Decimal128Dtype(scale=2, precision=6),
+            ["1.0", "1.0"],
+            cudf.Decimal128Dtype(scale=9, precision=15),
+        ),
         (
             operator.add,
             ["1.5", None, "2.0"],
@@ -2150,16 +2146,15 @@ def test_binops_with_NA_consistent(dtype, op):
             ["2.25", None],
             cudf.Decimal64Dtype(scale=5, precision=8),
         ),
-        #(
-            # Todo(HIP): add when decimal128 is available
-            # operator.mul,
-            # ["100", "200"],
-            # cudf.Decimal64Dtype(scale=-2, precision=10),
-            # ["0.1", None],
-            # cudf.Decimal64Dtype(scale=3, precision=12),
-            # ["10.0", None],
-            # cudf.Decimal128Dtype(scale=1, precision=23),
-        #),
+        (
+            operator.mul,
+            ["100", "200"],
+            cudf.Decimal64Dtype(scale=-2, precision=10),
+            ["0.1", None],
+            cudf.Decimal64Dtype(scale=3, precision=12),
+            ["10.0", None],
+            cudf.Decimal128Dtype(scale=1, precision=23),
+        ),
         (
             operator.eq,
             ["0.18", "0.42"],
@@ -2335,7 +2330,7 @@ def test_binops_decimal(op, lhs, l_dtype, rhs, r_dtype, expect, expect_dtype):
         utils._decimal_series(expect, expect_dtype)
         if isinstance(
             expect_dtype,
-            (cudf.Decimal64Dtype, cudf.Decimal32Dtype), # Todo(HIP): add when decimal128 is available: , cudf.Decimal128Dtype),
+            (cudf.Decimal64Dtype, cudf.Decimal32Dtype, cudf.Decimal128Dtype),
         )
         else cudf.Series(expect, dtype=expect_dtype)
     )
@@ -2357,16 +2352,15 @@ def test_binops_decimal(op, lhs, l_dtype, rhs, r_dtype, expect, expect_dtype):
             ["3.0", "4.0"],
             cudf.Decimal64Dtype(scale=2, precision=4),
         ),
-        #(
-            # Todo(HIP): add when decimal128 is available
-            # "rsub",
-            # ["100", "200"],
-            # cudf.Decimal64Dtype(scale=-2, precision=10),
-            # ["0.1", "0.2"],
-            # cudf.Decimal64Dtype(scale=6, precision=10),
-            # ["-99.9", "-199.8"],
-            # cudf.Decimal128Dtype(scale=6, precision=19),
-        #),
+        (
+            "rsub",
+            ["100", "200"],
+            cudf.Decimal64Dtype(scale=-2, precision=10),
+            ["0.1", "0.2"],
+            cudf.Decimal64Dtype(scale=6, precision=10),
+            ["-99.9", "-199.8"],
+            cudf.Decimal128Dtype(scale=6, precision=19),
+        ),
         (
             "rmul",
             ["1000", "2000"],
