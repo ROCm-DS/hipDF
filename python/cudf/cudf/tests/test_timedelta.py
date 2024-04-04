@@ -1,5 +1,27 @@
 # Copyright (c) 2020-2025, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import datetime
 import operator
 
@@ -481,21 +503,21 @@ def test_timedelta_series_ops_with_scalars(data, other_scalars, dtype, op):
     assert_eq(expected, actual)
 
 
+# TODO(HIP/AMD):
+# The operation x % 0 is undefined behavior.
+# It is used by libcudf (PyMod) in this test case for reverse=true.
+# On CUDA, x % 0 returns -1, so the test fails expectedly (that is why it
+# originally is marked as xfail).
+# With HIP/AMD, x % 0 == x holds which matches Pandas' behavior.
+# We therefore no longer mark the test as xfail for HIP/AMD.
+# CAUTION: The fundamental behaviour of 'x % 0' remains undefined,
+# so for future compiler releases
+# or Pandas versions, this test may need to be changed again.
 @pytest.mark.parametrize(
     "reverse",
     [
         False,
-        pytest.param(
-            True,
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason=(
-                    "timedelta modulo by zero is dubiously defined in "
-                    "both pandas and cuDF "
-                    "(see https://github.com/rapidsai/cudf/issues/5938)"
-                ),
-            ),
-        ),
+        True
     ],
 )
 def test_timedelta_series_mod_with_scalar_zero(reverse):
@@ -599,21 +621,21 @@ def test_timedelta_series_ops_with_cudf_scalars(data, cpu_scalar, dtype, op):
     assert_eq(expected, actual)
 
 
+# TODO(HIP/AMD):
+# The operation x % 0 is undefined behavior.
+# It is used by libcudf (PyMod) in this test case for reverse=true.
+# On CUDA, x % 0 returns -1, so the test fails expectedly (that is why it
+# originally is marked as xfail).
+# With HIP/AMD, x % 0 == x holds which matches Pandas' behavior.
+# We therefore no longer mark the test as xfail for HIP/AMD.
+# CAUTION: The fundamental behaviour of 'x % 0' remains undefined,
+# so for future compiler releases
+# or Pandas versions, this test may need to be changed again.
 @pytest.mark.parametrize(
     "reverse",
     [
         False,
-        pytest.param(
-            True,
-            marks=pytest.mark.xfail(
-                strict=True,
-                reason=(
-                    "timedelta modulo by zero is dubiously defined in "
-                    "both pandas and cuDF "
-                    "(see https://github.com/rapidsai/cudf/issues/5938)"
-                ),
-            ),
-        ),
+        True
     ],
 )
 def test_timedelta_series_mod_with_cudf_scalar_zero(reverse):
