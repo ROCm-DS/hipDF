@@ -414,9 +414,9 @@ def test_as_column_buffer(data, expected):
     "data,pyarrow_kwargs,cudf_kwargs",
     [
         (
-           [100, 200, 300],
-           {"type": pa.decimal128(3)},
-           {"dtype": cudf.core.dtypes.Decimal128Dtype(3, 0)},
+            [100, 200, 300],
+            {"type": pa.decimal128(3)},
+            {"dtype": cudf.core.dtypes.Decimal128Dtype(3, 0)},
         ),
         (
             [{"a": 1, "b": 3}, {"c": 2, "d": 4}],

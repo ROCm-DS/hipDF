@@ -43,14 +43,12 @@ def _declare_binary_func(lhs, rhs, out, name):
         name,
         out(lhs, rhs),
     )
-    return 
 
 
 def _declare_strip_func(name):
     return cuda.declare_device(
         name, size_type(_UDF_STRING_PTR, _STR_VIEW_PTR, _STR_VIEW_PTR)
     )
-    return 
 
 
 # A binary function of the form f(string, string) -> bool
@@ -96,7 +94,6 @@ def _declare_upper_or_lower(func):
             types.uintp,
         ),
     )
-    return
 
 
 _string_view_isdigit = _declare_bool_str_int_func("pyisdigit")
@@ -110,6 +107,7 @@ _string_view_islower = _declare_bool_str_int_func("pyislower")
 _string_view_istitle = _declare_bool_str_int_func("pyistitle")
 _string_view_upper = _declare_upper_or_lower("upper")
 _string_view_lower = _declare_upper_or_lower("lower")
+
 
 _string_view_count = cuda.declare_device(
     "pycount",

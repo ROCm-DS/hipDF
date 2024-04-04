@@ -5,6 +5,7 @@ import operator
 import numpy as np
 import pytest
 from numba import cuda
+
 import cudf
 from cudf.core.missing import NA
 from cudf.core.udf._ops import (

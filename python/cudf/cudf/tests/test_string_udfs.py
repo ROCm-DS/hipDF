@@ -20,7 +20,6 @@ from cudf.core.udf.strings_typing import (
     string_view,
     udf_string,
 )
-# TODO(HIP): support this import
 from cudf.core.udf.utils import _PTX_FILE, _get_extensionty_size
 from cudf.testing._utils import assert_eq, sv_to_udf_str
 from cudf.utils._numba import _CUDFNumbaConfig
@@ -54,6 +53,7 @@ def get_kernels(func, dtype, size):
 
     @cuda.jit(sig, link=[_PTX_FILE], extensions=[str_view_arg_handler])
     def udf_string_kernel(input_strings, output_col):
+        # test the string function with a udf_string as input
         id = cuda.grid(1)
         if id < size:
             st = input_strings[id]

@@ -1433,7 +1433,7 @@ def test_concat_decimal_series(ltype, rtype):
 
 @pytest.mark.parametrize(
     "df1, df2, df3, expected",
-    [ 
+    [
         (
             gd.DataFrame(
                 {"val": [Decimal("42.5"), Decimal("8.7")]},
@@ -1679,7 +1679,7 @@ def test_concat_decimal_numeric_series(s1, s2, s3, expected):
             gd.Series(
                 [Decimal("955.22"), Decimal("8.2")], dtype=Decimal64Dtype(5, 2)
             ),
-            gd.Series(["2007-06-12", "2006-03-14"], dtype="datetime64"),
+            gd.Series(["2007-06-12", "2006-03-14"], dtype="datetime64[s]"),
             gd.Series(
                 [
                     "955.22",

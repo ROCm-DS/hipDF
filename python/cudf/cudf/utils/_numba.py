@@ -29,7 +29,7 @@ def _get_ptx_file(path, prefix):
         # cc=60 ptx is always built
         cc = int(os.environ.get("STRINGS_UDF_CC", "60"))
     else:
-        import numba.cuda as cuda
+        from numba import cuda
 
         dev = cuda.get_current_device()
 
@@ -182,7 +182,7 @@ def _get_cuda_version_from_ptx_file(path):
     return cuda_ver
 
 
-# HIP implementation
+# NOTE(HIP/AMD): Implementation of _get_ptx_file
 
 del _get_ptx_file
 

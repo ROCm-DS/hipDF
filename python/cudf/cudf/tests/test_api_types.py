@@ -90,7 +90,7 @@ from cudf.api import types
         (cudf.CategoricalDtype("a"), True),
         (cudf.ListDtype(int), False),
         (cudf.StructDtype({"a": int}), False),
-        (cudf.Decimal128Dtype(5, 2), False),  
+        (cudf.Decimal128Dtype(5, 2), False),
         (cudf.Decimal64Dtype(5, 2), False),
         (cudf.Decimal32Dtype(5, 2), False),
         (cudf.IntervalDtype(int), False),
