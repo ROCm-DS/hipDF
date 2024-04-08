@@ -688,13 +688,13 @@ class NumericalColumn(NumericalBaseColumn):
                 # TODO(HIP/AMD): We remove np.iinfo(np.int64).max from the column for the checks
                 # because both on CUDA side as well as on Pandas
                 # np.iinfo(np.int64).max is downcasted to float, *although this results in a loss of precision/rounding up*:
-                # On CUDA/Pandas: np.iinfo(np.int64).max == 9223372036854775807 -> (as float) 9223372036854775808.000000 -> (when casted back to int64) 9223372036854775807
+                # On CUDA/Pandas: np.iinfo(np.int64).max == 9223372036854775807 -> (as float) 9223372036854775808.000000 -> (when casted back to int64) 9223372036854775808
                 # On AMD: np.iinfo(np.int64).max == 9223372036854775807 -> (as float) 9223372036854775808.000000 -> (when casted back to int64) -9223372036854775808 or 4890909195324358656
                 # Because of the different cast behavior on AMD side, the following return would return false, preventing downcast to float in some instances (unlike pandas/CUDA cudf).
                 # One may argue that because the cast from float 9223372036854775808 to int64 is UB in the first place (overflow), AMD actually behaves correctly.
                 # Yet, to stay as closely as possible to how CUDA cuDF and Pandas behave, we exclude np.iinfo(np.int64).max from the column before checking 
                 # if the cast is safe.
-                # This fixes the unit tests test_to_numeric_downcast_* for downcast=float in test_numerical.py.
+                # This fixes the unit test test_to_numeric_downcast_int for downcast=float in test_numerical.py.
                 s = cudf.Series(self)
                 non_maxs = s[~((s == np.iinfo(np.int64).max))]
                 col = non_maxs._column
