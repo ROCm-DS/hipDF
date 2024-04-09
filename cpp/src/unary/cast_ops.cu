@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column.hpp>
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/detail/binaryop.hpp>
@@ -34,6 +56,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <cuda/std/cmath>
+
 #include <thrust/transform.h>
 
 namespace cudf {
@@ -41,10 +65,34 @@ namespace detail {
 namespace {  // anonymous namespace
 template <typename _TargetT>
 struct unary_cast {
+  // NOTE(HIP): We treat casts from floating point types to integral types specially, 
+  // as the cast behaviour from nan float to an integer is UB in C++.
+  // This fixes the unit test test_isin_numeric in test_series.py (for the Python backend),
+  // in which this UB is triggered by casting a nan floating point value to an int64.
+  // On AMD GPUs, the result of this cast operation happens to be 0 which (by chance) matches 
+  // the value of the input data in the unit test. Therefore, the test would fail, although
+  // nan != 0. In the below code, we therefore explicitly handle the casts of nan values
+  // to integer values. 
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
-    std::enable_if_t<(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>())>* = nullptr>
+    std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>())>* = nullptr>
+  __device__ inline TargetT operator()(SourceT const element)
+  {
+    TargetT res;
+    if(cuda::std::isnan(element)) {
+      res = cuda::std::numeric_limits<TargetT>::max();
+    }
+    else {
+      res = static_cast<TargetT>(element);
+    }
+    return res;
+  }
+
+  template <
+    typename SourceT,
+    typename TargetT                                                                = _TargetT,
+    std::enable_if_t<(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>() && !(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>()))>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
     return static_cast<TargetT>(element);
