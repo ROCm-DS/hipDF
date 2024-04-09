@@ -70,9 +70,11 @@ struct unary_cast {
   // This fixes the unit test test_isin_numeric in test_series.py (for the Python backend),
   // in which this UB is triggered by casting a nan floating point value to an int64.
   // On AMD GPUs, the result of this cast operation happens to be 0 which (by chance) matches 
-  // the value of the input data in the unit test. Therefore, the test would fail, although
-  // nan != 0. In the below code, we therefore explicitly handle the casts of nan values
-  // to integer values. 
+  // the value of the input data in the unit test. This result would make the test fail,
+  // as "static_cast<long>(nan) != 0" is expected by the test (which is the case on CUDA).
+  // In the below code, we therefore explicitly handle the casts of nan values
+  // to integer values, thus addressing the UB.
+  // Yet, this may have to be revisited later in case it has a non-negligible impact on performance.
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
