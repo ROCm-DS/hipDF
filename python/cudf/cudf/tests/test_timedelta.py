@@ -509,7 +509,7 @@ def test_timedelta_series_ops_with_scalars(data, other_scalars, dtype, op):
 # On CUDA, x % 0 returns -1, so the test fails expectedly (that is why it
 # originally is marked as xfail).
 # With HIP/AMD, x % 0 == x holds which matches Pandas' behavior.
-# We therefore no longer mark the test as xfail for HIP/AMD.
+# We therefore force the test to xfail for HIP/AMD by raising an exception.
 # CAUTION: The fundamental behaviour of 'x % 0' remains undefined,
 # so for future compiler releases
 # or Pandas versions, this test may need to be changed again.
@@ -517,7 +517,17 @@ def test_timedelta_series_ops_with_scalars(data, other_scalars, dtype, op):
     "reverse",
     [
         False,
-        True
+        pytest.param(
+            True,
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason=(
+                    "timedelta modulo by zero is dubiously defined in "
+                    "both pandas and cuDF "
+                    "(see https://github.com/rapidsai/cudf/issues/5938)"
+                ),
+            ),
+        ),
     ],
 )
 def test_timedelta_series_mod_with_scalar_zero(reverse):
@@ -630,7 +640,7 @@ def test_timedelta_series_ops_with_cudf_scalars(data, cpu_scalar, dtype, op):
 # On CUDA, x % 0 returns -1, so the test fails expectedly (that is why it
 # originally is marked as xfail).
 # With HIP/AMD, x % 0 == x holds which matches Pandas' behavior.
-# We therefore no longer mark the test as xfail for HIP/AMD.
+# We therefore force the test to xfail for HIP/AMD by raising an exception.
 # CAUTION: The fundamental behaviour of 'x % 0' remains undefined,
 # so for future compiler releases
 # or Pandas versions, this test may need to be changed again.
@@ -638,7 +648,17 @@ def test_timedelta_series_ops_with_cudf_scalars(data, cpu_scalar, dtype, op):
     "reverse",
     [
         False,
-        True
+        pytest.param(
+            True,
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason=(
+                    "timedelta modulo by zero is dubiously defined in "
+                    "both pandas and cuDF "
+                    "(see https://github.com/rapidsai/cudf/issues/5938)"
+                ),
+            ),
+        ),
     ],
 )
 def test_timedelta_series_mod_with_cudf_scalar_zero(reverse):
