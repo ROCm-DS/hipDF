@@ -84,7 +84,7 @@ def make_cache_key(udf, sig):
     return names, constants, codebytes, cvarbytes, sig
 
 
-def compile_udf(udf, type_signature):
+def compile_udf(udf, type_signature, **options):
     """Compile ``udf`` with `numba`
 
     Compile a python callable function ``udf`` with
