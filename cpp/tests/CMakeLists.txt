@@ -321,7 +321,6 @@ ConfigureTest(
 
 # ##################################################################################################
 # * io tests --------------------------------------------------------------------------------------
-# TODO(HIP/AMD): Enable
 ConfigureTest(DECOMPRESSION_TEST io/comp/decomp_test.cpp)
 ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
