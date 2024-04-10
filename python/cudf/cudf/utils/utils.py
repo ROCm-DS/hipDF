@@ -8,7 +8,9 @@ import traceback
 import warnings
 from functools import partial
 from typing import FrozenSet, Set, Union
-
+# NOTE(HIP/AMD): Avoid errors in test_timedelta.py, test_udf_masked_ops.py and test_binops.py
+# NameError: name 'pd' is not defined
+import pandas as pd 
 import numpy as np
 #: from nvtx import annotate #: TODO: HIP/AMD use roctx
 def annotate(*args,**kwargs):
