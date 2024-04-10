@@ -64,34 +64,35 @@ function(ConfigureTest CMAKE_TEST_NAME)
   endif()
 
   add_executable(${CMAKE_TEST_NAME} ${_CUDF_TEST_UNPARSED_ARGUMENTS})
+
   if (CUDA_BACKEND)
     set_target_properties(
       ${CMAKE_TEST_NAME}
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
-                 INSTALL_RPATH "\$ORIGIN/../../../lib"
-                 CXX_STANDARD 17
-                 CXX_STANDARD_REQUIRED ON
-                 # For std:: support of __int128_t. Can be removed once using cuda::std
-                 CXX_EXTENSIONS ON
-                 CUDA_STANDARD 17
-                 CUDA_STANDARD_REQUIRED ON
+                INSTALL_RPATH "\$ORIGIN/../../../lib"
+                CXX_STANDARD 17
+                CXX_STANDARD_REQUIRED ON
+                # For std:: support of __int128_t. Can be removed once using cuda::std
+                CXX_EXTENSIONS ON
+                CUDA_STANDARD 17
+                CUDA_STANDARD_REQUIRED ON
     )
-
     target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "CUDA_BACKEND" "RMM_USE_CUDA")
-  else()
+  else ()
     set_target_properties(
       ${CMAKE_TEST_NAME}
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
-                 INSTALL_RPATH "\$ORIGIN/../../../lib"
-                 CXX_STANDARD 20
-                 CXX_STANDARD_REQUIRED ON
-                 # For std:: support of __int128_t. Can be removed once using cuda::std
-                 CXX_EXTENSIONS ON
-                 HIP_STANDARD 20
-                 HIP_STANDARD_REQUIRED ON
+                  INSTALL_RPATH "\$ORIGIN/../../../lib"
+                  CXX_STANDARD 20
+                  CXX_STANDARD_REQUIRED ON
+                  # For std:: support of __int128_t. Can be removed once using cuda::std
+                  CXX_EXTENSIONS ON
+                  HIP_STANDARD 20
+                  HIP_STANDARD_REQUIRED ON
     )
     target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "HIP_BACKEND" "RMM_USE_HIP")
   endif()
+
   target_link_libraries(
     ${CMAKE_TEST_NAME}
     PRIVATE cudf::cudftestutil
@@ -246,9 +247,7 @@ ConfigureTest(
 # ##################################################################################################
 # * quantiles tests -------------------------------------------------------------------------------
 ConfigureTest(
-  QUANTILES_TEST 
-  quantiles/percentile_approx_test.cpp 
-  quantiles/quantile_test.cpp
+  QUANTILES_TEST quantiles/percentile_approx_test.cpp quantiles/quantile_test.cpp
   quantiles/quantiles_test.cpp
   GPUS 1
   PERCENT 70 EXTRA_LIBS ${ARROW_LIBRARIES}
