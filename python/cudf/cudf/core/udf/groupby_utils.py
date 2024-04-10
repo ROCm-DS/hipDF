@@ -4,7 +4,7 @@
 import cupy as cp
 import numpy as np
 from numba import cuda, types
-from numba.core.errors import TypingError
+from numba.core.errors import TypingError, NumbaPendingDeprecationWarning
 from numba.cuda.cudadrv.devices import get_context
 from numba.np import numpy_support
 
@@ -225,5 +225,10 @@ def _can_be_jitted(frame, func, args):
     try:
         _get_udf_return_type(dataframe_group_type, func, args)
         return True
-    except TypingError:
+    except (
+        TypingError,
+        NumbaPendingDeprecationWarning,  # TODO(HIP/AMD): fix for NUMBA_CAPTURED_ERRORS='old_style', see below for more details.
+        KeyError,  # TODO(HIP/AMD): fix for NUMBA_CAPTURED_ERRORS='new_style', see below for more details.
+        # TODO(HIP/AMD): Catching NumbaPendingDeprecationWarning and KeyError is temporary fix for https://github.com/rapidsai/cudf/issues/14160 that is caused by Numba 0.58+ related changes until we are up-to-date with cudf 24.02 (see PR: https://github.com/rapidsai/cudf/pull/13854)
+    ):
         return False
