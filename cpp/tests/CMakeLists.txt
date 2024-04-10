@@ -385,9 +385,9 @@ ConfigureTest(
 # ##################################################################################################
 # * span tests -------------------------------------------------------------------------------
 
-# # This test must be split into two executables so that one can use the preload library and one does
-# # not. The one that doesn't includes a thrust::device_vector copy, which is always synchronous on
-# # the default stream and is out of libcudf's control (but must be tested).
+# This test must be split into two executables so that one can use the preload library and one does
+# not. The one that doesn't includes a thrust::device_vector copy, which is always synchronous on
+# the default stream and is out of libcudf's control (but must be tested).
 set(_allowlist_filter SpanTest.CanConstructFromDeviceContainers)
 
 ConfigureTest(SPAN_TEST utilities_tests/span_tests.hip)
@@ -444,7 +444,7 @@ ConfigureTest(
 # ##################################################################################################
 # * sorted-merge tests ----------------------------------------------------------------------------
 ConfigureTest(
-  MERGE_TEST merge/merge_test.cpp merge/merge_dictionary_test.cpp merge/merge_string_test.cpp
+   MERGE_TEST merge/merge_test.cpp merge/merge_dictionary_test.cpp merge/merge_string_test.cpp
 )
 
 # ##################################################################################################
