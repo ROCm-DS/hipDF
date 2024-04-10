@@ -81,14 +81,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    TargetT res;
-    if(cuda::std::isnan(element)) {
-      res = cuda::std::numeric_limits<TargetT>::max();
-    }
-    else {
-      res = static_cast<TargetT>(element);
-    }
-    return res;
+    return (cuda::std::isnan(element)) ? cuda::std::numeric_limits<TargetT>::max() : static_cast<TargetT>(element);
   }
 
   template <
