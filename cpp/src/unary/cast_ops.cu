@@ -65,7 +65,7 @@ namespace detail {
 namespace {  // anonymous namespace
 template <typename _TargetT>
 struct unary_cast {
-  // NOTE(HIP): We treat casts from floating point types to integral types specially, 
+  // NOTE(HIP/AMD): We treat casts from floating point types to integral types specially, 
   // as the cast behaviour from nan float to an integer is UB in C++.
   // This fixes the unit test test_isin_numeric in test_series.py (for the Python backend),
   // in which this UB is triggered by casting a nan floating point value to an int64.
