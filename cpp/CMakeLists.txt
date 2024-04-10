@@ -13,7 +13,6 @@
 # =============================================================================
 
 cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
-set( AMDGPU_TARGETS "gfx90a" CACHE STRING "Compile for gfx90a only")
 include(../fetch_rapids.cmake)
 include(rapids-cmake)
 include(rapids-cpm)
@@ -29,13 +28,14 @@ else()
   rapids_hip_init_architectures(HIPDF)
 endif()
 
-project(
-  HIPDF 
-  VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
-  LANGUAGES C CXX
-)
-
+# NOTE(HIP/AMD/CUDA): rapids_*_init_architectures relies on HIP/CUDA compiler being set
+# during project call (project call is essentially calling back rapids-cmake to determine+set architecture)
 if(CUDA_BACKEND)
+  project(
+    HIPDF 
+    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+    LANGUAGES C CXX CUDA
+  )
   enable_language(CUDA)
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
     message(
@@ -46,7 +46,15 @@ if(CUDA_BACKEND)
 
   option(USE_NVTX "Build with NVTX support" ON)
 else()
+  project(
+    HIPDF 
+    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+    LANGUAGES C CXX HIP
+  )
   enable_language(HIP)
+  # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
+  # This ensures that those packages are compiled with the same architecture flags.
+  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 endif()
 
 # Needed because GoogleBenchmark changes the state of FindThreads.cmake, causing subsequent runs to
@@ -741,13 +749,6 @@ if(CUDA_BACKEND)
   target_compile_definitions(hipdf PRIVATE "RMM_USE_CUDA")
 else()
   target_compile_definitions(hipdf PRIVATE "RMM_USE_HIP")
-
-  #: Specify offload arch for CXX compiler too (hipcc/AMD clang++).
-  #: TODO(HIP/AMD): assumes that the CXX Compiler is hipcc/AMD clang++.
-  set(_offload_arch_arg "--offload-arch=${AMDGPU_TARGETS}")
-  string(REPLACE ";"  "," offload_arch_arg "${_offload_arch_arg}")
-  target_compile_options(hipcomp PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
-  target_compile_options(hipdf PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${offload_arch_arg}>>")
 endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of hipdf we are building so it can compute a cal-ver cache
