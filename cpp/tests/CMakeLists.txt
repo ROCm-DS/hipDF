@@ -95,7 +95,6 @@ ConfigureTest(
 
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
-# TODO(HIP/AMD): Enable 
 ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.hip)
 
 # ##################################################################################################
@@ -264,7 +263,6 @@ ConfigureTest(
 
 # ##################################################################################################
 # * io tests --------------------------------------------------------------------------------------
-# TODO(HIP/AMD): Enable
 ConfigureTest(DECOMPRESSION_TEST io/comp/decomp_test.cpp)
 ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
@@ -604,17 +602,16 @@ ConfigureTest(STREAM_COPYING_TEST streams/copying_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_FILLING_TEST streams/filling_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_GROUPBY_TEST streams/groupby_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_HASHING_TEST streams/hash_test.cpp STREAM_MODE testing)
-# ConfigureTest(STREAM_INTEROP_TEST streams/interop_test.cpp STREAM_MODE testing) # TODO(HIP/AMD): Enable to upgrade to branch-23.10
+ConfigureTest(STREAM_INTEROP_TEST streams/interop_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_REPLACE_TEST streams/replace_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_SEARCH_TEST streams/search_test.cpp STREAM_MODE testing)
-# TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
-# ConfigureTest(STREAM_DICTIONARY_TEST streams/dictionary_test.cpp STREAM_MODE testing)
-# ConfigureTest(
-#   STREAM_STRINGS_TEST streams/strings/case_test.cpp streams/strings/find_test.cpp STREAM_MODE
-#   testing
-# )
-# ConfigureTest(STREAM_SORTING_TEST streams/sorting_test.cpp STREAM_MODE testing)
-# ConfigureTest(STREAM_TEXT_TEST streams/text/ngrams_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_DICTIONARY_TEST streams/dictionary_test.cpp STREAM_MODE testing)
+ConfigureTest(
+  STREAM_STRINGS_TEST streams/strings/case_test.cpp streams/strings/find_test.cpp STREAM_MODE
+  testing
+)
+ConfigureTest(STREAM_SORTING_TEST streams/sorting_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_TEXT_TEST streams/text/ngrams_test.cpp STREAM_MODE testing)
 
 # ##################################################################################################
 # Install tests ####################################################################################
