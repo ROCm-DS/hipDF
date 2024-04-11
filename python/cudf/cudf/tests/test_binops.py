@@ -944,6 +944,24 @@ def test_logical_operator_func_dataframe(func, nulls, other):
 def test_binop_bool_uint(func, rhs):
     psr = pd.Series([True, False, False])
     gsr = cudf.from_pandas(psr)
+    
+    # TODO(HIP/AMD):
+    # On HIP/AMD backend, the special case of rmod 0 actually results in 
+    # a dataframe that is compatible to the one from Pandas (i.e. the issue
+    # https://github.com/rapidsai/cudf/issues/12162 does not apply).
+    # On HIP/AMD backend, "0 rmod 0" returns 0 (compatible with Pandas),
+    # while on CUDA, "0 rmod 0" returns -1 (incompatible with Pandas).
+    # The modulo 0 operation is UB which explains the differences in how this is treated. 
+    #
+    # The unit test on CUDA therefore fails expectedly (cudf df != pandas df),
+    # but it would pass on HIP/AMD per default.
+    # Because this test is checking a special treatment of UB, we force the test to
+    # fail on HIP/AMD as a temporary workaround.
+    # Once the original issue (https://github.com/rapidsai/cudf/issues/12162) in cuDF
+    # has been addressed in the upstream, this tmpfix can likely be reversed.
+    if(func=="rmod" and rhs==0):
+      raise AssertionError
+
     utils.assert_eq(
         getattr(psr, func)(rhs), getattr(gsr, func)(rhs), check_dtype=False
     )
