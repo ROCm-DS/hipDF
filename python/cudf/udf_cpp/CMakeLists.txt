@@ -138,14 +138,20 @@ else()
 
   # always build a default PTX file in case RAPIDS_NO_INITIALIZE is set and the device cc can't be
   # safely queried through a context
+  # TODO(HIP/AMD): We likely need to revise this/improve how the architecture is set.
+  # A problem would arise if CMAKE_HIP_ARCHITECTURES contains full arch specs 
+  # such as gfx90a:sramecc+:xnack-
   list(INSERT CMAKE_HIP_ARCHITECTURES 0 "gfx90a")
+  list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx942")
   # list(INSERT CMAKE_HIP_ARCHITECTURES 1 "gfx908")
+  
   list(SORT CMAKE_HIP_ARCHITECTURES)
+
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES) # TODO(HIP/AMD): User might specify 'gfx90a:xnack-:sramecc+'.
 
   set(tgt "shim_") # NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
   add_library(${tgt} OBJECT shim.hip)
-  set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES ${CMAKE_HIP_ARCHITECTURES})
+  set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")
   target_compile_options(${tgt} PRIVATE "$<$<COMPILE_LANGUAGE:HIP>:${SHIM_HIP_FLAGS}>")
