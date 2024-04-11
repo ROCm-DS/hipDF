@@ -96,10 +96,10 @@ dependencies:
 - pydata-sphinx-theme
 - pyorc
 - pytest==7.4.4
-- pytest-benchmark
-- pytest-cases
-- pytest-cov
-- pytest-xdist
+- pytest-benchmark=4.0.0
+- pytest-cases==3.8.1
+- pytest-cov==4.1.0
+- pytest-xdist==3.5.0
 - python-confluent-kafka>=1.9.0,<1.10.0a0
 - python-snappy>=0.6.0
 - python>=3.9,<3.11
