@@ -1,4 +1,6 @@
-# Copyright (c) 2018-2023, NVIDIA CORPORATION.
+# Copyright (c) 2018-2024, NVIDIA CORPORATION.
+# Modifications Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.
+# NOTE(HIP/AMD): This file merges parts of branch-23.08 with branch-24.06.
 
 import math
 import textwrap
@@ -22,11 +24,12 @@ from dask.utils import M, OperatorMethodMixin, apply, derived_from, funcname
 
 import cudf
 from cudf import _lib as libcudf
-from cudf.utils.utils import _dask_cudf_nvtx_annotate
+from cudf.utils.utils import _dask_cudf_nvtx_annotate # NOTE(HIP/AMD): This is the import for branch-23.10
+#: from cudf.utils.nvtx_annotation import _dask_cudf_nvtx_annotate # NOTE(HIP/AMD): This is the import from branch-24.06
 
 from dask_cudf import sorting
 from dask_cudf.accessors import ListMethods, StructMethods
-from dask_cudf.sorting import _get_shuffle_type
+from dask_cudf.sorting import _deprecate_shuffle_kwarg, _get_shuffle_method
 
 
 class _Frame(dd.core._Frame, OperatorMethodMixin):
@@ -113,17 +116,22 @@ class DataFrame(_Frame, dd.core.DataFrame):
             do_apply_rows, func, incols, outcols, kwargs, meta=meta
         )
 
+    @_deprecate_shuffle_kwarg
     @_dask_cudf_nvtx_annotate
-    def merge(self, other, shuffle=None, **kwargs):
+    def merge(self, other, shuffle_method=None, **kwargs):
         on = kwargs.pop("on", None)
         if isinstance(on, tuple):
             on = list(on)
         return super().merge(
-            other, on=on, shuffle=_get_shuffle_type(shuffle), **kwargs
+            other,
+            on=on,
+            shuffle_method=_get_shuffle_method(shuffle_method),
+            **kwargs,
         )
 
+    @_deprecate_shuffle_kwarg
     @_dask_cudf_nvtx_annotate
-    def join(self, other, shuffle=None, **kwargs):
+    def join(self, other, shuffle_method=None, **kwargs):
         # CuDF doesn't support "right" join yet
         how = kwargs.pop("how", "left")
         if how == "right":
@@ -133,14 +141,23 @@ class DataFrame(_Frame, dd.core.DataFrame):
         if isinstance(on, tuple):
             on = list(on)
         return super().join(
-            other, how=how, on=on, shuffle=_get_shuffle_type(shuffle), **kwargs
+            other,
+            how=how,
+            on=on,
+            shuffle_method=_get_shuffle_method(shuffle_method),
+            **kwargs,
         )
 
+    @_deprecate_shuffle_kwarg
     @_dask_cudf_nvtx_annotate
     def set_index(
-        self, other, sorted=False, divisions=None, shuffle=None, **kwargs
+        self,
+        other,
+        sorted=False,
+        divisions=None,
+        shuffle_method=None,
+        **kwargs,
     ):
-
         pre_sorted = sorted
         del sorted
 
@@ -152,7 +169,6 @@ class DataFrame(_Frame, dd.core.DataFrame):
                 and cudf.api.types.is_string_dtype(self[other].dtype)
             )
         ):
-
             # Let upstream-dask handle "pre-sorted" case
             if pre_sorted:
                 return dd.shuffle.set_sorted_index(
@@ -174,7 +190,7 @@ class DataFrame(_Frame, dd.core.DataFrame):
                 divisions=divisions,
                 set_divisions=True,
                 ignore_index=True,
-                shuffle=shuffle,
+                shuffle_method=shuffle_method,
             )
 
             # Ignore divisions if its a dataframe
@@ -201,11 +217,12 @@ class DataFrame(_Frame, dd.core.DataFrame):
         return super().set_index(
             other,
             sorted=pre_sorted,
-            shuffle=_get_shuffle_type(shuffle),
+            shuffle_method=_get_shuffle_method(shuffle_method),
             divisions=divisions,
             **kwargs,
         )
 
+    @_deprecate_shuffle_kwarg
     @_dask_cudf_nvtx_annotate
     def sort_values(
         self,
@@ -218,7 +235,7 @@ class DataFrame(_Frame, dd.core.DataFrame):
         na_position="last",
         sort_function=None,
         sort_function_kwargs=None,
-        shuffle=None,
+        shuffle_method=None,
         **kwargs,
     ):
         if kwargs:
@@ -235,7 +252,7 @@ class DataFrame(_Frame, dd.core.DataFrame):
             ignore_index=ignore_index,
             ascending=ascending,
             na_position=na_position,
-            shuffle=shuffle,
+            shuffle_method=shuffle_method,
             sort_function=sort_function,
             sort_function_kwargs=sort_function_kwargs,
         )
@@ -288,11 +305,12 @@ class DataFrame(_Frame, dd.core.DataFrame):
         else:
             return _parallel_var(self, meta, skipna, split_every, out)
 
+    @_deprecate_shuffle_kwarg
     @_dask_cudf_nvtx_annotate
-    def shuffle(self, *args, shuffle=None, **kwargs):
+    def shuffle(self, *args, shuffle_method=None, **kwargs):
         """Wraps dask.dataframe DataFrame.shuffle method"""
         return super().shuffle(
-            *args, shuffle=_get_shuffle_type(shuffle), **kwargs
+            *args, shuffle_method=_get_shuffle_method(shuffle_method), **kwargs
         )
 
     @_dask_cudf_nvtx_annotate
@@ -694,7 +712,10 @@ from_cudf.__doc__ = (
         rather than pandas objects.\n
         """
     )
-    + textwrap.dedent(dd.from_pandas.__doc__)
+    # TODO: `dd.from_pandas.__doc__` is empty when
+    # `DASK_DATAFRAME__QUERY_PLANNING=True`
+    # since dask-expr does not provide a docstring for from_pandas.
+    + textwrap.dedent(dd.from_pandas.__doc__ or "")
 )
 
 
