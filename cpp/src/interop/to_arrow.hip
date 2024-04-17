@@ -153,7 +153,7 @@ std::shared_ptr<arrow::Array> unsupported_decimals_to_arrow(column_view input,
                                                             arrow::MemoryPool* ar_mr,
                                                             rmm::cuda_stream_view stream)
 {
-  constexpr size_type BIT_WIDTH_RATIO = 2;  // TODO(HIP/AMD): constexpr size_type BIT_WIDTH_RATIO = sizeof(__int128_t) / sizeof(DeviceType);
+  constexpr size_type BIT_WIDTH_RATIO = sizeof(__int128_t) / sizeof(DeviceType);
 
   rmm::device_uvector<DeviceType> buf(input.size() * BIT_WIDTH_RATIO, stream);
 
