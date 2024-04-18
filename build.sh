@@ -18,13 +18,14 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 #TODO(HIP/AMD): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf hipdf benchmarks -v -g -n -h"
-HELP="$0 [clean] [libhipdf] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
+VALIDARGS="clean libhipdf hipdf benchmarks tests -v -g -n -h"
+HELP="$0 [clean] [libhipdf] [hipdf] [benchmarks] [tests] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
    hipdf                         - build the hipdf Python package			   
    libhipdf                      - build the hipdf C++ code only
    benchmarks                    - build benchmarks
+   tests                         - build tests
    -v                            - verbose build mode
    -g                            - build for debug
    -n                            - no install step (does not affect Python)
@@ -81,7 +82,7 @@ INSTALL_TARGET=install
 BUILD_BENCHMARKS=OFF
 BUILD_ALL_GPU_ARCH=0
 BUILD_NVTX=OFF
-BUILD_TESTS=ON
+BUILD_TESTS=ON # TODO(HIP/AMD): some scripts still rely on this default behavior, set to OFF in the future
 BUILD_DISABLE_DEPRECATION_WARNINGS=ON
 BUILD_PER_THREAD_DEFAULT_STREAM=OFF
 BUILD_REPORT_METRICS=OFF

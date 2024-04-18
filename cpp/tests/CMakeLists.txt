@@ -12,68 +12,82 @@
 # the License.
 # =============================================================================
 
+# ##################################################################################################
+# enable testing ################################################################################
+# ##################################################################################################
+enable_testing()
+
+include(rapids-test)
+rapids_test_init()
 
 # This function takes in a test name and test source and handles setting all of the associated
 # properties and linking to build the test
 function(ConfigureTest CMAKE_TEST_NAME)
   set(options)
-  set(one_value STREAM_MODE)
+  set(one_value GPUS PERCENT STREAM_MODE)
   set(multi_value)
   cmake_parse_arguments(_HIPDF_TEST "${options}" "${one_value}" "${multi_value}" ${ARGN})
-
+  if(NOT DEFINED _HIPDF_TEST_GPUS AND NOT DEFINED _HIPDF_TEST_PERCENT)
+    set(_HIPDF_TEST_GPUS 1)
+    set(_HIPDF_TEST_PERCENT 15)
+  endif()
+  if(NOT DEFINED _HIPDF_TEST_GPUS)
+    set(_HIPDF_TEST_GPUS 1)
+  endif()
+  if(NOT DEFINED _HIPDF_TEST_PERCENT)
+    set(_HIPDF_TEST_PERCENT 100)
+  endif()
   if(NOT DEFINED _HIPDF_TEST_STREAM_MODE)
     set(_HIPDF_TEST_STREAM_MODE hipdf)
   endif()
 
   add_executable(${CMAKE_TEST_NAME} ${_HIPDF_TEST_UNPARSED_ARGUMENTS})
+
   if (CUDA_BACKEND)
     set_target_properties(
       ${CMAKE_TEST_NAME}
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/gtests>"
-                 INSTALL_RPATH "\$ORIGIN/../../../lib"
-                 CXX_STANDARD 17
-                 CXX_STANDARD_REQUIRED ON
-                 # For std:: support of __int128_t. Can be removed once using hip::std
-                 CXX_EXTENSIONS ON
-                 CUDA_STANDARD 17
-                 CUDA_STANDARD_REQUIRED ON
+                INSTALL_RPATH "\$ORIGIN/../../../lib"
+                CXX_STANDARD 17
+                CXX_STANDARD_REQUIRED ON
+                # For std:: support of __int128_t. Can be removed once using hip::std
+                CXX_EXTENSIONS ON
+                CUDA_STANDARD 17
+                CUDA_STANDARD_REQUIRED ON
     )
-
     target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "CUDA_BACKEND" "RMM_USE_CUDA")
-  else()
+  else ()
     set_target_properties(
       ${CMAKE_TEST_NAME}
       PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/gtests>"
-                 INSTALL_RPATH "\$ORIGIN/../../../lib"
-                 CXX_STANDARD 20
-                 CXX_STANDARD_REQUIRED ON
-                 # For std:: support of __int128_t. Can be removed once using hip::std
-                 CXX_EXTENSIONS ON
-                 HIP_STANDARD 20
-                 HIP_STANDARD_REQUIRED ON
+                  INSTALL_RPATH "\$ORIGIN/../../../lib"
+                  CXX_STANDARD 20
+                  CXX_STANDARD_REQUIRED ON
+                  # For std:: support of __int128_t. Can be removed once using hip::std
+                  CXX_EXTENSIONS ON
+                  HIP_STANDARD 20
+                  HIP_STANDARD_REQUIRED ON
     )
     target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "HIP_BACKEND" "RMM_USE_HIP")
   endif()
+
   target_link_libraries(
     ${CMAKE_TEST_NAME} PRIVATE hipdftestutil GTest::gmock_main GTest::gtest_main
                                $<TARGET_NAME_IF_EXISTS:conda_env>
   )
-  # TODO(HIP/AMD): Is this needed?
-  #target_include_directories(${CMAKE_TEST_NAME}
-  #  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
-  #  "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>")
-  add_test(NAME ${CMAKE_TEST_NAME} COMMAND ${CMAKE_TEST_NAME})
-  set_tests_properties(
-     ${CMAKE_TEST_NAME}
-     PROPERTIES
-       ENVIRONMENT
-       "GTEST_CUDF_STREAM_MODE=new_${_HIPDF_TEST_STREAM_MODE}_default;LD_PRELOAD=$<TARGET_FILE:hipdf_identify_stream_usage_mode_${_HIPDF_TEST_STREAM_MODE}>"
+  rapids_test_add(
+    NAME ${CMAKE_TEST_NAME}
+    COMMAND ${CMAKE_TEST_NAME}
+    GPUS ${_HIPDF_TEST_GPUS}
+    PERCENT ${_HIPDF_TEST_PERCENT}
+    INSTALL_COMPONENT_SET testing
   )
-  install(
-    TARGETS ${CMAKE_TEST_NAME}
-    COMPONENT testing
-    DESTINATION bin/gtests/libhipdf
-    EXCLUDE_FROM_ALL
+
+  set_tests_properties(
+    ${CMAKE_TEST_NAME}
+    PROPERTIES
+      ENVIRONMENT
+      "GTEST_CUDF_STREAM_MODE=new_${_HIPDF_TEST_STREAM_MODE}_default;LD_PRELOAD=$<TARGET_FILE:hipdf_identify_stream_usage_mode_${_HIPDF_TEST_STREAM_MODE}>"
   )
 endfunction()
 
@@ -146,6 +160,8 @@ ConfigureTest(
   groupby/sum_tests.cpp
   groupby/tdigest_tests.hip
   groupby/var_tests.cpp
+  GPUS 1
+  PERCENT 100
 )
 
 # ##################################################################################################
@@ -179,6 +195,8 @@ ConfigureTest(
 ConfigureTest(
   PARTITIONING_TEST partitioning/hash_partition_test.cpp partitioning/round_robin_test.cpp
   partitioning/partition_test.cpp
+  GPUS 1
+  PERCENT 70
 )
 
 # ##################################################################################################
@@ -190,6 +208,8 @@ ConfigureTest(HASH_MAP_TEST hash_map/map_test.hip)
 ConfigureTest(
   QUANTILES_TEST quantiles/percentile_approx_test.cpp quantiles/quantile_test.cpp
   quantiles/quantiles_test.cpp
+  GPUS 1
+  PERCENT 70
 )
 
 # ##################################################################################################
@@ -203,6 +223,8 @@ ConfigureTest(
   reductions/segmented_reduction_tests.cpp
   reductions/list_rank_test.cpp
   reductions/tdigest_tests.hip
+  GPUS 1
+  PERCENT 70
 )
 
 # ##################################################################################################
@@ -219,10 +241,7 @@ ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
 
 # ##################################################################################################
 # * fixed_point tests -----------------------------------------------------------------------------
-ConfigureTest(FIXED_POINT_TEST 
-  fixed_point/fixed_point_tests.cpp 
-  fixed_point/fixed_point_tests.hip
-)
+ConfigureTest(FIXED_POINT_TEST fixed_point/fixed_point_tests.cpp fixed_point/fixed_point_tests.hip)
 
 # ##################################################################################################
 # * unary tests -----------------------------------------------------------------------------------
@@ -268,18 +287,28 @@ ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
 ConfigureTest(
   CSV_TEST io/csv_test.cpp
+  GPUS 1
+  PERCENT 30
 )
  ConfigureTest(
   FILE_IO_TEST io/file_io_test.cpp
+  GPUS 1
+  PERCENT 30
 )
 ConfigureTest(
   ORC_TEST io/orc_test.cpp
+  GPUS 1
+  PERCENT 30
 )
 ConfigureTest(
   PARQUET_TEST io/parquet_test.cpp io/parquet_chunked_reader_test.cpp
+  GPUS 1
+  PERCENT 30
 )
 ConfigureTest(
   JSON_TEST io/json_test.cpp io/json_chunked_reader.cpp
+  GPUS 1
+  PERCENT 30
 )
 ConfigureTest(JSON_WRITER_TEST io/json_writer.cpp)
 ConfigureTest(JSON_TYPE_CAST_TEST io/json_type_cast_test.hip)
@@ -288,20 +317,24 @@ ConfigureTest(ARROW_IO_SOURCE_TEST io/arrow_io_source_test.cpp)
 ConfigureTest(MULTIBYTE_SPLIT_TEST io/text/multibyte_split_test.cpp)
 ConfigureTest(
   DATA_CHUNK_SOURCE_TEST io/text/data_chunk_source_test.cpp
+  GPUS 1
+  PERCENT 30
 )
 target_link_libraries(DATA_CHUNK_SOURCE_TEST PRIVATE ZLIB::ZLIB)
 ConfigureTest(LOGICAL_STACK_TEST io/fst/logical_stack_test.hip)
 ConfigureTest(FST_TEST io/fst/fst_test.hip)
 ConfigureTest(TYPE_INFERENCE_TEST io/type_inference_test.hip)
-if(CUDF_ENABLE_ARROW_S3)
+if(HIPDF_ENABLE_ARROW_S3)
   target_compile_definitions(ARROW_IO_SOURCE_TEST PRIVATE "S3_ENABLED")
 endif()
 
 ##################################################################################################
 # * sort tests ------------------------------------------------------------------------------------
 ConfigureTest(
-  SORT_TEST sort/segmented_sort_tests.cpp sort/sort_nested_types_tests.cpp sort/sort_test.cpp
-  sort/stable_sort_tests.cpp sort/rank_test.cpp
+   SORT_TEST sort/segmented_sort_tests.cpp sort/sort_nested_types_tests.cpp sort/sort_test.cpp
+   sort/stable_sort_tests.cpp sort/rank_test.cpp
+   GPUS 1
+   PERCENT 70
  )
 
 # ##################################################################################################
@@ -332,6 +365,8 @@ ConfigureTest(
   copying/split_tests.cpp
   copying/utility_tests.cpp
   copying/reverse_tests.cpp
+  GPUS 1
+  PERCENT 70
 )
 
 # ##################################################################################################
@@ -350,24 +385,24 @@ ConfigureTest(
 # ##################################################################################################
 # * span tests -------------------------------------------------------------------------------
 
-# This test must be split into two executables so that one can use the preload library and one does
-# not. The one that doesn't includes a thrust::device_vector copy, which is always synchronous on
-# the default stream and is out of libcudf's control (but must be tested).
-# set(_allowlist_filter SpanTest.CanConstructFromDeviceContainers)
+# # This test must be split into two executables so that one can use the preload library and one does
+# # not. The one that doesn't includes a thrust::device_vector copy, which is always synchronous on
+# # the default stream and is out of libcudf's control (but must be tested).
+set(_allowlist_filter SpanTest.CanConstructFromDeviceContainers)
 
 ConfigureTest(SPAN_TEST utilities_tests/span_tests.hip)
 ConfigureTest(SPAN_TEST_DEVICE_VECTOR utilities_tests/span_tests.hip)
 
-# # Overwrite the environments set by ConfigureTest
-# set_tests_properties(
-#   SPAN_TEST
-#   PROPERTIES
-#     ENVIRONMENT
-#     "GTEST_FILTER=-${_allowlist_filter};GTEST_HIPDF_STREAM_MODE=new_hipdf_default;LD_PRELOAD=$<TARGET_FILE:hipdf_identify_stream_usage_mode_hipdf>"
-# )
-# set_tests_properties(
-#   SPAN_TEST_DEVICE_VECTOR PROPERTIES ENVIRONMENT "GTEST_FILTER=${_allowlist_filter}"
-# )
+# Overwrite the environments set by ConfigureTest
+set_tests_properties(
+  SPAN_TEST
+  PROPERTIES
+    ENVIRONMENT
+    "GTEST_FILTER=-${_allowlist_filter};GTEST_HIPDF_STREAM_MODE=new_hipdf_default;LD_PRELOAD=$<TARGET_FILE:hipdf_identify_stream_usage_mode_hipdf>"
+)
+set_tests_properties(
+  SPAN_TEST_DEVICE_VECTOR PROPERTIES ENVIRONMENT "GTEST_FILTER=${_allowlist_filter}"
+)
 
 # ##################################################################################################
 # * iterator tests --------------------------------------------------------------------------------
@@ -395,6 +430,8 @@ ConfigureTest(DEVICE_ATOMICS_TEST device_atomics/device_atomics_test.hip)
 # * transpose tests -------------------------------------------------------------------------------
 ConfigureTest(
   TRANSPOSE_TEST transpose/transpose_test.cpp
+  GPUS 1
+  PERCENT 70
 )
 
 # ##################################################################################################
@@ -438,7 +475,9 @@ ConfigureTest(
    rolling/range_rolling_window_test.cpp
    rolling/range_window_bounds_test.cpp
    rolling/rolling_test.cpp
- )
+   GPUS 1
+   PERCENT 70
+)
 
 # ##################################################################################################
 # * filling test ----------------------------------------------------------------------------------
@@ -585,6 +624,8 @@ ConfigureTest(
   lists/sort_lists_tests.cpp
   lists/stream_compaction/apply_boolean_mask_tests.cpp
   lists/stream_compaction/distinct_tests.cpp
+  GPUS 1
+  PERCENT 70
 )
 
 # ##################################################################################################
@@ -616,5 +657,4 @@ ConfigureTest(STREAM_TEXT_TEST streams/text/ngrams_test.cpp STREAM_MODE testing)
 # ##################################################################################################
 # Install tests ####################################################################################
 # ##################################################################################################
-
-enable_testing()
+rapids_test_install_relocatable(INSTALL_COMPONENT_SET testing DESTINATION bin/gtests/libhipdf)
