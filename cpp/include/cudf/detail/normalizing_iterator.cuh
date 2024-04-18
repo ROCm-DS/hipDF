@@ -296,8 +296,8 @@ struct input_normalator : base_normalator<input_normalator<Integer>, Integer> {
 template <typename Integer>
 struct output_normalator : base_normalator<output_normalator<Integer>, Integer> {
   friend struct base_normalator<output_normalator<Integer>, Integer>;  // for CRTP
-
-  using reference = output_normalator const&;  // required for output iterators
+  // NOTE(HIP/AMD): https://ontrack-internal.amd.com/browse/SWDEV-433015. The original code gives errors in dictionary and copying tests. 
+  using reference = output_normalator;  // required for output iterators
 
   output_normalator()                                    = default;
   output_normalator(output_normalator const&)            = default;
@@ -309,8 +309,7 @@ struct output_normalator : base_normalator<output_normalator<Integer>, Integer> 
    * @brief Indirection operator returns this iterator instance in order
    * to capture the `operator=(Integer)` calls.
    */
-  // TODO(HIP/AMD): Without optnone we get errors in dictionary and copying tests.
-  __attribute__((optnone)) __device__ inline output_normalator const& operator*() const { return *this; }
+  __device__ inline output_normalator const& operator*() const { return *this; }
 
   /**
    * @brief Array subscript operator returns an iterator instance at the specified `idx` position.
