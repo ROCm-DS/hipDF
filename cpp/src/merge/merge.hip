@@ -201,23 +201,43 @@ index_vector generate_merged_indices(table_view const& left_table,
 
     auto ineq_op = detail::row_lexicographic_tagged_comparator<true>(
       *lhs_device_view, *rhs_device_view, d_column_order.data(), d_null_precedence.data());
-    thrust::merge(thrust::device, //TODO(HIP/AMD): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests, see https://github.com/AMD-AI/hipdf/issues/30
+#ifdef HIPDF_HAS_ROCPRIM_PATCH
+    thrust::merge(rmm::exec_policy(stream),
                   left_begin,
                   left_begin + left_size,
                   right_begin,
                   right_begin + right_size,
                   merged_indices.begin(),
                   ineq_op);
+#else
+    thrust::merge(thrust::device,
+                  left_begin,
+                  left_begin + left_size,
+                  right_begin,
+                  right_begin + right_size,
+                  merged_indices.begin(),
+                  ineq_op);
+#endif
   } else {
     auto ineq_op = detail::row_lexicographic_tagged_comparator<false>(
       *lhs_device_view, *rhs_device_view, d_column_order.data());
-    thrust::merge(thrust::device, //TODO(HIP/AMD): normally, rmm::exec_policy(stream) should be used here, but it corrupts memory/results in failing unit tests#, see https://github.com/AMD-AI/hipdf/issues/30
+#ifdef HIPDF_HAS_ROCPRIM_PATCH
+    thrust::merge(rmm::exec_policy(stream), 
                   left_begin,
                   left_begin + left_size,
                   right_begin,
                   right_begin + right_size,
                   merged_indices.begin(),
                   ineq_op);
+#else
+    thrust::merge(thrust::device, 
+                  left_begin,
+                  left_begin + left_size,
+                  right_begin,
+                  right_begin + right_size,
+                  merged_indices.begin(),
+                  ineq_op);
+#endif
   }
 
   CUDF_CHECK_CUDA(stream.value());

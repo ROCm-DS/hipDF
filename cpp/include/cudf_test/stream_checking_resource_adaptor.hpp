@@ -162,8 +162,8 @@ class stream_checking_resource_adaptor final : public rmm::mr::device_memory_res
     auto cstream{stream.value()};
     auto const invalid_stream =
 #ifdef CUDA_BACKEND
-      check_default_stream_ ? ((cstream == hipStreamDefault) || (cstream == cudaStreamLegacy) ||
-                               (cstream == hipStreamPerThread))
+      check_default_stream_ ? ((cstream == cudaStreamDefault) || (cstream == cudaStreamLegacy) ||
+                               (cstream == cudaStreamPerThread))
                             : (cstream != cudf::test::get_default_stream().value());
 #else
       check_default_stream_ ? ((cstream == hipStreamDefault) || (cstream == hipStreamPerThread))

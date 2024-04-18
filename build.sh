@@ -18,7 +18,7 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 #TODO(HIP/AMD): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf hipdf benchmarks tests -v -g -n -h"
+VALIDARGS="clean libhipdf hipdf benchmarks tests -v -g -n --ptds -h"
 HELP="$0 [clean] [libhipdf] [hipdf] [benchmarks] [tests] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
@@ -29,6 +29,7 @@ HELP="$0 [clean] [libhipdf] [hipdf] [benchmarks] [tests] [-v] [-g] [-n] [-h] [--
    -v                            - verbose build mode
    -g                            - build for debug
    -n                            - no install step (does not affect Python)
+   --ptds                        - enable per-thread default stream
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
    
