@@ -30,9 +30,8 @@ __device__ inline int32_t fixed_point_string_size(__int128_t const& value, int32
 {
   if (scale >= 0) return count_digits(value) + scale;
 
-  // TODO(HIP/AMD): Change uint64_t to auto for both abs_value and exp_ten when we have support for 128 type
-  int64_t const abs_value = numeric::detail::abs(value);
-  int64_t const exp_ten   = numeric::detail::exp10<__int128_t>(-scale);
+  auto const abs_value = numeric::detail::abs(value);
+  auto const exp_ten   = numeric::detail::exp10<__int128_t>(-scale);
   auto const fraction  = count_digits(abs_value % exp_ten);
   auto const num_zeros = std::max(0, (-scale - fraction));
   return static_cast<int32_t>(value < 0) +    // sign if negative
@@ -55,8 +54,7 @@ __device__ inline int32_t fixed_point_string_size(__int128_t const& value, int32
 __device__ inline void fixed_point_to_string(__int128_t const& value, int32_t scale, char* out_ptr)
 {
   if (scale >= 0) {
-    // TODO(HIP/AMD): Remove uint64_t when we have support for 128 type
-    out_ptr += integer_to_string(int64_t(value), out_ptr);
+    out_ptr += integer_to_string(value, out_ptr);
     thrust::generate_n(thrust::seq, out_ptr, scale, []() { return '0'; });  // add zeros
     return;
   }
@@ -66,9 +64,8 @@ __device__ inline void fixed_point_to_string(__int128_t const& value, int32_t sc
   // where integer  = abs(value) / (10^abs(scale))
   //       fraction = abs(value) % (10^abs(scale))
   if (value < 0) *out_ptr++ = '-';  // add sign
-  // TODO(HIP/AMD): Change uint64_t to auto for both abs_value and exp_ten when we have support for 128 type
-  int64_t const abs_value = numeric::detail::abs(value);
-  int64_t const exp_ten   = numeric::detail::exp10<__int128_t>(-scale);
+  auto const abs_value = numeric::detail::abs(value);
+  auto const exp_ten   = numeric::detail::exp10<__int128_t>(-scale);
   auto const num_zeros = std::max(0, (-scale - count_digits(abs_value % exp_ten)));
 
   out_ptr += integer_to_string(abs_value / exp_ten, out_ptr);  // add the integer part
