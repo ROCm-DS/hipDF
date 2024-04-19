@@ -50,6 +50,11 @@ void __global__ test_kernel(int* data) { data[threadIdx.x] = threadIdx.x; }
 // calls.
 TEST(StreamCheck, FailedKernel)
 {
+
+  if constexpr(cudf::HIP_PLATFORM_AMD) {
+    GTEST_SKIP() << "This test is presently not supported on AMD platform (internal issue 9)"; 
+  }
+
   rmm::cuda_stream stream;
   int a;
   test_kernel<<<1, 1, 0, stream.value()>>>(&a);
