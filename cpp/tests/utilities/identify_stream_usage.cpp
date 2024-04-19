@@ -132,22 +132,37 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
  * NOTE(HIP/AMD): We add overloads for HIP's _spt variants, too
  *  (if a per-thread default stream is used).
  */
+
+#define STRINGIFY(x) #x
+#define ADD_QUOTES(x) "\"" STRINGIFY(x) "\""
+#define CONCAT_SPT(x) (x ## _spt)
+
 #define DEFINE_OVERLOAD(function, signature, arguments)     \
   using function##_t = hipError_t (*)(signature);          \
-                                                            \
-  hipError_t function##_spt(signature)                           \
-  {                                                         \
-    check_stream_and_error(stream);                     \
-    return ((function##_t)originals[#function])(arguments); \
-  }                                                         \
-  __attribute__((constructor(1002))) void queue_##function##_spt() { originals[#function] = nullptr; }\
-                                                             \
+                                                          \
   hipError_t function(signature)                           \
   {                                                       \
      check_stream_and_error(stream);                         \
      return ((function##_t)originals[#function])(arguments); \
   }                                                         \
   __attribute__((constructor(1002))) void queue_##function() { originals[#function] = nullptr; }
+
+#define DEFINE_OVERLOAD_WITH_SPT(function, signature, arguments) \
+  using function##_t = hipError_t (*)(signature);                \
+                                                                 \
+  hipError_t function(signature)                                 \
+  {                                                              \
+     check_stream_and_error(stream);                             \
+     return ((function##_t)originals[#function])(arguments);     \
+  }                                                              \
+  __attribute__((constructor(1002))) void queue_##function() { originals[#function] = nullptr; }                      \
+  hipError_t function##_spt(signature)                                                                                \
+  {                                                                                                                     \
+     hipStreamSynchronize(stream);                                                                                            \
+     check_stream_and_error(stream);                                                                                    \
+     return ((function##_t)originals[STRINGIFY(function##_spt)])(arguments);                                            \
+  }                                                                                                                     \
+   __attribute__((constructor(1002))) void queue_##function##_spt() { originals[STRINGIFY(function##_spt)] = nullptr; }
 
 /**
  * @brief Helper macro to define macro arguments that contain a comma.
@@ -176,15 +191,15 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
 
 // Event APIS:
 // https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EVENT.html#group__CUDART__EVENT
-DEFINE_OVERLOAD(hipEventRecord, ARG(hipEvent_t event, hipStream_t stream), ARG(event, stream));
+DEFINE_OVERLOAD_WITH_SPT(hipEventRecord, ARG(hipEvent_t event, hipStream_t stream), ARG(event, stream));
 
-DEFINE_OVERLOAD(cudaEventRecordWithFlags,
+DEFINE_OVERLOAD(hipEventRecordWithFlags,
                 ARG(hipEvent_t event, hipStream_t stream, unsigned int flags),
                 ARG(event, stream, flags));
 
 // Execution APIS:
 // https://docs.nvidia.com/cuda/cuda-runtime-api/group__CUDART__EXECUTION.html#group__CUDART__EXECUTION
-DEFINE_OVERLOAD(hipLaunchKernel,
+DEFINE_OVERLOAD_WITH_SPT(hipLaunchKernel,
                 ARG(void const* func,
                     dim3 gridDim,
                     dim3 blockDim,
@@ -192,7 +207,7 @@ DEFINE_OVERLOAD(hipLaunchKernel,
                     size_t sharedMem,
                     hipStream_t stream),
                 ARG(func, gridDim, blockDim, args, sharedMem, stream));
-DEFINE_OVERLOAD(hipLaunchCooperativeKernel,
+DEFINE_OVERLOAD_WITH_SPT(hipLaunchCooperativeKernel,
                 ARG(void const* func,
                     dim3 gridDim,
                     dim3 blockDim,
@@ -200,7 +215,7 @@ DEFINE_OVERLOAD(hipLaunchCooperativeKernel,
                     size_t sharedMem,
                     hipStream_t stream),
                 ARG(func, gridDim, blockDim, args, sharedMem, stream));
-DEFINE_OVERLOAD(hipLaunchHostFunc,
+DEFINE_OVERLOAD_WITH_SPT(hipLaunchHostFunc,
                 ARG(hipStream_t stream, hipHostFn_t fn, void* userData),
                 ARG(stream, fn, userData));
 
@@ -209,7 +224,7 @@ DEFINE_OVERLOAD(hipLaunchHostFunc,
 DEFINE_OVERLOAD(hipMemPrefetchAsync,
                 ARG(void const* devPtr, size_t count, int dstDevice, hipStream_t stream),
                 ARG(devPtr, count, dstDevice, stream));
-DEFINE_OVERLOAD(hipMemcpy2DAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy2DAsync,
                 ARG(void* dst,
                     size_t dpitch,
                     void const* src,
@@ -219,7 +234,7 @@ DEFINE_OVERLOAD(hipMemcpy2DAsync,
                     hipMemcpyKind kind,
                     hipStream_t stream),
                 ARG(dst, dpitch, src, spitch, width, height, kind, stream));
-DEFINE_OVERLOAD(hipMemcpy2DFromArrayAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy2DFromArrayAsync,
                 ARG(void* dst,
                     size_t dpitch,
                     hipArray_const_t src,
@@ -230,7 +245,7 @@ DEFINE_OVERLOAD(hipMemcpy2DFromArrayAsync,
                     hipMemcpyKind kind,
                     hipStream_t stream),
                 ARG(dst, dpitch, src, wOffset, hOffset, width, height, kind, stream));
-DEFINE_OVERLOAD(hipMemcpy2DToArrayAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy2DToArrayAsync,
                 ARG(hipArray_t dst,
                     size_t wOffset,
                     size_t hOffset,
@@ -241,19 +256,19 @@ DEFINE_OVERLOAD(hipMemcpy2DToArrayAsync,
                     hipMemcpyKind kind,
                     hipStream_t stream),
                 ARG(dst, wOffset, hOffset, src, spitch, width, height, kind, stream));
-DEFINE_OVERLOAD(hipMemcpy3DAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpy3DAsync,
                 ARG(hipMemcpy3DParms const* p, hipStream_t stream),
                 ARG(p, stream));
-#if 0  // TODO PORTING
+#if 0  // TODO(HIP/AMD): PORTING
 DEFINE_OVERLOAD(cudaMemcpy3DPeerAsync,
                 ARG(cudaMemcpy3DPeerParms const* p, hipStream_t stream),
                 ARG(p, stream));
 #endif
-DEFINE_OVERLOAD(
+DEFINE_OVERLOAD_WITH_SPT(
   hipMemcpyAsync,
   ARG(void* dst, void const* src, size_t count, hipMemcpyKind kind, hipStream_t stream),
   ARG(dst, src, count, kind, stream));
-DEFINE_OVERLOAD(hipMemcpyFromSymbolAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpyFromSymbolAsync,
                 ARG(void* dst,
                     void const* symbol,
                     size_t count,
@@ -261,7 +276,7 @@ DEFINE_OVERLOAD(hipMemcpyFromSymbolAsync,
                     hipMemcpyKind kind,
                     hipStream_t stream),
                 ARG(dst, symbol, count, offset, kind, stream));
-DEFINE_OVERLOAD(hipMemcpyToSymbolAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemcpyToSymbolAsync,
                 ARG(void const* symbol,
                     void const* src,
                     size_t count,
@@ -269,14 +284,14 @@ DEFINE_OVERLOAD(hipMemcpyToSymbolAsync,
                     hipMemcpyKind kind,
                     hipStream_t stream),
                 ARG(symbol, src, count, offset, kind, stream));
-DEFINE_OVERLOAD(
+DEFINE_OVERLOAD_WITH_SPT(
   hipMemset2DAsync,
   ARG(void* devPtr, size_t pitch, int value, size_t width, size_t height, hipStream_t stream),
   ARG(devPtr, pitch, value, width, height, stream));
-DEFINE_OVERLOAD(hipMemset3DAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemset3DAsync,
                 ARG(hipPitchedPtr pitchedDevPtr, int value, hipExtent extent, hipStream_t stream),
                 ARG(pitchedDevPtr, value, extent, stream));
-DEFINE_OVERLOAD(hipMemsetAsync,
+DEFINE_OVERLOAD_WITH_SPT(hipMemsetAsync,
                 ARG(void* devPtr, int value, size_t count, hipStream_t stream),
                 ARG(devPtr, value, count, stream));
 
