@@ -30,6 +30,8 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
+#include <hip/std/cmath>
+
 #include <thrust/transform.h>
 
 namespace cudf {
@@ -37,10 +39,29 @@ namespace detail {
 namespace {  // anonymous namespace
 template <typename _TargetT>
 struct unary_cast {
+  // NOTE(HIP/AMD): We treat casts from floating point types to integral types specially, 
+  // as the cast behaviour from nan float to an integer is UB in C++.
+  // This fixes the unit test test_isin_numeric in test_series.py (for the Python backend),
+  // in which this UB is triggered by casting a nan floating point value to an int64.
+  // On AMD GPUs, the result of this cast operation happens to be 0 which (by chance) matches 
+  // the value of the input data in the unit test. This result would make the test fail,
+  // as "static_cast<long>(nan) != 0" is expected by the test (which is the case on CUDA).
+  // In the below code, we therefore explicitly handle the casts of nan values
+  // to integer values, thus addressing the UB.
+  // Yet, this may have to be revisited later in case it has a non-negligible impact on performance.
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
-    std::enable_if_t<(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>())>* = nullptr>
+    std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>())>* = nullptr>
+  __device__ inline TargetT operator()(SourceT const element)
+  {
+    return (hip::std::isnan(element)) ? hip::std::numeric_limits<TargetT>::max() : static_cast<TargetT>(element);
+  }
+
+  template <
+    typename SourceT,
+    typename TargetT                                                                = _TargetT,
+    std::enable_if_t<(cudf::is_numeric<SourceT>() && cudf::is_numeric<TargetT>() && !(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>()))>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
     return static_cast<TargetT>(element);
