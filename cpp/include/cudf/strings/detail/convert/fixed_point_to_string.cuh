@@ -13,29 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// MIT License
-//
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 #pragma once
 
 #include <cudf/strings/detail/convert/int_to_string.cuh>
@@ -55,9 +32,8 @@ __device__ inline int32_t fixed_point_string_size(__int128_t const& value, int32
 {
   if (scale >= 0) return count_digits(value) + scale;
 
-  // TODO(HIP/AMD): Change uint64_t to auto for both abs_value and exp_ten when we have support for 128 type
-  int64_t const abs_value = numeric::detail::abs(value);
-  int64_t const exp_ten   = numeric::detail::exp10<__int128_t>(-scale);
+  auto const abs_value = numeric::detail::abs(value);
+  auto const exp_ten   = numeric::detail::exp10<__int128_t>(-scale);
   auto const fraction  = count_digits(abs_value % exp_ten);
   auto const num_zeros = cuda::std::max(0, (-scale - fraction));
   return static_cast<int32_t>(value < 0) +    // sign if negative
@@ -80,8 +56,7 @@ __device__ inline int32_t fixed_point_string_size(__int128_t const& value, int32
 __device__ inline void fixed_point_to_string(__int128_t const& value, int32_t scale, char* out_ptr)
 {
   if (scale >= 0) {
-    // TODO(HIP/AMD): Remove uint64_t when we have support for 128 type
-    out_ptr += integer_to_string(int64_t(value), out_ptr);
+    out_ptr += integer_to_string(value, out_ptr);
     thrust::generate_n(thrust::seq, out_ptr, scale, []() { return '0'; });  // add zeros
     return;
   }
