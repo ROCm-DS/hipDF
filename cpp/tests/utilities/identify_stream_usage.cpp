@@ -158,7 +158,6 @@ __attribute__((init_priority(1001))) std::unordered_map<std::string, void*> orig
   __attribute__((constructor(1002))) void queue_##function() { originals[#function] = nullptr; }                      \
   hipError_t function##_spt(signature)                                                                                \
   {                                                                                                                     \
-     hipStreamSynchronize(stream);                                                                                            \
      check_stream_and_error(stream);                                                                                    \
      return ((function##_t)originals[STRINGIFY(function##_spt)])(arguments);                                            \
   }                                                                                                                     \
