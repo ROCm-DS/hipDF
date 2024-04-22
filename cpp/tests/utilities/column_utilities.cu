@@ -927,6 +927,9 @@ void expect_column_empty(cudf::column_view const& col)
  */
 std::vector<bitmask_type> bitmask_to_host(cudf::column_view const& c)
 {
+  // NOTE(HIP/AMD): If stream identification is used, cuDF will internally
+  // use a new stream that is different from the default stream/the per-thread
+  // default stream. Therefore, we need to synchronize the stream appropriately.
   if (c.nullable()) {
     auto num_bitmasks      = num_bitmask_words(c.size());
     auto [bitmask_span, _] = [&] {
@@ -939,6 +942,8 @@ std::vector<bitmask_type> bitmask_to_host(cudf::column_view const& c)
                          static_cast<bitmask_type*>(mask.data()), num_bitmasks),
                        std::move(mask)};
     }();
+    //TODO(HIP/AMD): check if this is still required
+    CUDF_CUDA_TRY(cudaStreamSynchronize(cudf::get_default_stream().value()));
     return cudf::detail::make_std_vector_sync(bitmask_span, cudf::get_default_stream());
   } else {
     return std::vector<bitmask_type>{};
