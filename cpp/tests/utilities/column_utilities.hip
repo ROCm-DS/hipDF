@@ -908,20 +908,28 @@ void expect_column_empty(cudf::column_view const& col)
  */
 std::vector<bitmask_type> bitmask_to_host(cudf::column_view const& c)
 {
+  // NOTE(HIP/AMD): If stream identification is used, cuDF will internally
+  // use a new stream that is different from the default stream/the per-thread
+  // default stream. Therefore, we need to synchronize the stream appropriately.
   if (c.nullable()) {
     auto num_bitmasks = num_bitmask_words(c.size());
     std::vector<bitmask_type> host_bitmask(num_bitmasks);
     if (c.offset() == 0) {
-      CUDF_CUDA_TRY(hipMemcpy(host_bitmask.data(),
+      CUDF_CUDA_TRY(hipMemcpyAsync(host_bitmask.data(),
                                c.null_mask(),
                                num_bitmasks * sizeof(bitmask_type),
-                               hipMemcpyDefault));
+                               hipMemcpyDefault,
+                               cudf::get_default_stream().value()));
     } else {
       auto mask = copy_bitmask(c.null_mask(), c.offset(), c.offset() + c.size());
-      CUDF_CUDA_TRY(hipMemcpy(
-        host_bitmask.data(), mask.data(), num_bitmasks * sizeof(bitmask_type), hipMemcpyDefault));
+      CUDF_CUDA_TRY(hipMemcpyAsync(
+        host_bitmask.data(),
+        mask.data(),
+        num_bitmasks * sizeof(bitmask_type),
+        hipMemcpyDefault,
+        cudf::get_default_stream().value()));
     }
-
+    CUDF_CUDA_TRY(hipStreamSynchronize(cudf::get_default_stream().value()));
     return host_bitmask;
   } else {
     return std::vector<bitmask_type>{};
