@@ -169,7 +169,7 @@ struct genericAtomicOperationImpl<float, DeviceSum, 4> {
   }
 };
 
-#if defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 600)
+#if (defined(__CUDA_ARCH__) && (__CUDA_ARCH__ >= 600)) || defined(__HIP_DEVICE_COMPILE__)
 // `atomicAdd(double)` is supported after cuda architecture 6.0
 template <>
 struct genericAtomicOperationImpl<double, DeviceSum, 8> {
