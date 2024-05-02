@@ -2,6 +2,28 @@
 # All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+# MIT License
+#
+# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import collections
 import contextlib
 import copy
@@ -585,12 +607,12 @@ def test_cudf_pandas_eval_series(op):
     lhs = xpd.Series([10, 11, 12])  # noqa: F841
     rhs = xpd.Series([100, 1, 12])  # noqa: F841
 
-    actual = xpd.eval(f"lhs {op} rhs")
+    actual = xpd.eval(f"lhs {op} rhs", local_dict=locals())
 
     pd_lhs = pd.Series([10, 11, 12])  # noqa: F841
     pd_rhs = pd.Series([100, 1, 12])  # noqa: F841
 
-    expected = pd.eval(f"pd_lhs {op} pd_rhs")
+    expected = pd.eval(f"pd_lhs {op} pd_rhs", local_dict=locals())
 
     tm.assert_series_equal(expected, actual)
 
@@ -602,12 +624,12 @@ def test_cudf_pandas_eval_dataframe(op):
     lhs = xpd.DataFrame({"a": [10, 11, 12], "b": [1, 2, 3]})  # noqa: F841
     rhs = xpd.DataFrame({"a": [100, 1, 12], "b": [15, -10, 3]})  # noqa: F841
 
-    actual = xpd.eval(f"lhs {op} rhs")
+    actual = xpd.eval(f"lhs {op} rhs", local_dict=locals())
 
     pd_lhs = pd.DataFrame({"a": [10, 11, 12], "b": [1, 2, 3]})  # noqa: F841
     pd_rhs = pd.DataFrame({"a": [100, 1, 12], "b": [15, -10, 3]})  # noqa: F841
 
-    expected = pd.eval(f"pd_lhs {op} pd_rhs")
+    expected = pd.eval(f"pd_lhs {op} pd_rhs", local_dict=locals())
 
     tm.assert_frame_equal(expected, actual)
 
@@ -1139,7 +1161,7 @@ def test_dataframe_query():
     tm.assert_equal(actual, expected)
 
     bizz = 2  # noqa: F841
-    actual = cudf_pandas_df.query("foo > @bizz")
+    actual = cudf_pandas_df.query("foo > @bizz", local_dict=locals())
     expected = pd_df.query("foo > @bizz")
 
     tm.assert_equal(actual, expected)
