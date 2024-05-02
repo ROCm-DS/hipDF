@@ -208,7 +208,8 @@ template <typename T, std::enable_if_t<not cudf::is_fixed_point<T>()>* = nullptr
 std::pair<thrust::host_vector<T>, std::vector<bitmask_type>> to_host(column_view c)
 {
   thrust::host_vector<T> host_data(c.size());
-  CUDF_CUDA_TRY(hipMemcpy(host_data.data(), c.data<T>(), c.size() * sizeof(T), hipMemcpyDefault));
+  CUDF_CUDA_TRY(hipMemcpyAsync(host_data.data(), c.data<T>(), c.size() * sizeof(T), hipMemcpyDefault, cudf::get_default_stream().value()));
+  // NOTE(HIP/AMD): bitmask_to_host takes care of synchronizing the stream!
   return {host_data, bitmask_to_host(c)};
 }
 
