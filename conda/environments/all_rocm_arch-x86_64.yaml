@@ -95,7 +95,7 @@ dependencies:
 - pyarrow==12.0.1.*
 - pydata-sphinx-theme
 - pyorc
-- pytest==7.4.4
+- pytest==7.4.3 # NOTE(HIP/AMD): Changed 7.4.4 to 7.4.3 because this version captures the warning which is generated in python/cudf/cudf_pandas_tests/test_cudf_pandas.py:666
 - pytest-benchmark=4.0.0
 - pytest-cases==3.8.1
 - pytest-cov==4.1.0
@@ -109,7 +109,7 @@ dependencies:
 #: - rmm==23.10.* #: provide as local package
 - s3fs>=2022.3.0
 - scikit-build>=0.13.1
-- scipy
+- scipy==1.11.4 # TODO(HIP/AMD): DeprecationWarning: Importing boxcar from 'scipy.signal' is deprecated and will raise an error in SciPy 1.13.0.
 - spdlog>=1.11.0,<1.12
 - sphinx
 - sphinx-autobuild
