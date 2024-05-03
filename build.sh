@@ -18,12 +18,13 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 #TODO(HIP/AMD): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf hipdf benchmarks tests -v -g -n --ptds -h"
-HELP="$0 [clean] [libhipdf] [hipdf] [benchmarks] [tests] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
+VALIDARGS="clean libhipdf hipdf dask_hipdf libcudf cudf dask_cudf benchmarks tests -v -g -n --ptds -h"
+HELP="$0 [clean] [libhipdf] [hipdf] [dask_hipdf] [libcudf] [cudf] [dask_cudf] [benchmarks] [tests] [-v] [-g] [-n] [--ptds] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
-   hipdf                         - build the hipdf Python package			   
-   libhipdf                      - build the hipdf C++ code only
+   hipdf|cudf                    - build the cudf Python package
+   libhipdf|libcudf              - build the hipdf C++ code only
+   dask_hipdf|dask_cudf          - build the dask_cudf Python package
    benchmarks                    - build benchmarks
    tests                         - build tests
    -v                            - verbose build mode
@@ -97,7 +98,8 @@ INSTALL_PREFIX=${INSTALL_PREFIX:=${PREFIX:=${CONDA_PREFIX}}}
 PARALLEL_LEVEL=${PARALLEL_LEVEL:=$(nproc)}
 
 function hasArg {
-    (( ${NUMARGS} != 0 )) && (echo " ${ARGS} " | grep -q " $1 ")
+    (( ${NUMARGS} != 0 )) && (echo " ${ARGS} ${ARGS//cudf/hipdf} " | grep -q " $1 ") #: NOTE(HIP/AMD): Allows '*cudf*' build parameters instead of '*hipdf' ones.
+    #: (( ${NUMARGS} != 0 )) && (echo " ${ARGS} ${ARGS//hipdf/cudf}" | grep -q " $1 ") #: NOTE(HIP/AMD): The opposite variant would help to minimize changes to original 'build.sh'
 }
 
 function cmakeArgs {

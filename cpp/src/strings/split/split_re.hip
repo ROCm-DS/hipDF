@@ -146,8 +146,10 @@ rmm::device_uvector<string_index_pair> generate_tokens(column_device_view const&
   auto const d_offsets = offsets.data<size_type>();
 
   // convert match counts to token offsets
-  auto map_fn = [d_strings, d_offsets, max_tokens] __device__(auto idx) {
-    return d_strings.is_null(idx) ? 0 : std::min(d_offsets[idx], max_tokens) + 1;
+  // NOTE(HIP/AMD): We need a range check, as idx is in [0, strings_count]. 
+  // For idx==strings_count, d_strings.is_null(idx) is UB (and leads to a segfault in STRINGS_NVBENCH)
+  auto map_fn = [d_strings, d_offsets, max_tokens, strings_count] __device__(auto idx) {
+    return ((idx>=strings_count) || d_strings.is_null(idx)) ? 0 : std::min(d_offsets[idx], max_tokens) + 1;
   };
   thrust::transform_exclusive_scan(
     rmm::exec_policy(stream), begin, end + 1, d_offsets, map_fn, 0, thrust::plus<size_type>{});
