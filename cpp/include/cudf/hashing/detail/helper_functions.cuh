@@ -97,7 +97,7 @@ __forceinline__ __device__ void store_pair_vectorized(pair_type* __restrict__ co
       uint4 vec_val;
       pair_type pair_val;
     };
-    pair_type2vec_type converter   = {0, 0, 0, 0};
+    pair_type2vec_type converter   = {uint4{0}}; // TODO(HIP/AMD): error: no viable conversion from 'int' to 'uint4' (aka 'HIP_vector_type<unsigned int, 4>')
     converter.pair_val             = val;
     *reinterpret_cast<uint4*>(ptr) = converter.vec_val;
   } else if (sizeof(uint2) == sizeof(pair_type)) {
@@ -105,7 +105,7 @@ __forceinline__ __device__ void store_pair_vectorized(pair_type* __restrict__ co
       uint2 vec_val;
       pair_type pair_val;
     };
-    pair_type2vec_type converter   = {0, 0};
+    pair_type2vec_type converter   = {uint2{0}}; // TODO(HIP/AMD): error: no viable conversion from 'int' to 'uint2' (aka 'HIP_vector_type<unsigned int, 2>')
     converter.pair_val             = val;
     *reinterpret_cast<uint2*>(ptr) = converter.vec_val;
   } else if (sizeof(int) == sizeof(pair_type)) {

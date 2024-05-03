@@ -463,24 +463,6 @@ def _get_nan_for_dtype(dtype):
         return np.float64("nan")
 
 
-def _decimal_to_int64(decimal: Decimal) -> int:
-    """
-    Scale a Decimal such that the result is the integer
-    that would result from removing the decimal point.
-
-    Examples
-    --------
-    >>> _decimal_to_int64(Decimal('1.42'))
-    142
-    >>> _decimal_to_int64(Decimal('0.0042'))
-    42
-    >>> _decimal_to_int64(Decimal('-1.004201'))
-    -1004201
-
-    """
-    return int(f"{decimal:0f}".replace(".", ""))
-
-
 def get_allowed_combinations_for_operator(dtype_l, dtype_r, op):
     error = TypeError(
         f"{op} not supported between {dtype_l} and {dtype_r} scalars"
@@ -632,6 +614,16 @@ def find_common_type(dtypes):
     if common_dtype == np.dtype("float16"):
         return cudf.dtype("float32")
     return cudf.dtype(common_dtype)
+
+
+def _dtype_pandas_compatible(dtype):
+    """
+    A utility function, that returns `str` instead of `object`
+    dtype when pandas comptibility mode is enabled.
+    """
+    if cudf.get_option("mode.pandas_compatible") and dtype == cudf.dtype("O"):
+        return "str"
+    return dtype
 
 
 def _can_cast(from_dtype, to_dtype):

@@ -25,7 +25,7 @@
 
 #include <thrust/scan.h>
 
-#include <cuda_runtime.h>
+#include <hip/hip_runtime.h>
 #include <nvtx3/nvToolsExt.h>
 
 /**

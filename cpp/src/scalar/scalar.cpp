@@ -475,7 +475,8 @@ timestamp_scalar<T>::timestamp_scalar(timestamp_scalar<T> const& other,
   : chrono_scalar<T>{other, stream, mr}
 {
 }
-
+// TODO(HIP/AMD): If we removed the macro, we get an error in TYPED_TEST(TypedScalarTest, CopyConstructor):
+// undefined symbol timestamp_scalar referenced in scalar_test.cpp
 #define COPY_CTOR(TimestampType) \
   template timestamp_scalar<TimestampType>::timestamp_scalar( \
     timestamp_scalar<TimestampType> const& other, \
@@ -485,8 +486,8 @@ timestamp_scalar<T>::timestamp_scalar(timestamp_scalar<T> const& other,
 #define TS_CTOR(TimestampType, DurationType)                  \
   template timestamp_scalar<TimestampType>::timestamp_scalar( \
     DurationType const&, bool, rmm::cuda_stream_view, rmm::mr::device_memory_resource*);
-
-
+// TODO(HIP/AMD): If we removed the following 5 COPY_CTORs, we get an error in TYPED_TEST(TypedScalarTest, CopyConstructor):
+// undefined symbol timestamp_scalar referenced in scalar_test.cpp
 /**
  * @brief Explicit instantiations of the copy construtor.
  */
@@ -495,7 +496,6 @@ COPY_CTOR(timestamp_s)
 COPY_CTOR(timestamp_ms)
 COPY_CTOR(timestamp_us)
 COPY_CTOR(timestamp_ns)
-
 /**
  * @brief These are the valid combinations of duration types to timestamp types.
  */

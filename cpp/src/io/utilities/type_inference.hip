@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// #include <hip/hip_runtime.h>
+
 #include <hipcub/hipcub.hpp>
-#include <hipcub/block/block_reduce.hpp>
 #include <io/utilities/column_type_histogram.hpp>
 #include <io/utilities/string_parsing.hpp>
 #include <io/utilities/trie.cuh>
@@ -25,6 +24,7 @@
 
 #include <rmm/device_scalar.hpp>
 
+#include <hipcub/block/block_reduce.hpp>
 
 #include <cstddef>
 

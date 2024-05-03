@@ -16,7 +16,6 @@
 
 #include "orc_gpu.hpp"
 
-#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/io/orc_types.hpp>
 #include <io/utilities/block_utils.cuh>
 
@@ -36,8 +35,8 @@ constexpr int bytestream_buffer_size = 512 * 8 * 2;
 constexpr int bytestream_buffer_mask = (bytestream_buffer_size - 1) >> 2;
 
 // TODO: Should be more efficient with 512 threads per block and circular queue for values
-constexpr int num_warps  = 32 / (cudf::detail::warp_size/32); //: NOTE(HIP/AMD): On AMD, we use half the number of warps as too large block sizes would consume too much LDS.
-constexpr int block_size = 32 * num_warps * (cudf::detail::warp_size/32); //: NOTE(HIP/AMD): On AMD, we multiply by warpSize/32 to ensure that we have 1024 threads
+constexpr int num_warps  = 32 / (warpSize/32); //: NOTE(HIP/AMD): On AMD, we use half the number of warps as too large block sizes would consume too much LDS.
+constexpr int block_size = 32 * num_warps * (warpSize/32); //: NOTE(HIP/AMD): On AMD, we multiply by warpSize/32 to ensure that we have 1024 threads
 // Add some margin to look ahead to future rows in case there are many zeroes
 constexpr int row_decoder_buffer_size = block_size + 128;
 inline __device__ uint8_t is_rlev1(uint8_t encoding_mode) { return encoding_mode < DIRECT_V2; }
@@ -368,14 +367,14 @@ inline __device__ uint32_t varint_length(volatile orc_bytestream_s* bs, int pos)
       if (zbit) {
         return 5 + (zbit >> 3);  // up to 9x7 bits
       } else if ((sizeof(T) <= 8) || (bytestream_readbyte(bs, pos + 9) <= 0x7f)) {
-        return 10;               // up to 70 bits
+        return 10;  // up to 70 bits
       } else {
         uint64_t next64 = bytestream_readu64(bs, pos + 10);
         zbit            = __ffsll((~next64) & 0x8080'8080'8080'8080ull);
         if (zbit) {
           return 10 + (zbit >> 3);  // Up to 18x7 bits (126)
         } else {
-          return 19;                // Up to 19x7 bits (133)
+          return 19;  // Up to 19x7 bits (133)
         }
       }
     }
@@ -589,7 +588,7 @@ static __device__ uint32_t Integer_RLEv1(
       int delta        = run_data >> 24;
       uint32_t base    = run_data & 0x3ff;
       uint32_t pos     = vals[base] & 0xffff;
-      for (int i = 1 + tr; i < n; i += cudf::detail::warp_size) {
+      for (int i = 1 + tr; i < n; i += warpSize) {
         vals[base + i] = ((delta * i) << 16) | pos;
       }
     }
@@ -784,7 +783,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
     n    = shuffle(n);
     w    = shuffle(w);
     hip_extensions::__syncwarp();  // Not required, included to fix the racecheck warning
-    for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
+    for (uint32_t i = tr; i < n; i += warpSize) {
       if constexpr (sizeof(T) <= 4) {
         if (mode == 0) {
           vals[base + i] = rle->baseval.u32[r];
@@ -858,7 +857,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
       T baseval;
       for (uint32_t i = 1; i < n; i <<= 1) {
         hip_extensions::__syncwarp();
-        for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
+        for (uint32_t j = tr; j < n; j += warpSize) {
           if (j & i) vals[base + j] += vals[base + ((j & ~i) | (i - 1))];
         }
       }
@@ -866,7 +865,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         baseval = rle->baseval.u32[r];
       else
         baseval = rle->baseval.u64[r];
-      for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
+      for (uint32_t j = tr; j < n; j += warpSize) {
         vals[base + j] += baseval;
       }
     }
@@ -957,7 +956,7 @@ static __device__ uint32_t Byte_RLE(orc_bytestream_s* bs,
       literal_mask = ~0;
       n            = 0x100 - n;
     }
-    for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
+    for (uint32_t i = tr; i < n; i += warpSize) {
       vals[loc + i] = bytestream_readbyte(bs, pos + (i & literal_mask));
     }
   }
@@ -1035,7 +1034,6 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
     }
     __syncthreads();
     uint32_t num_vals_to_read = scratch->num_vals;
-
     if (t >= num_vals_read and t < num_vals_to_read) {
       auto const pos = static_cast<int>(vals.i64[2 * t]);
       __int128_t v   = decode_varint128(bs, pos);
@@ -1109,7 +1107,7 @@ __global__ void __launch_bounds__(block_size)
   using warp_reduce  = hipcub::WarpReduce<uint32_t>;
   using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ union {
-    typename warp_reduce::TempStorage wr_storage[block_size / cudf::detail::warp_size];
+    typename warp_reduce::TempStorage wr_storage[block_size / warpSize];
     typename block_reduce::TempStorage bk_storage;
   } temp_storage;
 
@@ -1209,17 +1207,17 @@ __global__ void __launch_bounds__(block_size)
       }
       // We may have some valid values that are not decoded below first_row -> count these in
       // skip_count, so that subsequent kernel can infer the correct row position
-      if (row_in < first_row && t < cudf::detail::warp_size) {
+      if (row_in < first_row && t < warpSize) {
         uint32_t skippedrows = min(static_cast<uint32_t>(first_row - row_in), nrows);
         uint32_t skip_count  = 0;
-        for (thread_index_type i = t * 32; i < skippedrows; i += cudf::detail::warp_size * 32) {
+        for (thread_index_type i = t * 32; i < skippedrows; i += warpSize * 32) {
           // Need to arrange the bytes to apply mask properly.
           uint32_t bits = (i + 32 <= skippedrows) ? s->vals.u32[i >> 5]
                                                   : (__byte_perm(s->vals.u32[i >> 5], 0, 0x0123) &
                                                      (0xffff'ffffu << (0x20 - skippedrows + i)));
           skip_count += __POPC(bits);
         }
-        skip_count = warp_reduce(temp_storage.wr_storage[t / cudf::detail::warp_size]).Sum(skip_count);
+        skip_count = warp_reduce(temp_storage.wr_storage[t / warpSize]).Sum(skip_count);
         if (t == 0) { s->chunk.skip_count += skip_count; }
       }
       __syncthreads();

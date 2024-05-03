@@ -265,7 +265,6 @@ cpdef dtype_to_pylibcudf_type(dtype):
     elif cudf.api.types.is_decimal_dtype(dtype):
         if cudf.api.types.is_decimal128_dtype(dtype):
             tid = pylibcudf.TypeId.DECIMAL128
-            pass
         elif cudf.api.types.is_decimal64_dtype(dtype):
             tid = pylibcudf.TypeId.DECIMAL64
         else:

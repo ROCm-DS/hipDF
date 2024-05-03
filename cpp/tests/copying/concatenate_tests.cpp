@@ -1085,6 +1085,7 @@ TEST_F(ListsColumnTest, ConcatenateEmptyLists)
   }
 
   {
+    // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
     cudf::test::lists_column_wrapper<int> a({LCW{}});
     cudf::test::lists_column_wrapper<int> b{4, 5, 6, 7};
     cudf::test::lists_column_wrapper<int> expected{LCW{}, {4, 5, 6, 7}};

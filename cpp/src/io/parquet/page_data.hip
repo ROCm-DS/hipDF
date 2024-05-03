@@ -31,7 +31,7 @@ namespace gpu {
 
 namespace {
 
-constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
+constexpr int decode_block_size = 4 * warpSize; //need to have four WARPS/wavefronts for decoding algorithm
 // NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
 // gpuDecodeLevels typically decodes more values per run
 // due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
@@ -39,7 +39,7 @@ constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have fo
 // Some buffer space is needed to avoid that the rolling buffer
 // wraps around and overwrites values that haven't been consumed
 // yet (by the output warp/wavefront) which would result in failing decoding.
-constexpr int rolling_buf_size  = (cudf::detail::warp_size/32) * decode_block_size;
+constexpr int rolling_buf_size  = (warpSize/32) * decode_block_size;
 /**
  * @brief Output a string descriptor
  *
@@ -442,14 +442,18 @@ static __device__ void gpuOutputGeneric(
  * @param chunks List of column chunks
  * @param min_row Row index to start reading at
  * @param num_rows Maximum number of rows to read
+ * @param error_code Error code to set if an error is encountered
  */
 template <int lvl_buf_size, typename level_t>
-__global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
-  PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
+__global__ void __launch_bounds__(decode_block_size)
+  gpuDecodePageData(PageInfo* pages,
+                    device_span<ColumnChunkDesc const> chunks,
+                    size_t min_row,
+                    size_t num_rows,
+                    int32_t* error_code)
 {
-
-  //extern __shared__ __align__(16) page_state_s state_g[];
-  extern __shared__ page_state_s state_g[];
+  // extern __shared__ page_state_s state_g[];
+  extern __shared__ __align__(16) page_state_s state_g[];
   __shared__ __align__(16)
     page_state_buffers_s<rolling_buf_size, rolling_buf_size, rolling_buf_size>
       state_buffers;
@@ -469,13 +473,13 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
   bool const has_repetition = s->col.max_level[level_type::REPETITION] > 0;
 
   if (s->dict_base) {
-    out_thread0 = (s->dict_bits > 0) ? 2 * cudf::detail::warp_size  : cudf::detail::warp_size;
+    out_thread0 = (s->dict_bits > 0) ? 2 * warpSize  : warpSize;
   } else {
     switch (s->col.data_type & 7) {
       case BOOLEAN: [[fallthrough]];
       case BYTE_ARRAY: [[fallthrough]];
-      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 2 * cudf::detail::warp_size; break;
-      default: out_thread0 = cudf::detail::warp_size;
+      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 2 * warpSize; break;
+      default: out_thread0 = warpSize;
     }
   }
 
@@ -486,7 +490,8 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
 
   // skipped_leaf_values will always be 0 for flat hierarchies.
   uint32_t skipped_leaf_values = s->page.skipped_leaf_values;
-  while (!s->error && (s->input_value_count < s->num_input_values || s->src_pos < s->nz_count)) {
+  while (!s->error &&
+         (s->input_value_count < s->num_input_values || s->src_pos < s->nz_count)) {
     int target_pos;
     int src_pos = s->src_pos;
 
@@ -495,10 +500,10 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
                        s->nz_count + (decode_block_size - out_thread0));
     } else {
       target_pos = min(s->nz_count, src_pos + decode_block_size - out_thread0);
-      if (out_thread0 > cudf::detail::warp_size) { target_pos = min(target_pos, s->dict_pos); }
+      if (out_thread0 > warpSize) { target_pos = min(target_pos, s->dict_pos); }
     }
     __syncthreads();
-    if (t < cudf::detail::warp_size) {
+    if (t < warpSize) {
       // decode repetition and definition levels.
       // - update validity vectors
       // - updates offsets (for nested columns)
@@ -517,7 +522,7 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
                  (s->col.data_type & 7) == FIXED_LEN_BYTE_ARRAY) {
         gpuInitStringDescriptors<false>(s, sb, src_target_pos, t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE));
       }
-      if (t == cudf::detail::warp_size) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
+      if (t == warpSize) { *(volatile int32_t*)&s->dict_pos = src_target_pos; }
     } else {
       // WARP1..WARP3: Decode values
       int const dtype = s->col.data_type & 7;
@@ -610,6 +615,10 @@ __global__ void __launch_bounds__(decode_block_size) gpuDecodePageData(
     }
     __syncthreads();
   }
+  if (t == 0 and s->error != 0) {
+    hip::atomic_ref<int32_t, hip::thread_scope_device> ref{*error_code};
+    ref.fetch_or(s->error, hip::std::memory_order_relaxed);
+  }
 }
 
 struct mask_tform {
@@ -635,6 +644,7 @@ void __host__ DecodePageData(cudf::detail::hostdevice_vector<PageInfo>& pages,
                              size_t num_rows,
                              size_t min_row,
                              int level_type_size,
+                             int32_t* error_code,
                              rmm::cuda_stream_view stream)
 {
   CUDF_EXPECTS(pages.size() > 0, "There is no page to decode");
@@ -643,11 +653,11 @@ void __host__ DecodePageData(cudf::detail::hostdevice_vector<PageInfo>& pages,
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
-    gpuDecodePageData<rolling_buf_size, uint8_t>
-      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+    gpuDecodePageData<rolling_buf_size, uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+      pages.device_ptr(), chunks, min_row, num_rows, error_code);
   } else {
-    gpuDecodePageData<rolling_buf_size, uint16_t>
-      <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(pages.device_ptr(), chunks, min_row, num_rows);
+    gpuDecodePageData<rolling_buf_size, uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
+      pages.device_ptr(), chunks, min_row, num_rows, error_code);
   }
 }
 

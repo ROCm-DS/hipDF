@@ -769,7 +769,7 @@ struct datetime_formatter_fn {
    */
   __device__ int32_t modulo_time(int64_t time, int64_t base) const
   {
-// HIP: We need to distinguish between debug and release modes
+// NOTE(HIP/AMD): We need to distinguish between debug and release modes
 // The original code (i.e., ifdef part) works in release mode, but not in debug mode
 #ifdef NDEBUG
     return static_cast<int32_t>(((time % base) + base) % base);
@@ -802,7 +802,7 @@ struct datetime_formatter_fn {
     time_components result = {0};
     if constexpr (std::is_same_v<T, cudf::timestamp_D>) { return result; }
 
-    // Note: Tried using: hip::std::chrono::hh_mm_ss(T::duration(timestamp));
+    // Note: Tried using: cuda::std::chrono::hh_mm_ss(T::duration(timestamp));
     // and retrieving the hour, minute, second, and subsecond values from it
     // but it did not scale/modulo the components for negative timestamps
     // correctly -- it simply did an abs(timestamp) as documented here:
@@ -936,10 +936,11 @@ struct datetime_formatter_fn {
   __device__ int8_t get_week_of_year(hip::std::chrono::sys_days const days,
                                      hip::std::chrono::sys_days const start) const
   {
-    return days < start ? 0
-                        : (hip::std::chrono::duration_cast<hip::std::chrono::weeks>(days - start) +
-                           hip::std::chrono::weeks{1})
-                            .count();
+    return days < start
+             ? 0
+             : (hip::std::chrono::duration_cast<hip::std::chrono::weeks>(days - start) +
+                hip::std::chrono::weeks{1})
+                 .count();
   }
 
   __device__ int32_t get_day_of_year(hip::std::chrono::year_month_day const& ymd) const
@@ -1043,12 +1044,12 @@ struct datetime_formatter_fn {
           break;
         case 'u':    // day of week ISO
         case 'w': {  // day of week non-ISO
-          auto const day_of_week =
-            static_cast<int32_t>(hip::std::chrono::year_month_weekday(days).weekday().c_encoding());
+          auto const day_of_week = static_cast<int32_t>(
+            hip::std::chrono::year_month_weekday(days).weekday().c_encoding());
           copy_value = day_of_week == 0 && item.value == 'u' ? 7 : day_of_week;
           break;
         }
-          // clang-format off
+        // clang-format off
         case 'U': {  // week of year: first week includes the first Sunday of the year
           copy_value = get_week_of_year(days, hip::std::chrono::sys_days{
             hip::std::chrono::Sunday[1]/hip::std::chrono::January/ymd.year()});

@@ -39,7 +39,6 @@
 #include <cudf/unary.hpp>
 #include <cudf/utilities/span.hpp>
 #include <cudf/wrappers/timestamps.hpp>
-#include <src/io/comp/hipcomp_adapter.hpp>
 
 #include <src/io/parquet/compact_protocol_reader.hpp>
 #include <src/io/parquet/parquet.hpp>
@@ -1385,7 +1384,7 @@ class custom_test_data_sink : public cudf::io::data_sink {
                                        size_t size,
                                        rmm::cuda_stream_view stream) override
   {
-    // NOTE(HIP): adding "this" to the capture clauses fixes a compiler warning with clang
+    // NOTE(HIP/AMD): adding "this" to the capture clauses fixes a compiler warning with clang
     return std::async(std::launch::deferred, [=, this] {
       char* ptr = nullptr;
       CUDF_CUDA_TRY(hipHostMalloc(&ptr, size));
@@ -2175,7 +2174,7 @@ TEST_F(ParquetChunkedWriterTest, ForcedNullabilityList)
   cudf::io::table_input_metadata metadata(table1);
   metadata.column_metadata[0].set_nullability(true);  // List is nullable at first (root) level
   metadata.column_metadata[0].child(1).set_nullability(
-    false);                                           // non-nullable at second (leaf) level
+    false);  // non-nullable at second (leaf) level
   metadata.column_metadata[1].set_nullability(true);
 
   auto filepath = temp_env->get_temp_filepath("ChunkedListNullable.parquet");
@@ -2441,7 +2440,7 @@ class custom_test_memmap_sink : public cudf::io::data_sink {
                                        size_t size,
                                        rmm::cuda_stream_view stream) override
   {
-    // NOTE(HIP): adding "this" to the capture clauses fixes a compiler warning with clang
+    // NOTE(HIP/AMD): adding "this" to the capture clauses fixes a compiler warning with clang
     return std::async(std::launch::deferred, [=, this] {
       char* ptr = nullptr;
       CUDF_CUDA_TRY(hipHostMalloc(&ptr, size));
@@ -5301,14 +5300,10 @@ TEST_F(ParquetWriterTest, DictionaryAdaptiveTest)
   auto const expected = table_view{{col0, col1}};
 
   auto const filepath = temp_env->get_temp_filepath("DictionaryAdaptiveTest.parquet");
-
-  auto compression_type = cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD) 
-                                     ? cudf::io::compression_type::NONE : cudf::io::compression_type::ZSTD;
-
   // no compression so we can easily read page data
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(compression_type)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .dictionary_policy(cudf::io::dictionary_policy::ADAPTIVE);
   cudf::io::write_parquet(out_opts);
 
@@ -5356,14 +5351,11 @@ TEST_F(ParquetWriterTest, DictionaryAlwaysTest)
 
   auto const expected = table_view{{col0, col1}};
 
-  auto compression_type = cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD)
-                                        ? cudf::io::compression_type::NONE : cudf::io::compression_type::ZSTD;
-
   auto const filepath = temp_env->get_temp_filepath("DictionaryAlwaysTest.parquet");
   // no compression so we can easily read page data
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(compression_type)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -5414,13 +5406,10 @@ TEST_F(ParquetWriterTest, DictionaryPageSizeEst)
 
   auto const expected = table_view{{col0}};
 
-  auto compression_type = cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD) 
-                                    ? cudf::io::compression_type::NONE : cudf::io::compression_type::ZSTD;
-
   auto const filepath = temp_env->get_temp_filepath("DictionaryPageSizeEst.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(compression_type)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -5904,7 +5893,7 @@ TEST_F(ParquetMetadataReaderTest, TestNested)
   EXPECT_EQ(out_map_col.type_kind(), cudf::io::parquet::TypeKind::UNDEFINED_TYPE);  // map
 
   ASSERT_EQ(out_map_col.num_children(), 1);
-  EXPECT_EQ(out_map_col.child(0).name(), "key_value");       // key_value (named in parquet writer)
+  EXPECT_EQ(out_map_col.child(0).name(), "key_value");  // key_value (named in parquet writer)
   ASSERT_EQ(out_map_col.child(0).num_children(), 2);
   EXPECT_EQ(out_map_col.child(0).child(0).name(), "key");    // key (named in parquet writer)
   EXPECT_EQ(out_map_col.child(0).child(1).name(), "value");  // value (named in parquet writer)
@@ -5921,7 +5910,7 @@ TEST_F(ParquetMetadataReaderTest, TestNested)
   ASSERT_EQ(out_list_col.child(0).num_children(), 1);
 
   auto const& out_list_struct_col = out_list_col.child(0).child(0);
-  EXPECT_EQ(out_list_struct_col.name(), "element");        // elements (named in parquet writer)
+  EXPECT_EQ(out_list_struct_col.name(), "element");  // elements (named in parquet writer)
   EXPECT_EQ(out_list_struct_col.type_kind(),
             cudf::io::parquet::TypeKind::UNDEFINED_TYPE);  // struct
   ASSERT_EQ(out_list_struct_col.num_children(), 2);
@@ -6558,7 +6547,6 @@ TEST_F(ParquetReaderTest, FilterFloatNAN)
   auto col0 = cudf::test::fixed_width_column_wrapper<float>(elements, elements + num_rows);
   auto col1 = cudf::test::fixed_width_column_wrapper<double>(elements, elements + num_rows);
 
-  cudf::test::print(col0);
   auto const written_table = table_view{{col0, col1}};
   auto const filepath      = temp_env->get_temp_filepath("FilterFloatNAN.parquet");
   {

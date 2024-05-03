@@ -61,7 +61,6 @@ THE SOFTWARE.
 #include <io/utilities/block_utils.cuh>
 
 #include <cudf/utilities/error.hpp>
-#include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
 
@@ -123,7 +122,7 @@ __inline__ __device__ int brotli_context(int p1, int p2, int lut)
 struct huff_scratch_s {
   uint16_t code_length_histo[16];
   uint8_t code_length_code_lengths[brotli_code_length_codes];
-  int8_t offset[6];                           // offsets in sorted table for each length
+  int8_t offset[6];  // offsets in sorted table for each length
   uint16_t lenvlctab[32];
   uint16_t sorted[brotli_code_length_codes];  // symbols sorted by code length
   int16_t next_symbol[32];
@@ -1300,7 +1299,7 @@ static __device__ void InverseMoveToFrontTransform(debrotli_state_s* s, uint8_t*
   // Reinitialize elements that could have been changed.
   uint32_t i           = 1;
   uint32_t upper_bound = s->mtf_upper_bound;
-  uint32_t* mtf        = &s->mtf[1];   // Make mtf[-1] addressable.
+  uint32_t* mtf        = &s->mtf[1];  // Make mtf[-1] addressable.
   auto* mtf_u8         = reinterpret_cast<uint8_t*>(mtf);
   uint32_t pattern     = 0x0302'0100;  // Little-endian
 
@@ -1865,7 +1864,7 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
       distance_code = shuffle(distance_code);
       if (distance_code > 0) {
         // Copy
-        for (uint32_t i = t; i < copy_length; i += cudf::detail::warp_size) {
+        for (uint32_t i = t; i < copy_length; i += warpSize) {
           uint8_t const* src =
             out + pos + ((i >= (uint32_t)distance_code) ? (i % (uint32_t)distance_code) : i) -
             distance_code;
@@ -1878,9 +1877,9 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
         if (t < copy_length) {
           b            = src[t];
           out[pos + t] = b;
-          if (cudf::detail::warp_size + t < copy_length) {
-            b                 = src[cudf::detail::warp_size + t];
-            out[pos + cudf::detail::warp_size + t] = b;
+          if (warpSize + t < copy_length) {
+            b                 = src[warpSize + t];
+            out[pos + warpSize + t] = b;
           }
         }
       }
@@ -1996,7 +1995,7 @@ __global__ void __launch_bounds__(block_size, 2)
           __syncthreads();
           if (!s->error) {
             // Warp0: Decode compressed block, warps 1..7 are all idle (!)
-            if (t < cudf::detail::warp_size)
+            if (t < warpSize)
               ProcessCommands(s, reinterpret_cast<brotli_dictionary_s*>(scratch + scratch_size), t);
             __syncthreads();
           }

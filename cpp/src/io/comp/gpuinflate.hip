@@ -46,10 +46,8 @@ Mark Adler    madler@alumni.caltech.edu
 
 #include "gpuinflate.hpp"
 #include "io_uncomp.hpp"
-
 #include <hipcub/hipcub.hpp>
 
-#include <cudf/detail/utilities/cuda.cuh>
 #include <io/utilities/block_utils.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
@@ -144,11 +142,11 @@ struct inflate_state_s {
   uint8_t* outbase;  ///< start of output buffer
   uint8_t* outend;   ///< end of output buffer
   // Input state
-  uint8_t const* cur;       ///< input buffer
-  uint8_t const* end;       ///< end of input buffer
+  uint8_t const* cur;  ///< input buffer
+  uint8_t const* end;  ///< end of input buffer
 
-  uint2 bitbuf;             ///< bit buffer (64-bit)
-  uint32_t bitpos;          ///< position in bit buffer
+  uint2 bitbuf;     ///< bit buffer (64-bit)
+  uint32_t bitpos;  ///< position in bit buffer
 
   int32_t err;              ///< Error status
   int btype;                ///< current block type
@@ -316,7 +314,7 @@ __device__ int construct(
     return 0;                    // complete, but decode() will fail
 
   // check for an over-subscribed or incomplete set of lengths
-  left = 1;                     // one possible code of zero length
+  left = 1;  // one possible code of zero length
   for (len = 1; len <= max_bits; len++) {
     left <<= 1;                 // one more bit, double codes left
     left -= counts[len];        // deduct count from possible codes
@@ -370,8 +368,8 @@ __device__ int init_dynamic(inflate_state_s* s)
   index = 0;
   while (index < nlen + ndist) {
     int symbol = decode(s, s->lencnt, s->lensym);
-    if (symbol < 0) return symbol;    // invalid symbol
-    if (symbol < 16)                  // length in 0..15
+    if (symbol < 0) return symbol;  // invalid symbol
+    if (symbol < 16)                // length in 0..15
       lengths[index++] = symbol;
     else {                            // repeat instruction
       int len = 0;                    // last length to repeat, assume repeating zeros
@@ -379,9 +377,9 @@ __device__ int init_dynamic(inflate_state_s* s)
         if (index == 0) return -5;    // no last length!
         len    = lengths[index - 1];  // last length
         symbol = 3 + getbits(s, 2);
-      } else if (symbol == 17)        // repeat zero 3..10 times
+      } else if (symbol == 17)  // repeat zero 3..10 times
         symbol = 3 + getbits(s, 3);
-      else                            // == 18, repeat zero 11..138 times
+      else  // == 18, repeat zero 11..138 times
         symbol = 11 + getbits(s, 7);
       if (index + symbol > nlen + ndist) return -6;  // too many lengths!
       while (symbol--)                               // repeat last or zero symbol times
@@ -810,7 +808,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
 
     auto const symt     = (t < batch_len) ? b[t] : 256;
     auto const lit_mask = ballot(symt >= 256);
-    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, cudf::detail::warp_size)); //TODO(HIP/AMD): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
+    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, warpSize)); //TODO(HIP/AMD): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
 
     if (t == 0) { s->x.batch_len[batch] = 0; }
 
@@ -835,7 +833,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
       // Process subsequent literals, if any
       if (!((lit_mask >> pos) & 1)) {
         len    = min((__FFS(lit_mask >> pos) - 1) & 0xff, batch_len);
-        symbol = shuffle(symt, (pos + t) & (cudf::detail::warp_size-1));
+        symbol = shuffle(symt, (pos + t) & (warpSize-1));
         if (t < len && out + t < outend) { out[t] = symbol; }
         out += len;
         pos += len;
@@ -973,11 +971,11 @@ __device__ void prefetch_warp(volatile inflate_state_s* s, int t)
   while (shuffle((t == 0) ? s->pref.run : 0)) {
     auto cur_lo = (int32_t)(size_t)cur_p;
     int do_pref =
-      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - cudf::detail::warp_size * 4 - 4) : 0);
+      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - warpSize * 4 - 4) : 0);
     if (do_pref) {
       uint8_t const* p             = cur_p + 4 * t;
       *prefetch_addr32(s->pref, p) = (p < end) ? *reinterpret_cast<uint32_t const*>(p) : 0;
-      cur_p += 4 * cudf::detail::warp_size;
+      cur_p += 4 * warpSize;
       __threadfence_block();
       hip_extensions::__syncwarp();
       if (!t) {
@@ -1117,7 +1115,7 @@ __global__ void __launch_bounds__(block_size)
       if (t < batch_count) { state->x.batch_len[t] = 0; }
       __syncthreads();
       // decode data until end-of-block code
-      if (t < 1 * cudf::detail::warp_size) {
+      if (t < 1 * warpSize) {
         // WARP0: decode variable-length symbols
         if (!t) {
           // Thread0: decode symbols (single threaded)
@@ -1126,14 +1124,14 @@ __global__ void __launch_bounds__(block_size)
           state->pref.run = 0;
 #endif
         }
-      } else if (t < 2 * cudf::detail::warp_size) {
+      } else if (t < 2 * warpSize) {
         // WARP1: perform LZ77 using length and distance codes from WARP0
-        process_symbols(state, t & (cudf::detail::warp_size-1));
+        process_symbols(state, t & (warpSize-1));
       }
 #if ENABLE_PREFETCH
-      else if (t < 3 * cudf::detail::warp_size) {
+      else if (t < 3 * warpSize) {
         // WARP2: Prefetcher: prefetch data for WARP0
-        prefetch_warp(state, t & (cudf::detail::warp_size-1));
+        prefetch_warp(state, t & (warpSize-1));
       }
 #endif
       // else WARP3: idle
@@ -1236,7 +1234,7 @@ void gpuinflate(device_span<device_span<uint8_t const> const> inputs,
   // Wavefront1/warp1: processes the decoded symbols and write them into the output stream
   // Wavefront2/warp2: prefetch data for warp0
   // Wavefront3/warp3: copy uncompressed data
-  constexpr int block_size = cudf::detail::warp_size * 4;  // Threads per block
+  constexpr int block_size = warpSize * 4;  // Threads per block
   if (inputs.size() > 0) {
     inflate_kernel<block_size>
       <<<inputs.size(), block_size, 0, stream.value()>>>(inputs, outputs, results, parse_hdr);

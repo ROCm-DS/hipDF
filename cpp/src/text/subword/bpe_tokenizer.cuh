@@ -40,9 +40,9 @@ using hash_value_type    = uint32_t;
 using string_hasher_type = cudf::hashing::detail::MurmurHash3_x86_32<cudf::string_view>;
 
 /**
- * @brief Hasher function used for building and using the hipco static-map
+ * @brief Hasher function used for building and using the cuco static-map
  *
- * This takes advantage of heterogeneous lookup feature in hipco static-map which
+ * This takes advantage of heterogeneous lookup feature in cuco static-map which
  * allows inserting with one type (index) and looking up with a different type (string).
  */
 struct bpe_hasher {
@@ -58,9 +58,9 @@ struct bpe_hasher {
 };
 
 /**
- * @brief Equal function used for building and using the hipco static-map
+ * @brief Equal function used for building and using the cuco static-map
  *
- * This takes advantage of heterogeneous lookup feature in hipco static-map which
+ * This takes advantage of heterogeneous lookup feature in cuco static-map which
  * allows inserting with one type (index) and looking up with a different type (string).
  */
 struct bpe_equal {

@@ -285,14 +285,8 @@ endif()
 
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
-#TODO(HIP/AMD)
 add_library(
   hipdf
-  src/column/column.hip
-  src/column/column_device_view.hip
-  src/column/column_factories.cpp
-  src/column/column_factories.hip
-  src/column/column_view.cpp
   src/aggregation/aggregation.cpp
   src/aggregation/aggregation.hip
   src/aggregation/result_cache.cpp
@@ -331,10 +325,15 @@ add_library(
   src/binaryop/compiled/TrueDiv.hip
   src/binaryop/compiled/binary_ops.hip
   src/binaryop/compiled/equality_ops.hip
-  src/binaryop/compiled/util.cpp # TODO(HIP/AMD): error: member reference base type 'int' is not a structure or union
+  src/binaryop/compiled/util.cpp
   src/labeling/label_bins.hip
   src/bitmask/null_mask.hip
   src/bitmask/is_element_valid.cpp
+  src/column/column.hip
+  src/column/column_device_view.hip
+  src/column/column_factories.cpp
+  src/column/column_factories.hip
+  src/column/column_view.cpp
   src/copying/concatenate.hip
   src/copying/contiguous_split.hip
   src/copying/copy.cpp
@@ -375,7 +374,7 @@ add_library(
   src/groupby/sort/group_collect.hip
   src/groupby/sort/group_correlation.hip
   src/groupby/sort/group_count.hip
-  # src/groupby/sort/group_histogram.hip # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
+  src/groupby/sort/group_histogram.hip
   src/groupby/sort/group_m2.hip
   src/groupby/sort/group_max.hip
   src/groupby/sort/group_min.hip
@@ -425,7 +424,7 @@ add_library(
   src/io/functions.cpp
   src/io/json/byte_range_info.hip
   src/io/json/json_column.hip
-  src/io/json/json_tree.hip # TODO(HIP/AMD): HipCollections
+  src/io/json/json_tree.hip
   src/io/json/nested_json_gpu.hip
   src/io/json/read_json.hip
   src/io/json/legacy/json_gpu.hip
@@ -436,33 +435,33 @@ add_library(
   src/io/orc/orc.cpp
   src/io/orc/reader_impl.hip
   src/io/orc/stats_enc.hip
-  src/io/orc/stripe_data.hip # TODO(HIP/AMD): does not compile in debug mode because of int128_t legalization errors
+  src/io/orc/stripe_data.hip
   src/io/orc/stripe_enc.hip
   src/io/orc/stripe_init.hip
   src/datetime/timezone.cpp
-  src/io/orc/writer_impl.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/orc/writer_impl.hip
   src/io/parquet/compact_protocol_reader.cpp
   src/io/parquet/compact_protocol_writer.cpp
-  src/io/parquet/decode_preprocess.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_data.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/decode_preprocess.hip
+  src/io/parquet/page_data.hip
   src/io/parquet/chunk_dict.hip
-  src/io/parquet/page_enc.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_hdr.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_delta_decode.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
-  src/io/parquet/page_string_decode.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/page_enc.hip
+  src/io/parquet/page_hdr.hip
+  src/io/parquet/page_delta_decode.hip
+  src/io/parquet/page_string_decode.hip
   src/io/parquet/predicate_pushdown.cpp
   src/io/parquet/reader.cpp
   src/io/parquet/reader_impl.cpp
   src/io/parquet/reader_impl_helpers.cpp
   src/io/parquet/reader_impl_preprocess.hip
-  src/io/parquet/writer_impl.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
-  src/io/statistics/orc_column_statistics.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
-  src/io/statistics/parquet_column_statistics.hip # TODO(HIP/AMD): error: initialization is not supported for __shared__ variables.
+  src/io/parquet/writer_impl.hip
+  src/io/statistics/orc_column_statistics.hip
+  src/io/statistics/parquet_column_statistics.hip
   src/io/text/byte_range_info.cpp
   src/io/text/data_chunk_source_factories.cpp
   src/io/text/bgzip_data_chunk_source.hip
   src/io/text/bgzip_utils.cpp
-  src/io/text/multibyte_split.hip # TODO(HIP/AMD): hipcub issue: error: no viable conversion from 'int' to 'cudf::io::text::detail::multistate'
+  src/io/text/multibyte_split.hip
   src/io/utilities/arrow_io_source.cpp
   src/io/utilities/column_buffer.cpp
   src/io/utilities/config_utils.cpp
@@ -524,7 +523,7 @@ add_library(
   src/reductions/all.hip
   src/reductions/any.hip
   src/reductions/collect_ops.hip
-  # src/reductions/histogram.hip # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
+  src/reductions/histogram.hip
   src/reductions/max.hip
   src/reductions/mean.hip
   src/reductions/min.hip
@@ -585,8 +584,8 @@ add_library(
   src/sort/stable_sort.hip
   src/stream_compaction/apply_boolean_mask.hip
   src/stream_compaction/distinct.hip
-  src/stream_compaction/distinct_count.hip #TODO(HIP/AMD): There are hipCollection integration errors
-  src/stream_compaction/distinct_reduce.hip
+  src/stream_compaction/distinct_count.hip
+  src/stream_compaction/distinct_helpers.hip
   src/stream_compaction/drop_nans.hip
   src/stream_compaction/drop_nulls.hip
   src/stream_compaction/stable_distinct.hip
@@ -665,10 +664,10 @@ add_library(
   src/text/normalize.hip
   src/text/replace.hip
   src/text/stemmer.hip
-  src/text/subword/bpe_tokenizer.hip  #TODO(HIP/AMD): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
+  src/text/subword/bpe_tokenizer.hip
   src/text/subword/data_normalizer.hip
   src/text/subword/load_hash_file.hip
-  src/text/subword/load_merges_file.hip #TODO(HIP/AMD): we commented code here and in bpe_tokenizer.cuh (missing hipco APIs), so this file is not fully functional
+  src/text/subword/load_merges_file.hip
   src/text/subword/subword_tokenize.hip
   src/text/subword/wordpiece_tokenizer.hip
   src/text/tokenize.hip
@@ -680,7 +679,7 @@ add_library(
   src/transform/nans_to_nulls.hip
   src/transform/one_hot_encode.hip
   src/transform/row_bit_count.hip
-  src/transform/transform.cpp # TODO(HIP/AMD): JIT
+  src/transform/transform.cpp
   src/transpose/transpose.hip
   src/unary/cast_ops.hip
   src/unary/math_ops.hip
@@ -690,7 +689,7 @@ add_library(
   src/utilities/linked_column.cpp
   src/utilities/logger.cpp
   src/utilities/stacktrace.cpp
-  # src/utilities/stream_pool.cpp # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
+  src/utilities/stream_pool.cpp
   src/utilities/traits.cpp
   src/utilities/type_checks.cpp
   src/utilities/type_dispatcher.cpp

@@ -29,7 +29,6 @@
 #include <cstdint>
 #include <iterator>
 
-
 /**
  * @file
  * @brief Type declarations for libcudf.

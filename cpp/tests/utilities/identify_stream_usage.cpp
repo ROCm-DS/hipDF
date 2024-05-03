@@ -37,10 +37,10 @@
 // 1. STREAM_MODE_TESTING=OFF: In this mode, cudf::get_default_stream will
 //    return a custom stream and stream_is_invalid will return true if any CUDA
 //    API is called using any of CUDA's default stream constants
-//    (cudaStreamLegacy, hipStreamDefault, or hipStreamPerThread). This check
+//    (cudaStreamLegacy, cudaStreamDefault, or cudaStreamPerThread). This check
 //    is sufficient to ensure that cudf is using cudf::get_default_stream
 //    everywhere internally rather than implicitly using stream 0,
-//    hipStreamDefault, cudaStreamLegacy, thrust execution policies, etc. It
+//    cudaStreamDefault, cudaStreamLegacy, thrust execution policies, etc. It
 //    is not sufficient to guarantee a stream-ordered API because it will not
 //    identify places in the code that use cudf::get_default_stream instead of
 //    properly forwarding along a user-provided stream.

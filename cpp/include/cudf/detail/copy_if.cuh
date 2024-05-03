@@ -116,7 +116,7 @@ __launch_bounds__(block_size) __global__
   cudf::size_type block_offset = block_offsets[blockIdx.x];
 
   // one extra warp worth in case the block is not aligned
-  __shared__ bool temp_valids[has_validity ? block_size + cudf::detail::warp_size : 1];
+  __shared__ bool temp_valids[has_validity ? block_size + warpSize : 1];
   __shared__ T temp_data[block_size];
 
   cudf::size_type warp_valid_counts{0};  // total valid sum over the `per_thread` loop below
@@ -135,8 +135,8 @@ __launch_bounds__(block_size) __global__
 
     if (has_validity) {
       temp_valids[threadIdx.x] = false;  // init shared memory
-      if (threadIdx.x < cudf::detail::warp_size) temp_valids[block_size + threadIdx.x] = false;
-      __syncthreads();                   // wait for init
+      if (threadIdx.x < warpSize) temp_valids[block_size + threadIdx.x] = false;
+      __syncthreads();  // wait for init
     }
 
     if (mask_true) {
@@ -145,7 +145,7 @@ __launch_bounds__(block_size) __global__
       // scatter validity mask to shared memory
       if (has_validity and input_view.is_valid(tid)) {
         // determine aligned offset for this warp's output
-        cudf::size_type const aligned_offset      = block_offset % cudf::detail::warp_size;
+        cudf::size_type const aligned_offset      = block_offset % warpSize;
         temp_valids[local_index + aligned_offset] = true;
       }
     }
@@ -158,25 +158,24 @@ __launch_bounds__(block_size) __global__
 
     if (has_validity) {
       // Since the valid bools are contiguous in shared memory now, we can use
-      // __POPC to combine them into a single mask element.
+      // __popc to combine them into a single mask element.
       // Then, most mask elements can be directly copied from shared to global
       // memory. Only the first and last 32-bit mask elements of each block must
       // use an atomicOr, because these are where other blocks may overlap.
 
-      constexpr int num_warps = block_size / cudf::detail::warp_size;
+      constexpr int num_warps = block_size / warpSize;
       // account for partial blocks with non-warp-aligned offsets
-      int const last_index = tmp_block_sum + (block_offset % cudf::detail::warp_size) - 1;
-      int const last_warp  = min(num_warps, last_index / cudf::detail::warp_size);
-      int const wid        = threadIdx.x / cudf::detail::warp_size;
-      int const lane       = threadIdx.x % cudf::detail::warp_size;
+      int const last_index = tmp_block_sum + (block_offset % warpSize) - 1;
+      int const last_warp  = min(num_warps, last_index / warpSize);
+      int const wid        = threadIdx.x / warpSize;
+      int const lane       = threadIdx.x % warpSize;
 
       cudf::size_type tmp_warp_valid_counts{0};
 
       if (tmp_block_sum > 0 && wid <= last_warp) {
-        int valid_index = (block_offset / cudf::detail::warp_size) + wid;
+        int valid_index = (block_offset / warpSize) + wid;
 
         // compute the valid mask for this warp
-        //TODO(HIP/AMD)
         cudf::bitmask_type valid_warp = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, temp_valids[threadIdx.x]);
 
         // Note the atomicOr's below assume that output_valid has been set to
@@ -194,7 +193,6 @@ __launch_bounds__(block_size) __global__
 
         // if the block is full and not aligned then we have one more warp to cover
         if ((wid == 0) && (last_warp == num_warps)) {
-          //TODO(HIP/AMD)
           cudf::bitmask_type valid_warp = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, temp_valids[block_size + threadIdx.x]);
           if (lane == 0 && valid_warp != 0) {
             tmp_warp_valid_counts += __POPC(valid_warp);
@@ -359,8 +357,7 @@ std::unique_ptr<table> copy_if(table_view const& input,
   if (grid.num_blocks > 1) {
     // Determine and allocate temporary device storage
     size_t temp_storage_bytes = 0;
-    //TODO(HIP/AMD)
-    auto dummy = hipcub::DeviceScan::InclusiveSum(nullptr,
+    (void)hipcub::DeviceScan::InclusiveSum(nullptr,
                                   temp_storage_bytes,
                                   block_counts.begin(),
                                   block_offsets.begin() + 1,
@@ -369,8 +366,7 @@ std::unique_ptr<table> copy_if(table_view const& input,
     rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
 
     // Run exclusive prefix sum
-    //TODO(HIP/AMD)
-    auto dummy2 = hipcub::DeviceScan::InclusiveSum(d_temp_storage.data(),
+    (void)hipcub::DeviceScan::InclusiveSum(d_temp_storage.data(),
                                   temp_storage_bytes,
                                   block_counts.begin(),
                                   block_offsets.begin() + 1,

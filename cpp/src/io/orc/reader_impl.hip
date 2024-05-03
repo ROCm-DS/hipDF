@@ -950,7 +950,7 @@ column_buffer assemble_buffer(size_type orc_col_id,
 }  // namespace
 
 reader::impl::impl(std::vector<std::unique_ptr<datasource>>&& sources,
-                   cudf::io::orc_reader_options const& options,
+                   orc_reader_options const& options,
                    rmm::cuda_stream_view stream,
                    rmm::mr::device_memory_resource* mr)
   : _stream(stream),
@@ -966,7 +966,7 @@ reader::impl::impl(std::vector<std::unique_ptr<datasource>>&& sources,
 {
 }
 
-cudf::io::table_with_metadata reader::impl::read(uint64_t skip_rows,
+table_with_metadata reader::impl::read(uint64_t skip_rows,
                                        std::optional<size_type> const& num_rows_opt,
                                        std::vector<std::vector<size_type>> const& stripes)
 {

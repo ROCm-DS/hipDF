@@ -75,13 +75,13 @@ struct sorted_unique_fn {
     using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
     __shared__ typename warp_reduce::TempStorage temp_storage;
 
-    auto const row_idx  = idx / cudf::detail::warp_size;
-    auto const lane_idx = idx % cudf::detail::warp_size;
+    auto const row_idx  = idx / warpSize;
+    auto const lane_idx = idx % warpSize;
     auto const row      = get_row(d_input, row_idx);
     auto const begin    = row.begin();
 
     cudf::size_type count = 0;
-    for (auto itr = begin + lane_idx; itr < row.end(); itr += cudf::detail::warp_size) {
+    for (auto itr = begin + lane_idx; itr < row.end(); itr += warpSize) {
       count += (itr == begin || *itr != *(itr - 1));
     }
     auto const result = warp_reduce(temp_storage).Sum(count);
@@ -97,7 +97,7 @@ rmm::device_uvector<cudf::size_type> compute_unique_counts(cudf::column_view con
   sorted_unique_fn fn{*d_input, d_results.data()};
   thrust::for_each_n(rmm::exec_policy(stream),
                      thrust::counting_iterator<cudf::size_type>(0),
-                     input.size() * cudf::detail::warp_size,
+                     input.size() * warpSize,
                      fn);
   return d_results;
 }
@@ -118,8 +118,8 @@ struct sorted_intersect_fn {
     using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
     __shared__ typename warp_reduce::TempStorage temp_storage;
 
-    auto const row_idx  = idx / cudf::detail::warp_size;
-    auto const lane_idx = idx % cudf::detail::warp_size;
+    auto const row_idx  = idx / warpSize;
+    auto const lane_idx = idx % warpSize;
 
     auto const needles  = get_row(d_input1, row_idx);
     auto const haystack = get_row(d_input2, row_idx);
@@ -127,11 +127,11 @@ struct sorted_intersect_fn {
     auto begin     = haystack.begin();
     auto const end = haystack.end();
 
-    // TODO: investigate hipcollections device-side static-map to match row values
+    // TODO: investigate cuCollections device-side static-map to match row values
 
     cudf::size_type count = 0;
     for (auto itr = needles.begin() + lane_idx; itr < needles.end() && begin < end;
-         itr += cudf::detail::warp_size) {
+         itr += warpSize) {
       if (itr != needles.begin() && *itr == *(itr - 1)) { continue; }  // skip duplicates
       // search haystack for this needle (*itr)
       auto const found = thrust::lower_bound(thrust::seq, begin, end, *itr);
@@ -154,7 +154,7 @@ rmm::device_uvector<cudf::size_type> compute_intersect_counts(cudf::column_view 
   sorted_intersect_fn fn{*d_input1, *d_input2, d_results.data()};
   thrust::for_each_n(rmm::exec_policy(stream),
                      thrust::counting_iterator<cudf::size_type>(0),
-                     input1.size() * cudf::detail::warp_size,
+                     input1.size() * warpSize,
                      fn);
   return d_results;
 }
@@ -211,7 +211,7 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
   rmm::device_buffer d_temp_storage;
   size_t temp_storage_bytes = 0;
   //TODO(HIP/AMD): add proper error checking
-  (void) hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
+  (void)hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,
                                      sorted.data(),
@@ -221,7 +221,7 @@ std::unique_ptr<cudf::column> hash_substrings(cudf::strings_column_view const& c
                                      offsets + 1,
                                      stream.value());
   d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-  (void) hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
+  (void)hipcub::DeviceSegmentedSort::SortKeys(d_temp_storage.data(),
                                      temp_storage_bytes,
                                      data,
                                      sorted.data(),

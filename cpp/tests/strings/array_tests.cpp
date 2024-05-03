@@ -111,7 +111,7 @@ TEST_P(SliceParmsTest, SliceAllEmpty)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
 }
 
-INSTANTIATE_TEST_SUITE_P(StringsColumnTest,
+INSTANTIATE_TEST_CASE_P(StringsColumnTest,
                         SliceParmsTest,
                         testing::ValuesIn(std::array<cudf::size_type, 3>{5, 6, 7}));
 

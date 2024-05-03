@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022, NVIDIA CORPORATION.
+ * Copyright (c) 2020-2023, NVIDIA CORPORATION.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ struct find_index_fn {
     auto find_key    = static_cast<ScalarType const&>(key).value(stream);
     auto keys_view   = column_device_view::create(input.keys(), stream);
     auto iter        = thrust::equal_range(
-                                    rmm::exec_policy(cudf::get_default_stream()), 
+                                    rmm::exec_policy(stream), 
                                     keys_view->begin<Element>(),
                                     keys_view->end<Element>(),
                                     find_key);
@@ -178,10 +178,11 @@ std::unique_ptr<scalar> get_insert_index(dictionary_column_view const& dictionar
 
 std::unique_ptr<scalar> get_index(dictionary_column_view const& dictionary,
                                   scalar const& key,
+                                  rmm::cuda_stream_view stream,
                                   rmm::mr::device_memory_resource* mr)
 {
   CUDF_FUNC_RANGE();
-  return detail::get_index(dictionary, key, cudf::get_default_stream(), mr);
+  return detail::get_index(dictionary, key, stream, mr);
 }
 
 }  // namespace dictionary

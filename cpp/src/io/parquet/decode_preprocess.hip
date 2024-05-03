@@ -63,7 +63,7 @@ __device__ size_type gpuDecodeTotalPageStringSize(page_state_s* s, int t)
     target_pos = new_target_pos;
     str_len    = len;
   } else if ((s->col.data_type & 7) == BYTE_ARRAY) {
-    //Caution: The result is only valid on thread 0!
+    // CAUTION(HIP/AMD): The result is only valid on thread 0!
     str_len = gpuInitStringDescriptors<true, unused_state_buf>(s, nullptr, target_pos, t);
   }
   if (!t) { *(int32_t volatile*)&s->dict_pos = target_pos; }
@@ -97,8 +97,8 @@ static __device__ void gpuUpdatePageSizes(page_state_s* s,
   // max nesting depth of the column
   int const max_depth = s->col.max_nesting_depth;
 
-  constexpr int num_warps      = preprocess_block_size / cudf::detail::warp_size;
-  constexpr int max_batch_size = num_warps * cudf::detail::warp_size;
+  constexpr int num_warps      = preprocess_block_size / warpSize;
+  constexpr int max_batch_size = num_warps * warpSize;
 
   using block_reduce = hipcub::BlockReduce<int, preprocess_block_size>;
   using block_scan   = hipcub::BlockScan<int, preprocess_block_size>;
@@ -353,7 +353,7 @@ __global__ void __launch_bounds__(preprocess_block_size)
   // retrieve total string size.
   // TODO: make this block-based instead of just 1 warp
 
-  // Caution: There is a path in gpuDecodeTotalPageStringSize where str_bytes only contains the correct result on t == 0.
+  // CAUTION(HIP/AMD): There is a path in gpuDecodeTotalPageStringSize where str_bytes only contains the correct result on t == 0.
   // This is why we only let thread 0 write the final result into shared memory.
   if (compute_string_sizes) {
     size_t str_bytes = 0;

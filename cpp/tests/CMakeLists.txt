@@ -133,7 +133,7 @@ ConfigureTest(
   groupby/covariance_tests.cpp
   groupby/groupby_test_util.cpp
   groupby/groups_tests.cpp
-  # groupby/histogram_tests.cpp # TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
+  groupby/histogram_tests.cpp
   groupby/keys_tests.cpp
   groupby/lists_tests.cpp
   groupby/m2_tests.cpp
@@ -274,14 +274,14 @@ ConfigureTest(
   transform/one_hot_encode_tests.cpp
 )
 
-# # ##################################################################################################
-# # * interop tests -------------------------------------------------------------------------
+# ##################################################################################################
+# * interop tests -------------------------------------------------------------------------
 ConfigureTest(
-   INTEROP_TEST interop/to_arrow_test.cpp interop/from_arrow_test.cpp interop/dlpack_test.cpp
- )
+  INTEROP_TEST interop/to_arrow_test.cpp interop/from_arrow_test.cpp interop/dlpack_test.cpp
+)
 
-# # ##################################################################################################
-# # * io tests --------------------------------------------------------------------------------------
+# ##################################################################################################
+# * io tests --------------------------------------------------------------------------------------
 ConfigureTest(DECOMPRESSION_TEST io/comp/decomp_test.cpp)
 ConfigureTest(ROW_SELECTION_TEST io/row_selection_test.cpp)
 
@@ -328,8 +328,8 @@ if(HIPDF_ENABLE_ARROW_S3)
   target_compile_definitions(ARROW_IO_SOURCE_TEST PRIVATE "S3_ENABLED")
 endif()
 
-# # ##################################################################################################
-# # * sort tests ------------------------------------------------------------------------------------
+##################################################################################################
+# * sort tests ------------------------------------------------------------------------------------
 ConfigureTest(
    SORT_TEST sort/segmented_sort_tests.cpp sort/sort_nested_types_tests.cpp sort/sort_test.cpp
    sort/stable_sort_tests.cpp sort/rank_test.cpp
@@ -337,8 +337,8 @@ ConfigureTest(
    PERCENT 70
  )
 
-# # ##################################################################################################
-# # * copying tests ---------------------------------------------------------------------------------
+# ##################################################################################################
+# * copying tests ---------------------------------------------------------------------------------
 ConfigureTest(
   COPYING_TEST
   copying/concatenate_tests.cpp
@@ -369,8 +369,8 @@ ConfigureTest(
   PERCENT 70
 )
 
-# # ##################################################################################################
-# # * utilities tests -------------------------------------------------------------------------------
+# ##################################################################################################
+# * utilities tests -------------------------------------------------------------------------------
 ConfigureTest(
   UTILITIES_TEST
   utilities_tests/type_list_tests.cpp
@@ -382,8 +382,8 @@ ConfigureTest(
   utilities_tests/type_check_tests.cpp
 )
 
-# # ##################################################################################################
-# # * span tests -------------------------------------------------------------------------------
+# ##################################################################################################
+# * span tests -------------------------------------------------------------------------------
 
 # # This test must be split into two executables so that one can use the preload library and one does
 # # not. The one that doesn't includes a thrust::device_vector copy, which is always synchronous on
@@ -404,13 +404,13 @@ set_tests_properties(
   SPAN_TEST_DEVICE_VECTOR PROPERTIES ENVIRONMENT "GTEST_FILTER=${_allowlist_filter}"
 )
 
-# # ##################################################################################################
-# # * iterator tests --------------------------------------------------------------------------------
+# ##################################################################################################
+# * iterator tests --------------------------------------------------------------------------------
 ConfigureTest(
   ITERATOR_TEST
-  iterator/indexalator_test.hip 
+  iterator/indexalator_test.hip
   iterator/optional_iterator_test_chrono.hip
-  iterator/optional_iterator_test_numeric.hip 
+  iterator/optional_iterator_test_numeric.hip
   iterator/pair_iterator_test_chrono.hip
   iterator/pair_iterator_test_numeric.hip
   iterator/scalar_iterator_test.hip
@@ -422,33 +422,33 @@ ConfigureTest(
   iterator/value_iterator_test_transform.hip
 )
 
-# # ##################################################################################################
-# # * device atomics tests --------------------------------------------------------------------------
+# ##################################################################################################
+# * device atomics tests --------------------------------------------------------------------------
 ConfigureTest(DEVICE_ATOMICS_TEST device_atomics/device_atomics_test.hip)
 
-# # ##################################################################################################
-# # * transpose tests -------------------------------------------------------------------------------
+# ##################################################################################################
+# * transpose tests -------------------------------------------------------------------------------
 ConfigureTest(
   TRANSPOSE_TEST transpose/transpose_test.cpp
   GPUS 1
   PERCENT 70
 )
 
-# # ##################################################################################################
-# # * table tests -----------------------------------------------------------------------------------
+# ##################################################################################################
+# * table tests -----------------------------------------------------------------------------------
 ConfigureTest(
   TABLE_TEST table/table_tests.cpp table/table_view_tests.hip table/row_operators_tests.cpp
   table/experimental_row_operator_tests.hip table/row_operator_tests_utilities.hip
 )
 
-# # ##################################################################################################
-# # * sorted-merge tests ----------------------------------------------------------------------------
+# ##################################################################################################
+# * sorted-merge tests ----------------------------------------------------------------------------
 ConfigureTest(
-   MERGE_TEST merge/merge_test.cpp merge/merge_dictionary_test.cpp merge/merge_string_test.cpp
+  MERGE_TEST merge/merge_test.cpp merge/merge_dictionary_test.cpp merge/merge_string_test.cpp
 )
 
-# # ##################################################################################################
-# # * stream compaction tests -----------------------------------------------------------------------
+# ##################################################################################################
+# * stream compaction tests -----------------------------------------------------------------------
 ConfigureTest(
   STREAM_COMPACTION_TEST
   stream_compaction/apply_boolean_mask_tests.cpp
@@ -479,40 +479,40 @@ ConfigureTest(
    PERCENT 70
 )
 
-# # ##################################################################################################
-# # * filling test ----------------------------------------------------------------------------------
+# ##################################################################################################
+# * filling test ----------------------------------------------------------------------------------
 ConfigureTest(
   FILLING_TEST filling/fill_tests.cpp filling/repeat_tests.cpp filling/sequence_tests.cpp
 )
 
-# # ##################################################################################################
-# # * search test -----------------------------------------------------------------------------------
+# ##################################################################################################
+# * search test -----------------------------------------------------------------------------------
 ConfigureTest(
   SEARCH_TEST search/search_dictionary_test.cpp search/search_list_test.cpp
   search/search_struct_test.cpp search/search_test.cpp
 )
 
-# # ##################################################################################################
-# # * reshape test ----------------------------------------------------------------------------------
+# ##################################################################################################
+# * reshape test ----------------------------------------------------------------------------------
 ConfigureTest(
   RESHAPE_TEST reshape/byte_cast_tests.cpp reshape/interleave_columns_tests.cpp
   reshape/tile_tests.cpp
 )
 
-# # ##################################################################################################
-# # * traits test -----------------------------------------------------------------------------------
+# ##################################################################################################
+# * traits test -----------------------------------------------------------------------------------
 ConfigureTest(TRAITS_TEST types/traits_test.cpp)
 
-# # ##################################################################################################
-# # * factories test --------------------------------------------------------------------------------
+# ##################################################################################################
+# * factories test --------------------------------------------------------------------------------
 ConfigureTest(FACTORIES_TEST scalar/factories_test.cpp column/factories_test.cpp)
 
-# # ##################################################################################################
-# # * dispatcher test -------------------------------------------------------------------------------
+# ##################################################################################################
+# * dispatcher test -------------------------------------------------------------------------------
 ConfigureTest(DISPATCHER_TEST types/type_dispatcher_test.hip)
 
-# # ##################################################################################################
-# # * strings test ----------------------------------------------------------------------------------
+# ##################################################################################################
+# * strings test ----------------------------------------------------------------------------------
 ConfigureTest(
   STRINGS_TEST
   strings/array_tests.cpp
@@ -552,12 +552,12 @@ ConfigureTest(
   strings/urls_tests.cpp
 )
 
-# # ##################################################################################################
-# # * structs test ----------------------------------------------------------------------------------
+# ##################################################################################################
+# * structs test ----------------------------------------------------------------------------------
 ConfigureTest(STRUCTS_TEST structs/structs_column_tests.cpp structs/utilities_tests.cpp)
 
-# # ##################################################################################################
-# # * nvtext test -----------------------------------------------------------------------------------
+# ##################################################################################################
+# * nvtext test -----------------------------------------------------------------------------------
 ConfigureTest(
   TEXT_TEST
   text/bpe_tests.cpp
@@ -573,15 +573,15 @@ ConfigureTest(
   text/tokenize_tests.cpp
 )
 
-# # ##################################################################################################
-# # * bitmask tests ---------------------------------------------------------------------------------
+# ##################################################################################################
+# * bitmask tests ---------------------------------------------------------------------------------
 ConfigureTest(
   BITMASK_TEST bitmask/valid_if_tests.hip bitmask/set_nullmask_tests.hip bitmask/bitmask_tests.cpp
   bitmask/is_element_valid_tests.cpp
 )
 
-# # ##################################################################################################
-# # * dictionary tests ------------------------------------------------------------------------------
+# ##################################################################################################
+# * dictionary tests ------------------------------------------------------------------------------
 ConfigureTest(
   DICTIONARY_TEST
   dictionary/add_keys_test.cpp
@@ -597,16 +597,16 @@ ConfigureTest(
   dictionary/slice_test.cpp
 )
 
-# # ##################################################################################################
-# # * encode tests -----------------------------------------------------------------------------------
+# ##################################################################################################
+# * encode tests -----------------------------------------------------------------------------------
 ConfigureTest(ENCODE_TEST encode/encode_tests.cpp)
 
-# # ##################################################################################################
-# # * ast tests -------------------------------------------------------------------------------------
+# ##################################################################################################
+# * ast tests -------------------------------------------------------------------------------------
 ConfigureTest(AST_TEST ast/transform_tests.cpp)
 
-# # ##################################################################################################
-# # * lists tests ----------------------------------------------------------------------------------
+# ##################################################################################################
+# * lists tests ----------------------------------------------------------------------------------
 ConfigureTest(
   LISTS_TEST
   lists/combine/concatenate_list_elements_tests.cpp
@@ -628,31 +628,31 @@ ConfigureTest(
   PERCENT 70
 )
 
-# # ##################################################################################################
-# # * bin tests ----------------------------------------------------------------------------------
+# ##################################################################################################
+# * bin tests ----------------------------------------------------------------------------------
 ConfigureTest(LABEL_BINS_TEST labeling/label_bins_tests.cpp)
 
-# # ##################################################################################################
-# # * stream testing ---------------------------------------------------------------------------------
+# ##################################################################################################
+# * stream testing ---------------------------------------------------------------------------------
 ConfigureTest(
   STREAM_IDENTIFICATION_TEST identify_stream_usage/test_default_stream_identification.hip
 )
 
-ConfigureTest(STREAM_HASHING_TEST streams/hash_test.cpp STREAM_MODE testing)
-ConfigureTest(STREAM_COPYING_TEST streams/copying_test.cpp STREAM_MODE testing)
-ConfigureTest(STREAM_GROUPBY_TEST streams/groupby_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_CONCATENATE_TEST streams/concatenate_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_COPYING_TEST streams/copying_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_FILLING_TEST streams/filling_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_GROUPBY_TEST streams/groupby_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_HASHING_TEST streams/hash_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_INTEROP_TEST streams/interop_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_REPLACE_TEST streams/replace_test.cpp STREAM_MODE testing)
 ConfigureTest(STREAM_SEARCH_TEST streams/search_test.cpp STREAM_MODE testing)
-# TODO(HIP/AMD): Should be enabled for upgrade to branch-23.10
-# ConfigureTest(STREAM_DICTIONARY_TEST streams/dictionary_test.cpp STREAM_MODE testing)
-# ConfigureTest(
-#   STREAM_STRINGS_TEST streams/strings/case_test.cpp streams/strings/find_test.cpp STREAM_MODE
-#   testing
-# )
-# ConfigureTest(STREAM_SORTING_TEST streams/sorting_test.cpp STREAM_MODE testing)
-# ConfigureTest(STREAM_TEXT_TEST streams/text/ngrams_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_DICTIONARY_TEST streams/dictionary_test.cpp STREAM_MODE testing)
+ConfigureTest(
+  STREAM_STRINGS_TEST streams/strings/case_test.cpp streams/strings/find_test.cpp STREAM_MODE
+  testing
+)
+ConfigureTest(STREAM_SORTING_TEST streams/sorting_test.cpp STREAM_MODE testing)
+ConfigureTest(STREAM_TEXT_TEST streams/text/ngrams_test.cpp STREAM_MODE testing)
 
 # ##################################################################################################
 # Install tests ####################################################################################

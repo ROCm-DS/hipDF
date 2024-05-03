@@ -148,8 +148,8 @@ struct count_bytes_fn {
 
   __device__ void operator()(size_type idx) const
   {
-    auto const str_idx  = idx / cudf::detail::warp_size;
-    auto const lane_idx = idx % cudf::detail::warp_size;
+    auto const str_idx  = idx / warpSize;
+    auto const lane_idx = idx % warpSize;
 
     // initialize the output for the atomicAdd
     if (lane_idx == 0) { d_offsets[str_idx] = 0; }
@@ -161,14 +161,14 @@ struct count_bytes_fn {
     auto const str_ptr = d_str.data();
 
     size_type size = 0;
-    for (auto i = lane_idx; i < d_str.size_bytes(); i += cudf::detail::warp_size) {
+    for (auto i = lane_idx; i < d_str.size_bytes(); i += warpSize) {
       auto const chr = str_ptr[i];
       if (is_utf8_continuation_char(chr)) { continue; }
       char_utf8 u8 = 0;
       to_char_utf8(str_ptr + i, u8);
       size += converter.process_character(u8);
     }
-    // this is every so slightly faster than using the hipcub::warp_reduce
+    // this is every so slightly faster than using the cub::warp_reduce
     if (size > 0) {
       hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_offsets + str_idx)};
       ref.fetch_add(size, hip::std::memory_order_relaxed);
@@ -255,7 +255,7 @@ std::unique_ptr<column> convert_case(strings_column_view const& input,
   count_bytes_fn counter{ccfn, *d_strings, d_offsets};
   auto const count_itr = thrust::make_counting_iterator<size_type>(0);
   thrust::for_each_n(
-    rmm::exec_policy(stream), count_itr, input.size() * cudf::detail::warp_size, counter);
+    rmm::exec_policy(stream), count_itr, input.size() * warpSize, counter);
 
   // convert sizes to offsets
   auto const bytes =
@@ -311,24 +311,27 @@ std::unique_ptr<column> swapcase(strings_column_view const& strings,
 // APIs
 
 std::unique_ptr<column> to_lower(strings_column_view const& strings,
+                                 rmm::cuda_stream_view stream,
                                  rmm::mr::device_memory_resource* mr)
 {
   CUDF_FUNC_RANGE();
-  return detail::to_lower(strings, cudf::get_default_stream(), mr);
+  return detail::to_lower(strings, stream, mr);
 }
 
 std::unique_ptr<column> to_upper(strings_column_view const& strings,
+                                 rmm::cuda_stream_view stream,
                                  rmm::mr::device_memory_resource* mr)
 {
   CUDF_FUNC_RANGE();
-  return detail::to_upper(strings, cudf::get_default_stream(), mr);
+  return detail::to_upper(strings, stream, mr);
 }
 
 std::unique_ptr<column> swapcase(strings_column_view const& strings,
+                                 rmm::cuda_stream_view stream,
                                  rmm::mr::device_memory_resource* mr)
 {
   CUDF_FUNC_RANGE();
-  return detail::swapcase(strings, cudf::get_default_stream(), mr);
+  return detail::swapcase(strings, stream, mr);
 }
 
 }  // namespace strings

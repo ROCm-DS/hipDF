@@ -55,7 +55,7 @@ __launch_bounds__(block_size) __global__
   size_type end   = out.size();
   // warp indices.  since 1 warp == 32 threads == sizeof(bitmask_type) * 8,
   // each warp will process one (32 bit) of the validity mask via
-  // hip_extensions::__ballot_sync()
+  // __ballot_sync()
   size_type warp_begin = cudf::word_index(begin);
   size_type warp_end   = cudf::word_index(end - 1);
 

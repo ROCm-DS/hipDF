@@ -66,7 +66,7 @@ namespace detail {
 namespace hash {
 namespace {
 
-// TODO: replace it with `hipco::static_map`
+// TODO: replace it with `cuco::static_map`
 // https://github.com/rapidsai/cudf/issues/10401
 template <typename ComparatorType>
 using map_type = concurrent_unordered_map<

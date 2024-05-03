@@ -74,8 +74,11 @@ struct aggregate_writer_metadata {
     for (size_t i = 0; i < partitions.size(); ++i) {
       this->files[i].num_rows = partitions[i].num_rows;
     }
-    this->column_order_listsize =
-      (stats_granularity != statistics_freq::STATISTICS_NONE) ? num_columns : 0;
+
+    if (stats_granularity != statistics_freq::STATISTICS_NONE) {
+      ColumnOrder default_order = {ColumnOrder::TYPE_ORDER};
+      this->column_orders       = std::vector<ColumnOrder>(num_columns, default_order);
+    }
 
     for (size_t p = 0; p < kv_md.size(); ++p) {
       std::transform(kv_md[p].begin(),
@@ -102,13 +105,13 @@ struct aggregate_writer_metadata {
   {
     CUDF_EXPECTS(part < files.size(), "Invalid part index queried");
     FileMetaData meta{};
-    meta.version               = this->version;
-    meta.schema                = this->schema;
-    meta.num_rows              = this->files[part].num_rows;
-    meta.row_groups            = this->files[part].row_groups;
-    meta.key_value_metadata    = this->files[part].key_value_metadata;
-    meta.created_by            = this->created_by;
-    meta.column_order_listsize = this->column_order_listsize;
+    meta.version            = this->version;
+    meta.schema             = this->schema;
+    meta.num_rows           = this->files[part].num_rows;
+    meta.row_groups         = this->files[part].row_groups;
+    meta.key_value_metadata = this->files[part].key_value_metadata;
+    meta.created_by         = this->created_by;
+    meta.column_orders      = this->column_orders;
     return meta;
   }
 
@@ -170,8 +173,8 @@ struct aggregate_writer_metadata {
     std::vector<std::vector<uint8_t>> column_indexes;
   };
   std::vector<per_file_metadata> files;
-  std::string created_by         = "";
-  uint32_t column_order_listsize = 0;
+  std::string created_by                                   = "";
+  thrust::optional<std::vector<ColumnOrder>> column_orders = thrust::nullopt;
 };
 
 namespace {
@@ -867,7 +870,7 @@ parquet_column_view::parquet_column_view(schema_tree_node const& schema_node,
   }
   _nullability = std::vector<uint8_t>(r_nullability.crbegin(), r_nullability.crend());
   // TODO(cp): Explore doing this for all columns in a single go outside this ctor. Maybe using
-  // hostdevice_vector. Currently this involves a hipMemcpyAsync for each column.
+  // hostdevice_vector. Currently this involves a cudaMemcpyAsync for each column.
   _d_nullability = cudf::detail::make_device_uvector_async(
     _nullability, stream, rmm::mr::get_current_device_resource());
 
@@ -1136,8 +1139,8 @@ build_chunk_dictionaries(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
       chunk.use_dictionary = false;
     } else {
       chunk.use_dictionary = true;
-      // hipcollections suggests using a hash map of size N * (1/0.7) = num_values * 1.43
-      // https://github.com/NVIDIA/hipcollections/blob/3a49fc71/include/hipco/static_map.cuh#L190-L193
+      // cuCollections suggests using a hash map of size N * (1/0.7) = num_values * 1.43
+      // https://github.com/NVIDIA/cuCollections/blob/3a49fc71/include/cuco/static_map.cuh#L190-L193
       auto& inserted_map   = hash_maps_storage.emplace_back(chunk.num_values * 1.43, stream);
       chunk.dict_map_slots = inserted_map.data();
       chunk.dict_map_size  = inserted_map.size();
@@ -2373,20 +2376,7 @@ std::unique_ptr<std::vector<uint8_t>> writer::merge_row_group_metadata(
       md.num_rows += tmp.num_rows;
     }
   }
-  // Reader doesn't currently populate column_order, so infer it here
-  if (not md.row_groups.empty()) {
-    auto const is_valid_stats = [](auto const& stats) {
-      return not stats.max.empty() || not stats.min.empty() || stats.null_count != -1 ||
-             stats.distinct_count != -1 || not stats.max_value.empty() ||
-             not stats.min_value.empty();
-    };
 
-    uint32_t num_columns = static_cast<uint32_t>(md.row_groups[0].columns.size());
-    md.column_order_listsize =
-      (num_columns > 0 && is_valid_stats(md.row_groups[0].columns[0].meta_data.statistics))
-        ? num_columns
-        : 0;
-  }
   // Thrift-encode the resulting output
   file_header_s fhdr;
   file_ender_s fendr;

@@ -150,32 +150,6 @@ _cudf_scalar_reflected_ops = [
     lambda x: cudf.Scalar(0) / x,
 ]
 
-_series_or_index_names = [
-    None,
-    pd.NA,
-    cudf.NA,
-    np.nan,
-    float("NaN"),
-    "abc",
-    1,
-    pd.NaT,
-    np.datetime64("nat"),
-    np.timedelta64("NaT"),
-    np.timedelta64(10, "D"),
-    np.timedelta64(5, "D"),
-    np.datetime64("1970-01-01 00:00:00.000000001"),
-    np.datetime64("1970-01-01 00:00:00.000000002"),
-    pd.Timestamp(1),
-    pd.Timestamp(2),
-    pd.Timedelta(1),
-    pd.Timedelta(2),
-    decimal.Decimal("NaN"),
-    decimal.Decimal("1.2"),
-    np.int64(1),
-    np.int32(1),
-    np.float32(1),
-    pd.Timestamp(1),
-]
 
 pytest_xfail = pytest.mark.xfail
 pytestmark = pytest.mark.spilling
@@ -3192,14 +3166,23 @@ def test_empty_column(binop, data, scalar):
 @pytest.mark.parametrize(
     "df",
     [
-        cudf.DataFrame([[1, 2, 3, 4], [5, 6, 7, 8]]),
+        cudf.DataFrame(
+            [[1, 2, 3, 4], [5, 6, 7, 8], [10, 11, 12, 13], [14, 15, 16, 17]]
+        ),
         pytest.param(
             cudf.DataFrame([[1, None, None, 4], [5, 6, 7, None]]),
             marks=pytest_xfail(
                 reason="Cannot access Frame.values if frame contains nulls"
             ),
         ),
-        cudf.DataFrame([[1.2, 2.3, 3.4, 4.5], [5.6, 6.7, 7.8, 8.9]]),
+        cudf.DataFrame(
+            [
+                [1.2, 2.3, 3.4, 4.5],
+                [5.6, 6.7, 7.8, 8.9],
+                [7.43, 4.2, 23.2, 23.2],
+                [9.1, 2.4, 4.5, 65.34],
+            ]
+        ),
         cudf.Series([14, 15, 16, 17]),
         cudf.Series([14.15, 15.16, 16.17, 17.18]),
     ],
@@ -3213,8 +3196,6 @@ def test_empty_column(binop, data, scalar):
         ),
         cudf.Series([5, 6, 7, 8]),
         cudf.Series([5.6, 6.7, 7.8, 8.9]),
-        pd.DataFrame([[9, 10], [11, 12], [13, 14], [15, 16]]),
-        pd.Series([5, 6, 7, 8]),
         np.array([5, 6, 7, 8]),
         [25.5, 26.6, 27.7, 28.8],
     ],
@@ -3227,6 +3208,14 @@ def test_binops_dot(df, other):
     got = df @ other
 
     utils.assert_eq(expected, got)
+
+
+def test_binop_dot_preserve_index():
+    ser = cudf.Series(range(2), index=["A", "B"])
+    df = cudf.DataFrame(np.eye(2), columns=["A", "B"], index=["A", "B"])
+    result = ser @ df
+    expected = ser.to_pandas() @ df.to_pandas()
+    utils.assert_eq(result, expected)
 
 
 def test_binop_series_with_repeated_index():
@@ -3333,8 +3322,8 @@ def test_binop_index_series(op):
     utils.assert_eq(expected, actual)
 
 
-@pytest.mark.parametrize("name1", _series_or_index_names)
-@pytest.mark.parametrize("name2", _series_or_index_names)
+@pytest.mark.parametrize("name1", utils.SERIES_OR_INDEX_NAMES)
+@pytest.mark.parametrize("name2", utils.SERIES_OR_INDEX_NAMES)
 def test_binop_index_dt_td_series_with_names(name1, name2):
     gi = cudf.Index([1, 2, 3], dtype="datetime64[ns]", name=name1)
     gs = cudf.Series([10, 11, 12], dtype="timedelta64[ns]", name=name2)

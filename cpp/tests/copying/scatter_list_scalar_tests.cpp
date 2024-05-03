@@ -215,7 +215,7 @@ TYPED_TEST(ScatterListOfListScalarTest, Basic)
   LCW col({LCW({LCW{88, 88}, LCW{}, LCW{9, 9, 9}}, mask_vector{1, 0, 1}.begin()),
            LCW{LCW{66}, LCW{}, LCW({77, 77, 77, 77}, mask_vector{1, 0, 0, 1}.begin())},
            LCW{LCW{55, 55}, LCW{}, LCW{10, 10, 10}},
-             //: LCW{LCW{44, 44}}});
+             //: LCW{LCW{44, 44}}}); // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
            LCW({LCW{44, 44}})});
 
   size_column scatter_map{1, 2, 3};

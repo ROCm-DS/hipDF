@@ -69,8 +69,8 @@ TEST_F(XXHash_64_Test, TestInteger)
 
   auto const output = cudf::hashing::xxhash_64(cudf::table_view({col1}));
 
-  // these were generated using the CPU compiled version of the hipco xxhash_64 source
-  // https://github.com/NVIDIA/hipcollections/blob/dev/include/hipco/detail/hash_functions/xxhash.cuh
+  // these were generated using the CPU compiled version of the cuco xxhash_64 source
+  // https://github.com/NVIDIA/cuCollections/blob/dev/include/cuco/detail/hash_functions/xxhash.cuh
   auto expected = cudf::test::fixed_width_column_wrapper<uint64_t>({4827426872506142937ul,
                                                                     13867166853951622683ul,
                                                                     4246796580750024372ul,
@@ -99,8 +99,8 @@ TEST_F(XXHash_64_Test, TestDouble)
 
   auto const output = cudf::hashing::xxhash_64(cudf::table_view({col1}));
 
-  // these were generated using the CPU compiled version of the hipco xxhash_64 source
-  // https://github.com/NVIDIA/hipcollections/blob/dev/include/hipco/detail/hash_functions/xxhash.cuh
+  // these were generated using the CPU compiled version of the cuco xxhash_64 source
+  // https://github.com/NVIDIA/cuCollections/blob/dev/include/cuco/detail/hash_functions/xxhash.cuh
   auto expected = cudf::test::fixed_width_column_wrapper<uint64_t>({16892115221677838993ul,
                                                                     1686446903308179321ul,
                                                                     3803688792395291579ul,
@@ -138,8 +138,8 @@ TEST_F(XXHash_64_Test, StringType)
 
   auto output = cudf::hashing::xxhash_64(cudf::table_view({col1}));
 
-  // these were generated using the CPU compiled version of the hipco xxhash_64 source
-  // https://github.com/NVIDIA/hipcollections/blob/dev/include/hipco/detail/hash_functions/xxhash.cuh
+  // these were generated using the CPU compiled version of the cuco xxhash_64 source
+  // https://github.com/NVIDIA/cuCollections/blob/dev/include/cuco/detail/hash_functions/xxhash.cuh
   // Also verified these with https://pypi.org/project/xxhash/
   // using xxhash.xxh64(bytes(s,'utf-8')).intdigest()
   auto expected = cudf::test::fixed_width_column_wrapper<uint64_t>({4686269239494003989ul,
@@ -165,8 +165,8 @@ TEST_F(XXHash_64_Test, TestFixedPoint)
     {0, 100, -100, -999999999, 999999999}, numeric::scale_type{-3});
   auto const output = cudf::hashing::xxhash_64(cudf::table_view({col1}));
 
-  // these were generated using the CPU compiled version of the hipco xxhash_64 source
-  // https://github.com/NVIDIA/hipcollections/blob/dev/include/hipco/detail/hash_functions/xxhash.cuh
+  // these were generated using the CPU compiled version of the cuco xxhash_64 source
+  // https://github.com/NVIDIA/cuCollections/blob/dev/include/cuco/detail/hash_functions/xxhash.cuh
   // and passing the 'value' of each input (without the scale) as the decimal-type
   auto expected = cudf::test::fixed_width_column_wrapper<uint64_t>({4246796580750024372ul,
                                                                     5959467639951725378ul,

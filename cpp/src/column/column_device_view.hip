@@ -113,8 +113,8 @@ column_device_view::create(column_view source, rmm::cuda_stream_view stream)
     // Can't use make_unique since the ctor is protected
     return std::unique_ptr<column_device_view>(new column_device_view(source));
   }
+
   return create_device_view_from_view<column_view, column_device_view>(source, stream);
-  //return std::unique_ptr<column_device_view>(new column_device_view(source));
 }
 
 std::size_t column_device_view::extent(column_view const& source)

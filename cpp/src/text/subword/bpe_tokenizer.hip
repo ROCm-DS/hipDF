@@ -261,7 +261,7 @@ struct byte_pair_encoding_fn {
           while (itr < end) {
             auto rhs = next_substr(itr, end, d_str);
             if (d_pair.first == lhs && d_pair.second == rhs) {
-              *itr = 0;                   // removes the pair from this string
+              *itr = 0;  // removes the pair from this string
               itr += rhs.size_bytes();
               if (itr >= end) { break; }  // done checking for pairs
               // skip to the next adjacent pair
@@ -364,7 +364,7 @@ std::unique_ptr<cudf::column> byte_pair_encoding(
                                            stream,
                                            rmm::mr::get_current_device_resource());
   auto d_offsets = offsets->mutable_view().data<cudf::size_type>();
-  
+
   auto map_ref = merge_pairs.get_merge_pairs_ref();
   byte_pair_encoding_fn<decltype(map_ref)> fn{
     d_merges, *d_strings, map_ref, d_offsets, string_hasher_type{}, d_byte_indices.data()};

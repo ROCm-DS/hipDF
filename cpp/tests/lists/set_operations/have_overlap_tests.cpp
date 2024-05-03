@@ -127,7 +127,6 @@ TEST_F(ListOverlapTest, StringTestsNonNull)
 {
   // Trivial cases - empty input.
   {
-    
     auto const lhs      = strings_lists{};
     auto const rhs      = strings_lists{};
     auto const expected = bools_col{};
@@ -138,7 +137,7 @@ TEST_F(ListOverlapTest, StringTestsNonNull)
 
   // Trivial cases - empty input.
   {
-    //TODO: Workaround for HIP
+    // TODO(HIP/AMD): Workaround for HIP
     auto const lhs      = strings_lists{{strings_lists{}}};
     auto const rhs      = strings_lists{{strings_lists{}}};
     auto const expected = bools_col{0};
@@ -375,7 +374,7 @@ TYPED_TEST(ListOverlapTypedTest, InputHaveNullsTests)
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, *results);
   }
 }
-
+// TODO(HIP/AMD): Enable the test?
 // TEST_F(ListOverlapTest, InputListsOfNestedStructsHaveNull)
 // {
 //   auto const get_structs_lhs = [] {
@@ -485,7 +484,7 @@ TYPED_TEST(ListOverlapTypedTest, InputHaveNullsTests)
 //     CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, *results);
 //   }
 // }
-
+// TODO(HIP/AMD): Enable the test?
 // TEST_F(ListOverlapTest, InputListsOfStructsOfLists)
 // {
 //   auto const lhs = [] {

@@ -46,13 +46,13 @@ static const __device__ __constant__ uint8_t g_list2struct[16] = {0,
                                                                   ST_FLD_LIST};
 
 struct byte_stream_s {
-  uint8_t const* cur;
-  uint8_t const* end;
-  uint8_t const* base;
+  uint8_t const* cur{};
+  uint8_t const* end{};
+  uint8_t const* base{};
   // Parsed symbols
-  PageType page_type;
-  PageInfo page;
-  ColumnChunkDesc ck;
+  PageType page_type{};
+  PageInfo page{};
+  ColumnChunkDesc ck{};
 };
 
 /**
@@ -358,16 +358,16 @@ struct gpuParsePageHeader {
  * @param[in] chunks List of column chunks
  * @param[in] num_chunks Number of column chunks
  */
-// blockDim {4 * cudf::detail::warp_size,1,1}
-__global__ void __launch_bounds__(4 * cudf::detail::warp_size)
+// blockDim {4 * warpSize,1,1}
+__global__ void __launch_bounds__(4 * warpSize)
   gpuDecodePageHeaders(ColumnChunkDesc* chunks, int32_t num_chunks)
 {
   gpuParsePageHeader parse_page_header;
   extern __shared__ byte_stream_s bs_g[];
 
-  int lane_id             = threadIdx.x % cudf::detail::warp_size;
-  int chunk               = (blockIdx.x * 4) + (threadIdx.x / cudf::detail::warp_size);
-  byte_stream_s* const bs = &bs_g[threadIdx.x / cudf::detail::warp_size];
+  int lane_id             = threadIdx.x % warpSize;
+  int chunk               = (blockIdx.x * 4) + (threadIdx.x / warpSize);
+  byte_stream_s* const bs = &bs_g[threadIdx.x / warpSize];
 
   if (chunk < num_chunks and lane_id == 0) bs->ck = chunks[chunk];
   __syncthreads();
@@ -477,6 +477,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
 __global__ void __launch_bounds__(128)
   gpuBuildStringDictionaryIndex(ColumnChunkDesc* chunks, int32_t num_chunks)
 {
+  // __shared__ ColumnChunkDesc chunk_g[4];
   extern __shared__ ColumnChunkDesc chunk_g[];
 
   int lane_id               = threadIdx.x % 32;
@@ -516,7 +517,7 @@ void __host__ DecodePageHeaders(ColumnChunkDesc* chunks,
                                 rmm::cuda_stream_view stream)
 {
   //: TODO(HIP/AMD): does it make sense to use less warps/threads on AMD backend?
-  dim3 dim_block(4 * cudf::detail::warp_size, 1);
+  dim3 dim_block(4 * warpSize, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
   gpuDecodePageHeaders<<<dim_grid, dim_block, sizeof(byte_stream_s) * 4, stream.value()>>>(chunks, num_chunks);
 }

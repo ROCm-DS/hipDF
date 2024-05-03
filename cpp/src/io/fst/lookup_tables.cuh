@@ -92,7 +92,7 @@ class SingleSymbolSmemLUT {
    *
    * @param symbol_strings Array of strings, where the i-th string holds all symbols
    * (characters!) that correspond to the i-th symbol group index
-   * @param stream The stream that shall be used to hipMemcpyAsync the lookup table
+   * @param stream The stream that shall be used to cudaMemcpyAsync the lookup table
    * @return
    */
   template <typename SymbolGroupItT>

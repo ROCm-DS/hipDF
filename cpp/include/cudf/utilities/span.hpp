@@ -179,8 +179,8 @@ class span_base {
   }
 
  private:
-  pointer _data{nullptr}; //FIXME(HIP): _data{nullptr} initialization in struct does not work in c++17 with hip when struct is used in shared memory;
-  size_type _size{0}; //FIXME(HIP): _size{0} initialization in struct does not work in c++17 with hip when struct is used in shared memory; 
+  pointer _data{nullptr};
+  size_type _size{0};
 };
 
 }  // namespace detail

@@ -767,7 +767,7 @@ TYPED_TEST(Sort, WithListColumn)
   */
 
   using lcw = cudf::test::lists_column_wrapper<T, int32_t>;
-  //TODO: HIP Workaround for nested Empty List
+  // TODO(HIP/AMD): HIP Workaround for nested Empty List
   lcw col{{{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
           {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
           {{1, 2, 3}, {}, {4, 5}, {0, 6, 0}},
@@ -807,7 +807,7 @@ TYPED_TEST(Sort, WithNullableListColumn)
     [[1, 2], [3], [4, 5], [NULL, 7]]          11
   ]
   */
-  //TODO: HIP Workaround for nested Empty List
+  // TODO(HIP/AMD): HIP Workaround for nested Empty List
   lcw col{
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},                   // 0
     {{{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}}, nulls_at({3})},  // 1
@@ -845,7 +845,7 @@ TYPED_TEST(Sort, MoreLists)
       [[NULL, NULL]]      1
     ]
     */
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     lcw col{
       lcw{lcw{{0}, nulls_at({0})}, lcw{-21827}},    // 0
       lcw{{lcw{{0, 0}, nulls_at({0, 1})}}}          // 1
@@ -879,7 +879,7 @@ TYPED_TEST(Sort, MoreLists)
       [[[0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0]], [[0]]] 4
     ]
     */
-    //TODO: HIP Workaround for nested Empty List
+    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     lcw col{lcw{{lcw{{lcw{0, 0, 0}}}}},
             lcw{{lcw{lcw{0}, lcw{0}, lcw{0}}}},
             lcw{lcw{{lcw{0}}}, lcw{{lcw{0}}}, lcw{{lcw{0}}}},
@@ -951,7 +951,7 @@ TYPED_TEST(Sort, WithSlicedListColumn)
 
   using lcw = cudf::test::lists_column_wrapper<T, int32_t>;
   using cudf::test::iterators::nulls_at;
-  //TODO: HIP Workaround for nested Empty List
+  // TODO(HIP/AMD): HIP Workaround for nested Empty List
   lcw col{
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},                   //
     {{{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}}, nulls_at({3})},  // 0

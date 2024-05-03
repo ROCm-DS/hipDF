@@ -70,7 +70,6 @@ template <typename UnaryFunction>
 CUDF_HOST_DEVICE inline auto make_counting_transform_iterator(cudf::size_type start,
                                                               UnaryFunction f)
 {
-  //TODO(HIP/AMD)
   return thrust::make_transform_iterator(thrust::make_counting_iterator(start), f);
 }
 
@@ -139,7 +138,7 @@ struct validity_accessor {
   {
     if constexpr (not safe) {
       // verify col is nullable, otherwise, is_valid_nocheck() will crash
-#if defined(__CUDA_ARCH__)
+#if defined(__CUDA_ARCH__) || defined(__HIP_DEVICE_COMPILE__)
       cudf_assert(_col.nullable() && "Unexpected non-nullable column.");
 #else
       CUDF_EXPECTS(_col.nullable(), "Unexpected non-nullable column.");

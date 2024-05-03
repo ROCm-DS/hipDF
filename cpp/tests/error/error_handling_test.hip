@@ -45,7 +45,7 @@ void __global__ test_kernel(int* data) { data[threadIdx.x] = threadIdx.x; }
 
 // In a release build and without explicit synchronization, CUDF_CHECK_CUDA may
 // or may not fail on erroneous asynchronous CUDA calls. Invoke
-// hipStreamSynchronize to guarantee failure on error. In a non-release build,
+// cudaStreamSynchronize to guarantee failure on error. In a non-release build,
 // CUDF_CHECK_CUDA deterministically fails on erroneous asynchronous CUDA
 // calls.
 TEST(StreamCheck, FailedKernel)
@@ -57,6 +57,7 @@ TEST(StreamCheck, FailedKernel)
 
   rmm::cuda_stream stream;
   int a;
+  // TODO(HIP/AMD): test_kernel<<<0, 0, 0, stream.value()>>>(&a);
   test_kernel<<<1, 1, 0, stream.value()>>>(&a);
 #ifdef NDEBUG
   stream.synchronize();
@@ -105,7 +106,7 @@ TEST(DebugAssertDeathTest, cudf_assert_false)
   auto call_kernel = []() {
     assert_false_kernel<<<1, 1>>>();
 
-    // Kernel should fail with `hipErrorAssert`
+    // Kernel should fail with `cudaErrorAssert`
     // This error invalidates the current device context, so we need to kill
     // the current process. Running with EXPECT_DEATH spawns a new process for
     // each attempted kernel launch

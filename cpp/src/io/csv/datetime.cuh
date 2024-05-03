@@ -64,7 +64,7 @@ __inline__ __device__ T to_non_negative_integer(char const* begin, char const* e
  * @param begin Pointer to the first element of the string
  * @param end Pointer to the first element after the string
  * @param dayfirst Flag indicating that first field is the day
- * @return Extracted year, month and day in `hip::std::chrono::year_month_day` format
+ * @return Extracted year, month and day in `cuda::std::chrono::year_month_day` format
  */
 __inline__ __device__ hip::std::chrono::year_month_day extract_date(char const* begin,
                                                                      char const* end,

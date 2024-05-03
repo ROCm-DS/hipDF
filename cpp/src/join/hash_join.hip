@@ -241,7 +241,7 @@ probe_join_hash_table(
  * @brief Probes the `hash_table` built from `build_table` for tuples in `probe_table` twice,
  * and returns the output size of a full join operation between `build_table` and `probe_table`.
  * TODO: this is a temporary solution as part of `full_join_size`. To be refactored during
- * hipco integration.
+ * cuco integration.
  *
  * @param build_table Table of build side columns to join
  * @param probe_table Table of probe side columns to join
