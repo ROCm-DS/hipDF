@@ -124,4 +124,5 @@ dependencies:
 - zlib>=1.2.13
 - pip:
   - git+https://github.com/python-streamz/streamz.git@master
+  - git+https://github.com/rocm/dask-cuda-rocm@rocm-dev-patch-domcharrier-1
 name: all_rocm_arch-x86_64
