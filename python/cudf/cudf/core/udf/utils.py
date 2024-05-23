@@ -124,7 +124,7 @@ def _get_udf_return_type(argty, func: Callable, args=()):
     # Get the return type. The PTX is also returned by compile_udf, but is not
     # needed here.
     with _CUDFNumbaConfig():
-        ptx, output_type = cudautils.compile_udf(func, compile_sig)
+        ptx, output_type = cudautils.compile_udf(func, compile_sig, link_in_hipdevicelib=False)
 
     if not isinstance(output_type, MaskedType):
         numba_output_type = numpy_support.from_dtype(np.dtype(output_type))
