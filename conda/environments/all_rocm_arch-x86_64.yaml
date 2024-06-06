@@ -34,10 +34,12 @@ dependencies:
 - benchmark==1.8.0
 - boto3>=1.21.21
 - botocore>=1.24.21
-#:- c-compiler
+#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
+#:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
+#- c-compiler
 - cachetools
 - cmake>=3.26.4
-- cramjam 
+- cramjam
 #:- cubinlinker
 #:- cuda-nvtx=11.8
 #:- cuda-python>=11.7.1,<12.0a0  #: TODO(HIP/AMD): hip-python as its own conda package?
@@ -45,7 +47,9 @@ dependencies:
 #:- cuda-version=11.8 #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
 #:- cudatoolkit #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
 #:- cupy>=12.0.0
-#:- cxx-compiler
+#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
+#:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
+#: - cxx-compiler
 - cython>=3.0.0
 - dask-core>=2023.7.1
 #: - dask-cuda==23.10.* #: TODO(HIP/AMD) use dask_hip

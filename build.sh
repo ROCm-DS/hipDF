@@ -68,7 +68,7 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf
    --incl_cache_stats            - include cache statistics in build metrics report
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
-   
+
 
    default action (no args) is to build and install 'libcudf' then 'cudf'
    then 'dask_cudf' targets
@@ -109,6 +109,17 @@ DASK_CUDF_BUILD_DIR=${REPODIR}/python/dask_cudf/build
 PYLIBCUDF_BUILD_DIR=${REPODIR}/python/pylibcudf/build
 CUSTREAMZ_BUILD_DIR=${REPODIR}/python/custreamz/build
 CUDF_JAR_JAVA_BUILD_DIR="$REPODIR/java/target"
+#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which 
+#:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
+#: NOTE(HIP/AMD): We need to use declare -x (or export() to forward the variables to subprocesses such as those related to scikit-build.
+#:                scikit-build checks CXX + CC on Linux, it is used to compile Cython files.
+#: NOTE(HIP/AMD): CUDF_HIPCC allows to point to specific 'hipcc' implementations that are not part of the $PATH.
+#: NOTE(HIP/AMD): ROCM_PATH must be set for compiling cudf_kafka in order to specify include folders for the Cython build.
+declare -x CXX=${CUDF_HIPCC:-hipcc}
+declare -x CC=${CUDF_HIPCC:-hipcc}
+declare -x CFLAGS="${CFLAGS} -D__HIP_PLATFORM_AMD__"
+declare -x CXXFLAGS="${CXXFLAGS} -D__HIP_PLATFORM_AMD__"
+declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"} 
 
 BUILD_DIRS="${LIB_BUILD_DIR} ${CUDF_BUILD_DIR} ${DASK_CUDF_BUILD_DIR} ${KAFKA_LIB_BUILD_DIR} ${CUDF_KAFKA_BUILD_DIR} ${CUSTREAMZ_BUILD_DIR} ${CUDF_JAR_JAVA_BUILD_DIR} ${PYLIBCUDF_BUILD_DIR}"
 
@@ -343,8 +354,8 @@ if buildAll || hasArg libcudf; then
     #TODO(HIP/AMD): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
     cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
-          -DCMAKE_CXX_COMPILER=hipcc \
-          -DCMAKE_C_COMPILER=hipcc \
+          -DCMAKE_CXX_COMPILER=${CXX} \
+          -DCMAKE_C_COMPILER=${CC} \
           -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
           -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
@@ -431,9 +442,18 @@ fi
 
 # Build libcudf_kafka library
 if hasArg libcudf_kafka; then
+    # --trace --graphviz=libcudf_kafka.dot \
+    #: NOTE(HIP/AMD) We need to use hipcc as CXX compiler because of CMake target rocthrust->...->hip::device
     cmake -S $REPODIR/cpp/libcudf_kafka -B ${KAFKA_LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+          -DCMAKE_CXX_COMPILER=${CXX} \
+          -DCMAKE_C_COMPILER=${CC} \
+          -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
+          -DUSE_NVTX=${BUILD_NVTX} \
+          -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \
+          -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
+          -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           ${EXTRA_CMAKE_ARGS}
 

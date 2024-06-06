@@ -80,9 +80,9 @@ else()
     VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
     LANGUAGES C CXX HIP
   )
-  enable_language(HIP)
   # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
   # This ensures that those packages are compiled with the same architecture flags.
+  enable_language(HIP)
   set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 endif()
 
