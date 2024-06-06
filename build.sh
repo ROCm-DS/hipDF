@@ -18,7 +18,7 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 #TODO(HIP/AMD): add more options later
 #VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf hipdf dask_hipdf libcudf cudf dask_cudf benchmarks tests -v -g -n --ptds -h"
+VALIDARGS="clean libhipdf hipdf dask_hipdf libcudf cudf dask_cudf benchmarks tests libhipdf_kafka hipdf_kafka libcudf_kafka cudf_kafka custreamz -v -g -n --ptds -h"
 HELP="$0 [clean] [libhipdf] [hipdf] [dask_hipdf] [libcudf] [cudf] [dask_cudf] [benchmarks] [tests] [-v] [-g] [-n] [--ptds] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
@@ -27,13 +27,16 @@ HELP="$0 [clean] [libhipdf] [hipdf] [dask_hipdf] [libcudf] [cudf] [dask_cudf] [b
    dask_hipdf|dask_cudf          - build the dask_cudf Python package
    benchmarks                    - build benchmarks
    tests                         - build tests
+   libcudf_kafka|libhipdf_kafka  - build the libhipdf_kafka C++ code only
+   cudf_kafka|hipdf_kafka        - build the hipdf_kafka Python package
+   custreamz                     - build the custreamz Python package
    -v                            - verbose build mode
    -g                            - build for debug
    -n                            - no install step (does not affect Python)
    --ptds                        - enable per-thread default stream
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
-   
+
 
    default action (no args) is to build and install 'libhipdf' then 'hipdf'
    then 'dask_hipdf' targets
@@ -67,12 +70,23 @@ HELP="$0 [clean] [libhipdf] [hipdf] [dask_hipdf] [libcudf] [cudf] [dask_cudf] [b
 #    then 'dask_hipdf' targets
 # "
 LIB_BUILD_DIR=${LIB_BUILD_DIR:=${REPODIR}/cpp/build}
-KAFKA_LIB_BUILD_DIR=${KAFKA_LIB_BUILD_DIR:=${REPODIR}/cpp/libhipdf_kafka/build}
-HIPDF_KAFKA_BUILD_DIR=${REPODIR}/python/hipdf_kafka/build
+KAFKA_LIB_BUILD_DIR=${KAFKA_LIB_BUILD_DIR:=${REPODIR}/cpp/libcudf_kafka/build}
+HIPDF_KAFKA_BUILD_DIR=${REPODIR}/python/cudf_kafka/build
 HIPDF_BUILD_DIR=${REPODIR}/python/hipdf/build
 DASK_HIPDF_BUILD_DIR=${REPODIR}/python/dask_hipdf/build
 CUSTREAMZ_BUILD_DIR=${REPODIR}/python/custreamz/build
 HIPDF_JAR_JAVA_BUILD_DIR="$REPODIR/java/target"
+#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which 
+#:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
+#: NOTE(HIP/AMD): We need to use declare -x (or export() to forward the variables to subprocesses such as those related to scikit-build.
+#:                scikit-build checks CXX + CC on Linux, it is used to compile Cython files.
+#: NOTE(HIP/AMD): HIPDF_HIPCC allows to point to specific 'hipcc' implementations that are not part of the $PATH.
+#: NOTE(HIP/AMD): ROCM_PATH must be set for compiling cudf_kafka in order to specify include folders for the Cython build.
+declare -x CXX=${HIPDF_HIPCC:-hipcc}
+declare -x CC=${HIPDF_HIPCC:-hipcc}
+declare -x CFLAGS="${CFLAGS} -D__HIP_PLATFORM_AMD__"
+declare -x CXXFLAGS="${CXXFLAGS} -D__HIP_PLATFORM_AMD__"
+declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"} 
 
 BUILD_DIRS="${LIB_BUILD_DIR} ${HIPDF_BUILD_DIR} ${DASK_HIPDF_BUILD_DIR} ${KAFKA_LIB_BUILD_DIR} ${HIPDF_KAFKA_BUILD_DIR} ${CUSTREAMZ_BUILD_DIR} ${HIPDF_JAR_JAVA_BUILD_DIR}"
 
@@ -279,7 +293,7 @@ fi
 ################################################################################
 # Configure, build, and install libhipdf
 
-if buildAll || hasArg libhipdf || hasArg hipdf || hasArg hipdfjar; then
+if buildAll || hasArg libhipdf || hasArg hipdf || hasArg hipdfjar || hasArg libhipdf_kafka; then
     if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
         HIPDF_CMAKE_HIP_ARCHITECTURES="${HIPDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}"
         if [[ "$HIPDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
@@ -303,8 +317,8 @@ if buildAll || hasArg libhipdf; then
     #TODO(HIP/AMD): CXX/CC compiler needs to presently be hardcoded to hipcc for rmm
     cmake -S $REPODIR/cpp -B ${LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
-          -DCMAKE_CXX_COMPILER=hipcc \
-          -DCMAKE_C_COMPILER=hipcc \
+          -DCMAKE_CXX_COMPILER=${CXX} \
+          -DCMAKE_C_COMPILER=${CC} \
           -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
           -DHIPDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
@@ -357,12 +371,12 @@ fi
 if buildAll || hasArg hipdf; then
 
     cd ${REPODIR}/python/cudf
-    declare -x CXX=${CXX:-hipcc} #: scikit-build checks CXX on Linux
     SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR} -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} ${EXTRA_CMAKE_ARGS}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
         python setup.py bdist_wheel
         # python -m pip install --no-build-isolation --no-deps . #: TODO(HIP/AMD): results in a cmake Cache issue, the binary wheel is preferred in any case
 	echo "cuDF package wheel (install via pip): $(ls ${REPODIR}/python/cudf/dist/*whl)"
+    pip install ${REPODIR}/python/cudf/dist/cudf-*.whl
 fi
 
 
@@ -379,9 +393,18 @@ fi
 
 # Build libhipdf_kafka library
 if hasArg libhipdf_kafka; then
-    cmake -S $REPODIR/cpp/libhipdf_kafka -B ${KAFKA_LIB_BUILD_DIR} \
+    # --trace --graphviz=libhipdf_kafka.dot \
+    #: NOTE(HIP/AMD) We need to use hipcc as CXX compiler because of CMake target rocthrust->...->hip::device
+    cmake -S $REPODIR/cpp/libcudf_kafka -B ${KAFKA_LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
+          -DCMAKE_CXX_COMPILER=${CXX} \
+          -DCMAKE_C_COMPILER=${CC} \
+          -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} \
+          -DUSE_NVTX=${BUILD_NVTX} \
+          -DHIPDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \
+          -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
+          -DHIPDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           ${EXTRA_CMAKE_ARGS}
 
@@ -396,7 +419,11 @@ fi
 
 # build hipdf_kafka Python package
 if hasArg hipdf_kafka; then
-    cd ${REPODIR}/python/hipdf_kafka
+    cd ${REPODIR}/python/cudf_kafka
+    #: NOTE(HIP/AMD) We need to use hipcc as CXX compiler because of CMake target rocthrust->...->hip::device, scikit-build checks CXX on Linux
+    #: NOTE(HIP/AMD) Required for D__HIP_PLATFORM_AMD__.
+    # declare -x CFLAGS="-D__HIP_PLATFORM_AMD__"
+    # declare -x CXXFLAGS="-D__HIP_PLATFORM_AMD__"
     SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
         python -m pip install --no-build-isolation --no-deps .

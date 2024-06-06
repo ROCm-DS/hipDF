@@ -1,4 +1,27 @@
 # Copyright (c) 2020-2023, NVIDIA CORPORATION.
+
+# MIT License
+#
+# Modifications Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import shutil
 import sysconfig
@@ -12,22 +35,20 @@ from setuptools.extension import Extension
 
 cython_files = ["cudf_kafka/_lib/*.pyx"]
 
-CUDA_HOME = os.environ.get("CUDA_HOME", False)
-if not CUDA_HOME:
-    path_to_cuda_gdb = shutil.which("cuda-gdb")
-    if path_to_cuda_gdb is None:
+ROCM_PATH = os.environ.get("ROCM_PATH", False)
+if not ROCM_PATH:
+    if True:
         raise OSError(
-            "Could not locate CUDA. "
+            "Could not locate ROCM. "
             "Please set the environment variable "
-            "CUDA_HOME to the path to the CUDA installation "
+            "ROCM_PATH to the path to the ROCM installation "
             "and try again."
         )
-    CUDA_HOME = os.path.dirname(os.path.dirname(path_to_cuda_gdb))
 
-if not os.path.isdir(CUDA_HOME):
-    raise OSError(f"Invalid CUDA_HOME: directory does not exist: {CUDA_HOME}")
+if not os.path.isdir(ROCM_PATH):
+    raise OSError(f"Invalid ROCM_PATH: directory does not exist: {ROCM_PATH}")
 
-cuda_include_dir = os.path.join(CUDA_HOME, "include")
+rocm_include_dir = os.path.join(ROCM_PATH, "include")
 
 CUDF_ROOT = os.environ.get(
     "CUDF_ROOT",
@@ -57,15 +78,21 @@ extensions = [
                 os.path.join(CUDF_ROOT, "../libcudf_kafka/include/cudf_kafka")
             ),
             os.path.join(CUDF_ROOT, "include"),
-            os.path.join(CUDF_ROOT, "_deps/libcudacxx-src/include"),
+            os.path.join(CUDF_ROOT, "_deps/libhipcxx-src/include"),
             os.path.join(
                 os.path.dirname(sysconfig.get_path("include")),
-                "rapids/libcudacxx",
+                "rapids/libhipcxx",
             ),
+            #: NOTE(HIP/AMD): Can we solve this via a symlink that is placed by the rapids-cmake script?
+            #: os.path.join(CUDF_ROOT, "_deps/libcudacxx-src/include"),
+            #: os.path.join(
+            #:     os.path.dirname(sysconfig.get_path("include")),
+            #:     "rapids/libcudacxx",
+            #: ),
             os.path.dirname(sysconfig.get_path("include")),
             np.get_include(),
             pa.get_include(),
-            cuda_include_dir,
+            rocm_include_dir,
         ],
         library_dirs=(
             [
@@ -74,7 +101,9 @@ extensions = [
                 CUDF_KAFKA_ROOT,
             ]
         ),
-        libraries=["cudf", "cudf_kafka"],
+        #: TODO(HIP/AMD): We should use the same library names as cuDF to not break build systems
+        #: libraries=["cudf", "cudf_kafka"],
+        libraries=["hipdf", "cudf_kafka"],
         language="c++",
         extra_compile_args=["-std=c++17", "-DFMT_HEADER_ONLY=1"],
     )
