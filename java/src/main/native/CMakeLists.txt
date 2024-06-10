@@ -84,9 +84,9 @@ else()
 endif()
 
 # Use GPU_ARCHS if it is defined
-#if(DEFINED GPU_ARCHS)
-#  set(CMAKE_CUDA_ARCHITECTURES "${GPU_ARCHS}")
-#endif()
+if(DEFINED GPU_ARCHS)
+  set(CMAKE_CUDA_ARCHITECTURES "${GPU_ARCHS}")
+endif()
 #rapids_cuda_init_architectures(CUDF_JNI)
 
 project(
@@ -131,6 +131,26 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/"
                       "${CUDF_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH}
 )
 
+if(NOT CUDF_GENERATED_INCLUDE_DIR)
+  set(CUDF_GENERATED_INCLUDE_DIR ${CUDF_BINARY_DIR})
+endif()
+
+if(CUDA_BACKEND)
+  # * compiler options ----------------------------------------------------------------------------
+  rapids_find_package(
+    CUDAToolkit REQUIRED
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+  )
+  include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
+else()
+  rapids_find_package(
+    HIP REQUIRED
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
+  )
+#  include(/home/rschiavi/dev/hipdf/cpp/cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
+endif()
 # ##################################################################################################
 # * compiler options ------------------------------------------------------------------------------
 
@@ -188,6 +208,10 @@ find_package(JNI REQUIRED)
 #else()
 #  message(FATAL_ERROR "JDK with JNI not found, please check your settings.")
 #endif()
+
+rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__HIP_PLATFORM_AMD__=1")
 
 # ##################################################################################################
 # * GDS/cufile ------------------------------------------------------------------------------------
@@ -264,8 +288,18 @@ endif()
 # * include paths ---------------------------------------------------------------------------------
 
 target_include_directories(
-  cudfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
-                 "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
+  cudfjni
+  PUBLIC "/opt/rocm-6.0.2/include/" 
+          "${CMAKE_BINARY_DIR}/include" 
+          "${CMAKE_SOURCE_DIR}/include"
+          "${CMAKE_SOURCE_DIR}/src" 
+           "${JNI_INCLUDE_DIRS}"
+           "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
+           "$<BUILD_INTERFACE:${CUDF_GENERATED_INCLUDE_DIR}/include>"
+  PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
+  INTERFACE "$<INSTALL_INTERFACE:include>"
+
+
 )
 
 # ##################################################################################################
