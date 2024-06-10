@@ -206,7 +206,6 @@ find_package(JNI REQUIRED)
 
 rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__HIP_PLATFORM_AMD__=1")
 
 # ##################################################################################################
 # * GDS/cufile ------------------------------------------------------------------------------------
@@ -282,6 +281,7 @@ target_include_directories(
           "${CMAKE_SOURCE_DIR}/include"
           "${CMAKE_SOURCE_DIR}/src" 
            "${JNI_INCLUDE_DIRS}"
+          "/home/rschiavi/dev/hipdf/cpp/include"
            "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>"
            "$<BUILD_INTERFACE:${HIPDF_GENERATED_INCLUDE_DIR}/include>"
   PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
