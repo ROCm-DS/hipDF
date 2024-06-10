@@ -40,16 +40,54 @@ cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../../../../overrides.cmake")
 include(../../../../rapids_config.cmake)
 include(rapids-cmake)
-include(rapids-cuda)
+#include(rapids-cuda)
+include(rapids-hip)
 include(rapids-find)
 include(rapids-cpm)
-rapids_cpm_init()
+#rapids_cpm_init()
+
+option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
+
+if(CUDA_BACKEND)
+  rapids_cuda_init_architectures\(CUDF\)
+else()
+  rapids_hip_init_architectures\(CUDF\)
+endif()
+
+# NOTE(HIP/AMD/CUDA): rapids_*_init_architectures relies on HIP/CUDA compiler being set
+# during project call (project call is essentially calling back rapids-cmake to determine+set architecture)
+if(CUDA_BACKEND)
+  project(
+    CUDF_JNI 
+    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+    LANGUAGES C CXX CUDA
+  )
+  enable_language(CUDA)
+  if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
+    message(
+      FATAL_ERROR
+        "libcudf requires CUDA Toolkit 11.5+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
+    )
+  endif()
+
+  option(USE_NVTX "Build with NVTX support" ON)
+else()
+  project(
+    CUDF_JNI 
+    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+    LANGUAGES C CXX HIP
+  )
+  enable_language(HIP)
+  # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
+  # This ensures that those packages are compiled with the same architecture flags.
+  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
+endif()
 
 # Use GPU_ARCHS if it is defined
-if(DEFINED GPU_ARCHS)
-  set(CMAKE_CUDA_ARCHITECTURES "${GPU_ARCHS}")
-endif()
-rapids_cuda_init_architectures(CUDF_JNI)
+#if(DEFINED GPU_ARCHS)
+#  set(CMAKE_CUDA_ARCHITECTURES "${GPU_ARCHS}")
+#endif()
+#rapids_cuda_init_architectures(CUDF_JNI)
 
 project(
   CUDF_JNI
@@ -117,8 +155,8 @@ rapids_cmake_build_type("Release")
 # ##################################################################################################
 # * CUDF ------------------------------------------------------------------------------------------
 
-set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
-rapids_find_package(cudf REQUIRED)
+#set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
+#rapids_find_package(cudf REQUIRED)
 
 # ##################################################################################################
 # * nvtx3-------------------------------------------------------------------------------------------
@@ -127,19 +165,29 @@ include(${CUDF_SOURCE_DIR}/cmake/thirdparty/get_nvtx.cmake)
 # ##################################################################################################
 # * nvcomp------------------------------------------------------------------------------------------
 
-if(NOT DEFINED nvcomp_DIR)
-  set(nvcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/nvcomp-build")
-endif()
-rapids_find_package(nvcomp REQUIRED)
+#if(NOT DEFINED nvcomp_DIR)
+#  set(nvcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/nvcomp-build")
+#endif()
+#rapids_find_package(nvcomp REQUIRED)
 
 # ##################################################################################################
 # * find JNI -------------------------------------------------------------------------------------
+set(JAVA_AWT_LIBRARY "$ENV{JAVA_HOME}/lib/libjawt.so")
+set(JAVA_JVM_LIBRARY "$ENV{JAVA_HOME}/lib/server/libjvm.so")
+
+set(JAVA_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
+set(JAVA_INCLUDE_PATH2 "$ENV{JAVA_HOME}/include/linux")
+set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
+
 find_package(JNI REQUIRED)
-if(JNI_FOUND)
-  message(STATUS "JDK with JNI in ${JNI_INCLUDE_DIRS}")
-else()
-  message(FATAL_ERROR "JDK with JNI not found, please check your settings.")
-endif()
+
+#set(JAVA_AWT_LIBRARY NotNeeded)
+#find_package(JNI REQUIRED)
+#if(JNI_FOUND)
+#  message(STATUS "JDK with JNI in ${JNI_INCLUDE_DIRS}")
+#else()
+#  message(FATAL_ERROR "JDK with JNI not found, please check your settings.")
+#endif()
 
 # ##################################################################################################
 # * GDS/cufile ------------------------------------------------------------------------------------
@@ -154,6 +202,8 @@ if(USE_GDS)
   endif()
 endif()
 
+rapids_cpm_init()
+
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
 
@@ -167,6 +217,7 @@ add_library(
   src/CudaJni.cpp
   src/ColumnVectorJni.cpp
   src/ColumnViewJni.cpp
+  #src/ColumnViewJni.cu
   src/ColumnViewJni.cu
   src/CompiledExpression.cpp
   src/ContiguousTableJni.cpp
@@ -267,11 +318,13 @@ endif()
 # ##################################################################################################
 # * link libraries --------------------------------------------------------------------------------
 
-set(CUDF_LINK PUBLIC cudf::cudf)
-if(CUDF_JNI_LIBCUDF_STATIC)
+#TODO: not found cudf:cudf
+#set(CUDF_LINK PUBLIC cudf::cudf)
+
+#if(CUDF_JNI_LIBCUDF_STATIC)
   # Whole-link libcudf.a into the shared library but not its dependencies
-  set(CUDF_LINK PRIVATE -Wl,--whole-archive cudf::cudf -Wl,--no-whole-archive PUBLIC cudf::cudf)
-endif()
+# set(CUDF_LINK PRIVATE -Wl,--whole-archive cudf::cudf -Wl,--no-whole-archive PUBLIC cudf::cudf)
+#endif()
 
 # When nvcomp is installed we need to use nvcomp::nvcomp but from the cudf build directory it will
 # just be nvcomp.
