@@ -194,6 +194,7 @@ endif()
 
 rapids_cpm_init()
 
+#
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
 
@@ -332,13 +333,13 @@ endif()
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------
-if(TARGET nvcomp::nvcomp)
-  add_custom_command(
-    TARGET cudfjni
-    PRE_LINK
-    COMMAND
-      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nvcomp::nvcomp> $<TARGET_FILE:nvcomp::nvcomp_gdeflate>
-      $<TARGET_FILE:nvcomp::nvcomp_bitcomp> "${PROJECT_BINARY_DIR}"
-    COMMENT "Copying nvcomp libraries to ${PROJECT_BINARY_DIR}"
-  )
-endif()
+#if(TARGET nvcomp::nvcomp)
+#  add_custom_command(
+#    TARGET cudfjni
+#    PRE_LINK
+#    COMMAND
+#      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nvcomp::nvcomp> $<TARGET_FILE:nvcomp::nvcomp_gdeflate>
+#      $<TARGET_FILE:nvcomp::nvcomp_bitcomp> "${PROJECT_BINARY_DIR}"
+#    COMMENT "Copying nvcomp libraries to ${PROJECT_BINARY_DIR}"
+#  )
+#endif()
