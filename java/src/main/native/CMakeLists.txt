@@ -40,10 +40,11 @@ cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../../../../overrides.cmake")
 include(../../../../rapids_config.cmake)
 include(rapids-cmake)
-#include(rapids-cuda)
 include(rapids-hip)
 include(rapids-find)
 include(rapids-cpm)
+
+
 #rapids_cpm_init()
 
 option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
@@ -293,7 +294,10 @@ target_include_directories(
           "${CMAKE_SOURCE_DIR}/include"
           "${CMAKE_SOURCE_DIR}/src" 
            "${JNI_INCLUDE_DIRS}"
-          "/home/rschiavi/dev/hipdf/cpp/include"
+           "${CONDA_PREFIX}/include/rapids/libhipcxx"
+           "${CUDF_SOURCE_DIR}/include"
+           "../../../../cpp/include"
+           # TODO: these aren't setup/set anywhere
            "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
            "$<BUILD_INTERFACE:${CUDF_GENERATED_INCLUDE_DIR}/include>"
   PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
