@@ -40,10 +40,11 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../../../../overri
 
 include(../../../../fetch_rapids.cmake)
 include(rapids-cmake)
-#include(rapids-cuda)
 include(rapids-hip)
 include(rapids-find)
 include(rapids-cpm)
+
+
 #rapids_cpm_init()
 
 option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
@@ -281,7 +282,10 @@ target_include_directories(
           "${CMAKE_SOURCE_DIR}/include"
           "${CMAKE_SOURCE_DIR}/src" 
            "${JNI_INCLUDE_DIRS}"
-          "/home/rschiavi/dev/hipdf/cpp/include"
+           "${CONDA_PREFIX}/include/rapids/libhipcxx"
+           "${HIPDF_SOURCE_DIR}/include"
+           "../../../../cpp/include"
+           # TODO: these aren't setup/set anywhere
            "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>"
            "$<BUILD_INTERFACE:${HIPDF_GENERATED_INCLUDE_DIR}/include>"
   PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
