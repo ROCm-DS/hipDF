@@ -275,6 +275,8 @@ endif()
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
 
+message("Conda Prefix ==> $ENV{CONDA_PREFIX}")
+
 target_include_directories(
   cudfjni
   PUBLIC "/opt/rocm-6.0.2/include/" 
@@ -282,7 +284,8 @@ target_include_directories(
           "${CMAKE_SOURCE_DIR}/include"
           "${CMAKE_SOURCE_DIR}/src" 
            "${JNI_INCLUDE_DIRS}"
-           "${CONDA_PREFIX}/include/rapids/libhipcxx"
+           "$ENV{CONDA_PREFIX}/include/rapids/libhipcxx"
+           "$ENV{CONDA_PREFIX}/include/libhipdf/rapids/libhipcxx/"
            "${HIPDF_SOURCE_DIR}/include"
            "../../../../cpp/include"
            # TODO: these aren't setup/set anywhere
