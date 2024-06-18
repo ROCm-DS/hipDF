@@ -43,7 +43,7 @@ include(rapids-cmake)
 include(rapids-hip)
 include(rapids-find)
 include(rapids-cpm)
-
+#include(rapids-cuda)
 
 #rapids_cpm_init()
 
@@ -55,34 +55,19 @@ else()
   rapids_hip_init_architectures\(CUDF\)
 endif()
 
-# NOTE(HIP/AMD/CUDA): rapids_*_init_architectures relies on HIP/CUDA compiler being set
-# during project call (project call is essentially calling back rapids-cmake to determine+set architecture)
-if(CUDA_BACKEND)
-  project(
-    CUDF_JNI 
-    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
-    LANGUAGES C CXX CUDA
-  )
-  enable_language(CUDA)
-  if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
-    message(
-      FATAL_ERROR
-        "libcudf requires CUDA Toolkit 11.5+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
-    )
-  endif()
 
-  option(USE_NVTX "Build with NVTX support" ON)
+if (CUDA_BACKEND)
+   enable_language(CUDA)
 else()
-  project(
-    CUDF_JNI 
-    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
-    LANGUAGES C CXX HIP
-  )
-  enable_language(HIP)
-  # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
-  # This ensures that those packages are compiled with the same architecture flags.
-  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
+    enable_language(HIP)
 endif()
+
+
+project(
+  CUDF_JNI 
+  VERSION 23.10.00 
+  LANGUAGES C CXX
+)
 
 # Use GPU_ARCHS if it is defined
 if(DEFINED GPU_ARCHS)
