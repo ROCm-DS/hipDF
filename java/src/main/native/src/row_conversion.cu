@@ -40,6 +40,7 @@
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/scan.h>
 #include <type_traits>
+#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
 
 #include "row_conversion.hpp"
 
