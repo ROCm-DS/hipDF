@@ -43,48 +43,25 @@ include(rapids-cmake)
 include(rapids-hip)
 include(rapids-find)
 include(rapids-cpm)
-#include(rapids-cuda)
-
-#rapids_cpm_init()
-
-option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
-
-if(CUDA_BACKEND)
-  rapids_cuda_init_architectures(HIPDF)
-else()
-  rapids_hip_init_architectures(HIPDF)
-endif()
-
-
-if (CUDA_BACKEND)
-   enable_language(CUDA)
-else()
-    enable_language(HIP)
-endif()
-
-
-project(
-  CUDF_JNI 
-  VERSION 23.10.00 
-  LANGUAGES C CXX
-)
+rapids_cpm_init()
 
 # Use GPU_ARCHS if it is defined
 if(DEFINED GPU_ARCHS)
-  set(CMAKE_CUDA_ARCHITECTURES "${GPU_ARCHS}")
+  set(CMAKE_HIP_ARCHITECTURES "${GPU_ARCHS}")
 endif()
-#rapids_cuda_init_architectures(CUDF_JNI)
+rapids_hip_init_architectures(CUDF_JNI)
 
-#project(
-#  CUDF_JNI
-#  VERSION 23.10.00
-#  LANGUAGES C CXX CUDA
-#)
+project(
+  CUDF_JNI
+  VERSION 23.10.00
+  LANGUAGES C CXX HIP
+)
+
 
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
-option(USE_NVTX "Build with NVTX support" ON)
+option(USE_NVTX "Build with NVTX support" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF JNI shared libraries" ON)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(CUDF_USE_PER_THREAD_DEFAULT_STREAM "Build with per-thread default stream" OFF)
@@ -116,26 +93,6 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/"
                       "${CUDF_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH}
 )
 
-if(NOT HIPDF_GENERATED_INCLUDE_DIR)
-  set(HIPDF_GENERATED_INCLUDE_DIR ${HIPDF_BINARY_DIR})
-endif()
-
-if(CUDA_BACKEND)
-  # * compiler options ----------------------------------------------------------------------------
-  rapids_find_package(
-    CUDAToolkit REQUIRED
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
-  )
-  include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
-else()
-  rapids_find_package(
-    HIP REQUIRED
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
-  )
-#  include(/home/rschiavi/dev/hipdf/cpp/cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
-endif()
 # ##################################################################################################
 # * compiler options ------------------------------------------------------------------------------
 
@@ -144,7 +101,7 @@ set(CUDF_CUDA_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_CUDA_DEFINITIONS "")
 
-rapids_find_package(CUDAToolkit REQUIRED)
+rapids_find_package(HIP REQUIRED)
 include(ConfigureCUDA) # set other CUDA compilation flags
 
 if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
@@ -160,50 +117,34 @@ rapids_cmake_build_type("Release")
 # ##################################################################################################
 # * CUDF ------------------------------------------------------------------------------------------
 
-#set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
-#rapids_find_package(cudf REQUIRED)
+set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
+rapids_find_package(hipdf REQUIRED)
 
 # ##################################################################################################
 # * nvcomp------------------------------------------------------------------------------------------
 
-#if(NOT DEFINED nvcomp_DIR)
-#  set(nvcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/nvcomp-build")
-#endif()
-#rapids_find_package(nvcomp REQUIRED)
+if(NOT DEFINED hipcomp_DIR)
+  set(hipcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/hipcomp-build")
+endif()
+rapids_find_package(hipcomp REQUIRED)
 
 # ##################################################################################################
 # * find JNI -------------------------------------------------------------------------------------
-set(JAVA_AWT_LIBRARY "$ENV{JAVA_HOME}/lib/libjawt.so")
-set(JAVA_JVM_LIBRARY "$ENV{JAVA_HOME}/lib/server/libjvm.so")
-
-set(JAVA_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
-set(JAVA_INCLUDE_PATH2 "$ENV{JAVA_HOME}/include/linux")
-set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
-
 find_package(JNI REQUIRED)
-
-#set(JAVA_AWT_LIBRARY NotNeeded)
-#find_package(JNI REQUIRED)
-#if(JNI_FOUND)
-#  message(STATUS "JDK with JNI in ${JNI_INCLUDE_DIRS}")
-#else()
-#  message(FATAL_ERROR "JDK with JNI not found, please check your settings.")
-#endif()
-
-rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
-
+if(JNI_FOUND)
+  message(STATUS "JDK with JNI in ${JNI_INCLUDE_DIRS}")
+else()
+  message(FATAL_ERROR "JDK with JNI not found, please check your settings.")
+endif()
 
 # ##################################################################################################
 # * GDS/cufile ------------------------------------------------------------------------------------
 
-#if(USE_GDS) --> fail if using GDS since we dont have cuFile?
-#  message(STATUS "Building with GPUDirect Storage (GDS)/cuFile support")
-#  find_package(cuFile REQUIRED)
-#endif()
+# if(USE_GDS)
+#   message(STATUS "Building with GPUDirect Storage (GDS)/cuFile support")
+#   find_package(cuFile REQUIRED)
+# endif()
 
-rapids_cpm_init()
-
-#
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
 
@@ -217,7 +158,6 @@ add_library(
   src/CudaJni.cpp
   src/ColumnVectorJni.cpp
   src/ColumnViewJni.cpp
-  #src/ColumnViewJni.cu
   src/ColumnViewJni.hip
   src/CompiledExpression.cpp
   src/ContiguousTableJni.cpp
@@ -260,26 +200,9 @@ endif()
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
 
-message("Conda Prefix ==> $ENV{CONDA_PREFIX}")
-
 target_include_directories(
-  cudfjni
-  PUBLIC "/opt/rocm-6.0.2/include/" 
-          "${CMAKE_BINARY_DIR}/include" 
-          "${CMAKE_SOURCE_DIR}/include"
-          "${CMAKE_SOURCE_DIR}/src" 
-           "${JNI_INCLUDE_DIRS}"
-           "$ENV{CONDA_PREFIX}/include/rapids/libhipcxx"
-           "$ENV{CONDA_PREFIX}/include/libhipdf/rapids/libhipcxx/"
-           "${HIPDF_SOURCE_DIR}/include"
-           "../../../../cpp/include"
-           # TODO: these aren't setup/set anywhere
-           "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>"
-           "$<BUILD_INTERFACE:${HIPDF_GENERATED_INCLUDE_DIR}/include>"
-  PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
-  INTERFACE "$<INSTALL_INTERFACE:include>"
-
-
+  cudfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
+                 "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
 )
 
 # ##################################################################################################
@@ -302,46 +225,44 @@ set_target_properties(
 
 target_compile_options(
   cudfjni PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
-                  "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_FLAGS}>"
+                  "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_CUDA_FLAGS}>"
 )
 
 target_compile_definitions(
   cudfjni PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
-                 "$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_CUDA_DEFINITIONS}>"
+                 "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_CUDA_DEFINITIONS}>"
 )
 
-if(USE_GDS)
-  add_library(cufilejni src/CuFileJni.cpp)
-  set_target_properties(
-    cufilejni
-    PROPERTIES BUILD_RPATH "\$ORIGIN"
-               INSTALL_RPATH "\$ORIGIN"
-               # set target compile options
-               CXX_STANDARD 17
-               CXX_STANDARD_REQUIRED ON
-               POSITION_INDEPENDENT_CODE ON
-               INTERFACE_POSITION_INDEPENDENT_CODE ON
-  )
-  target_include_directories(cufilejni PRIVATE "${cuFile_INCLUDE_DIRS}")
-  target_link_libraries(cufilejni PRIVATE cudfjni "${cuFile_LIBRARIES}")
-endif()
+# if(USE_GDS)
+#   add_library(cufilejni src/CuFileJni.cpp)
+#   set_target_properties(
+#     cufilejni
+#     PROPERTIES BUILD_RPATH "\$ORIGIN"
+#                INSTALL_RPATH "\$ORIGIN"
+#                # set target compile options
+#                CXX_STANDARD 17
+#                CXX_STANDARD_REQUIRED ON
+#                POSITION_INDEPENDENT_CODE ON
+#                INTERFACE_POSITION_INDEPENDENT_CODE ON
+#   )
+#   target_include_directories(cufilejni PRIVATE "${cuFile_INCLUDE_DIRS}")
+#   target_link_libraries(cufilejni PRIVATE cudfjni "${cuFile_LIBRARIES}")
+# endif()
 
 # ##################################################################################################
 # * link libraries --------------------------------------------------------------------------------
 
-#TODO: not found cudf:cudf
-#set(CUDF_LINK PUBLIC cudf::cudf)
-
-#if(CUDF_JNI_LIBCUDF_STATIC)
+set(CUDF_LINK PUBLIC hipdf::hipdf)
+if(CUDF_JNI_LIBCUDF_STATIC)
   # Whole-link libcudf.a into the shared library but not its dependencies
-# set(CUDF_LINK PRIVATE -Wl,--whole-archive cudf::cudf -Wl,--no-whole-archive PUBLIC cudf::cudf)
-#endif()
+  set(CUDF_LINK PRIVATE -Wl,--whole-archive hipdf::hipdf -Wl,--no-whole-archive PUBLIC hipdf::hipdf)
+endif()
 
 # When nvcomp is installed we need to use nvcomp::nvcomp but from the cudf build directory it will
 # just be nvcomp.
 target_link_libraries(
-  cudfjni ${CUDF_LINK} PRIVATE $<TARGET_NAME_IF_EXISTS:nvcomp>
-                               $<TARGET_NAME_IF_EXISTS:nvcomp::nvcomp>
+  cudfjni ${CUDF_LINK} PRIVATE $<TARGET_NAME_IF_EXISTS:hipcomp>
+                               $<TARGET_NAME_IF_EXISTS:hipcomp::hipcomp>
 )
 
 # ##################################################################################################
@@ -359,13 +280,14 @@ endif()
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------
-#if(TARGET nvcomp::nvcomp)
-#  add_custom_command(
-#    TARGET cudfjni
-#    PRE_LINK
-#    COMMAND
-#      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:nvcomp::nvcomp> $<TARGET_FILE:nvcomp::nvcomp_gdeflate>
-#      $<TARGET_FILE:nvcomp::nvcomp_bitcomp> "${PROJECT_BINARY_DIR}"
-#    COMMENT "Copying nvcomp libraries to ${PROJECT_BINARY_DIR}"
-#  )
-#endif()
+if(TARGET hipcomp::hipcomp)
+  add_custom_command(
+    TARGET cudfjni
+    PRE_LINK
+    COMMAND
+      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hipcomp::hipcomp> #$<TARGET_FILE:hipcomp::hipcomp_gdeflate>
+      #$<TARGET_FILE:hipcomp::hipcomp_bitcomp> 
+      "${PROJECT_BINARY_DIR}"
+    COMMENT "Copying nvcomp libraries to ${PROJECT_BINARY_DIR}"
+  )
+endif()
