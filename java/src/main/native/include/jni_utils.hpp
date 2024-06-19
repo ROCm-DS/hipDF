@@ -794,7 +794,7 @@ inline auto add_global_ref(JNIEnv *env, jobject jobj) {
   return new_global_ref;
 }
 
-inline nullptr_t del_global_ref(JNIEnv *env, jobject jobj) {
+inline std::nullptr_t del_global_ref(JNIEnv *env, jobject jobj) {
   if (jobj != nullptr) {
     env->DeleteGlobalRef(jobj);
   }
