@@ -744,7 +744,7 @@ inline jthrowable cuda_exception(JNIEnv *const env, cudaError_t status, jthrowab
 
   // Calls cudaGetLastError twice. It is nearly certain that a fatal error occurred if the second
   // call doesn't return with cudaSuccess.
-  cudaGetLastError();
+  (void)cudaGetLastError();
   auto const last = cudaGetLastError();
   // Call cudaDeviceSynchronize to ensure `last` did not result from an asynchronous error.
   // between two calls.
@@ -929,7 +929,7 @@ inline std::nullptr_t del_global_ref(JNIEnv *env, jobject jobj) {
     /* Double check whether the thrown exception is unrecoverable CUDA error or not. */            \
     /* Like cudf::detail::throw_cuda_error, it is nearly certain that a fatal error  */            \
     /* occurred if the second call doesn't return with cudaSuccess. */                             \
-    cudaGetLastError();                                                                            \
+    (void)cudaGetLastError();                                                                            \
     auto const last = cudaFree(0);                                                                 \
     if (cudaSuccess != last && last == cudaDeviceSynchronize()) {                                  \
       /* Throw CudaFatalException since the thrown exception is unrecoverable CUDA error */        \

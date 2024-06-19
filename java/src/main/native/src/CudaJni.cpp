@@ -26,9 +26,9 @@
 namespace {
 
 /** The CUDA device that should be used by all threads using cudf */
-int Cudf_device{cudaInvalidDeviceId};
+int Cudf_device{hipInvalidDeviceId};
 
-thread_local int Thread_device = cudaInvalidDeviceId;
+thread_local int Thread_device = hipInvalidDeviceId;
 
 } // anonymous namespace
 
@@ -45,7 +45,7 @@ void set_cudf_device(int device) {
  * is using the same device.
  */
 void auto_set_device(JNIEnv *env) {
-  if (Cudf_device != cudaInvalidDeviceId) {
+  if (Cudf_device != hipInvalidDeviceId) {
     if (Thread_device != Cudf_device) {
       cudaError_t cuda_status = cudaSetDevice(Cudf_device);
       jni_cuda_check(env, cuda_status);
@@ -151,7 +151,7 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getDeviceCount(JNIEnv *env, jcla
 
 JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_setDevice(JNIEnv *env, jclass, jint dev) {
   try {
-    if (Cudf_device != cudaInvalidDeviceId && dev != Cudf_device) {
+    if (Cudf_device != hipInvalidDeviceId && dev != Cudf_device) {
       cudf::jni::throw_java_exception(env, cudf::jni::CUDF_ERROR_CLASS,
                                       "Cannot change device after RMM init");
     }
@@ -181,7 +181,7 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getRuntimeVersion(JNIEnv *env, j
   try {
     cudf::jni::auto_set_device(env);
     jint runtime_version;
-    CUDF_CUDA_TRY(cudaRuntimeGetVersion(&runtime_version));
+    CUDF_CUDA_TRY(hipRuntimeGetVersion(&runtime_version));
     return runtime_version;
   }
   CATCH_STD(env, -2);
@@ -192,8 +192,8 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getNativeComputeMode(JNIEnv *env
     cudf::jni::auto_set_device(env);
     int device;
     CUDF_CUDA_TRY(cudaGetDevice(&device));
-    cudaDeviceProp device_prop;
-    CUDF_CUDA_TRY(cudaGetDeviceProperties(&device_prop, device));
+    hipDeviceProp_t device_prop;
+    CUDF_CUDA_TRY(hipGetDeviceProperties(&device_prop, device));
     return device_prop.computeMode;
   }
   CATCH_STD(env, -2);
@@ -206,7 +206,7 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getComputeCapabilityMajor(JNIEnv
     CUDF_CUDA_TRY(::cudaGetDevice(&device));
     int attribute_value;
     CUDF_CUDA_TRY(
-        ::cudaDeviceGetAttribute(&attribute_value, ::cudaDevAttrComputeCapabilityMajor, device));
+        ::hipDeviceGetAttribute(&attribute_value, hipDeviceAttributeComputeCapabilityMajor, device));
     return attribute_value;
   }
   CATCH_STD(env, -2);
@@ -219,13 +219,13 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getComputeCapabilityMinor(JNIEnv
     CUDF_CUDA_TRY(::cudaGetDevice(&device));
     int attribute_value;
     CUDF_CUDA_TRY(
-        ::cudaDeviceGetAttribute(&attribute_value, ::cudaDevAttrComputeCapabilityMinor, device));
+        ::hipDeviceGetAttribute(&attribute_value, hipDeviceAttributeComputeCapabilityMinor, device));
     return attribute_value;
   }
   CATCH_STD(env, -2);
 }
 
-JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_freeZero(JNIEnv *env, jclass) {
+JNIEXPORT void JNICALL Java_ai_rapids_cuhip_freeZero(JNIEnv *env, jclass) {
   try {
     cudf::jni::auto_set_device(env);
     CUDF_CUDA_TRY(cudaFree(0));
@@ -238,8 +238,8 @@ JNIEXPORT jlong JNICALL Java_ai_rapids_cudf_Cuda_createStream(JNIEnv *env, jclas
   try {
     cudf::jni::auto_set_device(env);
     cudaStream_t stream = nullptr;
-    auto flags = isNonBlocking ? cudaStreamNonBlocking : cudaStreamDefault;
-    CUDF_CUDA_TRY(cudaStreamCreateWithFlags(&stream, flags));
+    auto flags = isNonBlocking ? hipStreamNonBlocking : hipStreamDefault;
+    CUDF_CUDA_TRY(hipStreamCreateWithFlags(&stream, flags));
     return reinterpret_cast<jlong>(stream);
   }
   CATCH_STD(env, 0);
@@ -286,7 +286,7 @@ JNIEXPORT jlong JNICALL Java_ai_rapids_cudf_Cuda_createEvent(JNIEnv *env, jclass
       flags = flags | cudaEventDisableTiming;
     }
     if (blockingSync) {
-      flags = flags | cudaEventBlockingSync;
+      flags = flags | hipEventBlockingSync;
     }
     CUDF_CUDA_TRY(cudaEventCreateWithFlags(&event, flags));
     return reinterpret_cast<jlong>(event);
@@ -307,10 +307,10 @@ JNIEXPORT jboolean JNICALL Java_ai_rapids_cudf_Cuda_eventQuery(JNIEnv *env, jcla
   try {
     cudf::jni::auto_set_device(env);
     auto event = reinterpret_cast<cudaEvent_t>(jevent);
-    auto result = cudaEventQuery(event);
+    auto result = hipEventQuery(event);
     if (result == cudaSuccess) {
       return true;
-    } else if (result == cudaErrorNotReady) {
+    } else if (result == hipErrorNotReady) {
       return false;
     } // else
     CUDF_CUDA_TRY(result);
@@ -352,7 +352,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_memcpyOnStream(JNIEnv *env, jcla
     cudf::jni::auto_set_device(env);
     auto dst = reinterpret_cast<void *>(jdst);
     auto src = reinterpret_cast<void *>(jsrc);
-    auto kind = static_cast<cudaMemcpyKind>(jkind);
+    auto kind = static_cast<hipMemcpyKind>(jkind);
     auto stream = reinterpret_cast<cudaStream_t>(jstream);
     CUDF_CUDA_TRY(cudaMemcpyAsync(dst, src, count, kind, stream));
     CUDF_CUDA_TRY(cudaStreamSynchronize(stream));
@@ -372,7 +372,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_asyncMemcpyOnStream(JNIEnv *env,
     cudf::jni::auto_set_device(env);
     auto dst = reinterpret_cast<void *>(jdst);
     auto src = reinterpret_cast<void *>(jsrc);
-    auto kind = static_cast<cudaMemcpyKind>(jkind);
+    auto kind = static_cast<hipMemcpyKind>(jkind);
     auto stream = reinterpret_cast<cudaStream_t>(jstream);
     CUDF_CUDA_TRY(cudaMemcpyAsync(dst, src, count, kind, stream));
   }

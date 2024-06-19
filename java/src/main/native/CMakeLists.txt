@@ -164,8 +164,8 @@ add_library(
   src/HashJoinJni.cpp
   src/HostMemoryBufferNativeUtilsJni.cpp
   src/NvcompJni.cpp
-  src/NvtxRangeJni.cpp
-  src/NvtxUniqueRangeJni.cpp
+  # src/NvtxRangeJni.cpp # TODO(HIP/AMD): Enable them later
+  # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable them later
   src/PackedColumnMetadataJni.cpp
   src/RmmJni.cpp
   src/ScalarJni.cpp
