@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/utilities/error.hpp>
@@ -791,7 +814,7 @@ inline jthrowable cuda_exception(JNIEnv* const env, cudaError_t status, jthrowab
 
   // Calls cudaGetLastError twice. It is nearly certain that a fatal error occurred if the second
   // call doesn't return with cudaSuccess.
-  cudaGetLastError();
+  (void)cudaGetLastError();
   auto const last = cudaGetLastError();
   // Call cudaDeviceSynchronize to ensure `last` did not result from an asynchronous error.
   // between two calls.
@@ -948,7 +971,7 @@ inline nullptr_t del_global_ref(JNIEnv* env, jobject jobj)
     /* Double check whether the thrown exception is unrecoverable CUDA error or not. */           \
     /* Like cudf::detail::throw_cuda_error, it is nearly certain that a fatal error  */           \
     /* occurred if the second call doesn't return with cudaSuccess. */                            \
-    cudaGetLastError();                                                                           \
+    (void)cudaGetLastError();                                                                           \
     auto const last = cudaFree(0);                                                                \
     if (cudaSuccess != last && last == cudaDeviceSynchronize()) {                                 \
       /* Throw CudaFatalException since the thrown exception is unrecoverable CUDA error */       \

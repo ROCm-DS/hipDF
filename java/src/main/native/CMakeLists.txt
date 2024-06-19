@@ -176,8 +176,8 @@ add_library(
   src/HostMemoryBufferNativeUtilsJni.cpp
   src/HostUDFWrapperJni.cpp
   src/NvcompJni.cpp
-  src/NvtxRangeJni.cpp
-  src/NvtxUniqueRangeJni.cpp
+  # src/NvtxRangeJni.cpp # TODO(HIP/AMD): Enable them later
+  # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable them later
   src/PackedColumnMetadataJni.cpp
   src/RmmJni.cpp
   src/ScalarJni.cpp
