@@ -68,7 +68,7 @@ option(CUDF_USE_PER_THREAD_DEFAULT_STREAM "Build with per-thread default stream"
 option(CUDA_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 option(USE_GDS "Build with GPUDirect Storage (GDS)/cuFile support" OFF)
 option(CUDF_JNI_LIBCUDF_STATIC "Link with libcudf.a" OFF)
-option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" ON)
+option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" OFF) # TODO(HIP/AMD): enable
 option(CUDA_STATIC_CUFILE "Statically link cuFile" OFF)
 
 message(VERBOSE "CUDF_JNI: Build with NVTX support: ${USE_NVTX}")
@@ -132,9 +132,13 @@ if(NOT DEFINED hipcomp_DIR)
   set(hipcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/hipcomp-build")
 endif()
 rapids_find_package(hipcomp REQUIRED)
+rapids_find_package(RMM REQUIRED)
 
 # ##################################################################################################
 # * find JNI -------------------------------------------------------------------------------------
+
+set(JAVA_AWT_INCLUDE_PATH "$ENV{JAVA_HOME}/include")
+
 find_package(JNI REQUIRED)
 if(JNI_FOUND)
   message(STATUS "JDK with JNI in ${JNI_INCLUDE_DIRS}")
@@ -211,6 +215,7 @@ endif()
 
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
+
 
 target_include_directories(
   cudfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
