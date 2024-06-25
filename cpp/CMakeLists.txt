@@ -76,7 +76,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
-option(BUILD_TESTS "Configure CMake to build tests" ON)
+option(BUILD_TESTS "Configure CMake to build tests" OFF)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)

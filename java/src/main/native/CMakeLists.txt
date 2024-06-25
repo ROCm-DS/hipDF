@@ -180,7 +180,7 @@ add_library(
   # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable them later
   src/PackedColumnMetadataJni.cpp
   src/RmmJni.cpp
-  src/ScalarJni.cpp
+  # src/ScalarJni.cpp # TODO(HIP/AMD): Enable them later
   src/TableJni.cpp
   src/aggregation128_utils.cu
   src/check_nvcomp_output_sizes.cu
