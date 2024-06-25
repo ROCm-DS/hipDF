@@ -323,7 +323,6 @@ dremel_data get_encoding(column_view h_col,
     auto output_zip_it =
       thrust::make_zip_iterator(thrust::make_tuple(rep_level.begin(), def_level.begin()));
 
-#ifdef HIPDF_HAS_ROCPRIM_PATCH
     auto ends = thrust::merge_by_key(rmm::exec_policy(stream),
                                      empties.begin(),
                                      empties.begin() + empties_size,
@@ -333,17 +332,6 @@ dremel_data get_encoding(column_view h_col,
                                      input_child_zip_it,
                                      thrust::make_discard_iterator(),
                                      output_zip_it);
-#else
-    auto ends = thrust::merge_by_key(thrust::device,
-                                     empties.begin(),
-                                     empties.begin() + empties_size,
-                                     thrust::make_counting_iterator(column_offsets[level + 1]),
-                                     thrust::make_counting_iterator(column_ends[level + 1]),
-                                     input_parent_zip_it,
-                                     input_child_zip_it,
-                                     thrust::make_discard_iterator(),
-                                     output_zip_it);
-#endif
 
     curr_rep_values_size = ends.second - output_zip_it;
 
@@ -419,7 +407,6 @@ dremel_data get_encoding(column_view h_col,
     auto output_zip_it =
       thrust::make_zip_iterator(thrust::make_tuple(rep_level.begin(), def_level.begin()));
 
-#ifdef HIPDF_HAS_ROCPRIM_PATCH
     auto ends = thrust::merge_by_key(rmm::exec_policy(stream),
                                      transformed_empties,
                                      transformed_empties + empties_size,
@@ -429,17 +416,6 @@ dremel_data get_encoding(column_view h_col,
                                      input_child_zip_it,
                                      thrust::make_discard_iterator(),
                                      output_zip_it);
-#else
-    auto ends = thrust::merge_by_key(thrust::device,
-                                     transformed_empties,
-                                     transformed_empties + empties_size,
-                                     thrust::make_counting_iterator(0),
-                                     thrust::make_counting_iterator(curr_rep_values_size),
-                                     input_parent_zip_it,
-                                     input_child_zip_it,
-                                     thrust::make_discard_iterator(),
-                                     output_zip_it);
-#endif
 
     curr_rep_values_size = ends.second - output_zip_it;
 
