@@ -3102,7 +3102,6 @@ TEST_F(ParquetReaderTest, SelectNestedColumn)
   }
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(ParquetReaderTest, DecimalRead)
 {
   {
@@ -3488,7 +3487,6 @@ TEST_F(ParquetReaderTest, DecimalRead)
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(result.tbl->view().column(2), col2);
   }
 }
-#endif
 
 TEST_F(ParquetReaderTest, EmptyOutput)
 {

@@ -344,12 +344,8 @@ TEST_F(HashPartition, FixedPointColumnsToHash)
   fixed_width_column_wrapper<int32_t> to_hash({1});
   cudf::test::fixed_point_column_wrapper<int64_t> first_col({7}, numeric::scale_type{-1});
 
-#ifdef HIPDF_ENABLE_DECIMAL128
   cudf::test::fixed_point_column_wrapper<__int128_t> second_col({77}, numeric::scale_type{0});
   auto input = cudf::table_view({to_hash, first_col, second_col});
-#else
-  auto input = cudf::table_view({to_hash, first_col});
-#endif
   auto columns_to_hash = std::vector<cudf::size_type>({0});
 
   cudf::size_type const num_partitions = 1;
@@ -360,9 +356,7 @@ TEST_F(HashPartition, FixedPointColumnsToHash)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(0).view(), input.column(0));
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(1).view(), input.column(1));
-#ifdef HIPDF_ENABLE_DECIMAL128
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(result->get_column(2).view(), input.column(2));
-#endif
 }
 
 TEST_F(HashPartition, ListWithNulls)

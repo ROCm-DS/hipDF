@@ -832,7 +832,6 @@ TYPED_TEST(FixedPointTests, Decimal64ToDecimalXX)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TYPED_TEST(FixedPointTests, Decimal128ToDecimalXX)
 {
   using namespace numeric;
@@ -848,7 +847,6 @@ TYPED_TEST(FixedPointTests, Decimal128ToDecimalXX)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
-#endif
 
 TYPED_TEST(FixedPointTests, Decimal32ToDecimalXXWithSmallerScale)
 {
@@ -882,7 +880,6 @@ TYPED_TEST(FixedPointTests, Decimal64ToDecimalXXWithSmallerScale)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithSmallerScale)
 {
   using namespace numeric;
@@ -898,7 +895,6 @@ TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithSmallerScale)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
-#endif
 
 TYPED_TEST(FixedPointTests, Decimal32ToDecimalXXWithLargerScale)
 {
@@ -957,7 +953,6 @@ TEST_F(FixedPointTestSingleType, AvoidOverflowDecimal32ToInt64)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScale)
 {
   using namespace numeric;
@@ -973,7 +968,6 @@ TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScale)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
-#endif
 
 TYPED_TEST(FixedPointTests, ValidateCastRescalePrecision)
 {
@@ -1047,7 +1041,6 @@ TYPED_TEST(FixedPointTests, Decimal64ToDecimalXXWithLargerScaleAndNullMask)
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScaleAndNullMask)
 {
   using namespace numeric;
@@ -1064,7 +1057,6 @@ TYPED_TEST(FixedPointTests, Decimal128ToDecimalXXWithLargerScaleAndNullMask)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
 }
-#endif
 
 TYPED_TEST(FixedPointTests, DecimalRescaleOverflowAndNullMask)
 {

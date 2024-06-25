@@ -379,15 +379,10 @@ TEST_F(OrcWriterTest, MultiColumn)
   expected_metadata.column_metadata[3].set_name("int32s");
   expected_metadata.column_metadata[4].set_name("floats");
   expected_metadata.column_metadata[5].set_name("doubles");
-#ifdef HIPDF_ENABLE_DECIMAL128  
   expected_metadata.column_metadata[6].set_name("decimal_pos_scale");
   expected_metadata.column_metadata[7].set_name("decimal_neg_scale");
   expected_metadata.column_metadata[8].set_name("lists");
   expected_metadata.column_metadata[9].set_name("structs");
-#else
-  expected_metadata.column_metadata[6].set_name("lists");
-  expected_metadata.column_metadata[7].set_name("structs");
-#endif
 
   auto filepath = temp_env->get_temp_filepath("OrcMultiColumn.orc");
   cudf::io::orc_writer_options out_opts =
