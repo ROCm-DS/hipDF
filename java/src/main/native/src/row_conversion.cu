@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <cooperative_groups.h>
+#include "hip/hip_runtime.h"
+// #include <cooperative_groups.h>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/iterator.cuh>
 #include <cudf/detail/sequence.hpp>
@@ -41,14 +41,14 @@
 #include <thrust/scan.h>
 #include <type_traits>
 #include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
-
+#include "hip/std/atomic"
 #include "row_conversion.hpp"
 
 #if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700
 #define ASYNC_MEMCPY_SUPPORTED
 #endif
 
-#if !defined(__CUDA_ARCH__) || defined(ASYNC_MEMCPY_SUPPORTED)
+#if (!defined(__CUDA_ARCH__) || defined(ASYNC_MEMCPY_SUPPORTED)) && (!defined(__HIP_PLATFORM_AMD__))
 #include <cuda/barrier>
 #endif // #if !defined(__CUDA_ARCH__) || defined(ASYNC_MEMCPY_SUPPORTED)
 
@@ -362,7 +362,7 @@ copy_from_rows_fixed_width_optimized(const size_type num_rows, const size_type n
     // But we might not use all of the threads if the number of rows does not go
     // evenly into the thread count. We don't want those threads to exit yet
     // because we may need them to copy data in for the next row group.
-    uint32_t active_mask = __ballot_sync(0xffff'ffffu, row_index < num_rows);
+    uint32_t active_mask = hip_extensions::__ballot_sync(0xffff'ffffu, row_index < num_rows);
     if (row_index < num_rows) {
       auto const col_index_start = threadIdx.y;
       auto const col_index_stride = blockDim.y;
@@ -405,7 +405,7 @@ copy_from_rows_fixed_width_optimized(const size_type num_rows, const size_type n
         int8_t *valid_byte = &row_vld_tmp[col_index / 8];
         size_type byte_bit_offset = col_index % 8;
         int predicate = *valid_byte & (1 << byte_bit_offset);
-        uint32_t bitmask = __ballot_sync(active_mask, predicate);
+        uint32_t bitmask = hip_extensions::__ballot_sync(active_mask, predicate);
         if (row_index % 32 == 0) {
           nm[word_index(row_index)] = bitmask;
         }
@@ -504,13 +504,13 @@ __global__ void copy_to_rows_fixed_width_optimized(
         // Now copy validity for the column
         if (input_nm[col_index]) {
           if (bit_is_set(input_nm[col_index], row_index)) {
-            atomicOr_block(valid_int, 1 << int_bit_offset);
+            atomicOr_system(valid_int, 1 << int_bit_offset); // TODO(HIP/AMD): Use atomicOr_block later
           } else {
-            atomicAnd_block(valid_int, ~(1 << int_bit_offset));
+            atomicAnd_system(valid_int, ~(1 << int_bit_offset)); // TODO(HIP/AMD): Use atomicAnd_block later
           }
         } else {
           // It is valid so just set the bit
-          atomicOr_block(valid_int, 1 << int_bit_offset);
+          atomicOr_system(valid_int, 1 << int_bit_offset); // TODO(HIP/AMD): Use atomicOr_block later
         }
       } // end column loop
     }   // end row copy
@@ -581,8 +581,8 @@ __global__ void copy_to_rows(const size_type num_rows, const size_type num_colum
   // This has been broken up for us in the tile_info struct, so we don't have
   // any calculation to do here, but it is important to note.
 
-  auto const group = cooperative_groups::this_thread_block();
-  auto const warp = cooperative_groups::tiled_partition<cudf::detail::warp_size>(group);
+  auto const group = hip_extensions::hip_cooperative_groups_ext::this_thread_block();
+  auto const warp = hip_extensions::hip_cooperative_groups_ext::tiled_partition<cudf::detail::warp_size>(group);
   extern __shared__ int8_t shared_data[];
 
 #ifdef ASYNC_MEMCPY_SUPPORTED
@@ -719,8 +719,8 @@ copy_validity_to_rows(const size_type num_rows, const size_type num_columns,
 
   // each thread of warp reads a single int32 of validity - so we read 128 bytes then ballot_sync
   // the bits and write the result to shmem after we fill shared mem memcpy it out in a blob.
-  auto const group = cooperative_groups::this_thread_block();
-  auto const warp = cooperative_groups::tiled_partition<cudf::detail::warp_size>(group);
+  auto const group = hip_extensions::hip_cooperative_groups_ext::this_thread_block();
+  auto const warp = hip_extensions::hip_cooperative_groups_ext::tiled_partition<cudf::detail::warp_size>(group);
 
 #ifdef ASYNC_MEMCPY_SUPPORTED
   // Initialize cuda barriers for each tile.
@@ -755,7 +755,7 @@ copy_validity_to_rows(const size_type num_rows, const size_type num_columns,
     auto const absolute_col = relative_col + tile.start_col;
     auto const absolute_row = relative_row + tile.start_row;
     auto const participating = absolute_col < num_columns && absolute_row < num_rows;
-    auto const participation_mask = __ballot_sync(0xFFFF'FFFFu, participating);
+    auto const participation_mask = hip_extensions::__ballot_sync(0xFFFF'FFFFu, participating);
 
     if (participating) {
       auto my_data = input_nm[absolute_col] != nullptr ?
@@ -767,7 +767,7 @@ copy_validity_to_rows(const size_type num_rows, const size_type num_columns,
       // we actually write.
       bitmask_type dw_mask = 0x1;
       for (int i = 0; i < threads_per_warp && relative_row + i < num_rows; ++i, dw_mask <<= 1) {
-        auto validity_data = __ballot_sync(participation_mask, my_data & dw_mask);
+        auto validity_data = hip_extensions::__ballot_sync(participation_mask, my_data & dw_mask);
         // lead thread in each warp writes data
         auto const validity_write_offset =
             validity_data_row_length * (relative_row + i) + (relative_col / CHAR_BIT);
@@ -837,8 +837,8 @@ __global__ void copy_strings_to_rows(size_type const num_rows, size_type const n
   // will copy a row at a time. The base thread will first go through column data and fill out
   // offset/length information for the column. Then all threads of the warp will participate in the
   // memcpy of the string data.
-  auto const my_block = cooperative_groups::this_thread_block();
-  auto const warp = cooperative_groups::tiled_partition<cudf::detail::warp_size>(my_block);
+  auto const my_block = hip_extensions::hip_cooperative_groups_ext::this_thread_block();
+  auto const warp = hip_extensions::hip_cooperative_groups_ext::tiled_partition<cudf::detail::warp_size>(my_block);
 #ifdef ASYNC_MEMCPY_SUPPORTED
   cuda::barrier<cuda::thread_scope_block> block_barrier;
 #endif
@@ -908,8 +908,8 @@ __global__ void copy_from_rows(const size_type num_rows, const size_type num_col
   // To speed up some of the random access memory we do, we copy col_sizes and col_offsets to shared
   // memory for each of the tiles that we work on
 
-  auto const group = cooperative_groups::this_thread_block();
-  auto const warp = cooperative_groups::tiled_partition<cudf::detail::warp_size>(group);
+  auto const group = hip_extensions::hip_cooperative_groups_ext::this_thread_block();
+  auto const warp = hip_extensions::hip_cooperative_groups_ext::tiled_partition<cudf::detail::warp_size>(group);
   extern __shared__ int8_t shared[];
 
 #ifdef ASYNC_MEMCPY_SUPPORTED
@@ -1034,8 +1034,8 @@ copy_validity_from_rows(const size_type num_rows, const size_type num_columns,
   //        |  1 bit of each input byte, by column, are swizzled into a single 32 bit word via
   //        __ballot_sync, representing 32 rows of that column.
 
-  auto const group = cooperative_groups::this_thread_block();
-  auto const warp = cooperative_groups::tiled_partition<cudf::detail::warp_size>(group);
+  auto const group = hip_extensions::hip_cooperative_groups_ext::this_thread_block();
+  auto const warp = hip_extensions::hip_cooperative_groups_ext::tiled_partition<cudf::detail::warp_size>(group);
 
 #ifdef ASYNC_MEMCPY_SUPPORTED
   // Initialize cuda barriers for each tile.
@@ -1074,7 +1074,7 @@ copy_validity_from_rows(const size_type num_rows, const size_type num_columns,
     auto const row_batch_start =
         tile.batch_number == 0 ? 0 : batch_row_boundaries[tile.batch_number];
 
-    auto const participation_mask = __ballot_sync(0xFFFF'FFFFu, absolute_row < num_rows);
+    auto const participation_mask = hip_extensions::__ballot_sync(0xFFFF'FFFFu, absolute_row < num_rows);
 
     if (absolute_row < num_rows) {
       auto const my_byte = input_data[row_offsets(absolute_row, row_batch_start) + validity_offset +
@@ -1085,7 +1085,7 @@ copy_validity_from_rows(const size_type num_rows, const size_type num_columns,
       // write.
       for (int i = 0, byte_mask = 0x1; (i < cols_per_read) && ((relative_col + i) < num_columns);
            ++i, byte_mask <<= 1) {
-        auto const validity_data = __ballot_sync(participation_mask, my_byte & byte_mask);
+        auto const validity_data = hip_extensions::__ballot_sync(participation_mask, my_byte & byte_mask);
         // lead thread in each warp writes data
         if (warp.thread_rank() == 0) {
           auto const validity_write_offset =
@@ -1149,8 +1149,8 @@ __global__ void copy_strings_from_rows(RowOffsetFunctor row_offsets, int32_t **s
   // Each warp takes a tile, which is a single column and up to ROWS_PER_BLOCK rows. A tile will not
   // wrap around the bottom of the table. The warp will copy the strings for each row in the tile.
   // Traversing in row-major order to coalesce the offsets and size reads.
-  auto my_block = cooperative_groups::this_thread_block();
-  auto warp = cooperative_groups::tiled_partition<cudf::detail::warp_size>(my_block);
+  auto my_block = hip_extensions::hip_cooperative_groups_ext::this_thread_block();
+  auto warp = hip_extensions::hip_cooperative_groups_ext::tiled_partition<cudf::detail::warp_size>(my_block);
 #ifdef ASYNC_MEMCPY_SUPPORTED
   cuda::barrier<cuda::thread_scope_block> block_barrier;
 #endif
@@ -1734,9 +1734,9 @@ std::vector<std::unique_ptr<column>> convert_to_rows(
   CUDF_CUDA_TRY(cudaGetDevice(&device_id));
   int total_shmem_in_bytes;
   CUDF_CUDA_TRY(
-      cudaDeviceGetAttribute(&total_shmem_in_bytes, cudaDevAttrMaxSharedMemoryPerBlock, device_id));
+      cudaDeviceGetAttribute(&total_shmem_in_bytes, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id));
 
-#ifndef __CUDA_ARCH__ // __host__ code.
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_PLATFORM_AMD__) // __host__ code.
   // Need to reduce total shmem available by the size of barriers in the kernel's shared memory
   total_shmem_in_bytes -=
       util::round_up_unsafe(sizeof(cuda::barrier<cuda::thread_scope_block>), 16ul);
@@ -2071,9 +2071,9 @@ std::unique_ptr<table> convert_from_rows(lists_column_view const &input,
   CUDF_CUDA_TRY(cudaGetDevice(&device_id));
   int total_shmem_in_bytes;
   CUDF_CUDA_TRY(
-      cudaDeviceGetAttribute(&total_shmem_in_bytes, cudaDevAttrMaxSharedMemoryPerBlock, device_id));
+      cudaDeviceGetAttribute(&total_shmem_in_bytes, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id));
 
-#ifndef __CUDA_ARCH__ // __host__ code.
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_PLATFORM_AMD__) // __host__ code.
   // Need to reduce total shmem available by the size of barriers in the kernel's shared memory
   total_shmem_in_bytes -=
       util::round_up_unsafe(sizeof(cuda::barrier<cuda::thread_scope_block>), 16ul);

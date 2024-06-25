@@ -61,10 +61,10 @@ public class NativeDepsLoader {
           "nvcomp"
       },
       new String[]{
-          "cudf"
+          "hipdf"
       },
       new String[]{
-          "cudfjni"
+          "hipdfjni"
       }
   };
   private static final ClassLoader loader = NativeDepsLoader.class.getClassLoader();
