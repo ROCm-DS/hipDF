@@ -523,10 +523,10 @@
                                 }
 
                                 def nvccout = new StringBuffer(), nvccerr = new StringBuffer()
-                                def nvccproc = 'nvcc --version'.execute()
+                                def nvccproc = 'hipcc --version'.execute()
                                 nvccproc.consumeProcessOutput(nvccout, nvccerr)
                                 nvccproc.waitForOrKill(10000)
-                                def cudaPattern = ~/Cuda compilation tools, release ([0-9]+)/
+                                def cudaPattern = ~/HIP version: ([0-9]+)/
                                 def cm = cudaPattern.matcher(nvccout)
                                 if (cm.find()) {
                                     def classifier = 'cuda' + cm.group(1)
