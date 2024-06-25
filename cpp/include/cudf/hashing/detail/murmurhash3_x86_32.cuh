@@ -170,14 +170,12 @@ hash_value_type __host__ __device__ inline MurmurHash3_x86_32<numeric::decimal64
   return compute(key.value());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <>
 hash_value_type __host__ __device__ inline MurmurHash3_x86_32<numeric::decimal128>::operator()(
   numeric::decimal128 const& key) const
 {
   return compute(key.value());
 }
-#endif
 
 template <>
 hash_value_type __host__ __device__ inline MurmurHash3_x86_32<cudf::list_view>::operator()(

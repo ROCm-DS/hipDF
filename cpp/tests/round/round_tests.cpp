@@ -662,7 +662,6 @@ TEST_F(RoundTests, FixedPoint128HalfUp)
   }
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(RoundTests, FixedPointAtBoundaryTestHalfUp)
 {
   using namespace numeric;
@@ -695,7 +694,6 @@ TEST_F(RoundTests, FixedPointAtBoundaryTestHalfUp)
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, result->view());
   }
 }
-#endif
 
 TEST_F(RoundTests, BoolTestHalfUp)
 {

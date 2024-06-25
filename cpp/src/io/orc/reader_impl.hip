@@ -779,21 +779,17 @@ type_id to_cudf_decimal_type(host_span<std::string const> decimal128_columns,
                              int column_index)
 {
   if (metadata.get_col_type(column_index).kind != DECIMAL) { return type_id::EMPTY; }
-#ifdef HIPDF_ENABLE_DECIMAL128
   if (std::find(decimal128_columns.begin(),
                 decimal128_columns.end(),
                 metadata.column_path(0, column_index)) != decimal128_columns.end()) {
     return type_id::DECIMAL128;
   }
-#endif
 
   auto const precision = metadata.get_col_type(column_index)
                            .precision.value_or(hip::std::numeric_limits<int64_t>::digits10);
   if (precision <= hip::std::numeric_limits<int32_t>::digits10) { return type_id::DECIMAL32; }
   if (precision <= hip::std::numeric_limits<int64_t>::digits10) { return type_id::DECIMAL64; }
-#ifdef HIPDF_ENABLE_DECIMAL128
   return type_id::DECIMAL128;
-#endif
 }
 
 std::string get_map_child_col_name(std::size_t const idx) { return (idx == 0) ? "key" : "value"; }
@@ -878,15 +874,9 @@ std::unique_ptr<column> create_empty_column(
 
     case orc::DECIMAL: {
       int32_t scale = 0;
-#ifdef HIPDF_ENABLE_DECIMAL128
       if (type == type_id::DECIMAL32 or type == type_id::DECIMAL64 or type == type_id::DECIMAL128) {
         scale = -static_cast<int32_t>(metadata.get_types()[orc_col_id].scale.value_or(0));
       }
-#else
-      if (type == type_id::DECIMAL32 or type == type_id::DECIMAL64) {
-        scale = -static_cast<int32_t>(metadata.get_types()[orc_col_id].scale.value_or(0));
-      }
-#endif
       return make_empty_column(data_type(type, scale));
     }
 
@@ -1056,12 +1046,8 @@ table_with_metadata reader::impl::read(uint64_t skip_rows,
                                    _timestamp_type.id(),
                                    to_cudf_decimal_type(_decimal128_columns, _metadata, col.id));
       CUDF_EXPECTS(col_type != type_id::EMPTY, "Unknown type");
-#if defined HIPDF_ENABLE_DECIMAL128
       if (col_type == type_id::DECIMAL32 or col_type == type_id::DECIMAL64 or
           col_type == type_id::DECIMAL128) {
-#else
-      if (col_type == type_id::DECIMAL32 or col_type == type_id::DECIMAL64) {
-#endif
         // sign of the scale is changed since cuDF follows c++ libraries like CNL
         // which uses negative scaling, but liborc and other libraries
         // follow positive scaling.

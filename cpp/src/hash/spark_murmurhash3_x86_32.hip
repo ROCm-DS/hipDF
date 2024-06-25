@@ -203,7 +203,6 @@ spark_hash_value_type __device__ inline Spark_MurmurHash3_x86_32<numeric::decima
   return compute<uint64_t>(key.value());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <>
 spark_hash_value_type __device__ inline Spark_MurmurHash3_x86_32<numeric::decimal128>::operator()(
   numeric::decimal128 const& key) const
@@ -245,7 +244,6 @@ spark_hash_value_type __device__ inline Spark_MurmurHash3_x86_32<numeric::decima
   thrust::reverse_copy(thrust::seq, data, data + length, big_endian_data);
   return compute_bytes(big_endian_data, length);
 }
-#endif
 
 /**
  * @brief Computes the hash value of a row in the given table.

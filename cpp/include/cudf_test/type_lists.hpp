@@ -287,13 +287,8 @@ using ListTypes = cudf::test::Types<list_view>;
  * TYPED_TEST_SUITE(MyTypedFixture, cudf::test::FixedPointTypes);
  * ```
  */
-#ifdef HIPDF_ENABLE_DECIMAL128
 using FixedPointTypes =
   cudf::test::Types<numeric::decimal32, numeric::decimal64, numeric::decimal128>;
-#else
-using FixedPointTypes =
-  cudf::test::Types<numeric::decimal32, numeric::decimal64>;
-#endif
 
 /**
  * @brief Provides a list of all fixed-width element types for use in GTest

@@ -803,7 +803,6 @@ TYPED_TEST(FixedPointCompiledTest, FixedPointBinaryOpPModAndPyMod)
   }
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <typename T>
 struct FixedPointTest_64_128_Reps : public cudf::test::BaseFixture {};
 
@@ -844,4 +843,3 @@ TYPED_TEST(FixedPointTest_64_128_Reps, FixedPoint_64_128_ComparisonTests)
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(h->view(), falses);
   }
 }
-#endif

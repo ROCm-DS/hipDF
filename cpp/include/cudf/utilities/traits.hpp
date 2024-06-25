@@ -372,12 +372,8 @@ bool is_timestamp(data_type type);
 template <typename T>
 constexpr inline bool is_fixed_point()
 {
-#ifdef HIPDF_ENABLE_DECIMAL128
   return std::is_same_v<numeric::decimal32, T> || std::is_same_v<numeric::decimal64, T> ||
          std::is_same_v<numeric::decimal128, T>;
-#else
-  return std::is_same_v<numeric::decimal32, T> || std::is_same_v<numeric::decimal64, T>;
-#endif
 }
 
 /**

@@ -70,7 +70,6 @@ option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks
 option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(HIPDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
-option(HIPDF_ENABLE_DECIMAL128 "Enables support for DECIMAL128 datatype (requires patched ROCm!)" OFF)
 option(HIPDF_HAS_ROCPRIM_PATCH "Set to true if rocPRIM patch is available to fix https://github.com/AMD-AI/hipdf/issues/30 (segfaults/wrong results with rmm::exec_policy)" OFF)
 option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
 mark_as_advanced(HIPDF_BUILD_TESTUTIL)
@@ -736,10 +735,6 @@ target_include_directories(
 
 if(HIPDF_ENABLE_UDF_WITH_JITIFY)
 target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_UDF_WITH_JITIFY")
-endif()
-
-if(HIPDF_ENABLE_DECIMAL128)
-target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_DECIMAL128")
 endif()
 
 if(HIPDF_HAS_ROCPRIM_PATCH)
