@@ -207,6 +207,7 @@ endif()
 
 target_include_directories(
   hipdfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
+                  "../../../../cpp/include"
                  "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
 )
 
