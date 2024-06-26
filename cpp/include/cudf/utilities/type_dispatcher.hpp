@@ -620,7 +620,7 @@ std::string type_to_name(data_type type);
  *  strings like "int32_t" or "int64_t" are passed to hipRTC/comgr for a template
  * instantiation, the demangled names  (that contain e.g.,  "int" or "long long") 
  * cannot be found, leading to errors in the JIT-compilation process. This will be resolved with
- *  https://ontrack-internal.amd.com/browse/SWDEV-379212.
+ *  SWDEV-379212.
  *
  * @param type The `data_type`
  * @return Jitsafe name of the type

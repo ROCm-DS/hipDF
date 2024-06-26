@@ -2095,7 +2095,7 @@ void gpu_debrotli(device_span<device_span<uint8_t const> const> inputs,
   CUDF_EXPECTS(scratch_size >= sizeof(brotli_dictionary_s),
                "Insufficient scratch space for debrotli");
   
-  //: TODO(HIP/AMD): Need to use std::min here, as the one in global namespace misbehaves: see https://ontrack-internal.amd.com/browse/SWDEV-446564
+  //: TODO(HIP/AMD): Need to use std::min here, as the one in global namespace misbehaves: see SWDEV-446564
   scratch_size = std::min(scratch_size, static_cast<size_t>(0xffff'ffff)); 
   fb_heap_size = (uint32_t)((scratch_size - sizeof(brotli_dictionary_s)) & ~0xf);
 

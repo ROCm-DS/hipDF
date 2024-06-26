@@ -244,7 +244,7 @@ if(CUDA_BACKEND)
 else()
   if(HIPDF_ENABLE_UDF_WITH_JITIFY)
   # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
-  # see https://ontrack-internal.amd.com/browse/SWDEV-444584
+  # see SWDEV-444584
   include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
   endif()
 endif()
@@ -780,7 +780,7 @@ target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBH
 # Compile stringified JIT sources first
 if(HIPDF_ENABLE_UDF_WITH_JITIFY)
   # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
-  # see https://ontrack-internal.amd.com/browse/SWDEV-444584
+  # see SWDEV-444584
 add_dependencies(hipdf jitify_preprocess_run)
 endif()
 

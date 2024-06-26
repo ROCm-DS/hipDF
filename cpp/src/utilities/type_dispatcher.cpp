@@ -26,7 +26,7 @@ std::string type_to_jitsafe_name(data_type type) {
     if constexpr(HIP_PLATFORM_AMD) {
       // TODO(HIP/AMD): make substitutions here to account for the way in which hiprtc/comgr internally calls/keeps track of 
       // the mapping between mangled/demangled names.
-      // Please see https://ontrack-internal.amd.com/browse/SWDEV-379212 and the doxygen documentation of this function
+      // Please see SWDEV-379212 and the doxygen documentation of this function
       // for more details.
       
       if(result == "int8_t") {
