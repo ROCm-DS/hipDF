@@ -370,8 +370,6 @@ endif()
 if(CUDA_BACKEND)
   include(cmake/Modules/JitifyPreprocessKernels.cmake)
 else()
-  # TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
-  # header conflicts during jitify preprocessing
   include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
 endif()
 
@@ -973,8 +971,6 @@ endif()
 target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
 
 # Compile stringified JIT sources first
-# TODO(HIP/AMD): jitify_preprocessing presently doesn't work due to issues with HIPRTC that cause
-# header conflicts during jitify preprocessing
 add_dependencies(cudf jitify_preprocess_run)
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
