@@ -171,7 +171,8 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getDriverVersion(JNIEnv *env, jc
   try {
     cudf::jni::auto_set_device(env);
     jint driver_version;
-    CUDF_CUDA_TRY(cudaDriverGetVersion(&driver_version));
+
+    CUDF_CUDA_TRY(hipDriverGetVersion(&driver_version));
     return driver_version;
   }
   CATCH_STD(env, -2);
