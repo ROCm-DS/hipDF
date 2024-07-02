@@ -167,7 +167,7 @@ add_library(
   src/ContiguousTableJni.cpp
   src/HashJoinJni.cpp
   src/HostMemoryBufferNativeUtilsJni.cpp
-  src/NvcompJni.cpp
+  # src/NvcompJni.cpp
   # src/NvtxRangeJni.cpp # TODO(HIP/AMD): Enable them later
   # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable them later
   src/PackedColumnMetadataJni.cpp
