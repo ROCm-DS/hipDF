@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -77,6 +78,8 @@ public class NativeDepsLoader {
   public static synchronized void loadNativeDeps() {
     if (!loaded) {
       try {
+        System.loadLibrary("hipdfjni");
+        //Arrays.asList(loadOrder).stream().forEach(s -> System.out.println(Arrays.toString(s)));   
         loadNativeDeps(loadOrder);
         loaded = true;
       } catch (Throwable t) {
