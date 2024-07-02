@@ -162,16 +162,17 @@ void binary_operation(mutable_column_view& out,
                       std::string const& udf,
                       rmm::cuda_stream_view stream)
 {
-  std::string const output_type_name = cudf::type_to_jitsafe_name(out.type());
+  std::string const output_type_name = cudf::type_to_name(out.type());
+
   std::string cuda_source;
   std::string parsed_llvm_ir;
   if(HIP_PLATFORM_AMD) {
     cuda_source = "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
                 + output_type_name +"*"
                 + ","
-                + cudf::type_to_jitsafe_name(lhs.type())
+                + cudf::type_to_name(lhs.type())
                 + ","
-                + cudf::type_to_jitsafe_name(rhs.type())
+                + cudf::type_to_name(rhs.type())
                 + ");"; 
     parsed_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_BINARY_OP");
   }
@@ -182,8 +183,8 @@ void binary_operation(mutable_column_view& out,
   //TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
                               .instantiate(output_type_name,  // list of template arguments
-                                           cudf::type_to_jitsafe_name(lhs.type()),
-                                           cudf::type_to_jitsafe_name(rhs.type()),
+                                           cudf::type_to_name(lhs.type()),
+                                           cudf::type_to_name(rhs.type()),
                                            std::string("cudf::binops::jit::UserDefinedOp"));
 
   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";
