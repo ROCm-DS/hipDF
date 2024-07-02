@@ -615,7 +615,7 @@
                                     <includes>
                                         <include>libcudfjni.so</include>
                                         <include>libcufilejni.so</include>
-                                        <include>libnvcomp.so</include>
+                                        <include>libhipcomp.so</include>
                                     </includes>
                                 </resource>
                                 <resource>
