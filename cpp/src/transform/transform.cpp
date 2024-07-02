@@ -49,17 +49,17 @@ void unary_operation(mutable_column_view output,
 #else
   std::string kernel_name =
     jitify2::reflection::Template("cudf::transformation::jit::kernel")  //
-      .instantiate(cudf::type_to_jitsafe_name(output.type()),  // list of template arguments
-                   cudf::type_to_jitsafe_name(input.type()));
+      .instantiate(cudf::type_to_name(output.type()),  // list of template arguments
+                   cudf::type_to_name(input.type()));
 
   std::string cuda_source; 
   std::string parsed_udf_llvm_ir;
   
   if(is_ptx && HIP_PLATFORM_AMD) {
     cuda_source = "extern \"C\" __device__ void GENERIC_UNARY_OP(" 
-                + cudf::type_to_jitsafe_name(output.type()) +"*"
+                + cudf::type_to_name(output.type()) +"*"
                 + ","
-                + cudf::type_to_jitsafe_name(input.type())
+                + cudf::type_to_name(input.type())
                 + ");";
     parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_UNARY_OP");
   }
