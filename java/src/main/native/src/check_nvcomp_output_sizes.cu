@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef NVTX_DISABLE
 #include <cudf/detail/nvtx/nvtx3.hpp>
+#endif
 #include <cudf/utilities/error.hpp>
 #include <thrust/device_ptr.h>
 #include <thrust/equal.h>
@@ -38,7 +40,9 @@ namespace java {
 bool check_nvcomp_output_sizes(std::size_t const *dev_uncompressed_sizes,
                                std::size_t const *dev_actual_uncompressed_sizes,
                                std::size_t num_chunks, rmm::cuda_stream_view stream) {
+#ifndef NVTX_DISABLE
   NVTX3_FUNC_RANGE_IN(java_domain);
+#endif
   return thrust::equal(rmm::exec_policy(stream), dev_uncompressed_sizes,
                        dev_uncompressed_sizes + num_chunks, dev_actual_uncompressed_sizes);
 }
