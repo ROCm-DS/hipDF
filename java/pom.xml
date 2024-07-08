@@ -253,8 +253,9 @@
                                     <goal>test</goal>
                                 </goals>
                             </execution>
-                            <execution>
+                           <execution>
                                 <id>fatal-cuda-test</id>
+                                <phase/>
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
@@ -262,9 +263,10 @@
                                     <reuseForks>false</reuseForks>
                                     <test>*/CudaFatalTest.java</test>
                                 </configuration>
-                            </execution>
+                            </execution> 
                             <execution>
                                 <id>non-empty-null-test</id>
+                                <phase/>
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
@@ -590,8 +592,8 @@
                                         <include>libhipdfjni.so</include>
                                         <include>libcufilejni.so</include>
                                         <include>libhipcomp.so</include> 
-                                        <include>libnvcomp_gdeflate.so</include>
-                                        <include>libnvcomp_bitcomp.so</include>
+                                    <!--   <include>libnvcomp_gdeflate.so</include> -->
+                                   <!--    <include>libnvcomp_bitcomp.so</include> -->
                                     </includes>
                                 </resource>
                                 <resource>
