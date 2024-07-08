@@ -80,14 +80,24 @@ public class NativeDepsLoader {
   private static final String[][] loadOrder = new String[][]{
       new String[]{
           "nvcomp"
-      },
+      }, 
       new String[]{
-          "hipdf"
+          "cudf"
       },
       new String[]{
           "cudfjni"
       }
   };
+
+  private static final String[][] noNVRAMLoadOrder = new String[][] {
+    new String[]{
+      "cudf"
+    },
+    new String[]{
+      "cudfjni"
+    }
+  };
+
   private static final ClassLoader loader = NativeDepsLoader.class.getClassLoader();
 
   private static boolean loaded = false;
@@ -98,6 +108,10 @@ public class NativeDepsLoader {
   public static synchronized void loadNativeDeps() {
     if (!loaded) {
       try {
+        if (System.getProperty("NO_NVRAM") != null) {
+          loadOrder = noNVRAMLoadOrder;
+        }
+
         loadNativeDeps(loadOrder, preserveDepsAfterLoad);
         loaded = true;
       } catch (Throwable t) {
