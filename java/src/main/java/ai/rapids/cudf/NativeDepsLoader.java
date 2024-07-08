@@ -54,13 +54,13 @@ public class NativeDepsLoader {
    * stage are guaranteed to have finished loading before any dependencies in
    * subsequent stages are loaded.
    */
-  private static final String[][] loadOrder = new String[][]{
-      new String[]{
+  private static String[][] loadOrder = new String[][]{
+     new String[]{
           "nvcomp_bitcomp", "nvcomp_gdeflate"
-      },
-      new String[]{
+      }, 
+     new String[]{
           "nvcomp"
-      },
+      }, 
       new String[]{
           "hipdf"
       },
@@ -68,6 +68,16 @@ public class NativeDepsLoader {
           "hipdfjni"
       }
   };
+
+  private static final String[][] noNVRAMLoadOrder = new String[][] {
+    new String[]{
+      "hipdf"
+    },
+    new String[]{
+      "hipdfjni"
+    }
+  };
+
   private static final ClassLoader loader = NativeDepsLoader.class.getClassLoader();
 
   private static boolean loaded = false;
@@ -78,8 +88,10 @@ public class NativeDepsLoader {
   public static synchronized void loadNativeDeps() {
     if (!loaded) {
       try {
-        System.loadLibrary("hipdfjni");
-        //Arrays.asList(loadOrder).stream().forEach(s -> System.out.println(Arrays.toString(s)));   
+        if (System.getProperty("NO_NVRAM") != null) {
+          loadOrder = noNVRAMLoadOrder;
+        }
+
         loadNativeDeps(loadOrder);
         loaded = true;
       } catch (Throwable t) {
