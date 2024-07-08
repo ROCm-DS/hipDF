@@ -463,14 +463,16 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
   // get 1-string index per warp/block
   auto get_next_string = [&]() {
     if constexpr (is_warp) {
-      size_type istring;
+      // FIXME(HIP/AMD): work-around for SWDEV-470886 through explicit initialization
+      size_type istring = 0;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
       return __shfl_sync(LANE_MASK_ALL, istring, 0);
     } else {
       // Ensure lane 0 doesn't update istring before all threads have read the previous iteration's
       // istring value
       __syncthreads();
-      __shared__ size_type istring;
+      // FIXME(HIP/AMD): work-around for SWDEV-470886 through explicit initialization
+      __shared__ size_type istring = 0;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
       __syncthreads();
       return istring;
