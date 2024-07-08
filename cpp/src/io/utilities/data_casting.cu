@@ -471,8 +471,7 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
       // Ensure lane 0 doesn't update istring before all threads have read the previous iteration's
       // istring value
       __syncthreads();
-      // FIXME(HIP/AMD): work-around for SWDEV-470886 through explicit initialization
-      __shared__ size_type istring = 0;
+      __shared__ size_type istring;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
       __syncthreads();
       return istring;
