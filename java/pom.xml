@@ -279,8 +279,9 @@
                                     <goal>test</goal>
                                 </goals>
                             </execution>
-                            <execution>
+                           <execution>
                                 <id>fatal-cuda-test</id>
+                                <phase/>
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
@@ -288,9 +289,10 @@
                                     <reuseForks>false</reuseForks>
                                     <test>*/CudaFatalTest.java</test>
                                 </configuration>
-                            </execution>
+                            </execution> 
                             <execution>
                                 <id>non-empty-null-test</id>
+                                <phase/>
                                 <goals>
                                     <goal>test</goal>
                                 </goals>
