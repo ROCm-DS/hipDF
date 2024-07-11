@@ -95,7 +95,10 @@ public class NativeDepsLoader {
     },
     new String[]{
       "cudfjni"
-    }
+    },
+    new String[]{
+      "hipcomp"
+    } 
   };
 
   private static final ClassLoader loader = NativeDepsLoader.class.getClassLoader();
