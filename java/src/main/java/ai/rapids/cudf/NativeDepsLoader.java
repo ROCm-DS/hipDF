@@ -75,7 +75,10 @@ public class NativeDepsLoader {
     },
     new String[]{
       "hipdfjni"
-    }
+    },
+    new String[]{
+      "hipcomp"
+    } 
   };
 
   private static final ClassLoader loader = NativeDepsLoader.class.getClassLoader();
