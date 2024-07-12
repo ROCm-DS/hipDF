@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/utilities/error.hpp>
 
 #include <rmm/device_buffer.hpp>
@@ -57,7 +79,7 @@ void auto_set_device(JNIEnv* env)
 /** Fills all the bytes in the buffer 'buf' with 'value'. */
 void device_memset_async(JNIEnv* env, rmm::device_buffer& buf, char value)
 {
-  cudaError_t cuda_status = cudaMemsetAsync((void*)buf.data(), value, buf.size());
+  cudaError_t cuda_status = cudaMemsetAsync((void*)buf.data(), value, buf.size(), 0);
   jni_cuda_check(env, cuda_status);
 }
 
@@ -114,7 +136,7 @@ Java_ai_rapids_cudf_Cuda_memset(JNIEnv* env, jclass, jlong dst, jbyte value, jlo
   JNI_NULL_CHECK(env, dst, "dst memory pointer is null", );
   try {
     cudf::jni::auto_set_device(env);
-    CUDF_CUDA_TRY(cudaMemsetAsync((void*)dst, value, count));
+    CUDF_CUDA_TRY(cudaMemsetAsync((void*)dst, value, count, 0));
     CUDF_CUDA_TRY(cudaStreamSynchronize(0));
   }
   CATCH_STD(env, );
@@ -126,7 +148,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_asyncMemset(
   JNI_NULL_CHECK(env, dst, "dst memory pointer is null", );
   try {
     cudf::jni::auto_set_device(env);
-    CUDF_CUDA_TRY(cudaMemsetAsync((void*)dst, value, count));
+    CUDF_CUDA_TRY(cudaMemsetAsync((void*)dst, value, count, 0));
   }
   CATCH_STD(env, );
 }
