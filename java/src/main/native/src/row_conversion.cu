@@ -81,7 +81,7 @@ constexpr auto NUM_WARPS_IN_BLOCK = 32;
 #pragma nv_diag_suppress static_var_with_dynamic_init
 
 using namespace cudf;
-using detail::make_device_uvector_async;
+using cudf::detail::make_device_uvector_async;
 using rmm::device_uvector;
 
 #ifdef ASYNC_MEMCPY_SUPPORTED
