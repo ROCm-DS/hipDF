@@ -318,6 +318,6 @@ if(TARGET hipcomp::hipcomp)
     PRE_LINK
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hipcomp::hipcomp>
             "${PROJECT_BINARY_DIR}/libhipcomp.so"
-    COMMENT "Copying nvcomp libraries to ${PROJECT_BINARY_DIR}"
+    COMMENT "Copying hipcomp libraries to ${PROJECT_BINARY_DIR}"
   )
 endif()
