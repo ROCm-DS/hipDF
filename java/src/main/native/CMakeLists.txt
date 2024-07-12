@@ -129,7 +129,6 @@ if(NOT DEFINED hipcomp_DIR)
   set(hipcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/hipcomp-build")
 endif()
 rapids_find_package(hipcomp REQUIRED)
-rapids_find_package(RMM REQUIRED)
 
 message(STATUS "CUDF CPP BUILD DIR ${CUDF_CPP_BUILD_DIR}")
 # ##################################################################################################
