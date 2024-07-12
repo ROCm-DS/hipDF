@@ -56,7 +56,7 @@ void auto_set_device(JNIEnv *env) {
 
 /** Fills all the bytes in the buffer 'buf' with 'value'. */
 void device_memset_async(JNIEnv *env, rmm::device_buffer &buf, char value) {
-  cudaError_t cuda_status = cudaMemsetAsync((void *)buf.data(), value, buf.size());
+  cudaError_t cuda_status = cudaMemsetAsync((void *)buf.data(), value, buf.size(), 0);
   jni_cuda_check(env, cuda_status);
 }
 
@@ -113,7 +113,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_memset(JNIEnv *env, jclass, jlon
   JNI_NULL_CHECK(env, dst, "dst memory pointer is null", );
   try {
     cudf::jni::auto_set_device(env);
-    CUDF_CUDA_TRY(cudaMemsetAsync((void *)dst, value, count));
+    CUDF_CUDA_TRY(cudaMemsetAsync((void *)dst, value, count, 0));
     CUDF_CUDA_TRY(cudaStreamSynchronize(0));
   }
   CATCH_STD(env, );
@@ -124,7 +124,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_asyncMemset(JNIEnv *env, jclass,
   JNI_NULL_CHECK(env, dst, "dst memory pointer is null", );
   try {
     cudf::jni::auto_set_device(env);
-    CUDF_CUDA_TRY(cudaMemsetAsync((void *)dst, value, count));
+    CUDF_CUDA_TRY(cudaMemsetAsync((void *)dst, value, count, 0));
   }
   CATCH_STD(env, );
 }
