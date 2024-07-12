@@ -308,6 +308,6 @@ if(TARGET hipcomp::hipcomp)
       ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hipcomp::hipcomp> #$<TARGET_FILE:hipcomp::hipcomp_gdeflate>
       #$<TARGET_FILE:hipcomp::hipcomp_bitcomp> 
       "${PROJECT_BINARY_DIR}"
-    COMMENT "Copying nvcomp libraries to ${PROJECT_BINARY_DIR}"
+    COMMENT "Copying hipcomp libraries to ${PROJECT_BINARY_DIR}"
   )
 endif()
