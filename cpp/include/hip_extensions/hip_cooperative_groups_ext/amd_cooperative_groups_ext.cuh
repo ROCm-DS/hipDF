@@ -296,6 +296,11 @@ __device__ thread_block_tile<1> this_thread() {
   return tiled_partition<1>(this_thread_block());
 }
 
+inline __device__  cooperative_groups::coalesced_group coalesced_threads() {
+  return cooperative_groups::coalesced_threads();
+}
+
+
 }  // namespace hip_cooperative_groups_ext
 
 }  // namespace hip_extensions
