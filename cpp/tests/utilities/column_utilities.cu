@@ -78,6 +78,7 @@
 
 #include <numeric>
 #include <sstream>
+#include <iomanip>
 
 namespace cudf {
 
