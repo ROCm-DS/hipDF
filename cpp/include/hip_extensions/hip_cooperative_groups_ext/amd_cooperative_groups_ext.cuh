@@ -133,24 +133,26 @@ class cooperative_group_base {
   }
 
   /**
-   * @brief Returns the group id of the calling work item in [0,size()-1]
-   * @return The group rank of the calling work item in [0,size()-1]
+   * @brief Returns the linear rank of the group within the set of tiles partitioned from a parent group (bounded by meta_group_size)
+   * @return Returns the linear rank of the group within the set of tiles partitioned from a parent group (bounded by meta_group_size)
    */
   __device__ inline int meta_group_rank() const
   {
-    auto const block = cooperative_groups::this_thread_block();
-    return (int)block.size()/size();
+    // TODO(HIP/AMD): this won't work for recursive partitions
+    auto const parent_block = cooperative_groups::this_thread_block();
+    return parent_block.thread_rank()/size();
   }
 
     /**
-   * @brief Returns the size of the calling work item
-   * @return The size of the calling work item 
+   * @brief Returns the number of groups created when the parent group was partitioned.
+   * @return The number of groups crated when the parent group was partitioned 
    */
   __device__ inline int meta_group_size() const
   {
-    auto const block = cooperative_groups::this_thread_block();
-    auto const id    = block.size();
-    return (int)id/size();
+    // TODO(HIP/AMD): this won't work for recursive partitions
+    auto const parent_block = cooperative_groups::this_thread_block();
+    auto const parent_size  = parent_block.size();
+    return (int)parent_size/size();
   }
 
   /**
