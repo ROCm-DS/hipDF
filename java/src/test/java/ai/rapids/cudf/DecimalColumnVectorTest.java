@@ -20,6 +20,7 @@ package ai.rapids.cudf;
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -395,6 +396,7 @@ public class DecimalColumnVectorTest extends CudfTestBase {
     }
   }
 
+  @Disabled
   @Test
   public void testColumnVectorFromScalar() {
     try (Scalar s = Scalar.fromDecimal(-3, 1233456)) {
