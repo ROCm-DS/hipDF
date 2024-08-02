@@ -37,7 +37,7 @@ else()
   )
   include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
   rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
-  add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.hip)
+  add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
 endif()
 
 target_include_directories(
@@ -150,7 +150,7 @@ else()
   list(REMOVE_DUPLICATES CMAKE_HIP_ARCHITECTURES) # TODO(HIP/AMD): User might specify 'gfx90a:xnack-:sramecc+'.
 
   set(tgt "shim_") # NOTE: we keep the suffix "_" because of code in python/cudf/cudf/core/udf/utils.py
-  add_library(${tgt} OBJECT shim.hip)
+  add_library(${tgt} OBJECT shim.cu)
   set_target_properties(${tgt} PROPERTIES HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES}")
   target_include_directories(
     ${tgt} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/strings/include>")

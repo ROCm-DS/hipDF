@@ -100,24 +100,24 @@ endfunction()
 ConfigureTest(
   COLUMN_TEST
   column/bit_cast_test.cpp
-  column/column_device_view_test.hip
+  column/column_device_view_test.cu
   column/column_test.cpp
   column/column_view_device_span_test.cpp
   column/column_view_shallow_test.cpp
-  column/compound_test.hip
+  column/compound_test.cu
 )
 
 # ##################################################################################################
 # * scalar tests ----------------------------------------------------------------------------------
-ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.hip)
+ConfigureTest(SCALAR_TEST scalar/scalar_test.cpp scalar/scalar_device_view_test.cu)
 
 # ##################################################################################################
 # * timestamps tests ------------------------------------------------------------------------------
-ConfigureTest(TIMESTAMPS_TEST wrappers/timestamps_test.hip)
+ConfigureTest(TIMESTAMPS_TEST wrappers/timestamps_test.cu)
 
 # ##################################################################################################
 # * cudf tests ------------------------------------------------------------------------------------
-ConfigureTest(ERROR_TEST error/error_handling_test.hip) # TODO(HIP/AMD): PTX asm("trap;");
+ConfigureTest(ERROR_TEST error/error_handling_test.cu) # TODO(HIP/AMD): PTX asm("trap;");
 
 # ##################################################################################################
 # * groupby tests ---------------------------------------------------------------------------------
@@ -158,7 +158,7 @@ ConfigureTest(
   groupby/sum_of_squares_tests.cpp
   groupby/sum_scan_tests.cpp
   groupby/sum_tests.cpp
-  groupby/tdigest_tests.hip
+  groupby/tdigest_tests.cu
   groupby/var_tests.cpp
   GPUS 1
   PERCENT 100
@@ -167,8 +167,8 @@ ConfigureTest(
 # ##################################################################################################
 # * join tests ------------------------------------------------------------------------------------
 ConfigureTest(
-  JOIN_TEST join/join_tests.cpp join/conditional_join_tests.hip join/cross_join_tests.cpp
-  join/semi_anti_join_tests.cpp join/mixed_join_tests.hip
+  JOIN_TEST join/join_tests.cpp join/conditional_join_tests.cu join/cross_join_tests.cpp
+  join/semi_anti_join_tests.cpp join/mixed_join_tests.cu
 )
 
 # ##################################################################################################
@@ -201,7 +201,7 @@ ConfigureTest(
 
 # ##################################################################################################
 # * hash_map tests --------------------------------------------------------------------------------
-ConfigureTest(HASH_MAP_TEST hash_map/map_test.hip)
+ConfigureTest(HASH_MAP_TEST hash_map/map_test.cu)
 
 # ##################################################################################################
 # * quantiles tests -------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ ConfigureTest(
   reductions/scan_tests.cpp
   reductions/segmented_reduction_tests.cpp
   reductions/list_rank_test.cpp
-  reductions/tdigest_tests.hip
+  reductions/tdigest_tests.cu
   GPUS 1
   PERCENT 70
 )
@@ -241,7 +241,7 @@ ConfigureTest(CLAMP_TEST replace/clamp_test.cpp)
 
 # ##################################################################################################
 # * fixed_point tests -----------------------------------------------------------------------------
-ConfigureTest(FIXED_POINT_TEST fixed_point/fixed_point_tests.cpp fixed_point/fixed_point_tests.hip)
+ConfigureTest(FIXED_POINT_TEST fixed_point/fixed_point_tests.cpp fixed_point/fixed_point_tests.cu)
 
 # ##################################################################################################
 # * unary tests -----------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ ConfigureTest(
   transform/nans_to_null_test.cpp
   transform/mask_to_bools_test.cpp
   transform/bools_to_mask_test.cpp
-  transform/row_bit_count_test.hip
+  transform/row_bit_count_test.cu
   transform/one_hot_encode_tests.cpp
 )
 
@@ -311,7 +311,7 @@ ConfigureTest(
   PERCENT 30
 )
 ConfigureTest(JSON_WRITER_TEST io/json_writer.cpp)
-ConfigureTest(JSON_TYPE_CAST_TEST io/json_type_cast_test.hip)
+ConfigureTest(JSON_TYPE_CAST_TEST io/json_type_cast_test.cu)
 ConfigureTest(NESTED_JSON_TEST io/nested_json_test.cpp io/json_tree.cpp)
 ConfigureTest(ARROW_IO_SOURCE_TEST io/arrow_io_source_test.cpp)
 ConfigureTest(MULTIBYTE_SPLIT_TEST io/text/multibyte_split_test.cpp)
@@ -321,9 +321,9 @@ ConfigureTest(
   PERCENT 30
 )
 target_link_libraries(DATA_CHUNK_SOURCE_TEST PRIVATE ZLIB::ZLIB)
-ConfigureTest(LOGICAL_STACK_TEST io/fst/logical_stack_test.hip)
-ConfigureTest(FST_TEST io/fst/fst_test.hip)
-ConfigureTest(TYPE_INFERENCE_TEST io/type_inference_test.hip)
+ConfigureTest(LOGICAL_STACK_TEST io/fst/logical_stack_test.cu)
+ConfigureTest(FST_TEST io/fst/fst_test.cu)
+ConfigureTest(TYPE_INFERENCE_TEST io/type_inference_test.cu)
 if(HIPDF_ENABLE_ARROW_S3)
   target_compile_definitions(ARROW_IO_SOURCE_TEST PRIVATE "S3_ENABLED")
 endif()
@@ -345,7 +345,7 @@ ConfigureTest(
   copying/copy_if_else_nested_tests.cpp
   copying/copy_range_tests.cpp
   copying/copy_tests.cpp
-  copying/detail_gather_tests.hip
+  copying/detail_gather_tests.cu
   copying/gather_list_tests.cpp
   copying/gather_str_tests.cpp
   copying/gather_struct_tests.cpp
@@ -390,8 +390,8 @@ ConfigureTest(
 # the default stream and is out of libcudf's control (but must be tested).
 set(_allowlist_filter SpanTest.CanConstructFromDeviceContainers)
 
-ConfigureTest(SPAN_TEST utilities_tests/span_tests.hip)
-ConfigureTest(SPAN_TEST_DEVICE_VECTOR utilities_tests/span_tests.hip)
+ConfigureTest(SPAN_TEST utilities_tests/span_tests.cu)
+ConfigureTest(SPAN_TEST_DEVICE_VECTOR utilities_tests/span_tests.cu)
 
 # Overwrite the environments set by ConfigureTest
 set_tests_properties(
@@ -408,23 +408,23 @@ set_tests_properties(
 # * iterator tests --------------------------------------------------------------------------------
 ConfigureTest(
   ITERATOR_TEST
-  iterator/indexalator_test.hip
-  iterator/optional_iterator_test_chrono.hip
-  iterator/optional_iterator_test_numeric.hip
-  iterator/pair_iterator_test_chrono.hip
-  iterator/pair_iterator_test_numeric.hip
-  iterator/scalar_iterator_test.hip
-  iterator/sizes_to_offsets_iterator_test.hip
+  iterator/indexalator_test.cu
+  iterator/optional_iterator_test_chrono.cu
+  iterator/optional_iterator_test_numeric.cu
+  iterator/pair_iterator_test_chrono.cu
+  iterator/pair_iterator_test_numeric.cu
+  iterator/scalar_iterator_test.cu
+  iterator/sizes_to_offsets_iterator_test.cu
   iterator/value_iterator.cpp
-  iterator/value_iterator_test_chrono.hip
-  iterator/value_iterator_test_numeric.hip
-  iterator/value_iterator_test_strings.hip
-  iterator/value_iterator_test_transform.hip
+  iterator/value_iterator_test_chrono.cu
+  iterator/value_iterator_test_numeric.cu
+  iterator/value_iterator_test_strings.cu
+  iterator/value_iterator_test_transform.cu
 )
 
 # ##################################################################################################
 # * device atomics tests --------------------------------------------------------------------------
-ConfigureTest(DEVICE_ATOMICS_TEST device_atomics/device_atomics_test.hip)
+ConfigureTest(DEVICE_ATOMICS_TEST device_atomics/device_atomics_test.cu)
 
 # ##################################################################################################
 # * transpose tests -------------------------------------------------------------------------------
@@ -437,8 +437,8 @@ ConfigureTest(
 # ##################################################################################################
 # * table tests -----------------------------------------------------------------------------------
 ConfigureTest(
-  TABLE_TEST table/table_tests.cpp table/table_view_tests.hip table/row_operators_tests.cpp
-  table/experimental_row_operator_tests.hip table/row_operator_tests_utilities.hip
+  TABLE_TEST table/table_tests.cpp table/table_view_tests.cu table/row_operators_tests.cpp
+  table/experimental_row_operator_tests.cu table/row_operator_tests_utilities.cu
 )
 
 # ##################################################################################################
@@ -471,7 +471,7 @@ ConfigureTest(
    rolling/grouped_rolling_test.cpp
    rolling/lead_lag_test.cpp
    rolling/nth_element_test.cpp
-   rolling/range_comparator_test.hip
+   rolling/range_comparator_test.cu
    rolling/range_rolling_window_test.cpp
    rolling/range_window_bounds_test.cpp
    rolling/rolling_test.cpp
@@ -509,7 +509,7 @@ ConfigureTest(FACTORIES_TEST scalar/factories_test.cpp column/factories_test.cpp
 
 # ##################################################################################################
 # * dispatcher test -------------------------------------------------------------------------------
-ConfigureTest(DISPATCHER_TEST types/type_dispatcher_test.hip)
+ConfigureTest(DISPATCHER_TEST types/type_dispatcher_test.cu)
 
 # ##################################################################################################
 # * strings test ----------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ ConfigureTest(
   strings/datetime_tests.cpp
   strings/durations_tests.cpp
   strings/extract_tests.cpp
-  strings/factories_test.hip
+  strings/factories_test.cu
   strings/fill_tests.cpp
   strings/findall_tests.cpp
   strings/find_tests.cpp
@@ -576,7 +576,7 @@ ConfigureTest(
 # ##################################################################################################
 # * bitmask tests ---------------------------------------------------------------------------------
 ConfigureTest(
-  BITMASK_TEST bitmask/valid_if_tests.hip bitmask/set_nullmask_tests.hip bitmask/bitmask_tests.cpp
+  BITMASK_TEST bitmask/valid_if_tests.cu bitmask/set_nullmask_tests.cu bitmask/bitmask_tests.cpp
   bitmask/is_element_valid_tests.cpp
 )
 
@@ -635,7 +635,7 @@ ConfigureTest(LABEL_BINS_TEST labeling/label_bins_tests.cpp)
 # ##################################################################################################
 # * stream testing ---------------------------------------------------------------------------------
 ConfigureTest(
-  STREAM_IDENTIFICATION_TEST identify_stream_usage/test_default_stream_identification.hip
+  STREAM_IDENTIFICATION_TEST identify_stream_usage/test_default_stream_identification.cu
 )
 
 ConfigureTest(STREAM_CONCATENATE_TEST streams/concatenate_test.cpp STREAM_MODE testing)
