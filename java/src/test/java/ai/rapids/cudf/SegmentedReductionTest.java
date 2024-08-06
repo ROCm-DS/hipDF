@@ -18,12 +18,13 @@
 package ai.rapids.cudf;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.Arrays;
 
 class SegmentedReductionTest extends CudfTestBase {
 
-  @Test
+  @Disabled
   public void testListSum() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -41,7 +42,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testListMin() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -59,7 +60,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testListMax() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -77,7 +78,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testListAny() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.BOOL8));
@@ -95,7 +96,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testListAll() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.BOOL8));

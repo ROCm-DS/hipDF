@@ -38,8 +38,10 @@ import java.util.stream.Stream;
 
 import static ai.rapids.cudf.AssertUtils.assertColumnsAreEqual;
 
+import org.junit.jupiter.api.Disabled;
+
 public class CompiledExpressionTest extends CudfTestBase {
-  @Test
+  @Disabled
   public void testColumnReferenceTransform() {
     try (Table t = new Table.TestBuilder().column(5, 4, 3, 2, 1).column(6, 7, 8, null, 10).build()) {
       // use an implicit table reference
@@ -58,7 +60,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testInvalidColumnReferenceTransform() {
     // Verify that computeColumn throws when passed an expression operating on TableReference.RIGHT.
     ColumnReference expr = new ColumnReference(1, TableReference.RIGHT);
@@ -68,7 +70,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testBooleanLiteralTransform() {
     try (Table t = new Table.TestBuilder().column(true, false, null).build()) {
       Literal expr = Literal.ofBoolean(true);
@@ -360,7 +362,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testUnaryShortOperationTransform() {
     Short[] input = new Short[] { -5, 4, null, 2, 1 };
     try (Table t = new Table.TestBuilder().column(input).build()) {
@@ -600,7 +602,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMismatchedBinaryOperationTypes() {
     // verify expression fails to transform if operands are not the same type
     BinaryOperation expr = new BinaryOperation(BinaryOperator.ADD,

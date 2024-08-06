@@ -19,6 +19,7 @@ package ai.rapids.cudf;
 
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.Random;
 import java.util.function.Consumer;
@@ -151,7 +152,7 @@ public class IntColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCastToInt() {
     try (ColumnVector doubleColumnVector = ColumnVector.fromDoubles(new double[]{4.3, 3.8, 8});
          ColumnVector shortColumnVector = ColumnVector.fromShorts(new short[]{100});

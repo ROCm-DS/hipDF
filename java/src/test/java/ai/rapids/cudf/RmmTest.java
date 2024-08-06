@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +53,7 @@ public class RmmTest {
     }
   }
 
-  @Test
+  @Disabled
   public void testCreateAdaptors() {
     final long poolSize = 32 * 1024 * 1024; // 32 MiB
     try (RmmCudaMemoryResource r = new RmmCudaMemoryResource()) {

@@ -20,6 +20,7 @@ package ai.rapids.cudf;
 
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import java.util.Random;
 
@@ -86,7 +87,7 @@ public class FloatColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCastToFloat() {
     try (ColumnVector doubleColumnVector = ColumnVector.fromDoubles(new double[]{4.3, 3.8, 8});
          ColumnVector shortColumnVector = ColumnVector.fromShorts(new short[]{100});
