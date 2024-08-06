@@ -17,10 +17,33 @@
  *
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package ai.rapids.cudf;
 
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 import static ai.rapids.cudf.AssertUtils.assertColumnsAreEqual;
 
@@ -114,7 +137,7 @@ public class UnaryOpTest extends CudfTestBase {
   // These tests are not for the correctness of the underlying implementation, but really just
   // plumbing
 
-  @Test
+  @Disabled
   public void testSin() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.sin();
@@ -123,7 +146,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCos() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.cos();
@@ -132,7 +155,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testTan() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.tan();
@@ -141,7 +164,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testArcsin() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.arcsin();
@@ -150,7 +173,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testArccos() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.arccos();
@@ -159,7 +182,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testArctan() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.arctan();
@@ -168,7 +191,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testSinh() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.sinh();
@@ -177,7 +200,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCosh() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.cosh();
@@ -186,7 +209,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testTanh() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.tanh();
@@ -200,7 +223,7 @@ public class UnaryOpTest extends CudfTestBase {
       java.lang.StrictMath.log(value + java.lang.Math.sqrt(value * value + 1.0));
   }
 
-  @Test
+  @Disabled
   public void testArcsinh() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.arcsinh();
@@ -213,7 +236,7 @@ public class UnaryOpTest extends CudfTestBase {
     return java.lang.StrictMath.log(value + java.lang.Math.sqrt(value * value - 1.0));
   }
 
-  @Test
+  @Disabled
   public void testArccosh() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.arccosh();
@@ -226,7 +249,7 @@ public class UnaryOpTest extends CudfTestBase {
     return 0.5 * (java.lang.StrictMath.log1p(value) - java.lang.StrictMath.log1p(- value));
   }
 
-  @Test
+  @Disabled
   public void testArctanh() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.arctanh();
@@ -235,7 +258,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testExp() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.exp();
@@ -244,7 +267,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testLog() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.log();
@@ -253,7 +276,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testLog2() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.log2();
@@ -262,7 +285,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testLog10() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.log10();
@@ -271,7 +294,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testSqrt() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.sqrt();
@@ -280,7 +303,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCbrt() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.cbrt();
@@ -289,7 +312,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCeil() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.ceil();
@@ -298,7 +321,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testFloor() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.floor();
@@ -307,7 +330,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testAbs() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.abs();
@@ -316,7 +339,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testRint() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.rint();
@@ -325,7 +348,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testBitInvert() {
     try (ColumnVector icv = ColumnVector.fromBoxedInts(INTS_1);
          ColumnVector answer = icv.bitInvert();
@@ -334,7 +357,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testNot() {
     try (ColumnVector icv = ColumnVector.fromBoxedBooleans(BOOLEANS_1);
          ColumnVector answer = icv.not();

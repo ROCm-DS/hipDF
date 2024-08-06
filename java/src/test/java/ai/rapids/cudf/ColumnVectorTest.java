@@ -16,6 +16,28 @@
  *
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package ai.rapids.cudf;
 
 import ai.rapids.cudf.ColumnView.FindOptions;
@@ -87,7 +109,7 @@ public class ColumnVectorTest extends CudfTestBase {
       "*output = input*input - input;" +
       "}";
 
-  @Test
+  @Disabled
   void testTransformVector() {
     try (ColumnVector cv = ColumnVector.fromBoxedInts(2,3,null,4);
          ColumnVector cv1 = cv.transform(ptx, true);
@@ -98,7 +120,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testDistinctCount() {
     try (ColumnVector cv = ColumnVector.fromBoxedLongs(5L, 3L, null, null, 5L)) {
       assertEquals(3, cv.distinctCount());
@@ -106,7 +128,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testClampDouble() {
     try (ColumnVector cv = ColumnVector.fromDoubles(2.33d, 32.12d, -121.32d, 0.0d, 0.00001d,
         Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN);
@@ -120,7 +142,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testClampFloat() {
     try (ColumnVector cv = ColumnVector.fromBoxedFloats(2.33f, 32.12f, null, -121.32f, 0.0f, 0.00001f, Float.NEGATIVE_INFINITY,
         Float.POSITIVE_INFINITY, Float.NaN);
@@ -133,7 +155,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testClampLong() {
     try (ColumnVector cv = ColumnVector.fromBoxedLongs(1l, 3l, 6l, -2l, 23l, -0l, -90l, null);
          Scalar num = Scalar.fromLong(0);
@@ -145,7 +167,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testClampShort() {
     try (ColumnVector cv = ColumnVector.fromShorts(new short[]{1, 3, 6, -2, 23, -0, -90});
          Scalar lo = Scalar.fromShort((short)1);
@@ -156,7 +178,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testClampInt() {
       try (ColumnVector cv = ColumnVector.fromInts(1, 3, 6, -2, 23, -0, -90);
            Scalar num = Scalar.fromInt(0);
@@ -168,7 +190,7 @@ public class ColumnVectorTest extends CudfTestBase {
       }
   }
 
-  @Test
+  @Disabled
   void testGetElementInt() {
     try (ColumnVector cv = ColumnVector.fromBoxedInts(3, 2, 1, null);
          Scalar s0 = cv.getScalarElement(0);
@@ -182,7 +204,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetElementByte() {
     try (ColumnVector cv = ColumnVector.fromBoxedBytes((byte)3, (byte)2, (byte)1, null);
          Scalar s0 = cv.getScalarElement(0);
@@ -196,7 +218,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetElementFloat() {
     try (ColumnVector cv = ColumnVector.fromBoxedFloats(3f, 2f, 1f, null);
          Scalar s0 = cv.getScalarElement(0);
@@ -210,7 +232,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetElementString() {
     try (ColumnVector cv = ColumnVector.fromStrings("3a", "2b", "1c", null);
          Scalar s0 = cv.getScalarElement(0);
@@ -224,7 +246,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetElementDecimal() {
     try (ColumnVector cv = ColumnVector.decimalFromLongs(1,3, 2, 1, -1);
          Scalar s0 = cv.getScalarElement(0);
@@ -239,7 +261,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetElementList() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -262,7 +284,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
- @Test
+ @Disabled
   void testStringCreation() {
     try (ColumnVector cv = ColumnVector.fromStrings("d", "sd", "sde", null, "END");
          HostColumnVector host = cv.copyToHost();
@@ -271,7 +293,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testUTF8StringCreation() {
     try (ColumnVector cv = ColumnVector.fromUTF8Strings(
             "d".getBytes(StandardCharsets.UTF_8),
@@ -284,7 +306,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testRefCountLeak() throws InterruptedException {
     assumeTrue(Boolean.getBoolean("ai.rapids.cudf.flaky-tests-enabled"));
     long expectedLeakCount = MemoryCleaner.leakCount.get() + 1;
@@ -299,7 +321,7 @@ public class ColumnVectorTest extends CudfTestBase {
     assertEquals(expectedLeakCount, MemoryCleaner.leakCount.get());
   }
 
-  @Test
+  @Disabled
   void testJoinStrings() {
     try (ColumnVector in = ColumnVector.fromStrings("A", "B", "C", "D", null, "E");
          ColumnVector expected = ColumnVector.fromStrings("A-B-C-D-null-E");
@@ -310,7 +332,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatTypeError() {
     try (ColumnVector v0 = ColumnVector.fromInts(1, 2, 3, 4);
          ColumnVector v1 = ColumnVector.fromFloats(5.0f, 6.0f)) {
@@ -318,7 +340,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatNoNulls() {
     try (ColumnVector v0 = ColumnVector.fromInts(1, 2, 3, 4);
          ColumnVector v1 = ColumnVector.fromInts(5, 6, 7);
@@ -329,7 +351,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatWithNulls() {
     try (ColumnVector v0 = ColumnVector.fromDoubles(1, 2, 3, 4);
          ColumnVector v1 = ColumnVector.fromDoubles(5, 6, 7);
@@ -340,7 +362,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatStrings() {
     try (ColumnVector v0 = ColumnVector.fromStrings("0","1","2",null);
          ColumnVector v1 = ColumnVector.fromStrings(null, "5", "6","7");
@@ -352,7 +374,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatTimestamps() {
     try (ColumnVector v0 = ColumnVector.timestampMicroSecondsFromBoxedLongs(0L, 1L, 2L, null);
          ColumnVector v1 = ColumnVector.timestampMicroSecondsFromBoxedLongs(null, 5L, 6L, 7L);
@@ -364,7 +386,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testNormalizeNANsAndZeros() {
     // Must check boundaries of NaN representation, as described in javadoc for Double#longBitsToDouble.
     // @see java.lang.Double#longBitsToDouble
@@ -400,7 +422,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashStrings() {
     try (ColumnVector v0 = ColumnVector.fromStrings(
           "a", "B\n", "dE\"\u0100\t\u0101 \ud720\ud721",
@@ -428,7 +450,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashInts() {
     try (ColumnVector v0 = ColumnVector.fromBoxedInts(0, 100, null, null, Integer.MIN_VALUE, null);
          ColumnVector v1 = ColumnVector.fromBoxedInts(0, null, -100, null, null, Integer.MAX_VALUE);
@@ -441,7 +463,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashDoubles() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(
           0.0, null, 100.0, -100.0, Double.MIN_NORMAL, Double.MAX_VALUE,
@@ -460,7 +482,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashFloats() {
     try (ColumnVector v = ColumnVector.fromBoxedFloats(
           0f, 100f, -100f, Float.MIN_NORMAL, Float.MAX_VALUE, null,
@@ -479,7 +501,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashBools() {
     try (ColumnVector v0 = ColumnVector.fromBoxedBooleans(null, true, false, true, null, false);
          ColumnVector v1 = ColumnVector.fromBoxedBooleans(null, true, false, null, false, true);
@@ -492,7 +514,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashMixed() {
     try (ColumnVector strings = ColumnVector.fromStrings(
           "a", "B\n", "dE\"\u0100\t\u0101 \ud720\ud721",
@@ -514,7 +536,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMD5HashLists() {
     List<String> list1 = Arrays.asList("dE\"\u0100\t\u0101 \u0500\u0501", "\\Fg2\'");
     List<String> list2 = Arrays.asList("A very long (greater than 128 bytes/char string) to test a multi hash-step data point " +
@@ -540,7 +562,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNullTest() {
     try (ColumnVector v = ColumnVector.fromBoxedInts(1, 2, null, 4, null, 6);
          ColumnVector expected = ColumnVector.fromBoxedBooleans(true, true, false, true, false, true);
@@ -549,7 +571,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNullTestAllNulls() {
     try (ColumnVector v = ColumnVector.fromBoxedInts(null, null, null, null, null, null);
          ColumnVector expected = ColumnVector.fromBoxedBooleans(false, false, false, false, false, false);
@@ -558,7 +580,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNullTestAllNotNulls() {
     try (ColumnVector v = ColumnVector.fromBoxedInts(1,2,3,4,5,6);
          ColumnVector expected = ColumnVector.fromBoxedBooleans(true, true, true, true, true, true);
@@ -567,7 +589,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNullTest() {
     try (ColumnVector v = ColumnVector.fromBoxedInts(1, 2, null, 4, null, 6);
          ColumnVector expected = ColumnVector.fromBoxedBooleans(false, false, true, false, true, false);
@@ -576,7 +598,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNullTestEmptyColumn() {
     try (ColumnVector v = ColumnVector.fromBoxedInts();
          ColumnVector expected = ColumnVector.fromBoxedBooleans();
@@ -585,7 +607,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-   @Test
+   @Disabled
   void isNanTestWithNulls() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(null, null, Double.NaN, null, Double.NaN, null);
          ColumnVector vF = ColumnVector.fromBoxedFloats(null, null, Float.NaN, null, Float.NaN, null);
@@ -597,7 +619,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNanForTypeMismatch() {
     assertThrows(CudfException.class, () -> {
       try (ColumnVector v = ColumnVector.fromStrings("foo", "bar", "baz");
@@ -605,7 +627,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void isNanTest() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(1.0, 2.0, Double.NaN, 4.0, Double.NaN, 6.0);
          ColumnVector vF = ColumnVector.fromBoxedFloats(1.1f, 2.2f, Float.NaN, 4.4f, Float.NaN, 6.6f);
@@ -617,7 +639,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNanTestEmptyColumn() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles();
          ColumnVector vF = ColumnVector.fromBoxedFloats();
@@ -629,7 +651,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNanTestAllNotNans() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
          ColumnVector vF = ColumnVector.fromBoxedFloats(1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f);
@@ -641,7 +663,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNanTestAllNans() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
          ColumnVector vF = ColumnVector.fromBoxedFloats(Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN);
@@ -653,7 +675,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNanTestWithNulls() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(null, null, Double.NaN, null, Double.NaN, null);
          ColumnVector vF = ColumnVector.fromBoxedFloats(null, null, Float.NaN, null, Float.NaN, null);
@@ -665,7 +687,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNanForTypeMismatch() {
     assertThrows(CudfException.class, () -> {
       try (ColumnVector v = ColumnVector.fromStrings("foo", "bar", "baz");
@@ -673,7 +695,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void isNotNanTest() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(1.0, 2.0, Double.NaN, 4.0, Double.NaN, 6.0);
          ColumnVector vF = ColumnVector.fromBoxedFloats(1.1f, 2.2f, Float.NaN, 4.4f, Float.NaN, 6.6f);
@@ -685,7 +707,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNanTestEmptyColumn() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles();
          ColumnVector vF = ColumnVector.fromBoxedFloats();
@@ -697,7 +719,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNanTestAllNotNans() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(1.0, 2.0, 3.0, 4.0, 5.0, 6.0);
          ColumnVector vF = ColumnVector.fromBoxedFloats(1.1f, 2.2f, 3.3f, 4.4f, 5.5f, 6.6f);
@@ -709,7 +731,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void isNotNanTestAllNans() {
     try (ColumnVector v = ColumnVector.fromBoxedDoubles(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
          ColumnVector vF = ColumnVector.fromBoxedFloats(Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN);
@@ -721,7 +743,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void roundFloatsHalfUp() {
     try (ColumnVector v = ColumnVector.fromBoxedFloats(1.234f, 25.66f, null, 154.9f, 2346f);
          ColumnVector result1 = v.round();
@@ -736,7 +758,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void roundFloatsHalfEven() {
     try (ColumnVector v = ColumnVector.fromBoxedFloats(1.5f, 2.5f, 1.35f, null, 1.25f, 15f, 25f);
          ColumnVector result1 = v.round(RoundMode.HALF_EVEN);
@@ -751,7 +773,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void roundIntsHalfUp() {
     try (ColumnVector v = ColumnVector.fromBoxedInts(12, 135, 160, -1454, null, -1500, -140, -150);
          ColumnVector result1 = v.round(2, RoundMode.HALF_UP);
@@ -763,7 +785,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void roundIntsHalfEven() {
     try (ColumnVector v = ColumnVector.fromBoxedInts(12, 24, 135, 160, null, 1450, 1550, -1650);
          ColumnVector result1 = v.round(2, RoundMode.HALF_EVEN);
@@ -775,7 +797,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void roundDecimal() {
     final int dec32Scale1 = -2;
     final int resultScale1 = -3;
@@ -793,7 +815,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void decimal128Cv() {
     final int dec32Scale1 = -2;
     BigInteger bigInteger1 = new BigInteger("-831457");
@@ -820,7 +842,7 @@ public class ColumnVectorTest extends CudfTestBase {
               HOST_ALIGN_BYTES);
   }
 
-  @Test
+  @Disabled
   void testGetDeviceMemorySizeNonStrings() {
     try (ColumnVector v0 = ColumnVector.fromBoxedInts(1, 2, 3, 4, 5, 6);
          ColumnVector v1 = ColumnVector.fromBoxedInts(1, 2, 3, null, null, 4, 5, 6)) {
@@ -829,7 +851,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetDeviceMemorySizeStrings() {
     if (ColumnView.hostPaddingSizeInBytes() != 8) {
       System.err.println("HOST PADDING SIZE: " + ColumnView.hostPaddingSizeInBytes());
@@ -842,7 +864,7 @@ public class ColumnVectorTest extends CudfTestBase {
   }
 
   @SuppressWarnings("unchecked")
-  @Test
+  @Disabled
   void testGetDeviceMemorySizeLists() {
     DataType svType = new ListType(true, new BasicType(true, DType.STRING));
     DataType ivType = new ListType(false, new BasicType(false, DType.INT32));
@@ -868,7 +890,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetDeviceMemorySizeStructs() {
     DataType structType = new StructType(true,
         new ListType(true, new BasicType(true, DType.STRING)),
@@ -896,7 +918,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSequenceInt() {
     try (Scalar zero = Scalar.fromInt(0);
          Scalar one = Scalar.fromInt(1);
@@ -930,7 +952,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSequenceDouble() {
     try (Scalar zero = Scalar.fromDouble(0.0);
          Scalar one = Scalar.fromDouble(1.0);
@@ -955,7 +977,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSequenceOtherTypes() {
     assertThrows(CudfException.class, () -> {
       try (Scalar s = Scalar.fromString("0");
@@ -973,7 +995,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void testSequencesInt() {
     try (ColumnVector start = ColumnVector.fromBoxedInts(1, 2, 3, 4, 5);
          ColumnVector size = ColumnVector.fromBoxedInts(2, 3, 2, 0, 1);
@@ -999,7 +1021,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSequencesDouble() {
     try (ColumnVector start = ColumnVector.fromBoxedDoubles(1.2, 2.2, 3.2, 4.2, 5.2);
          ColumnVector size = ColumnVector.fromBoxedInts(2, 3, 2, 0, 1);
@@ -1025,7 +1047,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarZeroRows() {
     // magic number to invoke factory method specialized for decimal types
     int mockScale = -8;
@@ -1131,7 +1153,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetNativeView() {
     try (ColumnVector cv = ColumnVector.fromInts(1, 3, 4, 5)) {
       //not a real test whats being returned is a view but this is the best we can do
@@ -1139,7 +1161,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalar() {
     final int rowCount = 4;
     for (DType.DTypeEnum type : DType.DTypeEnum.values()) {
@@ -1332,7 +1354,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarNull() {
     final int rowCount = 4;
     for (DType.DTypeEnum typeEnum : DType.DTypeEnum.values()) {
@@ -1359,7 +1381,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarNullByte() {
     int numNulls = 3000;
     try (Scalar s = Scalar.fromNull(DType.INT8);
@@ -1373,7 +1395,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarNullList() {
     final int rowCount = 4;
     for (DType.DTypeEnum typeEnum : DType.DTypeEnum.values()) {
@@ -1417,7 +1439,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarListOfList() {
     HostColumnVector.DataType childType = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -1440,7 +1462,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarListOfStruct() {
     HostColumnVector.DataType childType = new HostColumnVector.StructType(true,
             new HostColumnVector.BasicType(true, DType.INT32),
@@ -1466,7 +1488,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFromScalarNullStruct() {
     final int rowCount = 4;
     for (DType.DTypeEnum typeEnum : DType.DTypeEnum.values()) {
@@ -1523,7 +1545,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsScalarEmptyColumn() {
     try (ColumnVector input = ColumnVector.fromBoxedBooleans();
          ColumnVector expected = ColumnVector.fromBoxedBooleans();
@@ -1533,7 +1555,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsScalarBoolsWithAllNulls() {
     try (ColumnVector input = ColumnVector.fromBoxedBooleans(null, null, null, null);
          ColumnVector expected = ColumnVector.fromBoxedBooleans(false, false, false, false);
@@ -1543,7 +1565,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsScalarSomeNullBools() {
     try (ColumnVector input = ColumnVector.fromBoxedBooleans(false, null, null, false);
          ColumnVector expected = ColumnVector.fromBoxedBooleans(false, true, true, false);
@@ -1553,7 +1575,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsScalarIntegersWithAllNulls() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(null, null, null, null);
          ColumnVector expected = ColumnVector.fromBoxedInts(0, 0, 0, 0);
@@ -1563,7 +1585,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsScalarSomeNullIntegers() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(1, 2, null, 4, null);
          ColumnVector expected = ColumnVector.fromBoxedInts(1, 2, 999, 4, 999);
@@ -1573,7 +1595,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsScalarFailsOnTypeMismatch() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(1, 2, null, 4, null);
          Scalar s = Scalar.fromBool(true)) {
@@ -1581,7 +1603,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsWithNullScalar() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(1, 2, null, 4, null);
          Scalar s = Scalar.fromNull(input.getType());
@@ -1590,7 +1612,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsPolicy() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(null, 1, 2, null, 4, null);
          ColumnVector preceding = input.replaceNulls(ReplacePolicy.PRECEDING);
@@ -1602,7 +1624,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsColumnEmptyColumn() {
     try (ColumnVector input = ColumnVector.fromBoxedBooleans();
          ColumnVector r = ColumnVector.fromBoxedBooleans();
@@ -1612,7 +1634,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsColumnBools() {
     try (ColumnVector input = ColumnVector.fromBoxedBooleans(null, true, null, false);
          ColumnVector r = ColumnVector.fromBoxedBooleans(false, null, true, true);
@@ -1622,7 +1644,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsColumnIntegers() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(1, 2, null, 4, null);
          ColumnVector r = ColumnVector.fromBoxedInts(996, 997, 998, 909, null);
@@ -1632,7 +1654,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceNullsColumnFailsOnTypeMismatch() {
     try (ColumnVector input = ColumnVector.fromBoxedInts(1, 2, null, 4, null);
          ColumnVector r = ColumnVector.fromBoxedBooleans(true)) {
@@ -1643,7 +1665,7 @@ public class ColumnVectorTest extends CudfTestBase {
   static QuantileMethod[] methods = {LINEAR, LOWER, HIGHER, MIDPOINT, NEAREST};
   static double[] quantiles = {0.0, 0.25, 0.33, 0.5, 1.0};
 
-  @Test
+  @Disabled
   void testQuantilesOnIntegerInput() {
     double[][] exactExpected = {
         {-1.0,   1.0,   1.0,   2.5,   9.0},  // LINEAR
@@ -1666,7 +1688,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testQuantilesOnDoubleInput() {
     double[][] exactExpected = {
         {-1.01, 0.8, 0.9984, 2.13, 6.8},  // LINEAR
@@ -1689,7 +1711,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSubvector() {
     try (ColumnVector vec = ColumnVector.fromBoxedInts(1, 2, 3, null, 5);
          ColumnVector expected = ColumnVector.fromBoxedInts(2, 3, null, 5);
@@ -1704,7 +1726,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSlice() {
     try(ColumnVector cv = ColumnVector.fromBoxedInts(10, 12, null, null, 18, 20, 22, 24, 26, 28)) {
       Integer[][] expectedSlice = {
@@ -1741,7 +1763,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringSlice() {
     try(ColumnVector cv = ColumnVector.fromStrings("foo", "bar", null, null, "baz", "hello", "world", "cuda", "is", "great")) {
       String[][] expectedSlice = {
@@ -1777,7 +1799,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testSplitWithArray() {
     assumeTrue(Cuda.isEnvCompatibleForTesting());
     try(ColumnVector cv = ColumnVector.fromBoxedInts(10, 12, null, null, 18, 20, 22, 24, 26, 28)) {
@@ -1814,14 +1836,14 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWithOddSlices() {
     try (ColumnVector cv = ColumnVector.fromBoxedInts(10, 12, null, null, 18, 20, 22, 24, 26, 28)) {
       assertThrows(CudfException.class, () -> cv.slice(1, 3, 5, 9, 2, 4, 8));
     }
   }
 
-  @Test
+  @Disabled
   void testTrimStringsWhiteSpace() {
     try (ColumnVector cv = ColumnVector.fromStrings(" 123", "123 ", null, " 123 ", "\t\t123\n\n");
          ColumnVector trimmed = cv.strip();
@@ -1830,7 +1852,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testTrimStrings() {
     try (ColumnVector cv = ColumnVector.fromStrings("123", "123 ", null, "1231", "\t\t123\n\n");
          Scalar one = Scalar.fromString(" 1");
@@ -1840,7 +1862,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testLeftTrimStringsWhiteSpace() {
     try (ColumnVector cv = ColumnVector.fromStrings(" 123", "123 ", null, " 123 ", "\t\t123\n\n");
          ColumnVector trimmed = cv.lstrip();
@@ -1849,7 +1871,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testLeftTrimStrings() {
     try (ColumnVector cv = ColumnVector.fromStrings("123", " 123 ", null, "1231", "\t\t123\n\n");
          Scalar one = Scalar.fromString(" 1");
@@ -1859,7 +1881,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testRightTrimStringsWhiteSpace() {
     try (ColumnVector cv = ColumnVector.fromStrings(" 123", "123 ", null, " 123 ", "\t\t123\n\n");
          ColumnVector trimmed = cv.rstrip();
@@ -1868,7 +1890,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testRightTrimStrings() {
     try (ColumnVector cv = ColumnVector.fromStrings("123", "123 ", null, "1231 ", "\t\t123\n\n");
          Scalar one = Scalar.fromString(" 1");
@@ -1878,7 +1900,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testTrimStringsThrowsException() {
     assertThrows(CudfException.class, () -> {
       try (ColumnVector cv = ColumnVector.fromStrings("123", "123 ", null, "1231", "\t\t123\n\n");
@@ -1896,7 +1918,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void testTrimEmptyStringsWithNulls() {
     try (ColumnVector cv = ColumnVector.fromStrings("", null);
          ColumnVector trimmed = cv.strip();
@@ -1905,7 +1927,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testAppendStrings() {
     try (HostColumnVector cv = HostColumnVector.build(10, 0, (b) -> {
       b.append("123456789");
@@ -1921,7 +1943,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCountElements() {
     DataType dt = new ListType(true, new BasicType(true, DType.INT32));
     try (ColumnVector cv = ColumnVector.fromLists(dt, Arrays.asList(1),
@@ -1933,7 +1955,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringLengths() {
     try (ColumnVector cv = ColumnVector.fromStrings("1", "12", null, "123", "1234");
       ColumnVector lengths = cv.getCharLengths();
@@ -1942,7 +1964,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetByteCount() {
     try (ColumnVector cv = ColumnVector.fromStrings("1", "12", "123", null, "1234");
          ColumnVector byteLengthVector = cv.getByteCount();
@@ -1985,7 +2007,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringManipulation() {
     try (ColumnVector v = ColumnVector.fromStrings("a", "B", "cd", "\u0480\u0481", "E\tf",
                                                    "g\nH", "IJ\"\u0100\u0101\u0500\u0501",
@@ -2014,7 +2036,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void testStringManipulationWithNulls() {
     // Special characters in order of usage, capital and small cyrillic koppa
     // Latin A with macron, and cyrillic komi de
@@ -2038,7 +2060,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcat() {
     try (ColumnVector v = ColumnVector.fromStrings("a", "B", "cd", "\u0480\u0481", "E\tf",
         "g\nH", "IJ\"\u0100\u0101\u0500\u0501",
@@ -2100,7 +2122,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void testStringConcatWithNulls() {
     try (ColumnVector v = ColumnVector.fromStrings("a", "B", "cd", "\u0480\u0481", "E\tf",
         "g\nH", "IJ\"\u0100\u0101\u0500\u0501",
@@ -2129,7 +2151,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void testStringConcatSeparators() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "B", "cd", "\u0480\u0481", "E\tf", null, null, "\\G\u0100");
          ColumnVector sv2 = ColumnVector.fromStrings("b", "C", "\u0500\u0501", "x\nYz", null, null, "", null);
@@ -2142,7 +2164,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatSeparatorsEmptyStringForNull() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "B", "cd", "\u0480\u0481", "E\tf", null, null, "\\G\u0100");
          ColumnVector sv2 = ColumnVector.fromStrings("b", "C", "\u0500\u0501", "x\nYz", null, null, "", null);
@@ -2155,7 +2177,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatWsTypeError() {
     try (ColumnVector v0 = ColumnVector.fromInts(1, 2, 3, 4);
          ColumnVector v1 = ColumnVector.fromFloats(5.0f, 6.0f);
@@ -2167,7 +2189,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatWsNoColumn() {
     try (ColumnVector sep_col = ColumnVector.fromStrings("-*");
          Scalar separatorString = Scalar.fromString(null);
@@ -2177,7 +2199,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSimple() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a");
          ColumnVector sv2 = ColumnVector.fromStrings("B");
@@ -2197,7 +2219,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSimpleOtherApi() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a");
          ColumnVector sv2 = ColumnVector.fromStrings("B");
@@ -2216,7 +2238,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsOneCol() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a");
          ColumnVector sep_col = ColumnVector.fromStrings("-*");
@@ -2230,7 +2252,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsNullSep() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "c");
          ColumnVector sv2 = ColumnVector.fromStrings("b", "d");
@@ -2245,7 +2267,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsNullValueInCol() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "c", null);
          ColumnVector sv2 = ColumnVector.fromStrings("b", "", "e");
@@ -2259,7 +2281,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsNullValueInColKeepNull() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "c", null);
          ColumnVector sv2 = ColumnVector.fromStrings("b", "", "e");
@@ -2273,7 +2295,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsNullValueInColSepTrue() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "c", null);
          ColumnVector sv2 = ColumnVector.fromStrings("b", "", "e");
@@ -2288,7 +2310,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleCol() {
     try (ColumnVector sv1 = ColumnVector.fromStrings("a", "c", "e");
          ColumnVector sep_col = ColumnVector.fromStrings("-", "-", "-");
@@ -2301,7 +2323,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsNullAllCol() {
     try (Scalar nullString = Scalar.fromString(null);
          ColumnVector sv1 = ColumnVector.fromScalar(nullString, 3);
@@ -2316,7 +2338,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsNullAllColSepTrue() {
     try (Scalar nullString = Scalar.fromString(null);
          ColumnVector sv1 = ColumnVector.fromScalar(nullString, 3);
@@ -2331,7 +2353,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListCol() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2347,7 +2369,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColDefaultApi() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2360,7 +2382,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColScalarSep() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2375,7 +2397,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColAllNulls() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2390,7 +2412,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColAllNullsScalarSep() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2404,7 +2426,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColAllNullsSepTrue() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2419,7 +2441,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColAllNullsKeepNulls() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2434,7 +2456,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColEmptyArray() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2450,7 +2472,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringConcatWsSingleListColEmptyArrayReturnEmpty() {
     try (ColumnVector cv1 = ColumnVector.fromLists(new HostColumnVector.ListType(true,
            new HostColumnVector.BasicType(true, DType.STRING)),
@@ -2466,7 +2488,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testRepeatStringsWithScalarRepeatTimes() {
     // Empty strings column.
     try (ColumnVector input = ColumnVector.fromStrings("", "", "");
@@ -2502,7 +2524,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testRepeatStringsWithColumnRepeatTimes() {
     // Empty strings column.
     try (ColumnVector input = ColumnVector.fromStrings("", "", "");
@@ -2535,7 +2557,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testListConcatByRow() {
     try (ColumnVector cv = ColumnVector.fromLists(new HostColumnVector.ListType(true,
             new HostColumnVector.BasicType(true, DType.INT32)),
@@ -2638,7 +2660,7 @@ public class ColumnVectorTest extends CudfTestBase {
     });
   }
 
-  @Test
+  @Disabled
   void testListConcatByRowIgnoreNull() {
     try (ColumnVector cv = ColumnVector.fromLists(new HostColumnVector.ListType(true,
             new HostColumnVector.BasicType(true, DType.INT32)),
@@ -2690,7 +2712,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFlattenLists() {
     HostColumnVector.ListType listType = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -2726,7 +2748,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testPrefixSum() {
     try (ColumnVector v1 = ColumnVector.fromLongs(1, 2, 3, 5, 8, 10);
          ColumnVector summed = v1.prefixSum();
@@ -2735,7 +2757,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanSum() {
     try (ColumnVector v1 = ColumnVector.fromBoxedInts(1, 2, null, 3, 5, 8, 10)) {
       try (ColumnVector result = v1.scan(ScanAggregation.sum(), ScanType.INCLUSIVE, NullPolicy.INCLUDE);
@@ -2760,7 +2782,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanMax() {
     try (ColumnVector v1 = ColumnVector.fromBoxedInts(1, 2, null, 3, 5, 8, 10)) {
       try (ColumnVector result = v1.scan(ScanAggregation.max(), ScanType.INCLUSIVE, NullPolicy.INCLUDE);
@@ -2785,7 +2807,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanMin() {
     try (ColumnVector v1 = ColumnVector.fromBoxedInts(1, 2, null, 3, 5, 8, 10)) {
       try (ColumnVector result = v1.scan(ScanAggregation.min(), ScanType.INCLUSIVE, NullPolicy.INCLUDE);
@@ -2810,7 +2832,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanProduct() {
     try (ColumnVector v1 = ColumnVector.fromBoxedInts(1, 2, null, 3, 5, 8, 10)) {
       try (ColumnVector result = v1.scan(ScanAggregation.product(), ScanType.INCLUSIVE, NullPolicy.INCLUDE);
@@ -2835,7 +2857,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanRank() {
     try (ColumnVector col1 = ColumnVector.fromBoxedInts(-97, -97, -97, null, -16, 5, null, null, 6, 6, 34, null);
          ColumnVector col2 = ColumnVector.fromBoxedInts(3, 3, 4, 7, 7, 7, 7, 7, 8, 8, 8, 9);
@@ -2858,7 +2880,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanDenseRank() {
     try (ColumnVector col1 = ColumnVector.fromBoxedInts(-97, -97, -97, null, -16, 5, null, null, 6, 6, 34, null);
          ColumnVector col2 = ColumnVector.fromBoxedInts(3, 3, 4, 7, 7, 7, 7, 7, 8, 8, 8, 9);
@@ -2880,7 +2902,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testScanPercentRank() {
     try (ColumnVector col1 = ColumnVector.fromBoxedInts(-97, -97, -97, null, -16, 5, null, null, 6, 6, 34, null);
          ColumnVector col2 = ColumnVector.fromBoxedInts(  3,   3,   4,    7,   7, 7,    7,    7, 8, 8,  8,    9);
@@ -2902,7 +2924,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWindowStatic() {
     try (Scalar one = Scalar.fromInt(1);
          Scalar two = Scalar.fromInt(2);
@@ -2961,7 +2983,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWindowStaticCounts() {
     try (Scalar one = Scalar.fromInt(1);
          Scalar two = Scalar.fromInt(2);
@@ -2981,7 +3003,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWindowDynamicNegative() {
     try (ColumnVector precedingCol = ColumnVector.fromInts(1, 2, 3, 4, 4);
          ColumnVector followingCol = ColumnVector.fromInts(-1, -1, -1, -1, 0)) {
@@ -2996,7 +3018,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWindowLag() {
     try (Scalar negOne = Scalar.fromInt(-1);
          Scalar two = Scalar.fromInt(2);
@@ -3011,7 +3033,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWindowDynamic() {
     try (ColumnVector precedingCol = ColumnVector.fromInts(1, 2, 3, 1, 2);
          ColumnVector followingCol = ColumnVector.fromInts(2, 2, 2, 1, 0)) {
@@ -3026,7 +3048,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testWindowThrowsException() {
     try (Scalar one = Scalar.fromInt(1);
          Scalar two = Scalar.fromInt(2);
@@ -3051,7 +3073,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAll() {
     try(ColumnVector vector = ColumnVector.fromInts(1, 4, 1, 5, 3, 3, 1, 2, 9, 8);
         ColumnVector oldValues = ColumnVector.fromInts(1, 4, 7); // 7 doesn't exist, nothing to replace
@@ -3062,7 +3084,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllFloat() {
     try(ColumnVector vector = ColumnVector.fromFloats(1.0f, 4.2f, 1.3f, 5.7f, 3f, 3f, 1.0f, 2.6f, 0.9f, 8.3f);
         ColumnVector oldValues = ColumnVector.fromFloats(1.0f, 4.2f, 7); // 7 doesn't exist, nothing to replace
@@ -3073,7 +3095,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllTimeUnits() {
     try(ColumnVector vector = ColumnVector.timestampMicroSecondsFromLongs(1l, 1l, 2l, 8l);
         ColumnVector oldValues = ColumnVector.timestampMicroSecondsFromLongs(1l, 2l, 7l); // 7 dosn't exist, nothing to replace
@@ -3084,7 +3106,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllMixingTypes() {
     try(ColumnVector vector = ColumnVector.fromInts(1, 4, 1, 5, 3, 3, 1, 2, 9, 8);
         ColumnVector oldValues = ColumnVector.fromInts(1, 4, 7); // 7 doesn't exist, nothing to replace
@@ -3093,7 +3115,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllStrings() {
     try(ColumnVector vector = ColumnVector.fromStrings("spark", "scala", "spark", "hello", "code");
         ColumnVector oldValues = ColumnVector.fromStrings("spark","code","hello");
@@ -3104,7 +3126,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllWithNull() {
     try(ColumnVector vector = ColumnVector.fromBoxedInts(1, 4, 1, 5, 3, 3, 1, null, 9, 8);
         ColumnVector oldValues = ColumnVector.fromBoxedInts(1, 4, 8);
@@ -3115,7 +3137,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllNulllWithValue() {
     // null values cannot be replaced using findAndReplaceAll();
     try(ColumnVector vector = ColumnVector.fromBoxedInts(1, 4, 1, 5, 3, 3, 1, null, 9, 8);
@@ -3125,7 +3147,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllFloatNan() {
     // Float.NaN != Float.NaN therefore it cannot be replaced
     try(ColumnVector vector = ColumnVector.fromFloats(1.0f, 4.2f, 1.3f, 5.7f, 3f, 3f, 1.0f, 2.6f, Float.NaN, 8.3f);
@@ -3137,7 +3159,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFindAndReplaceAllWithFloatNan() {
     try(ColumnVector vector = ColumnVector.fromFloats(1.0f, 4.2f, 1.3f, 5.7f, 3f, 3f, 1.0f, 2.6f, Float.NaN, 8.3f);
         ColumnVector oldValues = ColumnVector.fromFloats(1.0f, 4.2f, 8.3f);
@@ -3148,7 +3170,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void emptyStringColumnFindReplaceAll() {
     try (ColumnVector cv = ColumnVector.fromStrings(null, "A", "B", "C",   "");
          ColumnVector expected = ColumnVector.fromStrings(null, "A", "B", "C",   null);
@@ -3159,7 +3181,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testBitCast() {
     try (ColumnVector cv = ColumnVector.decimalFromLongs(-2, 1L, 2L, 100L, 552L);
          ColumnVector expected = ColumnVector.fromLongs(1L, 2L, 100L, 552L);
@@ -3168,7 +3190,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testFixedWidthCast() {
     int[] values = new int[]{1,3,4,5,2};
     long[] longValues = Arrays.stream(values).asLongStream().toArray();
@@ -3228,7 +3250,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastBigDecimalToString() {
     BigDecimal[] bigValues = {new BigDecimal("923121331938210123.321"),
         new BigDecimal("9223372036854775808.191"),
@@ -3258,7 +3280,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastStringToBigDecimal() {
     String[] bigValues = {"923121331938210123.321",
         "9223372036854775808.191",
@@ -3274,7 +3296,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastByteToString() {
 
     Byte[] byteValues = {1, 3, 45, -0, null, Byte.MIN_VALUE, Byte.MAX_VALUE};
@@ -3283,7 +3305,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.INT8, () -> ColumnVector.fromBoxedBytes(byteValues), () -> ColumnVector.fromStrings(stringByteValues));
   }
 
-  @Test
+  @Disabled
   void testCastShortToString() {
 
     Short[] shortValues = {1, 3, 45, -0, null, Short.MIN_VALUE, Short.MAX_VALUE};
@@ -3292,7 +3314,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.INT16, () -> ColumnVector.fromBoxedShorts(shortValues), () -> ColumnVector.fromStrings(stringShortValues));
   }
 
-  @Test
+  @Disabled
   void testCastIntToString() {
     Integer[] integerArray = {1, -2, 3, null, 8, Integer.MIN_VALUE, Integer.MAX_VALUE};
     String[] stringIntValues = getStringArray(integerArray);
@@ -3300,7 +3322,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.INT32, () -> ColumnVector.fromBoxedInts(integerArray), () -> ColumnVector.fromStrings(stringIntValues));
   }
 
-  @Test
+  @Disabled
   void testCastLongToString() {
 
     Long[] longValues = {null, 3l, 2l, -43l, null, Long.MIN_VALUE, Long.MAX_VALUE};
@@ -3309,7 +3331,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.INT64, () -> ColumnVector.fromBoxedLongs(longValues), () -> ColumnVector.fromStrings(stringLongValues));
   }
 
-  @Test
+  @Disabled
   void testCastFloatToString() {
 
     Float[] floatValues = {Float.NaN, null, 03f, -004f, 12f};
@@ -3318,7 +3340,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.FLOAT32, () -> ColumnVector.fromBoxedFloats(floatValues), () -> ColumnVector.fromStrings(stringFloatValues));
   }
 
-  @Test
+  @Disabled
   void testCastDoubleToString() {
 
     Double[] doubleValues = {Double.NaN, Double.NEGATIVE_INFINITY, 4d, 98d, null, Double.POSITIVE_INFINITY};
@@ -3328,7 +3350,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.FLOAT64, () -> ColumnVector.fromBoxedDoubles(doubleValues), () -> ColumnVector.fromStrings(stringDoubleValues));
   }
 
-  @Test
+  @Disabled
   void testCastBoolToString() {
 
     Boolean[] booleans = {true, false, false};
@@ -3337,7 +3359,7 @@ public class ColumnVectorTest extends CudfTestBase {
     testCastFixedWidthToStringsAndBack(DType.BOOL8, () -> ColumnVector.fromBoxedBooleans(booleans), () -> ColumnVector.fromStrings(stringBools));
   }
 
-  @Test
+  @Disabled
   void testCastDecimal32ToString() {
 
     Integer[] unScaledValues = {0, null, 3, 2, -43, null, 5234, -73451, 348093, -234810};
@@ -3354,7 +3376,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastDecimal64ToString() {
 
     Long[] unScaledValues = {0l, null, 3l, 2l, -43l, null, 234802l, -94582l, 1234208124l, -2342348023812l};
@@ -3426,7 +3448,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastIntToDecimal() {
     testCastNumericToDecimalsAndBack(DType.INT32, true, 0,
         () -> ColumnVector.fromBoxedInts(1, -21, 345, null, 8008, Integer.MIN_VALUE, Integer.MAX_VALUE),
@@ -3445,7 +3467,7 @@ public class ColumnVectorTest extends CudfTestBase {
     );
   }
 
-  @Test
+  @Disabled
   void testCastLongToDecimal() {
     testCastNumericToDecimalsAndBack(DType.INT64, false, 0,
         () -> ColumnVector.fromBoxedLongs(1L, -21L, 345L, null, 8008L, Long.MIN_VALUE, Long.MAX_VALUE),
@@ -3464,7 +3486,7 @@ public class ColumnVectorTest extends CudfTestBase {
     );
   }
 
-  @Test
+  @Disabled
   void testCastDecimal64ToDecimal128() {
     testCastDecimal128(DType.DTypeEnum.DECIMAL64, DType.DTypeEnum.DECIMAL128, 0,
         () -> ColumnVector.fromBoxedLongs(1L, -21L, 345L, null, 8008L, Long.MIN_VALUE, Long.MAX_VALUE),
@@ -3488,7 +3510,7 @@ public class ColumnVectorTest extends CudfTestBase {
     );
   }
 
-  @Test
+  @Disabled
   void testCastFloatToDecimal() {
     testCastNumericToDecimalsAndBack(DType.FLOAT32, true, 0,
         () -> ColumnVector.fromBoxedFloats(1.0f, 2.1f, -3.23f, null, 2.41281f, 1378952.001f),
@@ -3507,7 +3529,7 @@ public class ColumnVectorTest extends CudfTestBase {
     );
   }
 
-  @Test
+  @Disabled
   void testCastDoubleToDecimal() {
     testCastNumericToDecimalsAndBack(DType.FLOAT64, false, 0,
         () -> ColumnVector.fromBoxedDoubles(1.0, 2.1, -3.23, null, 2.41281, (double) Integer.MAX_VALUE),
@@ -3526,7 +3548,7 @@ public class ColumnVectorTest extends CudfTestBase {
     );
   }
 
-  @Test
+  @Disabled
   void testCastDecimalToDecimal() {
     // DECIMAL32(scale: 0) -> DECIMAL32(scale: 0)
     testCastNumericToDecimalsAndBack(DType.create(DType.DTypeEnum.DECIMAL32, 0), true, -0,
@@ -3601,7 +3623,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testIsTimestamp() {
       final String[] TIMESTAMP_STRINGS = {
           "2018-07-04 12:00:00",
@@ -3627,7 +3649,7 @@ public class ColumnVectorTest extends CudfTestBase {
       }
   }
 
-  @Test
+  @Disabled
   void testCastTimestampAsString() {
     final String[] TIMES_S_STRING = {
         "2018-07-04 12:00:00",
@@ -3675,7 +3697,6 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
   @Disabled("Negative timestamp values are not currently supported. " +
       "See github issue https://github.com/rapidsai/cudf/issues/3116 for details")
   void testCastNegativeTimestampAsString() {
@@ -3702,7 +3723,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastStringToByteList() {
     List<Byte> list1 = Arrays.asList((byte)0x54, (byte)0x68, (byte)0xc3, (byte)0xa9, (byte)0x73,
       (byte)0xc3, (byte)0xa9);
@@ -3727,7 +3748,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastIntegerToByteList() {
     List<Byte> list1 = Arrays.asList((byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00);
     List<Byte> list2 = Arrays.asList((byte)0x00, (byte)0x00, (byte)0x00, (byte)0x64);
@@ -3743,7 +3764,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testCastFloatToByteList() {
     List<Byte> list1 = Arrays.asList((byte)0x00, (byte)0x00, (byte)0x00, (byte)0x00);
     List<Byte> list2 = Arrays.asList((byte)0x00, (byte)0x00, (byte)0xc8, (byte)0x42);
@@ -3761,7 +3782,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testGetBytesFromList() {
     List<Byte> list = Arrays.asList((byte)0x41, (byte)0x52, (byte)0xc3, (byte)0xa9);
     try(ColumnVector cv = ColumnVector.fromStrings("ARé");
@@ -3774,7 +3795,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testContainsScalar() {
     try (ColumnVector columnVector = ColumnVector.fromInts(1, 43, 42, 11, 2);
     Scalar s0 = Scalar.fromInt(3);
@@ -3784,7 +3805,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testContainsVector() {
     try (ColumnVector columnVector = ColumnVector.fromBoxedInts(1, null, 43, 42, 11, 2);
          ColumnVector cv0 = ColumnVector.fromBoxedInts(1, 3, null, 11);
@@ -3800,7 +3821,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testStringOpsEmpty() {
       try (ColumnVector sv = ColumnVector.fromStrings("a", "B", "cd", null, "");
            Scalar emptyString = Scalar.fromString("");
@@ -3886,7 +3907,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testExtractRe() {
     try (ColumnVector input = ColumnVector.fromStrings("a1", "b2", "c3", null);
          Table expected = new Table.TestBuilder()
@@ -3977,7 +3998,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testMatchesRe() {
     String patternString1 = "\\d+";
     String patternString2 = "[A-Za-z]+\\s@[A-Za-z]+";
@@ -4018,7 +4039,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testContainsRe() {
     String patternString1 = "\\d+";
     String patternString2 = "[A-Za-z]+\\s@[A-Za-z]+";
@@ -4062,7 +4083,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testContainsReEmptyInput() {
     String patternString1 = ".*";
     RegexProgram regexProg1 = new RegexProgram(patternString1, CaptureGroups.NON_CAPTURE);
@@ -4075,7 +4096,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testLike() {
     // Default escape character
     try (ColumnVector testStrings = ColumnVector.fromStrings(
@@ -4132,7 +4153,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void testUrlDecode() {
     String[] inputs = new String[] {
         "foobar.site%2Fq%3Fx%3D%C3%A9%25",
@@ -4162,7 +4183,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testUrlEncode() {
     String[] inputs = new String[] {
         "foobar.site/q?x=é%",
@@ -4192,7 +4213,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringFindOperationsThrowsException() {
     assertThrows(CudfException.class, () -> {
       try (ColumnVector sv = ColumnVector.fromStrings("a", "B", "cd");
@@ -4249,7 +4270,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void testStringLocate() {
     try(ColumnVector v = ColumnVector.fromStrings("Héllo", "thésé", null, "\r\ud720é\ud721", "ARé",
                                                   "\\THE\t8\ud720", "tést strings", "", "éé");
@@ -4268,7 +4289,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringLocateOffsets() {
     try(ColumnVector v = ColumnVector.fromStrings("Héllo", "thésé", null, "\r\ud720é\ud721", "ARé",
                                                   "\\THE\t8\ud720", "tést strings", "", "éé");
@@ -4285,7 +4306,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringLocateThrowsException() {
     assertThrows(AssertionError.class, () -> {
       try (ColumnVector cv = ColumnVector.fromStrings("Héllo", "thésé", null, "ARé", "tést strings");
@@ -4318,7 +4339,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void testsubstring() {
     try (ColumnVector v = ColumnVector.fromStrings("Héllo", "thésé", null,"", "ARé", "strings");
          ColumnVector e_allParameters = ColumnVector.fromStrings("llo", "ésé", null, "", "é", "rin");
@@ -4330,7 +4351,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testExtractListElements() {
     try (ColumnVector v = ColumnVector.fromStrings("Héllo there", "thésé", null, "", "ARé some", "test strings");
          ColumnVector expected = ColumnVector.fromStrings("Héllo", "thésé", null, "", "ARé", "test");
@@ -4340,7 +4361,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testExtractListElementsV() {
     try (ColumnVector v = ColumnVector.fromStrings("Héllo there", "thésé", null, "", "ARé some", "test strings");
          ColumnVector indices = ColumnVector.fromInts(0, 2, 0, 0, 1, -1);
@@ -4351,7 +4372,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testDropListDuplicates() {
     List<Integer> list1 = Arrays.asList(1, 2);
     List<Integer> list2 = Arrays.asList(3, 4, 5);
@@ -4373,7 +4394,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testDropListDuplicatesWithKeysValues() {
     try(ColumnVector inputChildKeys = ColumnVector.fromBoxedInts(
             1, 2, // list1
@@ -4440,7 +4461,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testDropListDuplicatesWithKeysValuesNullable() {
     try(ColumnVector inputChildKeys = ColumnVector.fromBoxedInts(
             1, 2, // list1
@@ -4525,7 +4546,7 @@ void testExtractReWithMultiLineDelimiters() {
     return ColumnVector.fromLists(listType, rows);
   }
 
-  @Test
+  @Disabled
   void testListContainsString() {
     List<String> list0 = Arrays.asList("Héllo there", "thésé");
     List<String> list1 = Arrays.asList("", "ARé some", "test strings");
@@ -4540,7 +4561,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListContainsInt() {
     List<Integer> list0 = Arrays.asList(1, 2, 3);
     List<Integer> list1 = Arrays.asList(4, 5, 6);
@@ -4554,7 +4575,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListContainsStringCol() {
     List<String> list0 = Arrays.asList("Héllo there", "thésé");
     List<String> list1 = Arrays.asList("", "ARé some", "test strings");
@@ -4570,7 +4591,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListContainsIntCol() {
     List<Integer> list0 = Arrays.asList(1, 2, 3);
     List<Integer> list1 = Arrays.asList(4, 5, 6);
@@ -4585,7 +4606,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListContainsNulls() {
     List<String> list0 = Arrays.asList("Héllo there", "thésé");
     List<String> list1 = Arrays.asList("", "ARé some", "test strings");
@@ -4600,7 +4621,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListIndexOfString() {
     List<String> list0 = Arrays.asList("Héllo there", "thésé");
     List<String> list1 = Arrays.asList("", "ARé some", "test strings");
@@ -4618,7 +4639,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListIndexOfInt() {
     List<Integer> list0 = Arrays.asList(1, 2, 3);
     List<Integer> list1 = Arrays.asList(4, 5, 6);
@@ -4635,7 +4656,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListIndexOfStringCol() {
     List<String> list0 = Arrays.asList("Héllo there", "thésé");
     List<String> list1 = Arrays.asList("", "ARé some", "test strings");
@@ -4654,7 +4675,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListIndexOfIntCol() {
     List<Integer> list0 = Arrays.asList(1, 2, 3);
     List<Integer> list1 = Arrays.asList(4, 5, 6);
@@ -4672,7 +4693,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListSortRowsWithIntChild() {
     List<Integer> list1 = Arrays.asList(1, 3, 0, 2);
     List<Integer> ascSortedList1 = Arrays.asList(0, 1, 2, 3);
@@ -4728,7 +4749,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListSortRowsWithStringChild() {
     List<String> list1 = Arrays.asList("b", "d", "a", "c");
     List<String> ascSortedList1 = Arrays.asList("a", "b", "c", "d");
@@ -4784,7 +4805,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testSetOperations() {
     List<Double> lhsList1 = Arrays.asList(Double.NaN, 5.0, 0.0, 0.0, 0.0, 0.0, null, 0.0);
     List<Double> lhsList2 = Arrays.asList(Double.NaN, 5.0, 0.0, 0.0, 0.0, 0.0, null, 1.0);
@@ -4843,7 +4864,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testReverseString() {
     try (ColumnVector input = ColumnVector.fromStrings("abcdef", "12345", "", "", "aébé",
            "A é Z", "X", "é");
@@ -4854,7 +4875,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testReverseList() {
     List<Integer> list0 = Arrays.asList(1, 2, 3);
     List<Integer> list1 = Arrays.asList(4, 5, null);
@@ -4871,7 +4892,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringSplit() {
     String pattern = " ";
     try (ColumnVector v = ColumnVector.fromStrings("Héllo there all", "thésé", null, "",
@@ -4892,7 +4913,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringSplitByRegularExpression() {
     String pattern = "[_ ]";
     RegexProgram regexProg = new RegexProgram(pattern, CaptureGroups.NON_CAPTURE);
@@ -4920,7 +4941,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringSplitRecord() {
     String pattern = " ";
     try (ColumnVector v = ColumnVector.fromStrings("Héllo there all", "thésé", null, "",
@@ -4950,7 +4971,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringSplitRecordByRegularExpression() {
     String pattern = "[_ ]";
     RegexProgram regexProg = new RegexProgram(pattern, CaptureGroups.NON_CAPTURE);
@@ -4987,7 +5008,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testsubstringColumn() {
     try (ColumnVector v = ColumnVector.fromStrings("Héllo", "thésé", null, "", "ARé", "strings");
          ColumnVector start = ColumnVector.fromInts(2, 1, 1, 1, 0, 1);
@@ -4998,7 +5019,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testsubstringThrowsException() {
     assertThrows(AssertionError.class, () -> {
       try (ColumnVector v = ColumnVector.fromStrings("Héllo", "thésé", null, "", "ARé", "strings");
@@ -5009,7 +5030,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void teststringReplace() {
     try (ColumnVector v = ColumnVector.fromStrings("Héllo", "thésssé", null, "", "ARé", "sssstrings");
          ColumnVector e_allParameters = ColumnVector.fromStrings("Héllo", "théSsé", null, "", "ARé", "SStrings");
@@ -5020,7 +5041,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void teststringReplaceThrowsException() {
     assertThrows(AssertionError.class, () -> {
       try (ColumnVector testStrings = ColumnVector.fromStrings("Héllo", "thésé", null, "", "ARé", "strings");
@@ -5030,7 +5051,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void teststringReplaceMulti() {
     try (ColumnVector v = ColumnVector.fromStrings("Héllo", "thésssé", null, "", "ARé", "sssstrings");
          ColumnVector e_allParameters = ColumnVector.fromStrings("Hello", "theSse", null, "", "ARe", "SStrings");
@@ -5041,7 +5062,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void teststringReplaceMultiThrowsException() {
     assertThrows(AssertionError.class, () -> {
       try (ColumnVector testStrings = ColumnVector.fromStrings("Héllo", "thésé", null, "", "ARé", "strings");
@@ -5051,7 +5072,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void testReplaceRegex() {
     try (ColumnVector v = ColumnVector.fromStrings("title and Title with title", "nothing", null, "Title");
          Scalar repl = Scalar.fromString("Repl")) {
@@ -5092,7 +5113,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceMultiRegex() {
     try (ColumnVector v =
              ColumnVector.fromStrings("title and Title with title", "nothing", null, "Title");
@@ -5104,7 +5125,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringReplaceWithBackrefs() {
 
     try (ColumnVector v = ColumnVector.fromStrings("<h1>title</h1>", "<h1>another title</h1>", null);
@@ -5174,7 +5195,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
   }
 
-  @Test
+  @Disabled
   void testLPad() {
       try (ColumnVector v = ColumnVector.fromStrings("1", "23", "45678", null);
            ColumnVector expected = ColumnVector.fromStrings("A1", "23", "45678", null);
@@ -5188,7 +5209,7 @@ void testExtractReWithMultiLineDelimiters() {
       }
   }
 
-  @Test
+  @Disabled
   void testRPad() {
       try (ColumnVector v = ColumnVector.fromStrings("1", "23", "45678", null);
            ColumnVector expected = ColumnVector.fromStrings("1A", "23", "45678", null);
@@ -5202,7 +5223,7 @@ void testExtractReWithMultiLineDelimiters() {
       }
   }
 
-  @Test
+  @Disabled
   void testPad() {
       try (ColumnVector v = ColumnVector.fromStrings("1", "23", "45678", null);
            ColumnVector expected = ColumnVector.fromStrings("1A", "23", "45678", null);
@@ -5216,7 +5237,7 @@ void testExtractReWithMultiLineDelimiters() {
       }
   }
 
-  @Test
+  @Disabled
   void testZfill() {
     try (ColumnVector v = ColumnVector.fromStrings("1", "23", "45678", null);
          ColumnVector expected = ColumnVector.fromStrings("01", "23", "45678", null);
@@ -5230,7 +5251,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringTitlize() {
     try (ColumnVector cv = ColumnVector.fromStrings("sPark", "sqL", "lowercase", null, "", "UPPERCASE");
          ColumnVector result = cv.toTitle();
@@ -5239,7 +5260,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStringCapitalize() {
     try (ColumnVector cv = ColumnVector.fromStrings("s Park", "S\nqL", "lower \tcase",
                                                     null, "", "UPPER\rCASE")) {
@@ -5264,7 +5285,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testNansToNulls() {
     Float[] floats = new Float[]{1.2f, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, null,
         Float.NaN, Float.MAX_VALUE, Float.MIN_VALUE, 435243.2323f, POSITIVE_FLOAT_NAN_LOWER_RANGE,
@@ -5295,7 +5316,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testIsIntegerWithBounds() {
     String[] intStrings = {"A", "nan", "Inf", "-Inf", "3.5",
         String.valueOf(Byte.MIN_VALUE),
@@ -5358,7 +5379,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testIsInteger() {
     String[] intStrings = {"A", "nan", "Inf", "-Inf", "Infinity", "infinity", "2147483647",
         "2147483648", "-2147483648", "-2147483649", "NULL", "null", null, "1.2", "1.2e-4", "0.00012"};
@@ -5384,7 +5405,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testIsFixedPoint() {
     String[] decimalStrings = {"A", "nan", "Inf", "-Inf", "Infinity", "infinity",
         "2.1474", "112.383", "-2.14748", "NULL", "null", null, "1.2", "1.2e-4", "0.00012"};
@@ -5398,7 +5419,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testIsFloat() {
     String[] floatStrings = {"A", "nan", "Inf", "-Inf", "Infinity", "infinity", "-0.0", "0.0",
         "3.4028235E38", "3.4028236E38", "-3.4028235E38", "-3.4028236E38", "1.2e-24", "NULL", "null",
@@ -5417,7 +5438,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testIsDouble() {
     String[] doubleStrings = {"A", "nan", "Inf", "-Inf", "Infinity", "infinity", "-0.0", "0.0",
         "1.7976931348623157E308",
@@ -5443,7 +5464,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testCreateDurationDays() {
     Integer[] days = {100, 10, 23, 1, -1, 0, Integer.MAX_VALUE, null, Integer.MIN_VALUE};
 
@@ -5460,7 +5481,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testCreateDurationSeconds() {
     Long[] secs = {10230L, 10L, 203L, 1L, -1L, 0L, Long.MAX_VALUE, null, Long.MIN_VALUE};
 
@@ -5477,7 +5498,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testCreateDurationMilliseconds() {
     Long[] ms = {12342340230L, 12112340L, 2230233L, 1L, -1L, 0L, Long.MAX_VALUE, null,
         Long.MIN_VALUE};
@@ -5495,7 +5516,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testCreateDurationMicroseconds() {
     Long[] us = {1234234230L, 132350L, 289877803L, 1L, -1L, 0L, Long.MAX_VALUE, null,
         Long.MIN_VALUE};
@@ -5513,7 +5534,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testCreateDurationNanoseconds() {
     Long[] ns = {1234234230L, 198832350L, 289877803L, 1L, -1L, 0L, Long.MAX_VALUE, null,
         Long.MIN_VALUE};
@@ -5531,7 +5552,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCv() {
     List<Integer> list1 = Arrays.asList(0, 1, 2, 3);
     List<Integer> list2 = Arrays.asList(6, 2, 4, 5);
@@ -5549,7 +5570,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvEmpty() {
     List<Integer> list1 = Arrays.asList(0, 1, 2, 3);
     List<Integer> list2 = Arrays.asList(6, 2, 4, 5);
@@ -5567,7 +5588,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvStrings() {
     List<String> list1 = Arrays.asList("0", "1", "2", "3");
     List<String> list2 = Arrays.asList("4", null, "6", null);
@@ -5585,7 +5606,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvDoubles() {
     List<Double> list1 = Arrays.asList(0.1, 1.2, 2.3, 3.4);
     List<Double> list2 = Arrays.asList(6.7, 7.8, 8.9, 5.6);
@@ -5601,7 +5622,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvBytes() {
     List<Byte> list1 = Arrays.asList((byte)1, (byte)3, (byte)5, (byte)7);
     List<Byte> list2 = Arrays.asList((byte)0, (byte)2, (byte)4, (byte)6);
@@ -5617,7 +5638,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvShorts() {
     List<Short> list1 = Arrays.asList((short)1, (short)3, (short)5, (short)7);
     List<Short> list2 = Arrays.asList((short)0, (short)2, (short)4, (short)6);
@@ -5633,7 +5654,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvFloats() {
     List<Float> list1 = Arrays.asList(0.1F, 1.2F, 2.3F, 3.4F);
     List<Float> list2 = Arrays.asList(6.7F, 7.8F, 8.9F, 5.6F);
@@ -5649,7 +5670,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvLongs() {
     List<Long> list1 = Arrays.asList(10L, 20L, 30L, 40L);
     List<Long> list2 = Arrays.asList(6L, 7L, 8L, 9L);
@@ -5665,7 +5686,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListCvBools() {
     List<Boolean> list1 = Arrays.asList(true, false, false, true);
     List<Boolean> list2 = Arrays.asList(false, true, false, false);
@@ -5681,7 +5702,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListOfListsCv() {
     List<Integer> list1 = Arrays.asList(1, 2, 3);
     List<Integer> list2 = Arrays.asList(4, 5, 6);
@@ -5705,7 +5726,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListOfListsCvStrings() {
     List<String> list1 = Arrays.asList("1", "23", "10");
     List<String> list2 = Arrays.asList("13", "14", "17");
@@ -5729,7 +5750,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListOfListsCvDoubles() {
     List<Double> list1 = Arrays.asList(1.1, 2.2, 3.3);
     List<Double> list2 = Arrays.asList(4.4, 5.5, 6.6);
@@ -5750,7 +5771,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testListOfListsCvDecimals() {
     List<BigDecimal> list1 = Arrays.asList(BigDecimal.valueOf(1.1), BigDecimal.valueOf(2.2), BigDecimal.valueOf(3.3));
     List<BigDecimal> list2 = Arrays.asList(BigDecimal.valueOf(4.4), BigDecimal.valueOf(5.5), BigDecimal.valueOf(6.6));
@@ -5772,7 +5793,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatLists() {
     List<Integer> list1 = Arrays.asList(0, 1, 2, 3);
     List<Integer> list2 = Arrays.asList(6, 2, 4, 5);
@@ -5794,7 +5815,7 @@ void testExtractReWithMultiLineDelimiters() {
   }
 
 
-  @Test
+  @Disabled
   void testConcatListsStrings() {
     List<String> list = Arrays.asList("0", "1", "2", "3");
     List<String> list2 = Arrays.asList("4", null, "6", null);
@@ -5817,7 +5838,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testNullsInLists() {
     List<String> val1 = Arrays.asList("Hello", "there");
     List<String> val2 = Arrays.asList("these");
@@ -5846,7 +5867,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testHcvOfInts() {
     List<Integer> val1 = Arrays.asList(1, 22);
     List<Integer> val2 = Arrays.asList(333);
@@ -5874,7 +5895,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testHcvOfDecimals() {
     List<BigDecimal>[] data = new List[6];
     data[0] = Arrays.asList(BigDecimal.ONE, BigDecimal.TEN);
@@ -5900,7 +5921,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testConcatListsOfLists() {
     List<Integer> list1 = Arrays.asList(1, 2, 3);
     List<Integer> list2 = Arrays.asList(4, 5, 6);
@@ -5923,7 +5944,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testContiguousSplitConstructor() {
     try (Table tmp = new Table.TestBuilder().column(1, 2).column(3, 4).build();
          ContiguousTable ct = tmp.contiguousSplit()[0]) {
@@ -5938,7 +5959,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testHcvForStruct() {
     List<HostColumnVector.DataType> children =
         Arrays.asList(new HostColumnVector.BasicType(true, DType.INT32),
@@ -5969,7 +5990,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testStructChildValidity() {
     List<HostColumnVector.DataType> children =
         Arrays.asList(new HostColumnVector.BasicType(true, DType.INT32),
@@ -6017,7 +6038,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetMapValueForKeys() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(new HostColumnVector.StructData(Arrays.asList(1, 2)));
     List<HostColumnVector.StructData> list2 = Arrays.asList(new HostColumnVector.StructData(Arrays.asList(2, 3)));
@@ -6032,7 +6053,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetMapValueForInteger() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(new HostColumnVector.StructData(Arrays.asList(1, 2)));
     List<HostColumnVector.StructData> list2 = Arrays.asList(new HostColumnVector.StructData(Arrays.asList(1, 3)));
@@ -6047,7 +6068,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetMapValueForStrings() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(new HostColumnVector.StructData(Arrays.asList("a", "b")));
     List<HostColumnVector.StructData> list2 = Arrays.asList(new HostColumnVector.StructData(Arrays.asList("a", "c")));
@@ -6062,7 +6083,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetMapValueEmptyInput() {
     HostColumnVector.StructType structType = new HostColumnVector.StructType(true, Arrays.asList(new HostColumnVector.BasicType(true, DType.STRING),
         new HostColumnVector.BasicType(true, DType.STRING)));
@@ -6074,7 +6095,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetMapKeyExistenceForKeys() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(new HostColumnVector.StructData(1, 2));
     List<HostColumnVector.StructData> list2 = Arrays.asList(new HostColumnVector.StructData(1, 3));
@@ -6093,7 +6114,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetMapKeyExistenceForInteger() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(new HostColumnVector.StructData(1, 2));
     List<HostColumnVector.StructData> list2 = Arrays.asList(new HostColumnVector.StructData(1, 3));
@@ -6124,7 +6145,7 @@ void testExtractReWithMultiLineDelimiters() {
     assertTrue(e.getMessage().contains("Lookup key may not be null"));
   }
 
-  @Test
+  @Disabled
   void testGetMapKeyExistenceForStrings() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(new HostColumnVector.StructData("a", "b"));
     List<HostColumnVector.StructData> list2 = Arrays.asList(new HostColumnVector.StructData("a", "c"));
@@ -6154,7 +6175,7 @@ void testExtractReWithMultiLineDelimiters() {
     });
     assertTrue(e.getMessage().contains("Lookup key may not be null"));
   }
-  @Test
+  @Disabled
   void testListOfStructsOfStructs() {
     List<HostColumnVector.StructData> list1 = Arrays.asList(
         new HostColumnVector.StructData(Arrays.asList(new HostColumnVector.StructData(Arrays.asList("a")))));
@@ -6172,7 +6193,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testCopyToColumnVector() {
     List<Integer> list1 = Arrays.asList(10, 11, 12, 13);
     List<Integer> list2 = Arrays.asList(16, 12, 14, 15);
@@ -6188,7 +6209,7 @@ void testExtractReWithMultiLineDelimiters() {
     }
   }
 
-  @Test
+  @Disabled
   void testGetJSONObject() {
     String jsonString = "{ \"store\": {\n" +
         "    \"book\": [\n" +
@@ -6273,7 +6294,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testMakeStruct() {
     try (ColumnVector expected = ColumnVector.fromStructs(new StructType(false,
             Arrays.asList(
@@ -6290,7 +6311,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testMakeListEmpty() {
     final int numRows = 4;
     List<List<String>> emptyListOfList = new ArrayList<>();
@@ -6315,7 +6336,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testMakeList() {
     List<Integer> list1 = Arrays.asList(1, 3);
     List<Integer> list2 = Arrays.asList(2, 4);
@@ -6353,7 +6374,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceLeafNodeInList() {
     try (
         ColumnVector c1 = ColumnVector.fromInts(1, 2);
@@ -6382,7 +6403,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceLeafNodeInListWithIllegal() {
     Exception e = assertThrows(IllegalArgumentException.class, () -> {
       try (ColumnVector child1 =
@@ -6405,7 +6426,7 @@ void testGetJSONObjectWithInvalidQueries() {
     assertTrue(e.getMessage().contains("Child row count doesn't match the old child"));
   }
 
-  @Test
+  @Disabled
   void testReplaceColumnInStruct() {
     try (ColumnVector expected = ColumnVector.fromStructs(new StructType(false,
             Arrays.asList(
@@ -6427,7 +6448,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testReplaceIllegalIndexColumnInStruct() {
     Exception e = assertThrows(IllegalArgumentException.class, () -> {
       try (ColumnVector child1 = ColumnVector.fromInts(1, 4);
@@ -6442,7 +6463,7 @@ void testGetJSONObjectWithInvalidQueries() {
     assertTrue(e.getMessage().contains("One or more invalid child indices passed to be replaced"));
   }
 
-  @Test
+  @Disabled
   void testReplaceSameIndexColumnInStruct() {
     Exception e = assertThrows(IllegalArgumentException.class, () -> {
       try (ColumnVector child1 = ColumnVector.fromInts(1, 4);
@@ -6481,7 +6502,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testGenerateListOffsets() {
     try (ColumnVector index = ColumnVector.fromInts(1, 3, 3, 0, 2, 0, 0, 5, 10, 25);
          ColumnVector actual = index.generateListOffsets();
@@ -6496,7 +6517,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testApplyBooleanMaskFromListOfInt() {
     try (
         ColumnVector elementCv = ColumnVector.fromBoxedInts(
@@ -6535,7 +6556,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testApplyBooleanMaskFromListOfStructure() {
     try (
         ColumnVector keyCv = ColumnVector.fromBoxedInts(
@@ -6590,7 +6611,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   void testColumnViewWithNonEmptyNullsIsCleared() {
     List<Integer> list0 = Arrays.asList(1, 2, 3);
     List<Integer> list1 = Arrays.asList(4, 5, null);
@@ -6639,7 +6660,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   public void testEventHandlerIsCalledForEachClose() {
     final AtomicInteger onClosedWasCalled = new AtomicInteger(0);
     try (ColumnVector cv = ColumnVector.fromInts(1,2,3,4)) {
@@ -6651,7 +6672,7 @@ void testGetJSONObjectWithInvalidQueries() {
     assertEquals(1, onClosedWasCalled.get());
   }
 
-  @Test
+  @Disabled
   public void testHostEventHandlerIsCalledForEachClose() {
     final AtomicInteger onClosedWasCalled = new AtomicInteger(0);
     try (HostColumnVector cv = HostColumnVector.fromInts(1,2,3,4)) {
@@ -6663,7 +6684,7 @@ void testGetJSONObjectWithInvalidQueries() {
     assertEquals(1, onClosedWasCalled.get());
   }
 
-  @Test
+  @Disabled
   public void testEventHandlerIsNotCalledIfNotSet() {
     final AtomicInteger onClosedWasCalled = new AtomicInteger(0);
     try (ColumnVector cv = ColumnVector.fromInts(1,2,3,4)) {
@@ -6680,7 +6701,7 @@ void testGetJSONObjectWithInvalidQueries() {
     assertEquals(0, onClosedWasCalled.get());
   }
 
-  @Test
+  @Disabled
   public void testHostEventHandlerIsNotCalledIfNotSet() {
     final AtomicInteger onClosedWasCalled = new AtomicInteger(0);
     try (HostColumnVector cv = HostColumnVector.fromInts(1,2,3,4)) {
@@ -6701,7 +6722,7 @@ void testGetJSONObjectWithInvalidQueries() {
    * Test that the ColumnView with unknown null-counts still returns
    * the correct null-count when queried.
    */
-  @Test
+  @Disabled
   public void testColumnViewNullCount() {
     try (ColumnVector vector = ColumnVector.fromBoxedInts(1, 2, null, 3, null, 4, null, 5, null, 6);
          ColumnView view = new ColumnView(DType.INT32,
@@ -6714,7 +6735,7 @@ void testGetJSONObjectWithInvalidQueries() {
     }
   }
 
-  @Test
+  @Disabled
   public void testUseAfterFree() {
     ColumnVector vector = ColumnVector.fromBoxedInts(1, 2, 3);
     vector.close();

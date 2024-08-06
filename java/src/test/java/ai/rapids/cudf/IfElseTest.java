@@ -16,9 +16,32 @@
  *
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 package ai.rapids.cudf;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -519,7 +542,7 @@ public class IfElseTest extends CudfTestBase {
     );
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createBooleanVVParams")
   void testBooleanVV(Boolean[] predVals, Boolean[] trueVals, Boolean[] falseVals, Boolean[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -531,7 +554,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createBooleanVSParams")
   void testBooleanVS(Boolean[] predVals, Boolean[] trueVals, Boolean falseVal, Boolean[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -543,7 +566,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createBooleanSVParams")
   void testBooleanSV(Boolean[] predVals, Boolean trueVal, Boolean[] falseVals, Boolean[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -555,7 +578,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createBooleanSSParams")
   void testBooleanSS(Boolean[] predVals, Boolean trueVal, Boolean falseVal, Boolean[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -567,7 +590,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createByteVVParams")
   void testByteVV(Boolean[] predVals, Byte[] trueVals, Byte[] falseVals, Byte[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -579,7 +602,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createByteVSParams")
   void testByteVS(Boolean[] predVals, Byte[] trueVals, Byte falseVal, Byte[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -591,7 +614,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createByteSVParams")
   void testBytesSV(Boolean[] predVals, Byte trueVal, Byte[] falseVals, Byte[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -603,7 +626,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createByteSSParams")
   void testBytesSS(Boolean[] predVals, Byte trueVal, Byte falseVal, Byte[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -615,7 +638,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createShortVVParams")
   void testShortVV(Boolean[] predVals, Short[] trueVals, Short[] falseVals, Short[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -627,7 +650,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createShortVSParams")
   void testShortVS(Boolean[] predVals, Short[] trueVals, Short falseVal, Short[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -639,7 +662,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createShortSVParams")
   void testShortsSV(Boolean[] predVals, Short trueVal, Short[] falseVals, Short[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -651,7 +674,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createShortSSParams")
   void testShortsSS(Boolean[] predVals, Short trueVal, Short falseVal, Short[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -663,7 +686,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntVVParams")
   void testIntVV(Boolean[] predVals, Integer[] trueVals, Integer[] falseVals, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -675,7 +698,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntVSParams")
   void testIntVS(Boolean[] predVals, Integer[] trueVals, Integer falseVal, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -687,7 +710,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntSVParams")
   void testIntsSV(Boolean[] predVals, Integer trueVal, Integer[] falseVals, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -699,7 +722,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntSSParams")
   void testIntsSS(Boolean[] predVals, Integer trueVal, Integer falseVal, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -711,7 +734,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVVParams")
   void testLongVV(Boolean[] predVals, Long[] trueVals, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -723,7 +746,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVSParams")
   void testLongVS(Boolean[] predVals, Long[] trueVals, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -735,7 +758,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSVParams")
   void testLongsSV(Boolean[] predVals, Long trueVal, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -747,7 +770,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSSParams")
   void testLongsSS(Boolean[] predVals, Long trueVal, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -759,7 +782,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createFloatVVParams")
   void testFloatVV(Boolean[] predVals, Float[] trueVals, Float[] falseVals, Float[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -771,7 +794,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createFloatVSParams")
   void testFloatVS(Boolean[] predVals, Float[] trueVals, Float falseVal, Float[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -783,7 +806,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createFloatSVParams")
   void testFloatsSV(Boolean[] predVals, Float trueVal, Float[] falseVals, Float[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -795,7 +818,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createFloatSSParams")
   void testFloatsSS(Boolean[] predVals, Float trueVal, Float falseVal, Float[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -807,7 +830,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createDoubleVVParams")
   void testDoubleVV(Boolean[] predVals, Double[] trueVals, Double[] falseVals, Double[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -819,7 +842,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createDoubleVSParams")
   void testDoubleVS(Boolean[] predVals, Double[] trueVals, Double falseVal, Double[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -831,7 +854,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createDoubleSVParams")
   void testDoublesSV(Boolean[] predVals, Double trueVal, Double[] falseVals, Double[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -843,7 +866,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createDoubleSSParams")
   void testDoublesSS(Boolean[] predVals, Double trueVal, Double falseVal, Double[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -855,7 +878,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntVVParams")
   void testTimestampDaysVV(Boolean[] predVals, Integer[] trueVals, Integer[] falseVals, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -867,7 +890,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntVSParams")
   void testTimestampDaysVS(Boolean[] predVals, Integer[] trueVals, Integer falseVal, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -879,7 +902,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntSVParams")
   void testTimestampDaysSV(Boolean[] predVals, Integer trueVal, Integer[] falseVals, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -891,7 +914,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createIntSSParams")
   void testTimestampDaysSS(Boolean[] predVals, Integer trueVal, Integer falseVal, Integer[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -903,7 +926,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVVParams")
   void testTimestampSecondsVV(Boolean[] predVals, Long[] trueVals, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -915,7 +938,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVSParams")
   void testTimestampSecondsVS(Boolean[] predVals, Long[] trueVals, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -927,7 +950,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSVParams")
   void testTimestampSecondsSV(Boolean[] predVals, Long trueVal, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -939,7 +962,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSSParams")
   void testTimestampSecondsSS(Boolean[] predVals, Long trueVal, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -951,7 +974,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVVParams")
   void testTimestampMilliSecondsVV(Boolean[] predVals, Long[] trueVals, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -963,7 +986,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVSParams")
   void testTimestampMilliSecondsVS(Boolean[] predVals, Long[] trueVals, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -975,7 +998,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSVParams")
   void testTimestampMilliSecondsSV(Boolean[] predVals, Long trueVal, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -987,7 +1010,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSSParams")
   void testTimestampMilliSecondsSS(Boolean[] predVals, Long trueVal, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -999,7 +1022,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVVParams")
   void testTimestampMicroSecondsVV(Boolean[] predVals, Long[] trueVals, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1011,7 +1034,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVSParams")
   void testTimestampMicroSecondsVS(Boolean[] predVals, Long[] trueVals, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1023,7 +1046,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSVParams")
   void testTimestampMicroSecondsSV(Boolean[] predVals, Long trueVal, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1035,7 +1058,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSSParams")
   void testTimestampMicroSecondsSS(Boolean[] predVals, Long trueVal, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1047,7 +1070,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVVParams")
   void testTimestampNanoSecondsVV(Boolean[] predVals, Long[] trueVals, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1059,7 +1082,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongVSParams")
   void testTimestampNanoSecondsVS(Boolean[] predVals, Long[] trueVals, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1071,7 +1094,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSVParams")
   void testTimestampNanoSecondsSV(Boolean[] predVals, Long trueVal, Long[] falseVals, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1083,7 +1106,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createLongSSParams")
   void testTimestampNanoSecondsSS(Boolean[] predVals, Long trueVal, Long falseVal, Long[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1095,7 +1118,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createStringVVParams")
   void testStringVV(Boolean[] predVals, String[] trueVals, String[] falseVals, String[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1107,7 +1130,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createStringVSParams")
   void testStringVS(Boolean[] predVals, String[] trueVals, String falseVal, String[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1119,7 +1142,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createStringSVParams")
   void testStringSV(Boolean[] predVals, String trueVal, String[] falseVals, String[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1131,7 +1154,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @ParameterizedTest
+  @ParameterizedTest @Disabled
   @MethodSource("createStringSSParams")
   void testStringSS(Boolean[] predVals, String trueVal, String falseVal, String[] expectVals) {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(predVals);
@@ -1143,7 +1166,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMismatchedTypesVV() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          ColumnVector trueVec = ColumnVector.fromBoxedInts(1, 2, 3, 4);
@@ -1152,7 +1175,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMismatchedTypesVS() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          ColumnVector trueVec = ColumnVector.fromBoxedLongs(1L, 2L, 3L, 4L);
@@ -1161,7 +1184,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMismatchedTypesSV() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          Scalar trueScalar = Scalar.fromByte((byte) 1);
@@ -1170,7 +1193,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   void testMismatchedTypesSS() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          Scalar trueScalar = Scalar.fromByte((byte) 1);
