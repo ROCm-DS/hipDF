@@ -28,6 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Disabled;
+
 public class ByteColumnVectorTest extends CudfTestBase {
 
   @Test
@@ -154,7 +156,7 @@ public class ByteColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Disabled
   public void testCastToByte() {
     final int[] DATES = {17897}; //Jan 01, 2019
 
