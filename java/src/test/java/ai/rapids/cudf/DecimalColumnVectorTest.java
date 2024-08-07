@@ -418,8 +418,7 @@ public class DecimalColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
-  @Test
+  @Test @Disabled
   public void testColumnVectorFromScalar() {
     try (Scalar s = Scalar.fromDecimal(-3, 1233456)) {
       try (ColumnVector cv = ColumnVector.fromScalar(s, 10)) {

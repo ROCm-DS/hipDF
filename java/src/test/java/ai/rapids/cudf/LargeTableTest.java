@@ -60,7 +60,7 @@ public class LargeTableTest extends CudfTestBase {
    * Tests that exploding large array columns will result in CudfColumnOverflowException
    * if the column size limit is crossed.
    */
-  @Disabled
+  @Test @Disabled
   public void testExplodeOverflow() {
     int numRows = 1000_000;
     int arraySize = 1000;
