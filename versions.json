@@ -1,0 +1,19 @@
+{
+  "packages" : {
+    "libhipcxx" : {
+      "version" : "1.0",
+      "git_url" : "https://github.com/ROCm/libhipcxx",
+      "git_tag" : "dev"
+    },
+    "hipco" : {
+      "version" : "1.0",
+      "git_url" : "https://github.com/rocm/hipCollections",
+      "git_tag" : "main-fix-cmakelists.txt"
+    },
+    "hipcomp" : {
+      "version" : "2.2.0",
+      "git_url" : "https://github.com/ROCm/hipcomp-core",
+      "git_tag" : "dev"
+    }
+  }
+}
