@@ -42,6 +42,11 @@ include(rapids-hip)
 include(rapids-export)
 include(rapids-find)
 
+# prescribe versions of internal dependencies
+include(cpm/package_override)
+# message(STATUS ${CMAKE_CURRENT_LIST_DIR})
+rapids_cpm_package_override(${CMAKE_CURRENT_LIST_DIR}/../versions.json)
+
 rapids_hip_init_architectures(CUDF)
 
 # NOTE(HIP/AMD/CUDA): rapids_*_init_architectures relies on HIP/CUDA compiler being set
