@@ -54,19 +54,7 @@ public class NativeDepsLoader {
    * stage are guaranteed to have finished loading before any dependencies in
    * subsequent stages are loaded.
    */
-  private static final String[][] loadOrder = new String[][]{
-      new String[]{
-      "hipdf"
-    },
-    new String[]{
-      "hipdfjni"
-    },
-    new String[]{
-      "hipcomp"
-    } 
-  };
-
-  private static final String[][] noNVRAMLoadOrder = new String[][] {
+  private final static String[][] loadOrder = new String[][]{
     new String[]{
       "hipdf"
     },
@@ -75,9 +63,8 @@ public class NativeDepsLoader {
     },
     new String[]{
       "hipcomp"
-    } 
+    }
   };
-
   private static final ClassLoader loader = NativeDepsLoader.class.getClassLoader();
 
   private static boolean loaded = false;
@@ -88,7 +75,11 @@ public class NativeDepsLoader {
   public static synchronized void loadNativeDeps() {
     if (!loaded) {
       try {
-        loadNativeDeps(loadOrder);
+        Arrays.asList(loadOrder).stream().forEach(s -> {
+          for (String lib:s) {
+            System.loadLibrary(lib);
+          }
+        });
         loaded = true;
       } catch (Throwable t) {
         log.error("Could not load cudf jni library...", t);
