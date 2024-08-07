@@ -1144,7 +1144,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   void testMismatchedTypesVV() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          ColumnVector trueVec = ColumnVector.fromBoxedInts(1, 2, 3, 4);
@@ -1153,7 +1153,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   void testMismatchedTypesVS() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          ColumnVector trueVec = ColumnVector.fromBoxedLongs(1L, 2L, 3L, 4L);
@@ -1162,7 +1162,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   void testMismatchedTypesSV() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          Scalar trueScalar = Scalar.fromByte((byte) 1);
@@ -1171,7 +1171,7 @@ public class IfElseTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   void testMismatchedTypesSS() {
     try (ColumnVector pred = ColumnVector.fromBoxedBooleans(true, false, false, true);
          Scalar trueScalar = Scalar.fromByte((byte) 1);

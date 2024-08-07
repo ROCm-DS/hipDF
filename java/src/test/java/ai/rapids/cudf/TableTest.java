@@ -45,6 +45,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Disabled;
+
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -75,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class TableTest extends CudfTestBase {
   private static final HostMemoryAllocator hostMemoryAllocator = DefaultHostMemoryAllocator.get();
@@ -135,7 +137,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testDistinctCount() {
     try (Table table1 = new Table.TestBuilder()
             .column(5, 3, null, null, 5)
@@ -145,7 +147,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMergeSimple() {
     try (Table table1 = new Table.TestBuilder()
             .column(5, 3, 3, 1, 1)
@@ -169,7 +171,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testOrderByAD() {
     try (Table table = new Table.TestBuilder()
         .column(5, 3, 3, 1, 1)
@@ -186,7 +188,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSortOrderSimple() {
     try (Table table = new Table.TestBuilder()
         .column(5, 3, 3, 1, 1)
@@ -204,7 +206,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testOrderByDD() {
     try (Table table = new Table.TestBuilder()
         .column(5, 3, 3, 1, 1)
@@ -221,7 +223,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testOrderByWithNulls() {
     try (Table table = new Table.TestBuilder()
         .column(5, null, 3, 1, 1)
@@ -240,7 +242,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testOrderByWithNullsAndStrings() {
     try (Table table = new Table.TestBuilder()
         .column("4", "3", "2", "1", "0")
@@ -259,7 +261,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testTableCreationIncreasesRefCountWithDoubleFree() {
     //tests the Table increases the refcount on column vectors
     assertThrows(IllegalStateException.class, () -> {
@@ -275,7 +277,7 @@ public class TableTest extends CudfTestBase {
     });
   }
 
-  @Disabled
+  @Test
   void testGetRows() {
     try (ColumnVector v1 = ColumnVector.build(DType.INT32, 5, Range.appendInts(5));
          ColumnVector v2 = ColumnVector.build(DType.INT32, 5, Range.appendInts(5));
@@ -284,13 +286,13 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSettingNullVectors() {
     ColumnVector[] columnVectors = null;
     assertThrows(AssertionError.class, () -> new Table(columnVectors));
   }
 
-  @Disabled
+  @Test
   void testAllRowsSize() {
     try (ColumnVector v1 = ColumnVector.build(DType.INT32, 4, Range.appendInts(4));
          ColumnVector v2 = ColumnVector.build(DType.INT32, 5, Range.appendInts(5))) {
@@ -301,7 +303,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGetNumberOfColumns() {
     try (ColumnVector v1 = ColumnVector.build(DType.INT32, 5, Range.appendInts(5));
          ColumnVector v2 = ColumnVector.build(DType.INT32, 5, Range.appendInts(5));
@@ -310,8 +312,8 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  //@Disabled
-  @Disabled
+  //@Test
+  @Test
   void testReadJSONFile() {
     Schema schema = Schema.builder()
         .column(DType.STRING, "name")
@@ -329,7 +331,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadJSONFileWithDifferentColumnOrder() {
     Schema schema = Schema.builder()
         .column(DType.INT32, "age")
@@ -347,7 +349,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadJSONBufferInferred() {
     JSONOptions opts = JSONOptions.builder()
         .withDayFirst(true)
@@ -367,7 +369,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadJSONSubColumns() {
     // JSON file has 2 columns, here only read 1 column
     Schema schema = Schema.builder()
@@ -384,7 +386,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadJSONBuffer() {
     // JSON reader will set the column according to the iterator if can't infer the name
     // So we must set the same name accordingly
@@ -409,7 +411,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadJSONBufferWithOffset() {
     // JSON reader will set the column according to the iterator if can't infer the name
     // So we must set the same name accordingly
@@ -436,7 +438,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadJSONTableWithMeta() {
     JSONOptions opts = JSONOptions.builder()
             .build();
@@ -460,7 +462,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadCSVPrune() {
     Schema schema = Schema.builder()
         .column(DType.INT32, "A")
@@ -480,7 +482,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadCSVBufferInferred() {
     CSVOptions opts = CSVOptions.builder()
         .includeColumn("A")
@@ -509,7 +511,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadCSVBuffer() {
     CSVOptions opts = CSVOptions.builder()
         .includeColumn("A")
@@ -529,7 +531,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadCSVWithOffset() {
     CSVOptions opts = CSVOptions.builder()
         .includeColumn("A")
@@ -549,7 +551,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadCSVOtherTypes() {
     final byte[] CSV_DATA_WITH_TYPES = ("A,B,C,D\n" +
         "0,true,120,\"zero\"\n" +
@@ -588,7 +590,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadCSV() {
     Schema schema = Schema.builder()
         .column(DType.INT32, "A")
@@ -653,7 +655,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testWriteCSVToFile() throws IOException {
     final boolean INCLUDE_HEADER = true;
     final boolean NO_HEADER = false;
@@ -702,7 +704,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testWriteUnquotedCSVToFile() throws IOException {
     testWriteUnquotedCSVToFileImpl(',');
     testWriteUnquotedCSVToFileImpl('\u0001');
@@ -752,7 +754,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testChunkedCSVWriterUnquoted() throws IOException {
     testChunkedCSVWriterUnquotedImpl(',');
     testChunkedCSVWriterUnquotedImpl('\u0001');
@@ -809,7 +811,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testChunkedCSVWriter() throws IOException {
     final boolean INCLUDE_HEADER = true;
     final boolean NO_HEADER = false;
@@ -819,7 +821,7 @@ public class TableTest extends CudfTestBase {
     testChunkedCSVWriterImpl('\u0001', INCLUDE_HEADER, "True", "False");
   }
 
-  @Disabled
+  @Test
   void testReadParquet() {
     ParquetOptions opts = ParquetOptions.builder()
         .includeColumn("loan_id")
@@ -833,7 +835,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadParquetBinary() {
     ParquetOptions opts = ParquetOptions.builder()
         .includeColumn("value1", true)
@@ -855,7 +857,7 @@ public class TableTest extends CudfTestBase {
     return ret;
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToBufferChunkedBinary() {
     // We create a String table and a Binary table with the same data in them to
     // avoid trying to read the binary data back in the same way. At least until the
@@ -892,7 +894,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadParquetBuffer() throws IOException {
     ParquetOptions opts = ParquetOptions.builder()
         .includeColumn("loan_id")
@@ -912,7 +914,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadParquetFull() {
     try (Table table = Table.readParquet(TEST_PARQUET_FILE)) {
       long rows = table.getRowCount();
@@ -951,7 +953,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadParquetContainsDecimalData() {
     try (Table table = Table.readParquet(TEST_DECIMAL_PARQUET_FILE)) {
       long rows = table.getRowCount();
@@ -970,7 +972,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testChunkedReadParquet() {
     try (ParquetChunkedReader reader = new ParquetChunkedReader(240000,
         TEST_PARQUET_FILE_CHUNKED_READ)) {
@@ -987,7 +989,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadAvro() {
     AvroOptions opts = AvroOptions.builder()
         .includeColumn("bool_col")
@@ -1006,7 +1008,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadAvroBuffer() throws IOException{
     AvroOptions opts = AvroOptions.builder()
         .includeColumn("bool_col")
@@ -1025,7 +1027,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadAvroFull() {
     try (Table expected = new Table.TestBuilder()
         .column(4, 5, 6, 7, 2, 3, 0, 1)
@@ -1046,7 +1048,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadORC() {
     ORCOptions opts = ORCOptions.builder()
         .includeColumn("string1")
@@ -1063,7 +1065,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadORCBuffer() throws IOException {
     ORCOptions opts = ORCOptions.builder()
         .includeColumn("string1")
@@ -1084,7 +1086,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadORCFull() {
     try (Table expected = new Table.TestBuilder()
         .column(false, true)
@@ -1101,7 +1103,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadORCNumPyTypes() {
     // by default ORC will promote TIMESTAMP_DAYS to TIMESTAMP_MILLISECONDS
     DType found;
@@ -1121,7 +1123,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testReadORCTimeUnit() {
     // specifying no NumPy types should load them as TIMESTAMP_DAYS.
     // specifying a specific type will return the result in that unit
@@ -1136,7 +1138,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testCrossJoin() {
     try (Table leftTable = new Table.TestBuilder()
             .column(100, 101, 102)
@@ -1180,7 +1182,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
@@ -1200,7 +1202,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder()
@@ -1224,7 +1226,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftHashJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
@@ -1245,7 +1247,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftHashJoinGatherMapsWithCount() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
@@ -1268,7 +1270,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftHashJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder()
@@ -1293,7 +1295,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftHashJoinGatherMapsNullsWithCount() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder()
@@ -1320,7 +1322,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -1346,7 +1348,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
@@ -1374,7 +1376,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftJoinGatherMapsWithCount() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -1402,7 +1404,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftJoinGatherMapsNullsWithCount() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
@@ -1432,7 +1434,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -1465,7 +1467,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -1498,7 +1500,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftJoinGatherMapsWithSize() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -1534,7 +1536,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftJoinGatherMapsNullsWithSize() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -1570,7 +1572,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInnerJoinGatherMaps() {
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
          Table rightKeys = new Table.TestBuilder().column(6, 5, 9, 8, 10, 32).build();
@@ -1589,7 +1591,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInnerJoinGatherMapsNulls() {
     try (Table leftKeys = new Table.TestBuilder()
         .column(2, 3, 9, 0, 1, 7, 4, null, null, 8)
@@ -1612,7 +1614,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInnerHashJoinGatherMaps() {
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
          Table rightKeys = new Table.TestBuilder().column(6, 5, 9, 8, 10, 32).build();
@@ -1632,7 +1634,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInnerHashJoinGatherMapsWithCount() {
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
          Table rightKeys = new Table.TestBuilder().column(6, 5, 9, 8, 10, 32).build();
@@ -1654,7 +1656,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInnerHashJoinGatherMapsNulls() {
     try (Table leftKeys = new Table.TestBuilder()
         .column(2, 3, 9, 0, 1, 7, 4, null, null, 8)
@@ -1678,7 +1680,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInnerHashJoinGatherMapsNullsWithCount() {
     try (Table leftKeys = new Table.TestBuilder()
         .column(2, 3, 9, 0, 1, 7, 4, null, null, 8)
@@ -1704,7 +1706,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalInnerJoinGatherMaps() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(0, TableReference.LEFT),
@@ -1730,7 +1732,7 @@ public class TableTest extends CudfTestBase {
   }
 
   // Test non-null-supporting equality at least once.
-  @Disabled
+  @Test
   void testConditionalInnerJoinGatherMapsEqual() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -1757,7 +1759,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalInnerJoinGatherMapsNulls() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -1784,7 +1786,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalInnerJoinGatherMapsWithCount() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(0, TableReference.LEFT),
@@ -1811,7 +1813,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalInnerJoinGatherMapsNullsWithCount() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -1840,7 +1842,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedInnerJoinGatherMaps() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -1872,7 +1874,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedInnerJoinGatherMapsNulls() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -1904,7 +1906,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedInnerJoinGatherMapsWithSize() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -1939,7 +1941,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedInnerJoinGatherMapsNullsWithSize() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -1974,7 +1976,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testFullJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, null, 1, 7, 4, 6, 5, 8).build();
@@ -1994,7 +1996,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testFullJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder()
@@ -2018,7 +2020,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testFullHashJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, null, 1, 7, 4, 6, 5, 8).build();
@@ -2039,7 +2041,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testFullHashJoinGatherMapsWithCount() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, null, 1, 7, 4, 6, 5, 8).build();
@@ -2062,7 +2064,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testFullHashJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder()
@@ -2087,7 +2089,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testFullHashJoinGatherMapsNullsWithCount() {
     final int inv = Integer.MIN_VALUE;
     try (Table leftKeys = new Table.TestBuilder()
@@ -2114,7 +2116,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalFullJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -2140,7 +2142,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalFullJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
@@ -2168,7 +2170,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedFullJoinGatherMaps() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -2201,7 +2203,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedFullJoinGatherMapsNulls() {
     final int inv = Integer.MIN_VALUE;
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
@@ -2234,7 +2236,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftSemiJoinGatherMap() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2259,7 +2261,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftSemiJoinGatherMapNulls() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2284,7 +2286,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftSemiJoinGatherMapWithSize() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2313,7 +2315,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftSemiJoinGatherMapNullsWithSize() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2342,7 +2344,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftAntiJoinGatherMap() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2367,7 +2369,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftAntiJoinGatherMapNulls() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2392,7 +2394,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftAntiJoinGatherMapWithSize() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2421,7 +2423,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMixedLeftAntiJoinGatherMapNullsWithSize() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(1, TableReference.LEFT),
@@ -2450,7 +2452,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftSemiJoinGatherMap() {
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
          Table rightKeys = new Table.TestBuilder().column(6, 5, 9, 8, 10, 32).build();
@@ -2462,7 +2464,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testLeftSemiJoinGatherMapNulls() {
     try (Table leftKeys = new Table.TestBuilder()
         .column(2, 3, 9, 0, 1, 7, 4, null, null, 8)
@@ -2478,7 +2480,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftSemiJoinGatherMap() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(0, TableReference.LEFT),
@@ -2496,7 +2498,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftSemiJoinGatherMapNulls() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -2516,7 +2518,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftSemiJoinGatherMapWithCount() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(0, TableReference.LEFT),
@@ -2538,7 +2540,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftSemiJoinGatherMapNullsWithCount() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -2562,7 +2564,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testAntiSemiJoinGatherMap() {
     try (Table leftKeys = new Table.TestBuilder().column(2, 3, 9, 0, 1, 7, 4, 6, 5, 8).build();
          Table rightKeys = new Table.TestBuilder().column(6, 5, 9, 8, 10, 32).build();
@@ -2574,7 +2576,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testAntiSemiJoinGatherMapNulls() {
     try (Table leftKeys = new Table.TestBuilder()
         .column(2, 3, 9, 0, 1, 7, 4, null, null, 8)
@@ -2590,7 +2592,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftAntiJoinGatherMap() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(0, TableReference.LEFT),
@@ -2608,7 +2610,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalAntiSemiJoinGatherMapNulls() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -2628,7 +2630,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalLeftAntiJoinGatherMapWithCount() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.GREATER,
         new ColumnReference(0, TableReference.LEFT),
@@ -2650,7 +2652,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConditionalAntiSemiJoinGatherMapNullsWithCount() {
     BinaryOperation expr = new BinaryOperation(BinaryOperator.NULL_EQUAL,
         new ColumnReference(0, TableReference.LEFT),
@@ -2674,7 +2676,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsNulls() {
     boolean[] descFlags = new boolean[1];
     try (Table table = new TestBuilder()
@@ -2693,7 +2695,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsValuesSizeBigger() {
     boolean[] descFlags = new boolean[2];
     try(Table table = new TestBuilder()
@@ -2710,7 +2712,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsInputSizeBigger() {
     boolean[] descFlags = new boolean[3];
     try(Table table = new TestBuilder()
@@ -2727,7 +2729,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsMultiCol() {
     boolean[] descFlags = new boolean[4];
     try (Table table = new TestBuilder()
@@ -2753,7 +2755,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsFloatsMultiVal() {
     boolean[] descFlags = new boolean[1];
     try (Table table = new TestBuilder()
@@ -2772,7 +2774,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsFloatsSingleCol() {
     boolean[] descFlags = {false};
     try(Table table = new TestBuilder()
@@ -2792,7 +2794,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsFloatsSingleColDesc() {
     boolean[] descFlags = new boolean[] {true};
     try(Table table = new TestBuilder()
@@ -2812,7 +2814,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsIntsSingleCol() {
     boolean[] descFlags = new boolean[1];
     try(Table table = new TestBuilder()
@@ -2832,7 +2834,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsIntsSingleColDesc() {
     boolean[] descFlags = new boolean[]{true};
     try (Table table = new TestBuilder()
@@ -2851,7 +2853,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsString() {
     boolean[] descFlags = new boolean[1];
     try (ColumnVector cIn = ColumnVector.build(DType.STRING, 4, (b) -> {
@@ -2873,7 +2875,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsEmptyValues() {
     boolean[] descFlags = new boolean[1];
     try (ColumnVector cv = ColumnVector.fromBoxedLongs();
@@ -2888,7 +2890,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsEmptyInput() {
     boolean[] descFlags = new boolean[1];
     try (ColumnVector cv =  ColumnVector.fromBoxedLongs();
@@ -2912,7 +2914,7 @@ public class TableTest extends CudfTestBase {
         table.lowerBound(nullsAreSmallest, values, descFlags);
   }
 
-  @Disabled
+  @Test
   void testRepeat() {
     try (Table t = new Table.TestBuilder()
             .column(1, 2)
@@ -2931,7 +2933,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testRepeatColumn() {
     try (Table t = new Table.TestBuilder()
             .column(1, 2)
@@ -2951,7 +2953,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInterleaveIntColumns() {
     try (Table t = new Table.TestBuilder()
           .column(1,2,3,4,5)
@@ -2963,7 +2965,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInterleaveFloatColumns() {
     try (Table t = new Table.TestBuilder()
         .column(1f,2f,3f,4f,5f)
@@ -2975,7 +2977,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInterleaveDecimalColumns() {
     try (Table t = new Table.TestBuilder()
         .decimal32Column(-2, 123, 456, 789)
@@ -2995,7 +2997,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInterleaveStringColumns() {
     try (Table t = new Table.TestBuilder()
         .column("a", "b", "c")
@@ -3007,7 +3009,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testInterleaveMixedColumns() {
     try (Table t = new Table.TestBuilder()
         .column(1f,2f,3f,4f,5f)
@@ -3018,7 +3020,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConcatNoNulls() {
     try (Table t1 = new Table.TestBuilder()
         .column(1, 2, 3)
@@ -3057,7 +3059,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConcatWithNulls() {
     try (Table t1 = new Table.TestBuilder()
         .column(1, null, 3)
@@ -3088,7 +3090,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testContiguousSplit() {
     ContiguousTable[] splits = null;
     try (Table t1 = new Table.TestBuilder()
@@ -3116,7 +3118,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testChunkedPackBasic() {
     try (Table t1 = new Table.TestBuilder()
         .column(10, 12, 14, 16, 18, 20, 22, 24, null, 28)
@@ -3139,8 +3141,8 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
-  void testChunkedPackTwoPasses() {
+  @Test @Disabled // fails with:  NULL for Column 0 Row 15 ==> expected: <true> but was: <false>
+  void DPasses() {
     // this test packes ~2MB worth of long into a 1MB bounce buffer
     // this is 3 iterations because of the validity buffer
     Long[] longs = new Long[256*1024];
@@ -3168,7 +3170,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testContiguousSplitWithStrings() {
     ContiguousTable[] splits = null;
     try (Table t1 = new Table.TestBuilder()
@@ -3197,7 +3199,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testContiguousSplitWithStringsChunked() {
     try (Table t1 = new Table.TestBuilder()
         .column(10, 12, 14, 16, 18, 20, 22, 24, null, 28)
@@ -3221,7 +3223,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testPartStability() {
     final int PARTS = 5;
     int expectedPart = -1;
@@ -3257,7 +3259,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testPartition() {
     try (Table t = new Table.TestBuilder()
         .column(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
@@ -3284,7 +3286,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testIdentityHashPartition() {
     final int count = 1024 * 1024;
     try (ColumnVector aIn = ColumnVector.build(DType.INT64, count, Range.appendLongs(count));
@@ -3334,7 +3336,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testHashPartition() {
     final int count = 1024 * 1024;
     try (ColumnVector aIn = ColumnVector.build(DType.INT64, count, Range.appendLongs(count));
@@ -3384,7 +3386,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripEmpty() throws IOException {
     DataType listStringsType = new ListType(true, new BasicType(true, DType.STRING));
     DataType mapType = new ListType(true,
@@ -3414,7 +3416,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationZeroColumns() throws IOException {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     JCudfSerialization.writeRowsToStream(bout, 10);
@@ -3426,7 +3428,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationZeroColsZeroRows() throws IOException {
     ByteArrayOutputStream bout = new ByteArrayOutputStream();
     JCudfSerialization.writeRowsToStream(bout, 0);
@@ -3438,7 +3440,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripConcatOnHostEmpty() throws IOException {
     DataType listStringsType = new ListType(true, new BasicType(true, DType.STRING));
     DataType mapType = new ListType(true,
@@ -3493,7 +3495,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripToHostEmpty() throws IOException {
     DataType listStringsType = new ListType(true, new BasicType(true, DType.STRING));
     DataType mapType = new ListType(true,
@@ -3515,7 +3517,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testRoundRobinPartition() {
     try (Table t = new Table.TestBuilder()
         .column(     100,      202,      3003,    40004,        5,      -60,       1,      null,        3,  null,        5,     null,        7, null,        9,      null,       11,      null,        13,      null,       15)
@@ -3610,7 +3612,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripConcatHostSide() throws IOException {
     try (Table t = buildTestTable()) {
       for (int sliceAmount = 1; sliceAmount < t.getRowCount(); sliceAmount ++) {
@@ -3653,7 +3655,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripToHost() throws IOException {
     try (Table t = buildTestTable()) {
       testSerializationRoundTripToHost(t);
@@ -3696,7 +3698,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testConcatHost() throws IOException {
     try (Table t1 = new Table.TestBuilder()
         .column(
@@ -3744,7 +3746,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripSlicedHostSide() throws IOException {
     try (Table t = buildTestTable()) {
       for (int sliceAmount = 1; sliceAmount < t.getRowCount(); sliceAmount ++) {
@@ -3795,7 +3797,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationRoundTripSliced() throws IOException {
     try (Table t = buildTestTable()) {
       for (int sliceAmount = 1; sliceAmount < t.getRowCount(); sliceAmount ++) {
@@ -3817,7 +3819,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSerializationReconstructFromMetadata() throws IOException {
     try (Table t = buildTestTable()) {
       ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -3836,7 +3838,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testValidityFill() {
     byte[] buff = new byte[2];
     buff[0] = 0;
@@ -3846,7 +3848,7 @@ public class TableTest extends CudfTestBase {
     assertEquals(buff[1], 0xFFFFFFFF);
   }
 
-  @Disabled
+  @Test
   void testGroupByScan() {
     try (Table t1 = new Table.TestBuilder()
         .column(  "1",  "1",  "1",  "1",  "1",  "1",  "1",  "2",  "2",  "2",  "2") // GBY Key#0
@@ -3882,7 +3884,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByReplaceNulls() {
     try (Table t1 = new Table.TestBuilder()
         .column( "1",  "1",  "1",  "1",  "1",  "1",  "1",  "2",  "2",  "2",  "2")
@@ -3907,7 +3909,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByApproxPercentileReproCase() {
     double[] percentiles = {0.25, 0.50, 0.75};
     try (Table t1 = new Table.TestBuilder()
@@ -3930,7 +3932,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByApproxPercentile() {
     double[] percentiles = {0.25, 0.50, 0.75};
     try (Table t1 = new Table.TestBuilder()
@@ -3951,7 +3953,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMergeApproxPercentile() {
     double[] percentiles = {0.25, 0.50, 0.75};
     try (Table t1 = new Table.TestBuilder()
@@ -3979,7 +3981,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMergeApproxPercentile2() {
     double[] percentiles = {0.25, 0.50, 0.75};
     try (Table t1 = new Table.TestBuilder()
@@ -4007,7 +4009,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testCreateTDigestReduction() {
     try (Table t1 = new Table.TestBuilder()
             .column(100, 150, 160, 70, 110, 160)
@@ -4033,7 +4035,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testMergeTDigestReduction() {
     StructType centroidStruct = new StructType(false,
             new BasicType(false, DType.FLOAT64), // mean
@@ -4098,7 +4100,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMinMaxDecimal() {
     try (Table t1 = new Table.TestBuilder()
         .column( "1",  "1", "1", "1", "2")
@@ -4138,7 +4140,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMinMaxDecimalAgg() {
     try (Table t1 = new Table.TestBuilder()
         .column(-341142443, 48424546)
@@ -4161,7 +4163,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCountDecimal() {
     try (Table t1 = new Table.TestBuilder()
         .column( "1",  "1", "1", "1", "2")
@@ -4189,7 +4191,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByUniqueCount() {
     try (Table t1 = new Table.TestBuilder()
             .column( "1",  "1",  "1",  "1",  "1",  "1")
@@ -4210,7 +4212,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testOrderByDecimal() {
     try (Table t1 = new Table.TestBuilder()
         .column( "1",  "1", "1", "1")
@@ -4237,7 +4239,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByUniqueCountNulls() {
     try (Table t1 = new Table.TestBuilder()
             .column( "1",  "1",  "1",  "1",  "1",  "1")
@@ -4258,7 +4260,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCount() {
     try (Table t1 = new Table.TestBuilder().column( "1",  "1",  "1",  "1",  "1",  "1")
                                            .column(   1,    3,    3,    5,    5,    0)
@@ -4290,7 +4292,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Needs Scalar
   void testWindowingCount() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4328,7 +4330,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingMin() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4369,7 +4371,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingMax() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4410,7 +4412,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingSum() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4440,7 +4442,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingRowNumber() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4525,7 +4527,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingCollectList() {
     RollingAggregation aggCollectWithNulls = RollingAggregation.collectList(NullPolicy.INCLUDE);
     RollingAggregation aggCollect = RollingAggregation.collectList();
@@ -4601,7 +4603,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingCollectSet() {
     RollingAggregation aggCollect = RollingAggregation.collectSet();
     RollingAggregation aggCollectWithEqNulls = RollingAggregation.collectSet(NullPolicy.INCLUDE,
@@ -4710,7 +4712,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingLead() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4931,7 +4933,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingLag() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5150,7 +5152,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingMean() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
         .column( 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3) // GBY Key
@@ -5179,7 +5181,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingNthElement() {
     final Integer X = null;
     try (Table unsorted = new Table.TestBuilder()
@@ -5229,7 +5231,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingOnMultipleDifferentColumns() {
     try (Table unsorted = new Table.TestBuilder()
         .column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5284,7 +5286,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testWindowingWithoutGroupByColumns() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6) // OBY Key
         .column( 7, 5, 1, 9, 7, 9, 8, 2, 8, 0, 6, 6) // Agg Column
@@ -5313,7 +5315,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testWindowWithUnboundedPrecedingUnboundedFollowing() {
     try (Table unsorted = new Table.TestBuilder()
             .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5374,7 +5376,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Needs Scalar
   void testRangeWindowingCount() {
     try (
         Table unsorted = new Table.TestBuilder()
@@ -5418,7 +5420,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingLead() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5464,7 +5466,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingMax() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5522,7 +5524,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingRowNumber() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5566,7 +5568,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingCountDescendingTimestamps() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1) // GBY Key
@@ -5625,7 +5627,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingWithoutGroupByColumns() {
     try (Table unsorted = new Table.TestBuilder()
         .column(             7, 5, 1, 9, 7, 9, 8, 2, 8, 0, 6, 6, 8) // Agg Column
@@ -5667,7 +5669,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled //Scalar
   void testRangeWindowingOrderByUnsupportedDataTypeExceptions() {
     try (Table table = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5691,7 +5693,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testInvalidWindowTypeExceptions() {
     try (Scalar one = Scalar.fromInt(1);
          Table table = new Table.TestBuilder()
@@ -5719,7 +5721,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingCountUnboundedPreceding() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5763,7 +5765,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingWithStringOrderByColumn() {
     final String X = null;
     final int orderIndex = 3; // Index of order-by column.
@@ -5815,7 +5817,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled //Scalar
   void testRangeWindowingCountUnboundedASCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5904,7 +5906,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled //Scalar
   void testRangeWindowingCountUnboundedDESCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5999,7 +6001,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowingCountUnboundedASCWithNullsLast() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6087,7 +6089,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled //Scalar
   void testRangeWindowingCountUnboundedDESCWithNullsLast() {
     Integer X = null;
     try (Table unsorted = new Table.TestBuilder()
@@ -6212,7 +6214,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowsWithDecimalOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6317,7 +6319,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testRangeWindowsWithFloatOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
             .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6399,7 +6401,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCountWithNulls() {
     try (Table t1 = new Table.TestBuilder().column(null, null,    1,    1,    1,    1)
                                            .column(   1,    1,    1,    1,    1,    1)
@@ -6438,7 +6440,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCountWithNullsIncluded() {
     try (Table t1 = new Table.TestBuilder()
             .column(null, null,    1,    1,    1,    1)
@@ -6484,7 +6486,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCountWithCollapsingNulls() {
     try (Table t1 = new Table.TestBuilder()
         .column(null, null,    1,    1,    1,    1)
@@ -6525,7 +6527,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMax() {
     try (Table t1 = new Table.TestBuilder().column(   1,    1,    1,    1,    1,    1)
                                            .column(   1,    3,    3,    5,    5,    0)
@@ -6557,7 +6559,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByArgMax() {
     // ArgMax is a sort based aggregation.
     try (Table t1 = new Table.TestBuilder()
@@ -6579,7 +6581,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByArgMin() {
     // ArgMin is a sort based aggregation
     try (Table t1 = new Table.TestBuilder()
@@ -6601,7 +6603,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMinBool() {
     try (Table t1 = new Table.TestBuilder()
         .column(true, null, false, true, null, null)
@@ -6616,7 +6618,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMaxBool() {
     try (Table t1 = new Table.TestBuilder()
         .column(false, null, false, true, null, null)
@@ -6631,7 +6633,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByDuplicateAggregates() {
     try (Table t1 = new Table.TestBuilder().column(   1,    1,    1,    1,    1,    1)
                                            .column(   1,    3,    3,    5,    5,    0)
@@ -6670,7 +6672,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMin() {
     try (Table t1 = new Table.TestBuilder().column(   1,    1,    1,    1,    1,    1)
                                            .column(   1,    3,    3,    5,    5,    0)
@@ -6705,7 +6707,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupBySum() {
     try (Table t1 = new Table.TestBuilder().column(   1,    1,    1,    1,    1,    1)
                                            .column(   1,    3,    3,    5,    5,    0)
@@ -6738,7 +6740,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByM2() {
     // A trivial test:
     try (Table input = new Table.TestBuilder().column(1, 2, 3, 1, 2, 2, 1, 3, 3, 2)
@@ -6811,7 +6813,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMergeM2() {
     StructType nestedType = new StructType(false,
         new BasicType(true, DType.INT32),
@@ -6867,7 +6869,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByFirstExcludeNulls() {
     try (Table input = new Table.TestBuilder()
             .column(  1,   1,    1,  1,  2,    2,  2,    2)
@@ -6883,7 +6885,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByLastExcludeNulls() {
     try (Table input = new Table.TestBuilder()
             .column(  1,   1,    1,  1,  2,    2,  2,    2)
@@ -6899,7 +6901,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByFirstIncludeNulls() {
     try (Table input = new Table.TestBuilder()
             .column(  1,   1,    1,  1,  2,    2,  2,    2)
@@ -6915,7 +6917,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByLastIncludeNulls() {
     try (Table input = new Table.TestBuilder()
             .column(  1,   1,    1,  1,  2,    2,  2,    2)
@@ -6931,7 +6933,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByAvg() {
     try (Table t1 = new Table.TestBuilder().column( 1,  1,  1,  1,  1,  1)
                                            .column( 1,  3,  3,  5,  5,  0)
@@ -6964,7 +6966,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMultiAgg() {
     try (Table t1 = new Table.TestBuilder().column(  1,   1,   1,   1,   1,    1)
                                            .column(  2,   2,   2,   3,   3,    3)
@@ -7035,7 +7037,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSumWithStrings() {
     try (Table t = new Table.TestBuilder()
         .column("1-URGENT", "3-MEDIUM", "1-URGENT", "3-MEDIUM")
@@ -7051,7 +7053,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByNoAggs() {
     try (Table t1 = new Table.TestBuilder().column(   1,    1,    1,    1,    1,    1)
         .column(   1,    3,    3,    5,    5,    0)
@@ -7089,7 +7091,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByContiguousSplitGroups() throws Exception {
     try (Table table = new Table.TestBuilder()
         .column(   1,    1,    1,    1,    1,    1)
@@ -7190,7 +7192,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCollectListIncludeNulls() {
     try (Table input = new Table.TestBuilder()
         .column(1, 1, 1, 1, 2, 2, 2, 2, 3, 4)
@@ -7210,7 +7212,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMergeLists() {
     ListType listOfInts = new ListType(false, new BasicType(false, DType.INT32));
     ListType listOfStructs = new ListType(false, new StructType(false,
@@ -7258,7 +7260,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByCollectSetIncludeNulls() {
     // test with null unequal and nan unequal
     GroupByAggregation collectSet = GroupByAggregation.collectSet(NullPolicy.INCLUDE,
@@ -7326,7 +7328,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testGroupByMergeSets() {
     ListType listOfInts = new ListType(false, new BasicType(false, DType.INT32));
     ListType listOfDoubles = new ListType(false, new BasicType(false, DType.FLOAT64));
@@ -7383,7 +7385,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testRowBitCount() {
     try (Table t = new Table.TestBuilder()
         .column(0, 1, null, 3)                 // 33 bits per row (4 bytes + valid bit)
@@ -7396,7 +7398,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testRowBitCountEmpty() {
     try (Table t = new Table.TestBuilder()
             .column(new Integer[0])
@@ -7409,7 +7411,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSimpleGather() {
     try (Table testTable = new Table.TestBuilder()
             .column(1, 2, 3, 4, 5)
@@ -7429,7 +7431,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testBoundsCheckedGather() {
     try (Table testTable = new Table.TestBuilder()
             .column(1, 2, 3, 4, 5)
@@ -7450,7 +7452,7 @@ public class TableTest extends CudfTestBase {
   }
 
 
-  @Disabled
+  @Test
   void testScatterTable() {
     try (Table srcTable = new Table.TestBuilder()
             .column(1, 2, 3, 4, 5)
@@ -7476,7 +7478,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalars
   void testScatterScalars() {
     try (Scalar s1 = Scalar.fromInt(0);
          Scalar s2 = Scalar.fromString("A");
@@ -7494,7 +7496,7 @@ public class TableTest extends CudfTestBase {
      }
   }
 
-  @Disabled
+  @Test
   void testMaskWithoutValidity() {
     try (ColumnVector mask = ColumnVector.fromBoxedBooleans(true, false, true, false, true);
          ColumnVector fromInts = ColumnVector.fromInts(1, 2, 3, 4, 5);
@@ -7510,7 +7512,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMaskWithValidity() {
     final int numRows = 5;
     try (Builder builder = HostColumnVector.builder(DType.BOOL8, numRows)) {
@@ -7534,7 +7536,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMaskDataOnly() {
     byte[] maskVals = new byte[]{0, 1, 0, 1, 1};
     try (ColumnVector mask = ColumnVector.boolFromBytes(maskVals);
@@ -7551,7 +7553,7 @@ public class TableTest extends CudfTestBase {
   }
 
 
-  @Disabled
+  @Test
   void testAllFilteredFromData() {
     Boolean[] maskVals = new Boolean[5];
     Arrays.fill(maskVals, false);
@@ -7573,7 +7575,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testAllFilteredFromValidity() {
     final int numRows = 5;
     try (Builder builder = HostColumnVector.builder(DType.BOOL8, numRows)) {
@@ -7623,7 +7625,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testRemoveNullMasksIfNeeded() {
     ListType nestedType = new ListType(true, new StructType(false,
         new BasicType(true, DType.INT32),
@@ -7689,7 +7691,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testRemoveNullMasksIfNeededWithNulls() {
     ListType nestedType = new ListType(true, new StructType(true,
         new BasicType(true, DType.INT32),
@@ -7715,7 +7717,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMismatchedSizesForFilter() {
     Boolean[] maskVals = new Boolean[3];
     Arrays.fill(maskVals, true);
@@ -7726,7 +7728,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testTableBasedFilter() {
     byte[] maskVals = new byte[]{0, 1, 0, 1, 1};
     try (ColumnVector mask = ColumnVector.boolFromBytes(maskVals);
@@ -7743,7 +7745,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testDropDuplicates() {
     int[] keyColumns = new int[]{ 1 };
 
@@ -8029,7 +8031,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToBufferChunkedInt96() {
     try (Table table0 = getExpectedFileTableWithDecimals();
          MyBufferConsumer consumer = new MyBufferConsumer()) {
@@ -8062,7 +8064,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // Scalar
   void testParquetWriteMap() throws IOException {
     ParquetWriterOptions options = ParquetWriterOptions.builder()
         .withMapColumn(mapColumn("my_map",
@@ -8098,7 +8100,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToBufferChunkedWithNested() {
     ParquetWriterOptions.Builder optBuilder = ParquetWriterOptions.builder();
     WriteUtils.buildWriterOptions(optBuilder, WriteUtils.getAllColumns(false));
@@ -8118,7 +8120,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToBufferChunked() {
     ParquetWriterOptions.Builder optBuilder = ParquetWriterOptions.builder();
     List<String> columns = Lists.newArrayList(WriteUtils.getNonNestedColumns(false));
@@ -8157,7 +8159,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToFileWithNames() throws IOException {
     File tempFile = File.createTempFile("test-names", ".parquet");
     try (Table table0 = getExpectedFileTableWithDecimals()) {
@@ -8179,7 +8181,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToFileWithNamesAndMetadata() throws IOException {
     File tempFile = File.createTempFile("test-names-metadata", ".parquet");
     try (Table table0 = getExpectedFileTableWithDecimals()) {
@@ -8202,7 +8204,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteToFileUncompressedNoStats() throws IOException {
     File tempFile = File.createTempFile("test-uncompressed", ".parquet");
     try (Table table0 = getExpectedFileTableWithDecimals()) {
@@ -8224,7 +8226,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteWithFieldId() throws IOException {
     // field IDs are:
     // c1: -1, c2: 2, c3: 3, c31: 31, c32: 32, c4: -4, c5: not specified
@@ -8277,7 +8279,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testParquetWriteWithFieldIdNestNotSpecified() throws IOException {
     // field IDs are:
     // c0: no field ID
@@ -8402,7 +8404,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowIPCWriteToFileWithNamesAndMetadata() throws IOException {
     File tempFile = File.createTempFile("test-names-metadata", ".arrow");
     String[] columnNames = WriteUtils.getNonNestedColumns(false);
@@ -8435,7 +8437,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowIPCWriteToBufferChunked() {
     String[] nonNestedCols = WriteUtils.getNonNestedColumns(false);
     List<String> columns = Lists.newArrayList(nonNestedCols);
@@ -8475,7 +8477,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowIPCWriteEmptyToBufferChunked() {
     try (Table emptyTable = new Table.TestBuilder().timestampDayColumn().build();
          MyBufferConsumer consumer = new MyBufferConsumer()) {
@@ -8504,7 +8506,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testORCWriteToBufferChunked() {
     String[] selectedColumns = WriteUtils.getAllColumns(false);
     try (Table table0 = getExpectedFileTable(selectedColumns);
@@ -8542,7 +8544,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testORCWriteToFileChunked() throws IOException {
     File tempFile = File.createTempFile("test", ".orc");
     String[] selectedColumns = WriteUtils.getAllColumns(false);
@@ -8561,7 +8563,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testORCWriteMapChunked() throws IOException {
     ORCWriterOptions options = ORCWriterOptions.builder()
             .withMapColumn(mapColumn("my_map",
@@ -8590,7 +8592,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testORCWriteToFileWithColNames() throws IOException {
     File tempFile = File.createTempFile("test", ".orc");
     String[] colNames = WriteUtils.getNonNestedColumns(false);
@@ -8613,7 +8615,7 @@ public class TableTest extends CudfTestBase {
   // https://github.com/NVIDIA/spark-rapids-jni/issues/1338
   // Need to remove this tag if #1338 is fixed.
   @Tag("noSanitizer")
-  @Disabled
+  @Test
   void testORCReadAndWriteForDecimal128() throws IOException {
     File tempFile = File.createTempFile("test", ".orc");
     String[] colNames = new String[]{Columns.DECIMAL64.name,
@@ -8639,7 +8641,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testORCWriteToFileUncompressed() throws IOException {
     File tempFileUncompressed = File.createTempFile("test-uncompressed", ".orc");
     try (Table table0 = getExpectedFileTable(WriteUtils.getNonNestedColumns(false))) {
@@ -8660,7 +8662,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testStructColumnFilter() {
     List<HostColumnVector.DataType> children =
         Arrays.asList(new HostColumnVector.BasicType(true, DType.INT32),
@@ -8685,7 +8687,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testStructColumnFilterStrings() {
     List<HostColumnVector.DataType> children =
         Arrays.asList(new HostColumnVector.BasicType(true, DType.STRING),
@@ -8711,7 +8713,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // fails with  Null Count For Column 0 ==> expected: <1> but was: <4>
   void fixedWidthRowsRoundTripWide() {
     TestBuilder tb = new TestBuilder();
     IntStream.range(0, 10).forEach(i -> tb.column(3l, 9l, 4l, 2l, 20l, null));
@@ -8745,7 +8747,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled // hangs
   void fixedWidthRowsRoundTrip() {
     try (Table origTable = new TestBuilder()
         .column(3l, 9l, 4l, 2l, 20l, null)
@@ -8856,7 +8858,7 @@ public class TableTest extends CudfTestBase {
         .build();
   }
 
-  @Disabled
+  @Test
   void testBuilderWithColumn() {
     try (Table t1 = new Table.TestBuilder()
         .decimal32Column(-3, 120, -230, null, 340)
@@ -8966,7 +8968,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testExplode() {
     // Child is primitive type
     Table[] testTables = buildExplodeTestTableWithPrimitiveTypes(false, false);
@@ -8987,7 +8989,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testExplodePosition() {
     // Child is primitive type
     Table[] testTables = buildExplodeTestTableWithPrimitiveTypes(true, false);
@@ -9008,7 +9010,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testExplodeOuter() {
     // Child is primitive type
     Table[] testTables = buildExplodeTestTableWithPrimitiveTypes(false, true);
@@ -9029,7 +9031,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testExplodeOuterPosition() {
     // Child is primitive type
     Table[] testTables = buildExplodeTestTableWithPrimitiveTypes(true, true);
@@ -9050,7 +9052,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testSample() {
     try (Table t = new Table.TestBuilder().column("s1", "s2", "s3", "s4", "s5").build()) {
       try (Table ret = t.sample(3, false, 0)) {

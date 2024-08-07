@@ -24,7 +24,7 @@ import java.util.Arrays;
 
 class SegmentedReductionTest extends CudfTestBase {
 
-  @Disabled
+  @Test @Disabled
   public void testListSum() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -42,7 +42,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   public void testListMin() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -60,7 +60,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   public void testListMax() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.INT32));
@@ -78,7 +78,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   public void testListAny() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.BOOL8));
@@ -96,7 +96,7 @@ class SegmentedReductionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test @Disabled
   public void testListAll() {
     HostColumnVector.DataType dt = new HostColumnVector.ListType(true,
         new HostColumnVector.BasicType(true, DType.BOOL8));
