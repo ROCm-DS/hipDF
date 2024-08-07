@@ -37,11 +37,10 @@ if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS.cmake)
   if (DEFINED ENV{RAPIDS_CMAKE_BRANCH})
     set(RAPIDS_CMAKE_BRANCH "$ENV{RAPIDS_CMAKE_BRANCH}")
   else()
-    set(RAPIDS_CMAKE_BRANCH hipdf-dev)
+    set(RAPIDS_CMAKE_BRANCH branch-24.06)
   endif()
 
-  # TODO(HIP/AMD): once rapids-cmake is publically available for HIP, we can remove the authentication needed here
-  set(URL "https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@raw.githubusercontent.com/AMD-AI/rapids-cmake/${RAPIDS_CMAKE_BRANCH}/RAPIDS.cmake")
+  set(URL "https://raw.githubusercontent.com/ROCm/rapids-cmake/${RAPIDS_CMAKE_BRANCH}/RAPIDS.cmake")
   file(DOWNLOAD ${URL}
        ${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS.cmake
        STATUS DOWNLOAD_STATUS
