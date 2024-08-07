@@ -14,6 +14,33 @@
       "version" : "2.2.0",
       "git_url" : "https://$ENV{GITHUB_PASS}@github.com/AMD-AI/hipcomp-core",
       "git_tag" : "dev"
+    },
+    "rocthrust" : {
+      "version" : "3.0.1",
+      "git_url" : "https://github.com/ROCm/rocThrust",
+      "git_tag" : "rocm-6.1.2"
+    },
+
+
+    "benchmark" : {
+      "version" : "1.8.0",
+      "git_url" : "https://github.com/google/benchmark.git",
+      "git_tag" : "v${version}"
+    },
+    "fmt" : {
+      "version" : "9.1.0",
+      "git_url" : "https://github.com/fmtlib/fmt.git",
+      "git_tag" : "${version}"
+    },
+    "GTest" : {
+      "version" : "1.13.0",
+      "git_url" : "https://github.com/google/googletest.git",
+      "git_tag" : "v${version}"
+    },
+    "spdlog" : {
+      "version" : "1.11.0",
+      "git_url" : "https://github.com/gabime/spdlog.git",
+      "git_tag" : "v${version}"
     }
   }
 }
