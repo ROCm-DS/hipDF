@@ -38,7 +38,7 @@ function(find_and_configure_thrust)
     include("${rapids-cmake-dir}/export/find_package_root.cmake")
     rapids_export_find_package_root(
       INSTALL Thrust
-      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/thrust]=] cudf-exports
+      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/thrust]=] EXPORT_SET cudf-exports
     )
   endif()
 endfunction()

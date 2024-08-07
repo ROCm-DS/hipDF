@@ -51,7 +51,7 @@ function(find_and_configure_libhipcxx)
       INSTALL
       libhipcxx
       [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/libhipcxx]=]
-      cudf-exports
+      EXPORT_SET cudf-exports
     )
   endif()
 endfunction()
