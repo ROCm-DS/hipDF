@@ -7,8 +7,8 @@
     },
     "hipco" : {
       "version" : "1.0",
-      "git_url" : "https://github.com/rocm/hipCollections",
-      "git_tag" : "main-fix-cmakelists.txt"
+      "git_url" : "https://$ENV{GITHUB_CREDENTIALS}@github.com/AMD-AI/hipCollections",
+      "git_tag" : "feat/external-rapids-cmake"
     },
     "hipcomp" : {
       "version" : "2.2.0",
