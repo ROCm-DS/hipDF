@@ -46,7 +46,7 @@ function(find_and_configure_hipcomp)
 
   # Per-thread default stream
   if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
-    target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__)
+    target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM HIP_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__)
   endif()
 endfunction()
 
