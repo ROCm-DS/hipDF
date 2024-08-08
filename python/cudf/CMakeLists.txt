@@ -68,7 +68,7 @@ if(FIND_CUDF_CPP)
   add_library(cudf ALIAS hipdf)
   add_library(cudf::cudf ALIAS hipdf)
   add_library(nvcomp::nvcomp ALIAS hipcomp)
-  set(cupdf_FOUND ${hipdf_FOUND})
+  set(cudf_FOUND ${hipdf_FOUND})
 
   # an installed version of libcudf doesn't provide the dlpack headers so we need to download dlpack
   # for the interop.pyx
