@@ -178,7 +178,7 @@ public class ByteColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   public void testCastToByte() {
     final int[] DATES = {17897}; //Jan 01, 2019
 
