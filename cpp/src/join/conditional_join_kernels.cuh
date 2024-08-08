@@ -302,7 +302,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
 
   auto outer_row_index = cudf::detail::grid_1d::global_thread_id<block_size>();
 
-  unsigned int const activemask = __ballot_sync(cudf::LANE_MASK_ALL, outer_row_index < outer_num_rows);
+  bitmask_type const activemask = __ballot_sync(cudf::LANE_MASK_ALL, outer_row_index < outer_num_rows);
 
   auto evaluator = cudf::ast::detail::expression_evaluator<has_nulls>(
     left_table, right_table, device_expression_data);
