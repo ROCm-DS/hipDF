@@ -175,7 +175,7 @@ struct count_bytes_fn {
     // initialize the output for the atomicAdd
     if (lane_idx == 0) { d_offsets[str_idx] = 0; }
     //TODO(HIP/AMD): double check that this is not necessary
-    hip_extensions::__syncwarp();
+    __syncwarp();
 
     if (d_strings.is_null(str_idx)) { return; }
     auto const d_str   = d_strings.element<string_view>(str_idx);

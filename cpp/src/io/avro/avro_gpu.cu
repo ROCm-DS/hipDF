@@ -425,7 +425,7 @@ __global__ void __launch_bounds__(num_warps * cudf::detail::warp_size, 2)
                             &skipped_row);
       if (!skipped_row) { rows_remaining -= nrows; }
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
 
     cur_row += nrows;
     if (nrows == 1) {

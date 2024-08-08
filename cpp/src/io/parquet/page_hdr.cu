@@ -422,7 +422,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
     num_dict_pages = bs->ck.num_dict_pages;
     max_num_pages  = (page_info) ? bs->ck.max_num_pages : 0;
     values_found   = 0;
-    hip_extensions::__syncwarp();
+    __syncwarp();
     while (values_found < num_values && bs->cur < bs->end) {
       int index_out = -1;
 
@@ -475,7 +475,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
       if (index_out >= 0 && index_out < max_num_pages && lane_id == 0)
         page_info[index_out] = bs->page;
       num_values = shuffle(num_values);
-      hip_extensions::__syncwarp();
+      __syncwarp();
     }
     if (lane_id == 0) {
       chunks[chunk].num_data_pages = data_page_count;

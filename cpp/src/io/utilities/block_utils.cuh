@@ -39,25 +39,30 @@
 #include <cstdint>
 #include <cudf/cuda_runtime.h>
 #include <cudf/cuda_runtime_api.h>
-#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hip/hip_cooperative_groups.h>
 namespace cudf {
 namespace io {
 
 template <typename T>
 inline __device__ T shuffle(T var, int lane = 0)
 {
-  return hip_extensions::__shfl_sync(LANE_MASK_ALL, var, lane);
+  return __shfl_sync(LANE_MASK_ALL, var, lane);
 }
 
 template <typename T>
 inline __device__ T shuffle_xor(T var, uint32_t delta)
 {
-  return hip_extensions::__shfl_xor_sync(LANE_MASK_ALL, var, delta);
+  return __shfl_xor_sync(LANE_MASK_ALL, var, delta);
 }
 
-inline __device__ void syncwarp() { hip_extensions::__syncwarp(); }
+inline __device__ void syncwarp() { 
+  __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
+  __builtin_amdgcn_wave_barrier();
+  __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
 
-inline __device__ lane_mask ballot(int pred) { return hip_extensions::__ballot_sync(LANE_MASK_ALL, pred); }
+}
+
+inline __device__ lane_mask ballot(int pred) { return __ballot_sync(LANE_MASK_ALL, pred); }
 
 // Warp reduction helpers
 template <typename T>

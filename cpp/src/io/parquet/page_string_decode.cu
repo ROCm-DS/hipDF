@@ -730,7 +730,7 @@ __global__ void __launch_bounds__(decode_block_size)
             pointers[me] = reinterpret_cast<uint8_t const*>(ptr);
             dsts[me]     = dst_pos;
             lengths[me]  = len;
-            hip_extensions::__syncwarp();
+            __syncwarp();
 
             for (int ss = 0; ss < warp_size && ss + i + s->src_pos < target_pos; ss++) {
               if (dsts[ss] >= 0) {
@@ -751,12 +751,12 @@ __global__ void __launch_bounds__(decode_block_size)
               auto str_ptr = nesting_info_base[leaf_level_index].string_out + offset;
               memcpy(str_ptr, ptr, len);
             }
-            hip_extensions::__syncwarp();
+            __syncwarp();
           }
 
           // last thread in warp updates last_offset
           if (me == warp_size - 1) { last_offset = offset + len; }
-          hip_extensions::__syncwarp();
+          __syncwarp();
         }
       }
 

@@ -1060,7 +1060,7 @@ __launch_bounds__(block_size) __global__
 
   size_type warp_valid_count{0};
 
-  auto active_threads = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, i < input.size());
+  auto active_threads = __ballot_sync(cudf::LANE_MASK_ALL, i < input.size());
   while (i < input.size()) {
     // to prevent overflow issues when computing bounds use int64_t
     int64_t const preceding_window = preceding_window_begin[i];
@@ -1084,7 +1084,7 @@ __launch_bounds__(block_size) __global__
       input, default_outputs, output, start_index, end_index, i);
 
     // set the mask
-    cudf::bitmask_type const result_mask{static_cast<bitmask_type>(hip_extensions::__ballot_sync(active_threads, output_is_valid))};
+    cudf::bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync(active_threads, output_is_valid))};
 
     // only one thread writes the mask
     if (0 == threadIdx.x % cudf::detail::warp_size) {
@@ -1094,7 +1094,7 @@ __launch_bounds__(block_size) __global__
 
     // process next element
     i += stride;
-    active_threads = hip_extensions::__ballot_sync(active_threads, i < input.size());
+    active_threads = __ballot_sync(active_threads, i < input.size());
   }
 
   // sum the valid counts across the whole block

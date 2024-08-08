@@ -47,15 +47,13 @@
 #include <cudf/table/table_device_view.cuh>
 #include <cudf/utilities/span.hpp>
 
-// #include <hip/hip_cooperative_groups.h>
-#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
 #include <thrust/iterator/discard_iterator.h>
 
 namespace cudf {
 namespace detail {
-// TODO(HIP/AMD)
-namespace cg = hip_extensions::hip_cooperative_groups_ext;
+namespace cg = cooperative_groups;
 
 template <cudf::size_type block_size, bool has_nulls>
 __launch_bounds__(block_size) __global__
@@ -97,7 +95,7 @@ __launch_bounds__(block_size) __global__
 
   if (outer_row_index < outer_num_rows) {
     // Figure out the number of elements for this key.
-    cg::thread_block_tile<1> this_thread = cg::this_thread();  //: TODO(HIP/AMD): this uses a custom cg::this_thread() implementation from the CG extensions (not officially in ROCm)
+    cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(cg::this_thread_block());
     // Figure out the number of elements for this key.
     auto query_pair = pair_func(outer_row_index);
     auto equality   = pair_expression_equality<has_nulls>{

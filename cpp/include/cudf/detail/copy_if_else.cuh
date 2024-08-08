@@ -48,7 +48,7 @@
 #include <thrust/iterator/iterator_traits.h>
 #include <thrust/optional.h>
 
-#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hip/hip_cooperative_groups.h>
 
 namespace cudf {
 namespace detail {
@@ -97,7 +97,7 @@ __launch_bounds__(block_size) __global__
     // update validity
     if (has_nulls) {
       // the final validity mask for this warp
-      bitmask_type warp_mask = hip_extensions::__ballot_sync(LANE_MASK_ALL, opt_value.has_value());
+      bitmask_type warp_mask = __ballot_sync(LANE_MASK_ALL, opt_value.has_value());
       // only one guy in the warp needs to update the mask and count
       if (lane_id == 0) {
         out.set_mask_word(warp_cur, warp_mask);

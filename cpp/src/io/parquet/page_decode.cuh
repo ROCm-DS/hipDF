@@ -302,7 +302,7 @@ __device__ hip::std::pair<int, int> gpuDecodeDictionaryIndices(
       is_literal    = run & 1;
       __threadfence_block();
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
     is_literal = shuffle(is_literal);
     batch_len  = shuffle(batch_len);
 
@@ -409,7 +409,7 @@ inline __device__ int gpuDecodeRleBooleans(page_state_s volatile* s,
       is_literal    = run & 1;
       __threadfence_block();
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
     is_literal = shuffle(is_literal);
     batch_len  = shuffle(batch_len);
     if (t < batch_len) {
@@ -853,7 +853,7 @@ __device__ void gpuUpdateValidityOffsetsAndRowIndices(int32_t target_input_value
     }
 
     input_value_count += min(cudf::detail::warp_size, (target_input_value_count - input_value_count));
-    hip_extensions::__syncwarp();
+    __syncwarp();
   }
 
   // update
@@ -904,7 +904,7 @@ __device__ void gpuDecodeLevels(page_state_s* s,
       gpuDecodeStream<level_t, rolling_buf_size>(rep, s, cur_leaf_count, t, level_type::REPETITION);
     }
     gpuDecodeStream<level_t, rolling_buf_size>(def, s, cur_leaf_count, t, level_type::DEFINITION);
-    hip_extensions::__syncwarp();
+    __syncwarp();
 
     // because the rep and def streams are encoded separately, we cannot request an exact
     // # of values to be decoded at once. we can only process the lowest # of decoded rep/def
@@ -917,7 +917,7 @@ __device__ void gpuDecodeLevels(page_state_s* s,
     gpuUpdateValidityOffsetsAndRowIndices<level_t, state_buf, rolling_buf_size>(
       actual_leaf_count, s, sb, rep, def, t);
     cur_leaf_count = actual_leaf_count + batch_size;
-    hip_extensions::__syncwarp();
+    __syncwarp();
   }
 }
 

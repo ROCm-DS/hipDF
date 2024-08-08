@@ -137,7 +137,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseCompre
       if (!lane_id && init_in_ctl) {
         s->ctl = {cur, block_len, uncompressed + max_uncompressed_size, uncompressed_size};
       }
-      hip_extensions::__syncwarp();
+      __syncwarp();
       if (init_in_ctl && lane_id == 0) {
         *init_in_ctl  = {s->ctl.in_ptr, s->ctl.in_size};
         *init_out_ctl = {s->ctl.out_ptr, s->ctl.out_size};
@@ -146,7 +146,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseCompre
       max_uncompressed_size += uncompressed_size;
       max_uncompressed_block_size = max(max_uncompressed_block_size, uncompressed_size);
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
     if (!lane_id) {
       s->info.num_compressed_blocks       = num_compressed_blocks;
       s->info.num_uncompressed_blocks     = num_uncompressed_blocks;

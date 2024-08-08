@@ -193,11 +193,11 @@ __global__ void conditional_join(table_device_view left_table,
 
   if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
 
-  hip_extensions::__syncwarp();
+  __syncwarp();
 
   auto outer_row_index = cudf::detail::grid_1d::global_thread_id();
 
-  bitmask_type const activemask = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, outer_row_index < outer_num_rows);
+  bitmask_type const activemask = __ballot_sync(cudf::LANE_MASK_ALL, outer_row_index < outer_num_rows);
 
   auto evaluator = cudf::ast::detail::expression_evaluator<has_nulls>(
     left_table, right_table, device_expression_data);
@@ -235,11 +235,11 @@ __global__ void conditional_join(table_device_view left_table,
       //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
       // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
       // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly.
-      hip_extensions::__syncwarp(activemask);
+      __syncwarp(activemask);
 
       // flush output cache if next iteration does not fit
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
-      auto const flush_mask = hip_extensions::__ballot_sync(activemask, do_flush);
+      auto const flush_mask = __ballot_sync(activemask, do_flush);
       if (do_flush) {
         flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                          max_size,
@@ -254,13 +254,13 @@ __global__ void conditional_join(table_device_view left_table,
         //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
         // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
         // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
-        hip_extensions::__syncwarp(flush_mask);
+        __syncwarp(flush_mask);
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
       //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
       // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
       // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
-      hip_extensions::__syncwarp(activemask);
+      __syncwarp(activemask);
     }
 
     // Left, left anti, and full joins all require saving left columns that
@@ -284,11 +284,11 @@ __global__ void conditional_join(table_device_view left_table,
     //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
     // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
     // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
-    hip_extensions::__syncwarp(activemask);
+    __syncwarp(activemask);
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
-    auto const flush_mask = hip_extensions::__ballot_sync(activemask, do_flush);
+    auto const flush_mask = __ballot_sync(activemask, do_flush);
     if (do_flush) {
       flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                        max_size,

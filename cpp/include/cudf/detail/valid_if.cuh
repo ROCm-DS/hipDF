@@ -37,6 +37,7 @@
 
 #pragma once
 
+#include <hip/hip_cooperative_groups.h>
 #include <cudf/detail/null_mask.hpp>
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/types.hpp>
@@ -49,7 +50,7 @@
 
 #include <thrust/distance.h>
 
-#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hip/amd_detail/amd_warp_sync_functions.h>
 
 namespace cudf {
 namespace detail {
@@ -76,15 +77,15 @@ __global__ void valid_if_kernel(
   auto const stride = cudf::detail::grid_1d::grid_stride();
   size_type warp_valid_count{0};
 
-  auto active_mask = hip_extensions::__ballot_sync(cudf::LANE_MASK_ALL, i < size);
+  auto active_mask = __ballot_sync(cudf::LANE_MASK_ALL, i < size);
   while (i < size) {
-    bitmask_type ballot = hip_extensions::__ballot_sync(active_mask, p(*(begin + i)));
+    bitmask_type ballot = __ballot_sync(active_mask, p(*(begin + i)));
     if (lane_id == leader_lane) {
       output[cudf::word_index(i)] = ballot;
       warp_valid_count += __POPC(ballot); 
     }
     i += stride;
-    active_mask = hip_extensions::__ballot_sync(active_mask, i < size); 
+    active_mask = __ballot_sync(active_mask, i < size); 
   }
 
   size_type block_count = single_lane_block_sum_reduce<block_size, leader_lane>(warp_valid_count);
@@ -195,7 +196,7 @@ __global__ void valid_if_n_kernel(InputIterator1 begin1,
       auto const arg_1         = *(begin1 + mask_idx);
       auto const arg_2         = *(begin2 + thread_idx);
       auto const bit_is_valid  = thread_active && p(arg_1, arg_2);
-      auto const warp_validity = hip_extensions::__ballot_sync(LANE_MASK_ALL, bit_is_valid);
+      auto const warp_validity = __ballot_sync(LANE_MASK_ALL, bit_is_valid);
       auto const mask_idx      = word_index(thread_idx);
 
       if (thread_active && threadIdx.x % warp_size == 0) { mask[mask_idx] = warp_validity; }

@@ -47,7 +47,6 @@
 #include <hip/atomic>
 
 #include <hip/hip_cooperative_groups.h>
-#include "../../../cpp/include/hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh"
 #include <limits>
 #include <type_traits>
 

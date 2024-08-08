@@ -308,7 +308,7 @@ struct bitfield_warp {
     if (threadIdx.x % cudf::detail::warp_size < UNICODE_LOOK_BACK)
       is_slash[warp_id][threadIdx.x % cudf::detail::warp_size] =
         is_slash[warp_id][cudf::detail::warp_size + threadIdx.x % cudf::detail::warp_size];
-    hip_extensions::__syncwarp();
+    __syncwarp();
   }
 
   /// Each thread in a warp sets its own bit.
@@ -316,7 +316,7 @@ struct bitfield_warp {
   {
     is_slash[warp_id][UNICODE_LOOK_BACK + threadIdx.x % cudf::detail::warp_size] =
       is_escaping_backslash;
-    hip_extensions::__syncwarp();
+    __syncwarp();
   }
 
   /// Each thread in a warp gets the requested bit.
@@ -439,7 +439,7 @@ __global__ void parse_fn_string_parallel(str_tuple_it str_tuples,
       // FIXME(HIP/AMD): work-around for SWDEV-470886 through explicit initialization
       size_type istring = 0;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
-      return hip_extensions::__shfl_sync(LANE_MASK_ALL, istring, 0);
+      return __shfl_sync(LANE_MASK_ALL, istring, 0);
     } else {
       // Ensure lane 0 doesn't update istring before all threads have read the previous iteration's
       // istring value
@@ -571,8 +571,8 @@ __global__ void parse_fn_string_parallel(str_tuple_it str_tuples,
         __shared__ typename SlashScan::TempStorage temp_slash[num_warps];
         SlashScan(temp_slash[warp_id]).InclusiveScan(curr, scanned, composite_op);
         is_escaping_backslash = scanned.get(init_state);
-        init_state            = hip_extensions::__shfl_sync(LANE_MASK_ALL, is_escaping_backslash, BLOCK_SIZE - 1);
-        hip_extensions::__syncwarp();
+        init_state            = __shfl_sync(LANE_MASK_ALL, is_escaping_backslash, BLOCK_SIZE - 1);
+        __syncwarp();
         is_slash.shift(warp_id);
         is_slash.set_bits(warp_id, is_escaping_backslash);
         is_prev_escaping_backslash = is_slash.get_bit(warp_id, lane - 1);
@@ -604,7 +604,7 @@ __global__ void parse_fn_string_parallel(str_tuple_it str_tuples,
       }
       // Make sure all threads have no errors before continuing
       if constexpr (is_warp) {
-        error = hip_extensions::__any_sync(LANE_MASK_ALL, error);
+        error = __any_sync(LANE_MASK_ALL, error);
       } else {
         using ErrorReduce = hipcub::BlockReduce<bool, BLOCK_SIZE>;
         __shared__ typename ErrorReduce::TempStorage temp_storage_error;
@@ -724,7 +724,7 @@ __global__ void parse_fn_string_parallel(str_tuple_it str_tuples,
         }
         offset += this_num_out;
         if constexpr (is_warp) {
-          last_offset = hip_extensions::__shfl_sync(LANE_MASK_ALL, offset, BLOCK_SIZE - 1);
+          last_offset = __shfl_sync(LANE_MASK_ALL, offset, BLOCK_SIZE - 1);
         } else {
           __syncthreads();
           if (threadIdx.x == BLOCK_SIZE - 1) last_offset = offset;

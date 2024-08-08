@@ -427,7 +427,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
         page_headers_size += page_g.max_hdr_size;
         max_page_data_size = max(max_page_data_size, page_g.max_data_size);
       }
-      hip_extensions::__syncwarp();
+      __syncwarp();
       if (t == 0) {
         if (not pages.empty()) pages[ck_g.first_page] = page_g;
         if (not page_sizes.empty()) page_sizes[ck_g.first_page] = page_g.max_data_size;
@@ -435,7 +435,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
       }
       num_pages = 1;
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
 
     // page padding needed for RLE encoded boolean data
     auto const rle_pad =
@@ -449,7 +449,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
     // page size.
     do {
       uint32_t minmax_len = 0;
-      hip_extensions::__syncwarp();
+      __syncwarp();
       if (num_rows < ck_g.num_rows) {
         if (t == 0) { frag_g = ck_g.fragments[fragments_in_chunk]; }
         if (!t && ck_g.stats) {
@@ -465,7 +465,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
         frag_g.fragment_data_size = 0;
         frag_g.num_rows           = 0;
       }
-      hip_extensions::__syncwarp();
+      __syncwarp();
       uint32_t fragment_data_size =
         (ck_g.use_dictionary)
           ? frag_g.num_leaf_values * util::div_rounding_up_unsafe(ck_g.dict_rle_bits, 8)
@@ -549,7 +549,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
           cur_row += rows_in_page;
           ck_max_stats_len = max(ck_max_stats_len, max_stats_len);
         }
-        hip_extensions::__syncwarp();
+        __syncwarp();
         if (t == 0) {
           if (not pages.empty()) { pages[ck_g.first_page + num_pages] = page_g; }
           if (not page_sizes.empty()) {
@@ -575,7 +575,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size)
       num_rows += frag_g.num_rows;
       fragments_in_chunk++;
     } while (frag_g.num_rows != 0);
-    hip_extensions::__syncwarp();
+    __syncwarp();
     if (!t) {
       if (ck_g.ck_stat_size == 0 && ck_g.stats) {
         uint32_t ck_stat_size = util::round_up_unsafe(48 + 2 * ck_max_stats_len, page_align);
@@ -1128,7 +1128,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
         } else if (not is_v2 && t < 4) {
           cur[t] = rle_bytes >> (t * 8);
         }
-        hip_extensions::__syncwarp();
+        __syncwarp();
         if (t == 0) { s->cur = rle_out; }
       }
     }
@@ -1171,7 +1171,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
         } else if (not is_v2 && t < 4) {
           cur[t] = rle_bytes >> (t * 8);
         }
-        hip_extensions::__syncwarp();
+        __syncwarp();
         if (t == 0) { s->cur = rle_out; }
       }
     };
@@ -1430,7 +1430,7 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
     // size doesn't include the 4 bytes for the length
     auto const rle_size = static_cast<uint32_t>(s->cur - s->rle_len_pos) - RLE_LENGTH_FIELD_LEN;
     if (t < RLE_LENGTH_FIELD_LEN) { s->rle_len_pos[t] = rle_size >> (t * 8); }
-    hip_extensions::__syncwarp();
+    __syncwarp();
   }
 
   // V2 does not compress rep and def level data
@@ -1489,7 +1489,7 @@ __global__ void __launch_bounds__(decide_compression_block_size)
     ck_g[warp_id]              = chunks[chunk_id];
     compression_error[warp_id] = 0;
   }
-  hip_extensions::__syncwarp();
+  __syncwarp();
 
   uint32_t uncompressed_data_size = 0;
   uint32_t compressed_data_size   = 0;
@@ -1511,9 +1511,9 @@ __global__ void __launch_bounds__(decide_compression_block_size)
   }
   uncompressed_data_size = warp_reduce(temp_storage[warp_id][0]).Sum(uncompressed_data_size);
   compressed_data_size   = warp_reduce(temp_storage[warp_id][1]).Sum(compressed_data_size);
-  hip_extensions::__syncwarp();
+  __syncwarp();
   encodings = warp_reduce(temp_storage[warp_id][0]).Reduce(encodings, BitwiseOr{});
-  hip_extensions::__syncwarp();
+  __syncwarp();
 
   if (lane_id == 0) {
     auto const write_compressed = compressed_data_size != 0 and compression_error[warp_id] == 0 and

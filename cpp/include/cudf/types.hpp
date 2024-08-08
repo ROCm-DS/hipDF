@@ -41,6 +41,28 @@
 #ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
 #include "cudf/cuda_runtime.h" //: including "hip/device_functions.h" causes errors
+
+
+//: TODO(HIP/AMD): ROCm does not provide __syncwarp, likely for a good reason:
+// due to the lockstepping, these sync operations may simply be noopts.
+// For now, we adopt the approach from the previously used warp 
+// primitive extensions. More testing is required to see if we can 
+// make those __syncwarps noops without breaking unit tests.
+__device__ inline void __syncwarp()
+{
+  /* sync/barrier all threads in a warp */
+  __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
+  __builtin_amdgcn_wave_barrier();
+  __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
+}
+
+__device__ inline void __syncwarp(uint64_t activemask)
+{
+  /* sync/barrier all threads in a warp */
+  __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
+  __builtin_amdgcn_wave_barrier();
+  __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
+}
 #else
 #define CUDF_HOST_DEVICE
 #endif

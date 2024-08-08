@@ -804,7 +804,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
     pos  = shuffle(pos);
     n    = shuffle(n);
     w    = shuffle(w);
-    hip_extensions::__syncwarp();  // Not required, included to fix the racecheck warning
+    __syncwarp();  // Not required, included to fix the racecheck warning
     for (uint32_t i = tr; i < n; i += cudf::detail::warp_size) {
       if constexpr (sizeof(T) <= 4) {
         if (mode == 0) {
@@ -848,7 +848,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         }
       }
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
     // Patch values
     if (mode == 2) {
       uint32_t pw_byte3 = rle->m2_pw_byte3[r];
@@ -874,11 +874,11 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         if (tr < pll && patch_pos < n) { vals[base + patch_pos] += patch; }
       }
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
     if (mode == 3) {
       T baseval;
       for (uint32_t i = 1; i < n; i <<= 1) {
-        hip_extensions::__syncwarp();
+        __syncwarp();
         for (uint32_t j = tr; j < n; j += cudf::detail::warp_size) {
           if (j & i) vals[base + j] += vals[base + ((j & ~i) | (i - 1))];
         }
@@ -891,7 +891,7 @@ static __device__ uint32_t Integer_RLEv2(orc_bytestream_s* bs,
         vals[base + j] += baseval;
       }
     }
-    hip_extensions::__syncwarp();
+    __syncwarp();
   }
   __syncthreads();
   return rle->num_vals;

@@ -45,7 +45,7 @@
 #include <string>
 #include <type_traits>
 
-#include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
+#include <hip/hip_cooperative_groups.h>
 namespace cudf {
 /**
  * @addtogroup utility_error

@@ -260,7 +260,7 @@ __global__ void url_decode_char_counter(column_device_view const in_strings,
         in_chars_shared[char_idx] = in_idx < string_length ? in_chars[in_idx] : 0;
       }
 
-      hip_extensions::__syncwarp();
+      __syncwarp();
 
       // `char_idx_start` represents the start character index of the current warp.
       for (size_type char_idx_start = 0; char_idx_start < string_length_block;
@@ -277,7 +277,7 @@ __global__ void url_decode_char_counter(column_device_view const in_strings,
 
         if (warp_lane == 0) { escape_char_count += total_escape_char; }
 
-        hip_extensions::__syncwarp();
+        __syncwarp();
       }
     }
     // URL decoding replaces 3 bytes with 1 for each escape character.
@@ -342,7 +342,7 @@ __global__ void url_decode_char_replacer(column_device_view const in_strings,
         in_chars_shared[char_idx] = in_idx >= 0 && in_idx < string_length ? in_chars[in_idx] : 0;
       }
 
-      hip_extensions::__syncwarp();
+      __syncwarp();
 
       // `char_idx_start` represents the start character index of the current warp.
       for (size_type char_idx_start = 0; char_idx_start < string_length_block;
@@ -380,7 +380,7 @@ __global__ void url_decode_char_replacer(column_device_view const in_strings,
           out_idx[local_warp_id] += (out_offset + out_size);
         }
 
-        hip_extensions::__syncwarp();
+        __syncwarp();
       }
     }
   }
