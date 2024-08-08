@@ -22,7 +22,7 @@ import java.math.BigInteger;
 import org.junit.jupiter.api.Disabled;
 
 public class Aggregation128UtilsTest extends CudfTestBase {
-  @Disabled
+  @Test
   public void testExtractInt32Chunks() {
     BigInteger[] intvals = new BigInteger[] {
         null,
@@ -50,7 +50,7 @@ public class Aggregation128UtilsTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   public void testCombineInt64SumChunks() {
     try (ColumnVector chunks0 = ColumnVector.fromBoxedUnsignedLongs(
              null, 0L, 1L, 0L, 0L, 0x12345678L, 0x123456789L, 0x1234567812345678L, 0xfedcba9876543210L);

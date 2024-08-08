@@ -28,7 +28,7 @@ public class Date64ColumnVectorTest extends CudfTestBase {
       1530705600000L,   //'2018-07-04 12:00:00.000'
       1674631932929L};  //'2023-01-25 07:32:12.929'
 
-  @Test @Disabled
+  @Test 
   public void getYear() {
     try (ColumnVector date64ColumnVector = ColumnVector.timestampMilliSecondsFromLongs(DATES);
          ColumnVector tmp = date64ColumnVector.year();
@@ -39,7 +39,7 @@ public class Date64ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled
+  @Test 
   public void getMonth() {
     try (ColumnVector date64ColumnVector = ColumnVector.timestampMilliSecondsFromLongs(DATES);
          ColumnVector tmp = date64ColumnVector.month();
@@ -50,7 +50,7 @@ public class Date64ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled
+  @Test 
   public void getDay() {
     try (ColumnVector date64ColumnVector = ColumnVector.timestampMilliSecondsFromLongs(DATES);
          ColumnVector tmp = date64ColumnVector.day();
@@ -61,7 +61,7 @@ public class Date64ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled
+  @Test 
   public void getHour() {
     try (ColumnVector date64ColumnVector = ColumnVector.timestampMilliSecondsFromLongs(DATES);
          ColumnVector tmp = date64ColumnVector.hour();
@@ -72,7 +72,7 @@ public class Date64ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled
+  @Test 
   public void getMinute() {
     try (ColumnVector date64ColumnVector = ColumnVector.timestampMilliSecondsFromLongs(DATES);
          ColumnVector tmp = date64ColumnVector.minute();
@@ -83,7 +83,7 @@ public class Date64ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled
+  @Test 
   public void getSecond() {
     try (ColumnVector date64ColumnVector = ColumnVector.timestampMilliSecondsFromLongs(DATES);
          ColumnVector tmp = date64ColumnVector.second();

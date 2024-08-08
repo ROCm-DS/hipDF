@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArrowColumnVectorTest extends CudfTestBase {
 
-  @Disabled
+  @Test
   void testArrowIntMultiBatches() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.INT32));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -83,7 +83,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowLong() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.INT64));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -106,7 +106,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowLongOnHeap() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.INT64));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -136,7 +136,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowDouble() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.FLOAT64));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -160,7 +160,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowFloat() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.FLOAT32));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -188,7 +188,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowString() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.STRING));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -213,7 +213,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowStringOnHeap() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.STRING));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -247,7 +247,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowDays() {
     ArrowColumnBuilder builder = new ArrowColumnBuilder(new HostColumnVector.BasicType(true, DType.TIMESTAMP_DAYS));
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
@@ -271,7 +271,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowDecimalThrows() {
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
     try (DecimalVector vector = new DecimalVector("vec", allocator, 7, 3)) {
@@ -292,7 +292,7 @@ public class ArrowColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testArrowDecimal64Throws() {
     BufferAllocator allocator = new RootAllocator(Long.MAX_VALUE);
     try (DecimalVector vector = new DecimalVector("vec", allocator, 18, 0)) {

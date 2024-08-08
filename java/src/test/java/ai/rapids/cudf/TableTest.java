@@ -3141,7 +3141,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // fails with:  NULL for Column 0 Row 15 ==> expected: <true> but was: <false>
+  @Test // fails with:  NULL for Column 0 Row 15 ==> expected: <true> but was: <false>
   void DPasses() {
     // this test packes ~2MB worth of long into a 1MB bounce buffer
     // this is 3 iterations because of the validity buffer
