@@ -35,6 +35,15 @@
 # =============================================================================
 
 cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
+
+# NOTE(HIP/AMD): With below code the RAPIDS CMake branch that is used to locate and download the
+#                CUDF_RAPIDS.cmake file will also be used for checking out the RAPIDS CMake
+#                repository itself. (Note that the CUDF_RAPIDS.cmake file doesn't actually
+#                change much across RAPIDS CMake releases.)
+if (DEFINED ENV{RAPIDS_CMAKE_BRANCH})
+  set(rapids-cmake-branch $ENV{RAPIDS_CMAKE_BRANCH})
+endif()
+
 include(../fetch_rapids.cmake)
 #include(../rapids_config.cmake) #TODO(HIP/AMD): is this the same file as fetch_rapids.cmake?
 include(rapids-cmake)
