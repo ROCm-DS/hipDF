@@ -97,7 +97,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
 
   if (outer_row_index < outer_num_rows) {
     // Figure out the number of elements for this key.
-    cg::thread_block_tile<1> this_thread = cg::this_thread();
+    cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(cg::this_thread_block()); //NOTE(HIP/AMD): Uses a workaround instead of cg::this_thread()
     // Figure out the number of elements for this key.
     auto query_pair = pair_func(outer_row_index);
     auto equality   = pair_expression_equality<has_nulls>{

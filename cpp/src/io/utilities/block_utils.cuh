@@ -55,7 +55,12 @@ inline __device__ T shuffle_xor(T var, uint32_t delta)
   return __shfl_xor_sync(LANE_MASK_ALL, var, delta);
 }
 
-inline __device__ void syncwarp() { __syncwarp(); }
+inline __device__ void syncwarp() { 
+  __builtin_amdgcn_fence(__ATOMIC_RELEASE, "wavefront");
+  __builtin_amdgcn_wave_barrier();
+  __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
+
+}
 
 inline __device__ lane_mask ballot(int pred) { return __ballot_sync(LANE_MASK_ALL, pred); }
 

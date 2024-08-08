@@ -38,6 +38,7 @@
 #pragma once
 
 #include <cudf/detail/device_scalar.hpp>
+#include <hip/hip_cooperative_groups.h>
 #include <cudf/detail/null_mask.hpp>
 #include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/types.hpp>
@@ -50,7 +51,7 @@
 
 #include <thrust/distance.h>
 
-#include <hip/hip_cooperative_groups.h>
+#include <hip/amd_detail/amd_warp_sync_functions.h>
 
 namespace cudf {
 namespace detail {

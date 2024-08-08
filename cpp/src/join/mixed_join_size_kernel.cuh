@@ -94,7 +94,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   make_pair_function pair_func{hash_probe, empty_key_sentinel};
 
   // Figure out the number of elements for this key.
-  cg::thread_block_tile<1> this_thread = cg::this_thread();
+  cg::thread_block_tile<1> this_thread = cg::tiled_partition<1>(cg::this_thread_block()); //NOTE(HIP/AMD): Uses a workaround instead of cg::this_thread()
   // TODO: Address asymmetry in operator.
   auto count_equality = pair_expression_equality<has_nulls>{
     evaluator, thread_intermediate_storage, swap_tables, equality_probe};

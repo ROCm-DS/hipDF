@@ -48,6 +48,8 @@
 #include <cuda/std/optional>
 #include <thrust/iterator/iterator_traits.h>
 
+#include <hip/hip_cooperative_groups.h>
+
 namespace cudf {
 namespace detail {
 namespace {  // anonymous
