@@ -564,7 +564,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                  <version>2.22.2</version>
                 <configuration>
-                    <forkCount>0</forkCount> <!-- need to debug stdout or vm/surefire will crash with 
+                <showOutput>true</showOutput>
+                 <!--  <forkCount>0</forkCount> -->     <!-- need to debug stdout or vm/surefire will crash with 
                                                 Corrupted STDOUT by directly writing to native stream 
                                                 in forked JVM -->
                     <!-- you can turn this off, by passing -DtrimStackTrace=true when running tests -->
