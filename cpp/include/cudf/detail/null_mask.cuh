@@ -51,6 +51,18 @@
 #include <hipcub/block/block_reduce.hpp>
 #include <hipcub/device/device_segmented_reduce.hpp>
 
+// NOTE(HIP/AMD): /opt/rocm hipcub has own rocprim backend which defines ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+//                If this macro is not undefined by hipcub's rocprim, this might cause a "define previously defined macro"
+//                issue with local rocThrust versions that have been installed via RAPIDS-CMake.
+//                A file-by-file comparison between the locally installed rocThrust version and
+//                the one coming with ROCm has not shown any differences between the file that made an issue
+//                (cpp/src/reductions/segmented/counts.hip).
+//                The inspection of the compile commands have not shown any differences aside the addition
+//                of the rocthrust-build and rocthrust-src include folders.
+#ifdef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+#  undef ROCPRIM_DETAIL_HIP_SYNC_AND_RETURN_ON_ERROR
+#endif
+
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
