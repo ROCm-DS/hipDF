@@ -4978,7 +4978,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testCreateTDigestReduction() {
     try (Table t1 = new Table.TestBuilder()
             .column(100, 150, 160, 70, 110, 160)
@@ -5004,7 +5004,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testMergeTDigestReduction() {
     StructType centroidStruct = new StructType(false,
             new BasicType(false, DType.FLOAT64), // mean
@@ -5370,7 +5370,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Needs Scalar
+  @Test  // Needs Scalar
   void testWindowingCount() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5408,7 +5408,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testWindowingMin() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5449,7 +5449,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingMax() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5490,7 +5490,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingSum() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5520,7 +5520,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingRowNumber() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5605,7 +5605,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingCollectList() {
     RollingAggregation aggCollectWithNulls = RollingAggregation.collectList(NullPolicy.INCLUDE);
     RollingAggregation aggCollect = RollingAggregation.collectList();
@@ -5681,7 +5681,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingCollectSet() {
     RollingAggregation aggCollect = RollingAggregation.collectSet();
     RollingAggregation aggCollectWithEqNulls = RollingAggregation.collectSet(NullPolicy.INCLUDE,
@@ -5790,7 +5790,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingLead() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6011,7 +6011,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testWindowingLag() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6230,7 +6230,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test 
   void testWindowingMean() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
         .column( 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3) // GBY Key
@@ -6259,7 +6259,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testWindowingNthElement() {
     final Integer X = null;
     try (Table unsorted = new Table.TestBuilder()
@@ -6309,7 +6309,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testWindowingOnMultipleDifferentColumns() {
     try (Table unsorted = new Table.TestBuilder()
         .column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6364,7 +6364,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testWindowingWithoutGroupByColumns() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6) // OBY Key
         .column( 7, 5, 1, 9, 7, 9, 8, 2, 8, 0, 6, 6) // Agg Column
@@ -6454,7 +6454,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Needs Scalar
+  @Test
   void testRangeWindowingCount() {
     try (
         Table unsorted = new Table.TestBuilder()
@@ -6498,7 +6498,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testRangeWindowingLead() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6544,7 +6544,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testRangeWindowingMax() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6602,7 +6602,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testRangeWindowingRowNumber() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6646,7 +6646,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test
   void testRangeWindowingCountDescendingTimestamps() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1) // GBY Key
@@ -6705,7 +6705,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test   // Scalar
   void testRangeWindowingWithoutGroupByColumns() {
     try (Table unsorted = new Table.TestBuilder()
         .column(             7, 5, 1, 9, 7, 9, 8, 2, 8, 0, 6, 6, 8) // Agg Column
@@ -6747,7 +6747,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled //Scalar
+  @Test  //Scalar
   void testRangeWindowingOrderByUnsupportedDataTypeExceptions() {
     try (Table table = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6771,7 +6771,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testInvalidWindowTypeExceptions() {
     try (Scalar one = Scalar.fromInt(1);
          Table table = new Table.TestBuilder()
@@ -6799,7 +6799,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testRangeWindowingCountUnboundedPreceding() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6843,7 +6843,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testRangeWindowingWithStringOrderByColumn() {
     final String X = null;
     final int orderIndex = 3; // Index of order-by column.
@@ -6895,7 +6895,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled //Scalar
+  @Test  //Scalar
   void testRangeWindowingCountUnboundedASCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6984,7 +6984,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled //Scalar
+  @Test  //Scalar
   void testRangeWindowingCountUnboundedDESCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -7079,7 +7079,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testRangeWindowingCountUnboundedASCWithNullsLast() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -7167,7 +7167,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled //Scalar
+  @Test  //Scalar
   void testRangeWindowingCountUnboundedDESCWithNullsLast() {
     Integer X = null;
     try (Table unsorted = new Table.TestBuilder()
@@ -7292,7 +7292,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testRangeWindowsWithDecimalOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -7397,7 +7397,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testRangeWindowsWithFloatOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
             .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -8557,7 +8557,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalars
+  @Test  // Scalars
   void testScatterScalars() {
     try (Scalar s1 = Scalar.fromInt(0);
          Scalar s2 = Scalar.fromString("A");
@@ -9143,7 +9143,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // Scalar
+  @Test  // Scalar
   void testParquetWriteMap() throws IOException {
     ParquetWriterOptions options = ParquetWriterOptions.builder()
         .withMapColumn(mapColumn("my_map",

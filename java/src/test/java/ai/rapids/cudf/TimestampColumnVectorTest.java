@@ -16,32 +16,9 @@
  *
  */
 
-// MIT License
-//
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 package ai.rapids.cudf;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import java.util.function.Function;
 
@@ -156,7 +133,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void getMonth() {
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS);
          ColumnVector tmp = timestampColumnVector.month();
@@ -176,7 +153,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void getDay() {
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS)) {
       assert timestampColumnVector.getType().equals(DType.TIMESTAMP_MILLISECONDS);
@@ -197,7 +174,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void getHour() {
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS)) {
       assert timestampColumnVector.getType().equals(DType.TIMESTAMP_MILLISECONDS);
@@ -218,7 +195,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void getMinute() {
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS)) {
       assert timestampColumnVector.getType().equals(DType.TIMESTAMP_MILLISECONDS);
@@ -239,7 +216,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void getSecond() {
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS)) {
       assert timestampColumnVector.getType().equals(DType.TIMESTAMP_MILLISECONDS);
@@ -348,7 +325,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testLastDayOfMonth() {
     int[] EXPECTED = new int[]{
             -1523,    //1965-10-31
@@ -375,7 +352,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testDayOfYear() {
     short[] EXPECTED = new short[]{299, 185, 25, 299, 185};
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS);
@@ -397,7 +374,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testQuarterOfYear() {
     short[] EXPECTED = new short[]{4, 3, 1, 4, 3};
     try (ColumnVector timestampColumnVector = ColumnVector.timestampMilliSecondsFromLongs(TIMES_MS);
@@ -419,7 +396,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testAddMonths() {
     long[] EXPECTED = new long[]{
         -131968727762L,   //'1965-10-26 14:01:12.238' Tuesday
@@ -613,7 +590,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testTimestampToDays() {
     try (ColumnVector s_string_times = ColumnVector.fromStrings(TIMES_S_STRING);
          ColumnVector ms_string_times = ColumnVector.fromStrings(TIMES_MS_STRING);
@@ -631,7 +608,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testTimestampToLongSecond() {
     try (ColumnVector s_string_times = ColumnVector.fromStrings(TIMES_S_STRING);
          ColumnVector ms_string_times = ColumnVector.fromStrings(TIMES_MS_STRING);
@@ -649,7 +626,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testTimestampToLongMillisecond() {
     try (ColumnVector s_string_times = ColumnVector.fromStrings(TIMES_S_STRING);
          ColumnVector ms_string_times = ColumnVector.fromStrings(TIMES_MS_STRING);
@@ -668,7 +645,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testTimestampToLongMicrosecond() {
     try (ColumnVector s_string_times = ColumnVector.fromStrings(TIMES_S_STRING);
          ColumnVector ms_string_times = ColumnVector.fromStrings(TIMES_MS_STRING);
@@ -688,7 +665,7 @@ public class TimestampColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testTimestampToLongNanosecond() {
     try (ColumnVector s_string_times = ColumnVector.fromStrings(TIMES_S_STRING);
          ColumnVector ms_string_times = ColumnVector.fromStrings(TIMES_MS_STRING);

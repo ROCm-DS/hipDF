@@ -178,7 +178,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test //@Disabled
+  @Test
   void testClampInt() {
       try (ColumnVector cv = ColumnVector.fromInts(1, 3, 6, -2, 23, -0, -90);
            Scalar num = Scalar.fromInt(0);
