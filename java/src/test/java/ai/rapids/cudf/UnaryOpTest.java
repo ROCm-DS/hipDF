@@ -21,7 +21,6 @@ package ai.rapids.cudf;
 
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import static ai.rapids.cudf.AssertUtils.assertColumnsAreEqual;
 
@@ -254,7 +253,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // needs Scalar in ColumnView.log2
+  @Test
   public void testLog2() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.log2();
@@ -263,7 +262,7 @@ public class UnaryOpTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // need Scalar in ColumnView.log10
+  @Test 
   public void testLog10() {
     try (ColumnVector dcv = ColumnVector.fromBoxedDoubles(DOUBLES_1);
          ColumnVector answer = dcv.log10();

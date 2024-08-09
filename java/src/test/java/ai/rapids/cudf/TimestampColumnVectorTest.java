@@ -19,8 +19,6 @@
 package ai.rapids.cudf;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
-
 import java.util.function.Function;
 
 import static ai.rapids.cudf.AssertUtils.assertColumnsAreEqual;

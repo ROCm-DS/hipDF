@@ -86,7 +86,7 @@ public class ColumnVectorTest extends CudfTestBase {
       "*output = input*input - input;" +
       "}";
 
-  @Test @Disabled
+  @Test 
   void testTransformVector() {
     try (ColumnVector cv = ColumnVector.fromBoxedInts(2,3,null,4);
          ColumnVector cv1 = cv.transform(ptx, true);
@@ -155,7 +155,7 @@ public class ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test //@Disabled
+  @Test
   void testClampInt() {
       try (ColumnVector cv = ColumnVector.fromInts(1, 3, 6, -2, 23, -0, -90);
            Scalar num = Scalar.fromInt(0);

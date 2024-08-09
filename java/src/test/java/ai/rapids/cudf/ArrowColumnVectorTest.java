@@ -38,7 +38,6 @@ import org.apache.arrow.vector.complex.StructVector;
 import org.apache.arrow.vector.util.Text;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import static ai.rapids.cudf.AssertUtils.assertColumnsAreEqual;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -18,8 +18,6 @@ package ai.rapids.cudf;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
-import org.junit.jupiter.api.Disabled;
-
 /**
  * Test for operations on tables with large row counts.
  */
@@ -37,7 +35,7 @@ public class LargeTableTest extends CudfTestBase {
    * Tests that exploding large array columns will result in CudfColumnOverflowException
    * if the column size limit is crossed.
    */
-  @Test @Disabled
+  @Test
   public void testExplodeOverflow() {
     int numRows = 1000_000;
     int arraySize = 1000;

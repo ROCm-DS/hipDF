@@ -19,7 +19,6 @@ package ai.rapids.cudf;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import org.junit.jupiter.api.Disabled;
 
 public class Aggregation128UtilsTest extends CudfTestBase {
   @Test

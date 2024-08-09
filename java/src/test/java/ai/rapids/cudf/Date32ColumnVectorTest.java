@@ -19,7 +19,6 @@
 package ai.rapids.cudf;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class Date32ColumnVectorTest extends CudfTestBase {
@@ -48,7 +47,7 @@ public class Date32ColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test //@Disabled
+  @Test 
   public void getMonth() {
     try (ColumnVector daysColumnVector = ColumnVector.daysFromInts(DATES);
          ColumnVector tmp = daysColumnVector.month();

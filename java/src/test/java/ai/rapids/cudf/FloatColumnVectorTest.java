@@ -20,7 +20,6 @@ package ai.rapids.cudf;
 
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Disabled;
 
 import java.util.Random;
 
