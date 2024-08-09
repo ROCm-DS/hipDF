@@ -100,6 +100,9 @@ set(CUDF_CXX_FLAGS "")
 set(CUDF_CUDA_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_CUDA_DEFINITIONS "")
+set(CMAKE_CXX_FLAGS "-DHIPDF_ENABLE_DECIMAL128")
+
+#set(HIPDF_ENABLE_DECIMAL128 "ON")
 
 rapids_find_package(HIP REQUIRED)
 include(ConfigureCUDA) # set other CUDA compilation flags
@@ -173,7 +176,7 @@ add_library(
   # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable them later
   src/PackedColumnMetadataJni.cpp
   src/RmmJni.cpp
-  # src/ScalarJni.cpp # TODO(HIP/AMD): Enable them later
+  src/ScalarJni.cpp
   src/TableJni.cpp
   src/aggregation128_utils.hip
   src/maps_column_view.hip
@@ -225,6 +228,7 @@ set_target_properties(
              CXX_STANDARD 17
              CXX_STANDARD_REQUIRED ON
              CUDA_STANDARD 17
+	     # HIPDF_ENABLE_DECIMAL128 ON
              CUDA_STANDARD_REQUIRED ON
              POSITION_INDEPENDENT_CODE ON
              INTERFACE_POSITION_INDEPENDENT_CODE ON
