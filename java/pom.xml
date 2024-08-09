@@ -132,10 +132,23 @@
             <version>2.25.0</version>
             <scope>test</scope>
         </dependency>
+      
+      <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-memory-netty</artifactId>
+            <version>15.0.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-memory-core</artifactId>
+            <version>15.0.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.arrow</groupId>
             <artifactId>arrow-vector</artifactId>
-            <version>${arrow.version}</version>
+            <version>15.0.0</version> <!-- 0.15.1 -->
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -157,6 +170,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <junit.version>5.4.2</junit.version>
+
         <ai.rapids.refcount.debug>false</ai.rapids.refcount.debug>
         <ai.rapids.cudf.nvtx.enabled>false</ai.rapids.cudf.nvtx.enabled>
         <native.build.path>${basedir}/target/cmake-build</native.build.path>
@@ -190,6 +204,8 @@
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
+                            <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED</argLine>
+
                             <excludes>
                                 <exclude>**/CudaFatalTest.java</exclude>
                                 <exclude>**/ColumnViewNonEmptyNullsTest.java</exclude>
@@ -240,6 +256,8 @@
                     <plugin>
                         <artifactId>maven-surefire-plugin</artifactId>
                         <configuration>
+                         <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED</argLine>
+
                             <excludes>
                                 <exclude>**/ColumnViewNonEmptyNullsTest.java</exclude>
                                 <exclude>**/CuFileTest.java</exclude>
@@ -378,11 +396,14 @@
         </resources>
         <pluginManagement>
             <plugins>
-                <plugin>
+              <!--  <plugin>
                     <groupId>org.codehaus.gmaven</groupId>
                     <artifactId>gmaven-plugin</artifactId>
                     <version>1.5</version>
-                </plugin>
+                      <configuration>
+                <providerSelection>2.0</providerSelection>
+                     </configuration>
+                </plugin> -->
                 <plugin>
                     <artifactId>maven-exec-plugin</artifactId>
                     <version>1.6.0</version>
@@ -394,7 +415,7 @@
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <!-- downgrade version so symlinks are followed -->
-                    <version>2.6</version>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
@@ -402,7 +423,6 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.0</version>
                     <dependencies>
                         <dependency>
                             <groupId>org.junit.platform</groupId>
@@ -500,48 +520,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.gmaven</groupId>
-                <artifactId>gmaven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>setproperty</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>execute</goal>
-                        </goals>
-                        <configuration>
-                            <source>
-                                def sout = new StringBuffer(), serr = new StringBuffer()
-                                //This only works on linux
-                                def proc = 'ldd ${native.build.path}/libhipdfjni.so'.execute()
-                                proc.consumeProcessOutput(sout, serr)
-                                proc.waitForOrKill(10000)
-                                def libhipdf = ~/libhipdf.*\\.so\\s+=>\\s+(.*)libhipdf.*\\.so\\s+.*/
-                                def cudfm = libhipdf.matcher(sout)
-                                if (cudfm.find()) {
-                                    pom.properties['native.hipdf.path'] = cudfm.group(1)
-                                } else {
-                                    fail("Could not find cudf as a dependency of libhipdfjni out> $sout err> $serr")
-                                }
-
-                                def nvccout = new StringBuffer(), nvccerr = new StringBuffer()
-                                def nvccproc = 'hipcc --version'.execute()
-                                nvccproc.consumeProcessOutput(nvccout, nvccerr)
-                                nvccproc.waitForOrKill(10000)
-                                def cudaPattern = ~/HIP version: ([0-9]+)/
-                                def cm = cudaPattern.matcher(nvccout)
-                                if (cm.find()) {
-                                    def classifier = 'cuda' + cm.group(1)
-                                    pom.properties['cuda.classifier'] = classifier
-                                } else {
-                                    fail('could not find CUDA version')
-                                }
-                            </source>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
@@ -564,6 +542,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                  <version>2.22.2</version>
                 <configuration>
+                <argLine>--add-opens=java.base/java.nio=ALL-UNNAMED</argLine>
+
                 <showOutput>true</showOutput>
                  <!--  <forkCount>0</forkCount> -->     <!-- need to debug stdout or vm/surefire will crash with 
                                                 Corrupted STDOUT by directly writing to native stream 
