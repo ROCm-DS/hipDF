@@ -82,8 +82,6 @@ if(FIND_CUDF_CPP)
   endif()
 
   find_package(cudf ${cudf_version} REQUIRED)
-  #: aliasing to use most of prexisting build system
-  add_library(nvcomp::nvcomp ALIAS hipcomp)
   set(cudf_FOUND ${cudf_FOUND})
 
   # an installed version of libcudf doesn't provide the dlpack headers so we need to download dlpack
@@ -120,8 +118,6 @@ if(NOT cudf_FOUND)
   endif()
 
   add_subdirectory(../../cpp cudf-cpp ${_exclude_from_all})
-  #: aliasing to use most of prexisting build system
-  add_library(nvcomp::nvcomp ALIAS hipcomp)
 
   if(CUDF_BUILD_WHEELS)
     include(cmake/Modules/WheelHelpers.cmake)
