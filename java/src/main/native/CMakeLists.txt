@@ -297,18 +297,11 @@ if(CUDA_STATIC_RUNTIME)
 else()
   # Tell CMake what CUDA language runtime to use
   set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
-  set_target_properties(hipcomp::hipcomp PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
+  set_target_properties(hipcomp::hipcomp PROPERTIES HIP_RUNTIME_LIBRARY Shared)
 endif()
 
 # Dynamically build and link hipcomp
-if (DEFINED ENV{HIPCOMP_DIR})
-    message(STATUS "Using hipcomp-core $ENV{HIPCOMP_DIR}")
-    add_library(hipcomp SHARED $ENV{HIPCOMP_DIR}/src) #"../../../../../hipcomp-core/src")
-    set_target_properties(hipcomp PROPERTIES LINKER_LANGUAGE CXX)
 
-else()
-    message(FATAL_ERROR "Please set HIPCOMP_DIR environment variable to point to the hipcomp-core repo")
-endif()
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------
