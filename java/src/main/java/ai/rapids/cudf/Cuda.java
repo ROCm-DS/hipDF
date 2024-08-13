@@ -32,7 +32,7 @@ public class Cuda {
   static final long CUDA_STREAM_DEFAULT = 0;
   static final long CUDA_STREAM_LEGACY = 1;
   static final long CUDA_STREAM_PER_THREAD = 2;
-  private final static long DEFAULT_STREAM_ID = 0; //isPtdsEnabled() ? CUDA_STREAM_PER_THREAD : CUDA_STREAM_LEGACY;
+  private final static long DEFAULT_STREAM_ID = isPtdsEnabled() ? CUDA_STREAM_PER_THREAD : CUDA_STREAM_LEGACY;
   private static final Logger log = LoggerFactory.getLogger(Cuda.class);
   private static Boolean isCompat = null;
 
