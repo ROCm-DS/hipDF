@@ -21,4 +21,4 @@
 # SOFTWARE.
 
 --extra-index-url https://test.pypi.org/simple/
-hip-python-as-cuda>=6.1.2,<6.2
+hip-python-as-cuda>=6.2
