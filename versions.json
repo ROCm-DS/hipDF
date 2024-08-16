@@ -16,9 +16,9 @@
       "git_tag" : "dev"
     },
     "rocthrust" : {
-      "version" : "3.0.0",
+      "version" : "3.1.0",
       "git_url" : "https://github.com/ROCm/rocThrust",
-      "git_tag" : "rocm-6.0.0"
+      "git_tag" : "rocm-6.2.0"
     },
     "rmm-rocm" : {
       "version" : "${rapids-cmake-version}",
