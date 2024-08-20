@@ -44,7 +44,7 @@ function(find_and_configure_cudf VERSION)
     CPM_ARGS
     #: GIT_REPOSITORY https://github.com/rapidsai/cudf.git
     #: GIT_TAG branch-${major_minor}
-    GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/hipdf.git
+    GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/cudf.git
     GIT_TAG dev
     GIT_SHALLOW TRUE SOURCE_SUBDIR cpp
     OPTIONS "BUILD_TESTS OFF" "BUILD_BENCHMARKS OFF"

@@ -21,7 +21,7 @@ include(${CMAKE_BINARY_DIR}/cmake/get_cpm.cmake)
 
 set(CUDF_TAG dev)
 CPMFindPackage(
-  NAME cudf GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/hipdf	
+  NAME cudf GIT_REPOSITORY https://github.com/ROCm/cudf-rocm
   GIT_TAG ${CUDF_TAG}
   GIT_SHALLOW
     TRUE
@@ -31,5 +31,5 @@ CPMFindPackage(
 
 # Configure your project here
 add_executable(basic_example src/process_csv.cpp)
-target_link_libraries(basic_example PRIVATE hipdf::hipdf)
+target_link_libraries(basic_example PRIVATE cudf::cudf)
 target_compile_features(basic_example PRIVATE cxx_std_17)

@@ -95,7 +95,7 @@ target_include_directories(
 # ##################################################################################################
 # * library paths ---------------------------------------------------------------------------------
 #: target_link_libraries(cudf_kafka PUBLIC cudf::cudf RDKAFKA::RDKAFKA)
-target_link_libraries(cudf_kafka PUBLIC hipdf::hipdf RDKAFKA::RDKAFKA)
+target_link_libraries(cudf_kafka PUBLIC cudf::cudf RDKAFKA::RDKAFKA)
 
 # Add Conda library, and include paths if specified
 if(TARGET conda_env)

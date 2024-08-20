@@ -26,27 +26,27 @@ function(ConfigureTest CMAKE_TEST_NAME)
   set(options)
   set(one_value GPUS PERCENT STREAM_MODE)
   set(multi_value)
-  cmake_parse_arguments(_HIPDF_TEST "${options}" "${one_value}" "${multi_value}" ${ARGN})
-  if(NOT DEFINED _HIPDF_TEST_GPUS AND NOT DEFINED _HIPDF_TEST_PERCENT)
-    set(_HIPDF_TEST_GPUS 1)
-    set(_HIPDF_TEST_PERCENT 15)
+  cmake_parse_arguments(_CUDF_TEST "${options}" "${one_value}" "${multi_value}" ${ARGN})
+  if(NOT DEFINED _CUDF_TEST_GPUS AND NOT DEFINED _CUDF_TEST_PERCENT)
+    set(_CUDF_TEST_GPUS 1)
+    set(_CUDF_TEST_PERCENT 15)
   endif()
-  if(NOT DEFINED _HIPDF_TEST_GPUS)
-    set(_HIPDF_TEST_GPUS 1)
+  if(NOT DEFINED _CUDF_TEST_GPUS)
+    set(_CUDF_TEST_GPUS 1)
   endif()
-  if(NOT DEFINED _HIPDF_TEST_PERCENT)
-    set(_HIPDF_TEST_PERCENT 100)
+  if(NOT DEFINED _CUDF_TEST_PERCENT)
+    set(_CUDF_TEST_PERCENT 100)
   endif()
-  if(NOT DEFINED _HIPDF_TEST_STREAM_MODE)
-    set(_HIPDF_TEST_STREAM_MODE hipdf)
+  if(NOT DEFINED _CUDF_TEST_STREAM_MODE)
+    set(_CUDF_TEST_STREAM_MODE cudf)
   endif()
 
-  add_executable(${CMAKE_TEST_NAME} ${_HIPDF_TEST_UNPARSED_ARGUMENTS})
+  add_executable(${CMAKE_TEST_NAME} ${_CUDF_TEST_UNPARSED_ARGUMENTS})
 
   if (CUDA_BACKEND)
     set_target_properties(
       ${CMAKE_TEST_NAME}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/gtests>"
+      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
                 INSTALL_RPATH "\$ORIGIN/../../../lib"
                 CXX_STANDARD 17
                 CXX_STANDARD_REQUIRED ON
@@ -59,7 +59,7 @@ function(ConfigureTest CMAKE_TEST_NAME)
   else ()
     set_target_properties(
       ${CMAKE_TEST_NAME}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/gtests>"
+      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
                   INSTALL_RPATH "\$ORIGIN/../../../lib"
                   CXX_STANDARD 20
                   CXX_STANDARD_REQUIRED ON
@@ -72,14 +72,14 @@ function(ConfigureTest CMAKE_TEST_NAME)
   endif()
 
   target_link_libraries(
-    ${CMAKE_TEST_NAME} PRIVATE hipdftestutil GTest::gmock_main GTest::gtest_main
+    ${CMAKE_TEST_NAME} PRIVATE cudftestutil GTest::gmock_main GTest::gtest_main
                                $<TARGET_NAME_IF_EXISTS:conda_env>
   )
   rapids_test_add(
     NAME ${CMAKE_TEST_NAME}
     COMMAND ${CMAKE_TEST_NAME}
-    GPUS ${_HIPDF_TEST_GPUS}
-    PERCENT ${_HIPDF_TEST_PERCENT}
+    GPUS ${_CUDF_TEST_GPUS}
+    PERCENT ${_CUDF_TEST_PERCENT}
     INSTALL_COMPONENT_SET testing
   )
 
@@ -87,7 +87,7 @@ function(ConfigureTest CMAKE_TEST_NAME)
     ${CMAKE_TEST_NAME}
     PROPERTIES
       ENVIRONMENT
-      "GTEST_CUDF_STREAM_MODE=new_${_HIPDF_TEST_STREAM_MODE}_default;LD_PRELOAD=$<TARGET_FILE:hipdf_identify_stream_usage_mode_${_HIPDF_TEST_STREAM_MODE}>"
+      "GTEST_CUDF_STREAM_MODE=new_${_CUDF_TEST_STREAM_MODE}_default;LD_PRELOAD=$<TARGET_FILE:cudf_identify_stream_usage_mode_${_CUDF_TEST_STREAM_MODE}>"
   )
 endfunction()
 
@@ -324,7 +324,7 @@ target_link_libraries(DATA_CHUNK_SOURCE_TEST PRIVATE ZLIB::ZLIB)
 ConfigureTest(LOGICAL_STACK_TEST io/fst/logical_stack_test.cu)
 ConfigureTest(FST_TEST io/fst/fst_test.cu)
 ConfigureTest(TYPE_INFERENCE_TEST io/type_inference_test.cu)
-if(HIPDF_ENABLE_ARROW_S3)
+if(CUDF_ENABLE_ARROW_S3)
   target_compile_definitions(ARROW_IO_SOURCE_TEST PRIVATE "S3_ENABLED")
 endif()
 
@@ -398,7 +398,7 @@ set_tests_properties(
   SPAN_TEST
   PROPERTIES
     ENVIRONMENT
-    "GTEST_FILTER=-${_allowlist_filter};GTEST_HIPDF_STREAM_MODE=new_hipdf_default;LD_PRELOAD=$<TARGET_FILE:hipdf_identify_stream_usage_mode_hipdf>"
+    "GTEST_FILTER=-${_allowlist_filter};GTEST_CUDF_STREAM_MODE=new_cudf_default;LD_PRELOAD=$<TARGET_FILE:cudf_identify_stream_usage_mode_cudf>"
 )
 set_tests_properties(
   SPAN_TEST_DEVICE_VECTOR PROPERTIES ENVIRONMENT "GTEST_FILTER=${_allowlist_filter}"
@@ -657,4 +657,4 @@ ConfigureTest(STREAM_TEXT_TEST streams/text/ngrams_test.cpp STREAM_MODE testing)
 # ##################################################################################################
 # Install tests ####################################################################################
 # ##################################################################################################
-rapids_test_install_relocatable(INSTALL_COMPONENT_SET testing DESTINATION bin/gtests/libhipdf)
+rapids_test_install_relocatable(INSTALL_COMPONENT_SET testing DESTINATION bin/gtests/libcudf)

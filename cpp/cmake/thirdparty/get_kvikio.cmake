@@ -27,7 +27,7 @@ function(find_and_configure_kvikio VERSION)
 
   if(KvikIO_BINARY_DIR)
     include("${rapids-cmake-dir}/export/find_package_root.cmake")
-    rapids_export_find_package_root(BUILD KvikIO "${KvikIO_BINARY_DIR}" hipdf-exports)
+    rapids_export_find_package_root(BUILD KvikIO "${KvikIO_BINARY_DIR}" cudf-exports)
   endif()
 
 endfunction()

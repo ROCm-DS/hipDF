@@ -23,16 +23,16 @@ include(rapids-find)
 option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
 
 if(CUDA_BACKEND)
-  rapids_cuda_init_architectures(HIPDF)
+  rapids_cuda_init_architectures(CUDF)
 else()
-  rapids_hip_init_architectures(HIPDF)
+  rapids_hip_init_architectures(CUDF)
 endif()
 
 # NOTE(HIP/AMD/CUDA): rapids_*_init_architectures relies on HIP/CUDA compiler being set
 # during project call (project call is essentially calling back rapids-cmake to determine+set architecture)
 if(CUDA_BACKEND)
   project(
-    HIPDF 
+    CUDF 
     VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
     LANGUAGES C CXX CUDA
   )
@@ -47,7 +47,7 @@ if(CUDA_BACKEND)
   option(USE_NVTX "Build with NVTX support" ON)
 else()
   project(
-    HIPDF 
+    CUDF 
     VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
     LANGUAGES C CXX HIP
   )
@@ -67,28 +67,28 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
-option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
+option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
-option(HIPDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
-option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
-mark_as_advanced(HIPDF_BUILD_TESTUTIL)
-#TODO(HIP/AMD) : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
-# option(HIPDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
-option(HIPDF_USE_ARROW_STATIC "Build and statically link Arrow libraries" OFF)
-option(HIPDF_ENABLE_ARROW_ORC "Build the Arrow ORC adapter" OFF)
-option(HIPDF_ENABLE_ARROW_PYTHON "Find (or build) Arrow with Python support" OFF)
-option(HIPDF_ENABLE_ARROW_PARQUET "Find (or build) Arrow with Parquet support" OFF)
-option(HIPDF_ENABLE_ARROW_S3 "Build/Enable AWS S3 Arrow filesystem support" OFF)
+option(CUDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
+option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
+mark_as_advanced(CUDF_BUILD_TESTUTIL)
+#TODO(HIP/AMD) : FIX wrt CUDF_USE_PROPRIETARY_NVCOMP is not used.
+# option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
+option(CUDF_USE_ARROW_STATIC "Build and statically link Arrow libraries" OFF)
+option(CUDF_ENABLE_ARROW_ORC "Build the Arrow ORC adapter" OFF)
+option(CUDF_ENABLE_ARROW_PYTHON "Find (or build) Arrow with Python support" OFF)
+option(CUDF_ENABLE_ARROW_PARQUET "Find (or build) Arrow with Parquet support" OFF)
+option(CUDF_ENABLE_ARROW_S3 "Build/Enable AWS S3 Arrow filesystem support" OFF)
 option(
-  HIPDF_USE_PER_THREAD_DEFAULT_STREAM
-  "Build hipDF with per-thread default stream, including passing the per-thread default
+  CUDF_USE_PER_THREAD_DEFAULT_STREAM
+  "Build cuDF with per-thread default stream, including passing the per-thread default
          stream to external libraries."
   OFF
 )
 # Option to add all symbols to the dynamic symbol table in the library file, allowing to retrieve
 # human-readable stacktrace for debugging.
 option(
-  HIPDF_BUILD_STACKTRACE_DEBUG
+  CUDF_BUILD_STACKTRACE_DEBUG
   "Replace the current optimization flags by the options '-rdynamic -Og -NDEBUG', useful for debugging with stacktrace retrieval"
   OFF
 )
@@ -102,75 +102,75 @@ option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilati
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
 option(GPU_STATIC_RUNTIME "Statically link the CUDA/HIP runtime" OFF)
 
-set(DEFAULT_HIPDF_BUILD_STREAMS_TEST_UTIL ON)
+set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
-  set(DEFAULT_HIPDF_BUILD_STREAMS_TEST_UTIL OFF)
+  set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL OFF)
 endif()
 option(
-  HIPDF_BUILD_STREAMS_TEST_UTIL
-  "Whether to build the utilities for stream testing contained in libhipdf"
-  ${DEFAULT_HIPDF_BUILD_STREAMS_TEST_UTIL}
+  CUDF_BUILD_STREAMS_TEST_UTIL
+  "Whether to build the utilities for stream testing contained in libcudf"
+  ${DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL}
 )
-mark_as_advanced(HIPDF_BUILD_STREAMS_TEST_UTIL)
+mark_as_advanced(CUDF_BUILD_STREAMS_TEST_UTIL)
 
 option(USE_LIBARROW_FROM_PYARROW "Use the libarrow contained within pyarrow." OFF)
 mark_as_advanced(USE_LIBARROW_FROM_PYARROW)
 
-message(VERBOSE "HIPDF: Build with NVTX support: ${USE_NVTX}")
-message(VERBOSE "HIPDF: Configure CMake to build tests: ${BUILD_TESTS}")
-message(VERBOSE "HIPDF: Configure CMake to build (google & nvbench) benchmarks: ${BUILD_BENCHMARKS}")
-message(VERBOSE "HIPDF: Build cuDF shared libraries: ${BUILD_SHARED_LIBS}")
-message(VERBOSE "HIPDF: Use a file cache for JIT compiled kernels: ${JITIFY_USE_CACHE}")
-message(VERBOSE "HIPDF: Build and statically link Arrow libraries: ${HIPDF_USE_ARROW_STATIC}")
-message(VERBOSE "HIPDF: Build and enable S3 filesystem support for Arrow: ${HIPDF_ENABLE_ARROW_S3}")
-message(VERBOSE "HIPDF: Build with per-thread default stream: ${HIPDF_USE_PER_THREAD_DEFAULT_STREAM}")
+message(VERBOSE "CUDF: Build with NVTX support: ${USE_NVTX}")
+message(VERBOSE "CUDF: Configure CMake to build tests: ${BUILD_TESTS}")
+message(VERBOSE "CUDF: Configure CMake to build (google & nvbench) benchmarks: ${BUILD_BENCHMARKS}")
+message(VERBOSE "CUDF: Build cuDF shared libraries: ${BUILD_SHARED_LIBS}")
+message(VERBOSE "CUDF: Use a file cache for JIT compiled kernels: ${JITIFY_USE_CACHE}")
+message(VERBOSE "CUDF: Build and statically link Arrow libraries: ${CUDF_USE_ARROW_STATIC}")
+message(VERBOSE "CUDF: Build and enable S3 filesystem support for Arrow: ${CUDF_ENABLE_ARROW_S3}")
+message(VERBOSE "CUDF: Build with per-thread default stream: ${CUDF_USE_PER_THREAD_DEFAULT_STREAM}")
 message(
   VERBOSE
-  "HIPDF: Replace the current optimization flags by the options '-rdynamic -Og' (useful for debugging with stacktrace retrieval): ${HIPDF_BUILD_STACKTRACE_DEBUG}"
+  "CUDF: Replace the current optimization flags by the options '-rdynamic -Og' (useful for debugging with stacktrace retrieval): ${CUDF_BUILD_STACKTRACE_DEBUG}"
 )
 message(
   VERBOSE
-  "HIPDF: Disable warnings generated from deprecated declarations: ${DISABLE_DEPRECATION_WARNINGS}"
+  "CUDF: Disable warnings generated from deprecated declarations: ${DISABLE_DEPRECATION_WARNINGS}"
 )
 message(
   VERBOSE
-  "HIPDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
+  "CUDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
 )
-message(VERBOSE "HIPDF: Statically link the CUDA/HIP runtime: ${GPU_STATIC_RUNTIME}")
+message(VERBOSE "CUDF: Statically link the CUDA/HIP runtime: ${GPU_STATIC_RUNTIME}")
 
 # Set a default build type if none was specified
 rapids_cmake_build_type("Release")
-set(HIPDF_BUILD_TESTS ${BUILD_TESTS})
-set(HIPDF_BUILD_BENCHMARKS ${BUILD_BENCHMARKS})
-if(BUILD_TESTS AND NOT HIPDF_BUILD_TESTUTIL)
+set(CUDF_BUILD_TESTS ${BUILD_TESTS})
+set(CUDF_BUILD_BENCHMARKS ${BUILD_BENCHMARKS})
+if(BUILD_TESTS AND NOT CUDF_BUILD_TESTUTIL)
   message(
     FATAL_ERROR
-      "Tests cannot be built without building hipdf test utils. Please set _BUILD_TESTUTIL=ON or BUILD_TESTS=OFF"
+      "Tests cannot be built without building cudf test utils. Please set _BUILD_TESTUTIL=ON or BUILD_TESTS=OFF"
   )
 endif()
 
-if(HIPDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
-  message(FATAL_ERROR "HIPDF_BUILD_STACKTRACE_DEBUG is only supported with GCC compiler")
+if(CUDF_BUILD_STACKTRACE_DEBUG AND NOT CMAKE_COMPILER_IS_GNUCXX)
+  message(FATAL_ERROR "CUDF_BUILD_STACKTRACE_DEBUG is only supported with GCC compiler")
 endif()
 #
-set(HIPDF_CXX_FLAGS "")
-set(HIPDF_GPU_FLAGS "") 
-set(HIPDF_CXX_DEFINITIONS "")
-set(HIPDF_GPU_DEFINITIONS "")
+set(CUDF_CXX_FLAGS "")
+set(CUDF_GPU_FLAGS "") 
+set(CUDF_CXX_DEFINITIONS "")
+set(CUDF_GPU_DEFINITIONS "")
 
 # Set logging level
-set(LIBHIPDF_LOGGING_LEVEL
+set(LIBCUDF_LOGGING_LEVEL
     "INFO"
     CACHE STRING "Choose the logging level."
 )
 set_property(
-  CACHE LIBHIPDF_LOGGING_LEVEL PROPERTY STRINGS "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "CRITICAL"
+  CACHE LIBCUDF_LOGGING_LEVEL PROPERTY STRINGS "TRACE" "DEBUG" "INFO" "WARN" "ERROR" "CRITICAL"
                                        "OFF"
 )
-message(VERBOSE "HIPDF: LIBHIPDF_LOGGING_LEVEL = '${LIBHIPDF_LOGGING_LEVEL}'.")
+message(VERBOSE "CUDF: LIBCUDF_LOGGING_LEVEL = '${LIBCUDF_LOGGING_LEVEL}'.")
 
-if(NOT HIPDF_GENERATED_INCLUDE_DIR)
-  set(HIPDF_GENERATED_INCLUDE_DIR ${HIPDF_BINARY_DIR})
+if(NOT CUDF_GENERATED_INCLUDE_DIR)
+  set(CUDF_GENERATED_INCLUDE_DIR ${CUDF_BINARY_DIR})
 endif()
 
 # ##################################################################################################
@@ -183,15 +183,15 @@ if(CUDA_BACKEND)
   # * compiler options ----------------------------------------------------------------------------
   rapids_find_package(
     CUDAToolkit REQUIRED
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
   )
   include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
 else()
   rapids_find_package(
     HIP REQUIRED
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
   )
   include(cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
 endif()
@@ -202,12 +202,12 @@ endif()
 # find zlib
 rapids_find_package(ZLIB REQUIRED)
 
-if(HIPDF_BUILD_TESTUTIL)
-  # find Threads (needed by hipdftestutil)
+if(CUDF_BUILD_TESTUTIL)
+  # find Threads (needed by cudftestutil)
   rapids_find_package(
     Threads REQUIRED
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
   )
 endif()
 
@@ -234,7 +234,7 @@ include(cmake/thirdparty/get_libhipcxx.cmake)
 # find cuCollections Should come after including thrust and libhipcxx
 include(cmake/thirdparty/get_hipcollections.cmake)
 # find or install GoogleTest
-if(HIPDF_BUILD_TESTUTIL)
+if(CUDF_BUILD_TESTUTIL)
   include(cmake/thirdparty/get_gtest.cmake)
 endif()
 
@@ -242,7 +242,7 @@ endif()
 if(CUDA_BACKEND)
   include(cmake/Modules/JitifyPreprocessKernels.cmake)
 else()
-  if(HIPDF_ENABLE_UDF_WITH_JITIFY)
+  if(CUDF_ENABLE_UDF_WITH_JITIFY)
   # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
   # see SWDEV-444584
   include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
@@ -272,19 +272,19 @@ if(NOT BUILD_SHARED_LIBS)
 
   foreach(METADATA_KIND IN LISTS METADATA_KINDS)
     foreach(dep IN LISTS dependencies)
-      rapids_export_package(${METADATA_KIND} ${dep} hipdf-exports)
+      rapids_export_package(${METADATA_KIND} ${dep} cudf-exports)
     endforeach()
   endforeach()
 
   if(TARGET conda_env)
-    install(TARGETS conda_env EXPORT hipdf-exports)
+    install(TARGETS conda_env EXPORT cudf-exports)
   endif()
 endif()
 
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
 add_library(
-  hipdf
+  cudf
   src/aggregation/aggregation.cpp
   src/aggregation/aggregation.cu
   src/aggregation/result_cache.cpp
@@ -694,7 +694,7 @@ add_library(
 )
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-  message(VERBOSE "HIPDF: Building with debugging flags")
+  message(VERBOSE "CUDF: Building with debugging flags")
 
   # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is hanging)
   # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround.
@@ -725,81 +725,81 @@ set_source_files_properties(
   PROPERTIES COMPILE_DEFINITIONS "_FILE_OFFSET_BITS=64"
 )
 
-set_hipdf_target_properties()
+set_cudf_target_properties()
 
 # Specify include paths for the current target and dependents
 target_include_directories(
-  hipdf
+  cudf
   PUBLIC "$<BUILD_INTERFACE:${DLPACK_INCLUDE_DIR}>"
          "$<BUILD_INTERFACE:${JITIFY_INCLUDE_DIR}>"
-         "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>"
-         "$<BUILD_INTERFACE:${HIPDF_GENERATED_INCLUDE_DIR}/include>"
-  PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
+         "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>"
+         "$<BUILD_INTERFACE:${CUDF_GENERATED_INCLUDE_DIR}/include>"
+  PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
   INTERFACE "$<INSTALL_INTERFACE:include>"
 )
 
-if(HIPDF_ENABLE_UDF_WITH_JITIFY)
-target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_UDF_WITH_JITIFY")
+if(CUDF_ENABLE_UDF_WITH_JITIFY)
+target_compile_definitions(cudf PRIVATE "CUDF_ENABLE_UDF_WITH_JITIFY")
 endif()
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
-target_compile_definitions(hipdf PRIVATE "JITIFY_PRINT_LOG=0")
+target_compile_definitions(cudf PRIVATE "JITIFY_PRINT_LOG=0")
 
 if(CUDA_BACKEND)
-  target_compile_definitions(hipdf PRIVATE "RMM_USE_CUDA")
+  target_compile_definitions(cudf PRIVATE "RMM_USE_CUDA")
 else()
-  target_compile_definitions(hipdf PRIVATE "RMM_USE_HIP")
+  target_compile_definitions(cudf PRIVATE "RMM_USE_HIP")
 endif()
 if(JITIFY_USE_CACHE)
-  # Instruct src/jit/cache what version of hipdf we are building so it can compute a cal-ver cache
+  # Instruct src/jit/cache what version of cudf we are building so it can compute a cal-ver cache
   # directory. We isolate this definition to the single source so it doesn't effect compiling
-  # caching for all of libhipdf
+  # caching for all of libcudf
   set_property(
     SOURCE src/jit/cache.cpp
     APPEND
-    PROPERTY COMPILE_DEFINITIONS "JITIFY_USE_CACHE" "HIPDF_VERSION=${PROJECT_VERSION}"
+    PROPERTY COMPILE_DEFINITIONS "JITIFY_USE_CACHE" "CUDF_VERSION=${PROJECT_VERSION}"
   )
 endif()
 
 # Per-thread default stream
-if(HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
+if(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
   target_compile_definitions(
-    hipdf PUBLIC HIPDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
+    cudf PUBLIC CUDF_USE_PER_THREAD_DEFAULT_STREAM CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__
   )
   #: TODO(HIP/AMD): assumes CXX compiler is HIPCC or AMD clang++.
-  target_compile_options(hipdf PUBLIC
+  target_compile_options(cudf PUBLIC
     "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP,CXX>:-fgpu-default-stream=per-thread>>"
   )
 endif()
 
 # Disable NVTX if necessary
 if(NOT USE_NVTX)
-  target_compile_definitions(hipdf PUBLIC NVTX_DISABLE)
+  target_compile_definitions(cudf PUBLIC NVTX_DISABLE)
 endif()
 
 # Define RMM logging level
-target_compile_definitions(hipdf PRIVATE "RMM_LOGGING_LEVEL=LIBHIPDF_LOGGING_LEVEL")
+target_compile_definitions(cudf PRIVATE "RMM_LOGGING_LEVEL=LIBCUDF_LOGGING_LEVEL")
 
 # Define spdlog level
-target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBHIPDF_LOGGING_LEVEL}")
+target_compile_definitions(cudf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBCUDF_LOGGING_LEVEL}")
 
 # Compile stringified JIT sources first
-if(HIPDF_ENABLE_UDF_WITH_JITIFY)
+if(CUDF_ENABLE_UDF_WITH_JITIFY)
   # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
   # see SWDEV-444584
-add_dependencies(hipdf jitify_preprocess_run)
+add_dependencies(cudf jitify_preprocess_run)
 endif()
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(CUDA_BACKEND)
-set(THRUST_LIBRARY hipdf::Thrust)
+set(THRUST_LIBRARY cudf::Thrust)
 else()
 set(THRUST_LIBRARY roc::rocthrust)
 endif()
 
 # Specify the target module library dependencies
 target_link_libraries(
-  hipdf
+  cudf
   PUBLIC ${ARROW_LIBRARIES} libhipcxx::libhipcxx ${THRUST_LIBRARY} rmm::rmm
   PRIVATE hipco::hipco ZLIB::ZLIB hipcomp::hipcomp $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
           $<TARGET_NAME_IF_EXISTS:cuFile_interface>
@@ -807,13 +807,13 @@ target_link_libraries(
 
 # Add Conda library, and include paths if specified
 if(TARGET conda_env)
-  target_link_libraries(hipdf PRIVATE conda_env)
+  target_link_libraries(cudf PRIVATE conda_env)
 endif()
 
 #TODO(HIP/AMD): do we need a linker script for HIP?
 if(CUDA_BACKEND)
   file(
-    WRITE "${HIPDF_BINARY_DIR}/fatbin.ld"
+    WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
     [=[
   SECTIONS
   {
@@ -822,21 +822,21 @@ if(CUDA_BACKEND)
   }
   ]=]
   )
-  target_link_options(hipdf PRIVATE "$<HOST_LINK:${HIPDF_BINARY_DIR}/fatbin.ld>")
+  target_link_options(cudf PRIVATE "$<HOST_LINK:${CUDF_BINARY_DIR}/fatbin.ld>")
 endif()
 
-add_library(hipdf::hipdf ALIAS hipdf)
+add_library(cudf::cudf ALIAS cudf)
 
 # ##################################################################################################
 # * tests and benchmarks --------------------------------------------------------------------------
 # ##################################################################################################
 
 # ##################################################################################################
-# * build hipdftestutil ----------------------------------------------------------------------------
+# * build cudftestutil ----------------------------------------------------------------------------
 
-if(HIPDF_BUILD_TESTUTIL)
+if(CUDF_BUILD_TESTUTIL)
   add_library(
-    hipdftest_default_stream
+    cudftest_default_stream
     # When compiled as a dynamic library allows us to use LD_PRELOAD injection of symbols. We
     # currently leverage this for stream-related library validation and may make use of it for
     # other similar features in the future.
@@ -846,20 +846,20 @@ if(HIPDF_BUILD_TESTUTIL)
   set_hidftest_default_stream_target()
 
   target_link_libraries(
-    hipdftest_default_stream
-    PUBLIC hipdf
+    cudftest_default_stream
+    PUBLIC cudf
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
 
-  target_include_directories(hipdftest_default_stream PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>")
-  target_link_libraries(hipdftest_default_stream PRIVATE rmm::rmm)
+  target_include_directories(cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
+  target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
 
-  add_library(hipdf::hipdftest_default_stream ALIAS hipdftest_default_stream)
+  add_library(cudf::cudftest_default_stream ALIAS cudftest_default_stream)
 
   # Needs to be static so that we support usage of static builds of gtest which doesn't compile with
   # fPIC enabled and therefore can't be embedded into shared libraries.
   add_library(
-    hipdftestutil STATIC
+    cudftestutil STATIC
     tests/io/metadata_utilities.cpp
     tests/utilities/base_fixture.cpp
     tests/utilities/column_utilities.cu
@@ -868,59 +868,59 @@ if(HIPDF_BUILD_TESTUTIL)
     tests/utilities/tdigest_utilities.cu
   )
 
-  set_hipdftestutil_target()
+  set_cudftestutil_target()
 
   # TODO(HIP/AMD): This activates UDF-related unit tests if UDF/Jitify support 
   # is enabled (requires patched hipRTC)
-  if(HIPDF_ENABLE_UDF_WITH_JITIFY)
-    target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_UDF_WITH_JITIFY")
+  if(CUDF_ENABLE_UDF_WITH_JITIFY)
+    target_compile_definitions(cudftestutil PUBLIC "CUDF_ENABLE_UDF_WITH_JITIFY")
   endif()
 
-  if(HIPDF_ENABLE_DECIMAL128)
-    target_compile_definitions(hipdftestutil PUBLIC "HIPDF_ENABLE_DECIMAL128")
+  if(CUDF_ENABLE_DECIMAL128)
+    target_compile_definitions(cudftestutil PUBLIC "CUDF_ENABLE_DECIMAL128")
   endif()
 
   if(CUDA_BACKEND)
     target_compile_options(
-      hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
-                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${HIPDF_GPU_FLAGS}>>"
+      cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_FLAGS}>>"
     )
   else()
     target_compile_options(
-      hipdftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
-                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${HIPDF_GPU_FLAGS}>>"
+      cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
     )
   endif()
 
   target_link_libraries(
-    hipdftestutil
-    PUBLIC GTest::gmock GTest::gtest Threads::Threads hipdf hipdftest_default_stream
+    cudftestutil
+    PUBLIC GTest::gmock GTest::gtest Threads::Threads cudf cudftest_default_stream
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
 
   target_include_directories(
-    hipdftestutil PUBLIC "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}>"
-                         "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
+    cudftestutil PUBLIC "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
+                         "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
   )
-  add_library(hipdf::hipdftestutil ALIAS hipdftestutil)
+  add_library(cudf::cudftestutil ALIAS cudftestutil)
 
 endif()
 
-# * build hipdf_identify_stream_usage --------------------------------------------------------------
+# * build cudf_identify_stream_usage --------------------------------------------------------------
 
-if(HIPDF_BUILD_STREAMS_TEST_UTIL)
+if(CUDF_BUILD_STREAMS_TEST_UTIL)
   if(GPU_STATIC_RUNTIME)
     message(
       FATAL_ERROR
-        "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or HIPDF_BUILD_STREAMS_TEST_UTIL=OFF."
+        "Stream identification cannot be used with a static GPU runtime. Please set GPU_STATIC_RUNTIME=OFF or CUDF_BUILD_STREAMS_TEST_UTIL=OFF."
     )
   endif()
 
   # Libraries for stream-related testing. We build the library twice, one with STREAM_MODE_TESTING
   # on and one with it set to off. Each test will then be configured to use the appropriate library
   # depending via ctest and whether it has been updated to expose public stream APIs.
-  foreach(_mode hipdf testing)
-    set(_tgt "hipdf_identify_stream_usage_mode_${_mode}")
+  foreach(_mode cudf testing)
+    set(_tgt "cudf_identify_stream_usage_mode_${_mode}")
     add_library(
       ${_tgt} SHARED src/utilities/stacktrace.cpp tests/utilities/identify_stream_usage.cpp
     )
@@ -933,9 +933,9 @@ if(HIPDF_BUILD_STREAMS_TEST_UTIL)
                  POSITION_INDEPENDENT_CODE ON
     )
     target_compile_options(
-      ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>>"
+      ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
-    target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/include>")
+    target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
     if(CUDA_BACKEND)
       target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm)
     else()
@@ -943,9 +943,9 @@ if(HIPDF_BUILD_STREAMS_TEST_UTIL)
     endif()
 
     if(_BUILD_STACKTRACE_DEBUG)
-      target_link_libraries(${_tgt} PRIVATE hipdf_backtrace)
+      target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
     endif()
-    add_library(hipdf::${_tgt} ALIAS ${_tgt})
+    add_library(cudf::${_tgt} ALIAS ${_tgt})
 
     if("${_mode}" STREQUAL "testing")
       target_compile_definitions(${_tgt} PUBLIC STREAM_MODE_TESTING)
@@ -956,7 +956,7 @@ endif()
 # ##################################################################################################
 # * add tests -------------------------------------------------------------------------------------
 
-if(HIPDF_BUILD_TESTS)
+if(CUDF_BUILD_TESTS)
   # include CTest module -- automatically calls enable_testing()
   include(CTest)
 
@@ -978,7 +978,7 @@ endif()
 # ##################################################################################################
 # * add benchmarks --------------------------------------------------------------------------------
 
-if(HIPDF_BUILD_BENCHMARKS)
+if(CUDF_BUILD_BENCHMARKS)
   # Find or install GoogleBench
   include(${rapids-cmake-dir}/cpm/gbench.cmake)
   rapids_cpm_gbench()
@@ -995,43 +995,43 @@ rapids_cmake_install_lib_dir(lib_dir)
 include(CPack)
 include(GNUInstallDirs)
 
-set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME hipdf)
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME cudf)
 
-# install target for hipdf_base and the proxy libhipdf.so
+# install target for cudf_base and the proxy libcudf.so
 install(
-  TARGETS hipdf
+  TARGETS cudf
   DESTINATION ${lib_dir}
-  EXPORT hipdf-exports
+  EXPORT cudf-exports
 )
 
 set(_components_export_string)
-if(TARGET hipdftestutil)
+if(TARGET cudftestutil)
   install(
-    TARGETS hipdftest_default_stream hipdftestutil
+    TARGETS cudftest_default_stream cudftestutil
     DESTINATION ${lib_dir}
-    EXPORT hipdf-testing-exports
+    EXPORT cudf-testing-exports
   )
-  set(_components_export_string COMPONENTS testing COMPONENTS_EXPORT_SET hipdf-testing-exports)
+  set(_components_export_string COMPONENTS testing COMPONENTS_EXPORT_SET cudf-testing-exports)
 endif()
 
-install(DIRECTORY ${HIPDF_SOURCE_DIR}/include/cudf ${HIPDF_SOURCE_DIR}/include/cudf_test
-                  ${HIPDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf ${CUDF_SOURCE_DIR}/include/cudf_test
+                  ${CUDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-if(HIPDF_BUILD_STREAMS_TEST_UTIL)
-  install(TARGETS hipdf_identify_stream_usage_mode_hipdf DESTINATION ${lib_dir})
-  install(TARGETS hipdf_identify_stream_usage_mode_testing DESTINATION ${lib_dir})
+if(CUDF_BUILD_STREAMS_TEST_UTIL)
+  install(TARGETS cudf_identify_stream_usage_mode_cudf DESTINATION ${lib_dir})
+  install(TARGETS cudf_identify_stream_usage_mode_testing DESTINATION ${lib_dir})
 endif()
 
 set(doc_string
     [=[
-Provide targets for the hipdf library.
+Provide targets for the cudf library.
 
-Built based on the Apache Arrow columnar memory format, hipDF is a GPU DataFrame
+Built based on the Apache Arrow columnar memory format, cuDF is a GPU DataFrame
 library for loading, joining, aggregating, filtering, and otherwise
 manipulating data.
 
-hipDF provides a pandas-like API that will be familiar to data engineers &
+cuDF provides a pandas-like API that will be familiar to data engineers &
 data scientists, so they can use it to easily accelerate their workflows
 without going into the details of CUDA/HIP programming.
 
@@ -1039,23 +1039,23 @@ without going into the details of CUDA/HIP programming.
 Imported Targets
 ^^^^^^^^^^^^^^^^
 
-If hipdf is found, this module defines the following IMPORTED GLOBAL
+If cudf is found, this module defines the following IMPORTED GLOBAL
 targets:
 
- hipdf::hipdf             - The main hipdf library.
+ cudf::cudf             - The main cudf library.
 
 This module offers an optional testing component which defines the
 following IMPORTED GLOBAL  targets:
 
- hipdf::hipdftestutil     - The main hipdf testing library
+ cudf::cudftestutil     - The main cudf testing library
     ]=]
 )
 
 if(CUDA_BACKEND) #: HIP/AMD: disable thrust target creation, missing indent below by intent
 set(common_code_string
     [=[
-if(NOT TARGET hipdf::Thrust)
-  thrust_create_target(hipdf::Thrust FROM_OPTIONS)
+if(NOT TARGET cudf::Thrust)
+  thrust_create_target(cudf::Thrust FROM_OPTIONS)
 endif()
 ]=]
 )
@@ -1063,7 +1063,7 @@ else(CUDA_BACKEND)
 set(common_code_string "")
 endif(CUDA_BACKEND)
 
-if(HIPDF_ENABLE_ARROW_PARQUET)
+if(CUDF_ENABLE_ARROW_PARQUET)
   string(
     APPEND
     install_code_string
@@ -1082,7 +1082,7 @@ if(CUDA_BACKEND)
     APPEND
     install_code_string
     [=[
-  if(testing IN_LIST hipdf_FIND_COMPONENTS)
+  if(testing IN_LIST cudf_FIND_COMPONENTS)
     enable_language(CUDA)
   endif()
   ]=]
@@ -1092,7 +1092,7 @@ else()
     APPEND
     install_code_string
     [=[
-  if(testing IN_LIST hipdf_FIND_COMPONENTS)
+  if(testing IN_LIST cudf_FIND_COMPONENTS)
     enable_language(HIP)
   endif()
   ]=]
@@ -1102,10 +1102,10 @@ endif()
 string(APPEND install_code_string "${common_code_string}")
 
 rapids_export(
-  INSTALL hipdf
-  EXPORT_SET hipdf-exports ${_components_export_string}
-  GLOBAL_TARGETS hipdf hipdftestutil
-  NAMESPACE hipdf::
+  INSTALL cudf
+  EXPORT_SET cudf-exports ${_components_export_string}
+  GLOBAL_TARGETS cudf cudftestutil
+  NAMESPACE cudf::
   DOCUMENTATION doc_string
   FINAL_CODE_BLOCK install_code_string
 )
@@ -1114,11 +1114,11 @@ rapids_export(
 # * build export -------------------------------------------------------------------------------
 set(build_code_string
     [=[
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/hipdf-testing-dependencies.cmake")
-  include("${CMAKE_CURRENT_LIST_DIR}/hipdf-testing-dependencies.cmake")
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/cudf-testing-dependencies.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/cudf-testing-dependencies.cmake")
 endif()
-if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/hipdf-testing-targets.cmake")
-  include("${CMAKE_CURRENT_LIST_DIR}/hipdf-testing-targets.cmake")
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/cudf-testing-targets.cmake")
+  include("${CMAKE_CURRENT_LIST_DIR}/cudf-testing-targets.cmake")
 endif()
 ]=]
 )
@@ -1126,10 +1126,10 @@ endif()
 string(APPEND build_code_string "${common_code_string}")
 
 rapids_export(
-  BUILD hipdf
-  EXPORT_SET hipdf-exports ${_components_export_string}
-  GLOBAL_TARGETS hipdf hipdftestutil
-  NAMESPACE hipdf::
+  BUILD cudf
+  EXPORT_SET cudf-exports ${_components_export_string}
+  GLOBAL_TARGETS cudf cudftestutil
+  NAMESPACE cudf::
   DOCUMENTATION doc_string
   FINAL_CODE_BLOCK build_code_string
 )
@@ -1139,17 +1139,17 @@ rapids_export(
 
 # doc targets for cuDF
 add_custom_command(
-  OUTPUT HIPDF_DOXYGEN
-  WORKING_DIRECTORY ${HIPDF_SOURCE_DIR}/doxygen
+  OUTPUT CUDF_DOXYGEN
+  WORKING_DIRECTORY ${CUDF_SOURCE_DIR}/doxygen
   COMMAND doxygen Doxyfile
   VERBATIM
-  COMMENT "Custom command for building hipdf doxygen docs."
+  COMMENT "Custom command for building cudf doxygen docs."
 )
 
 add_custom_target(
-  docs_hipdf
-  DEPENDS HIPDF_DOXYGEN
-  COMMENT "Custom command for building hipdf doxygen docs."
+  docs_cudf
+  DEPENDS CUDF_DOXYGEN
+  COMMENT "Custom command for building cudf doxygen docs."
 )
 
 # ##################################################################################################

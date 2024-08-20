@@ -16,9 +16,9 @@
 function(find_and_configure_hipcollections)
   include(${rapids-cmake-dir}/cpm/hipco.cmake)
   if(BUILD_SHARED_LIBS)
-    rapids_cpm_hipco(BUILD_EXPORT_SET hipdf-exports)
+    rapids_cpm_hipco(BUILD_EXPORT_SET cudf-exports)
   else()
-    rapids_cpm_hipco(BUILD_EXPORT_SET hipdf-exports INSTALL_EXPORT_SET hipdf-exports)
+    rapids_cpm_hipco(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
   endif()
 endfunction()
 

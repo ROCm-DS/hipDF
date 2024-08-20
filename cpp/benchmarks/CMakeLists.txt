@@ -14,37 +14,37 @@
 
 find_package(Threads REQUIRED)
 
-add_library(hipdf_datagen STATIC common/generate_input.cu)
+add_library(cudf_datagen STATIC common/generate_input.cu)
 
 if(CUDA_BACKEND)
-target_compile_features(hipdf_datagen PUBLIC cxx_std_17 cuda_std_17)
+target_compile_features(cudf_datagen PUBLIC cxx_std_17 cuda_std_17)
 else()
-target_compile_features(hipdf_datagen PUBLIC cxx_std_17 hip_std_17)
+target_compile_features(cudf_datagen PUBLIC cxx_std_17 hip_std_17)
 endif()
 
 target_compile_options(
-  hipdf_datagen PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${HIPDF_CXX_FLAGS}>"
-                      "$<$<COMPILE_LANGUAGE:HIP>:${HIPDF_GPU_FLAGS}>"
+  cudf_datagen PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
+                      "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>"
 )
 
 if(NOT CUDA_BACKEND)
 target_compile_options(
-  hipdf_datagen PUBLIC -Wno-injected-class-name #TODO(HIP/AMD): clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
+  cudf_datagen PUBLIC -Wno-injected-class-name #TODO(HIP/AMD): clang compiler will emit an error "ISO C++ specifies that qualified reference to 'duration' is a constructor name rather than a type in this context, despite preceding 'typename' keyword"
 		      -Wno-absolute-value  #TODO(HIP/AMD): clang compiler will emit an error when std::abs is called on unsigned ints
 )
 endif()
 
 target_link_libraries(
-  hipdf_datagen
-  PUBLIC GTest::gmock GTest::gtest benchmark::benchmark nvbench::nvbench Threads::Threads hipdf
-         hipdftestutil
+  cudf_datagen
+  PUBLIC GTest::gmock GTest::gtest benchmark::benchmark nvbench::nvbench Threads::Threads cudf
+         cudftestutil
   PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
 )
 
 target_include_directories(
-  hipdf_datagen
-  PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}>"
-         "$<BUILD_INTERFACE:${HIPDF_SOURCE_DIR}/src>"
+  cudf_datagen
+  PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>" "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
+         "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
 )
 
 # ##################################################################################################
@@ -52,10 +52,10 @@ target_include_directories(
 
 # Use an OBJECT library so we only compile these helper source files only once
 add_library(
-  hipdf_benchmark_common OBJECT "${HIPDF_SOURCE_DIR}/tests/utilities/base_fixture.cpp"
+  cudf_benchmark_common OBJECT "${CUDF_SOURCE_DIR}/tests/utilities/base_fixture.cpp"
                                synchronization/synchronization.cpp io/cuio_common.cpp
 )
-target_link_libraries(hipdf_benchmark_common PRIVATE hipdf_datagen $<TARGET_NAME_IF_EXISTS:conda_env>)
+target_link_libraries(cudf_benchmark_common PRIVATE cudf_datagen $<TARGET_NAME_IF_EXISTS:conda_env>)
 add_custom_command(
   OUTPUT CUDF_BENCHMARKS
   COMMAND echo Running benchmarks
@@ -71,7 +71,7 @@ function(ConfigureBench CMAKE_BENCH_NAME)
   add_executable(${CMAKE_BENCH_NAME} ${ARGN})
   set_target_properties(
     ${CMAKE_BENCH_NAME}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/benchmarks>"
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/benchmarks>"
                INSTALL_RPATH "\$ORIGIN/../../../lib"
                CXX_STANDARD 17
                CXX_STANDARD_REQUIRED ON
@@ -81,7 +81,7 @@ function(ConfigureBench CMAKE_BENCH_NAME)
                CUDA_STANDARD_REQUIRED ON
   )
   target_link_libraries(
-    ${CMAKE_BENCH_NAME} PRIVATE hipdf_benchmark_common hipdf_datagen benchmark::benchmark_main
+    ${CMAKE_BENCH_NAME} PRIVATE cudf_benchmark_common cudf_datagen benchmark::benchmark_main
                                 $<TARGET_NAME_IF_EXISTS:conda_env>
   )
   add_custom_command(
@@ -95,7 +95,7 @@ function(ConfigureBench CMAKE_BENCH_NAME)
   install(
     TARGETS ${CMAKE_BENCH_NAME}
     COMPONENT testing
-    DESTINATION bin/benchmarks/libhipdf
+    DESTINATION bin/benchmarks/libcudf
     EXCLUDE_FROM_ALL
   )
 endfunction()
@@ -106,17 +106,17 @@ function(ConfigureNVBench CMAKE_BENCH_NAME)
   add_executable(${CMAKE_BENCH_NAME} ${ARGN} fixture/nvbench_main.cpp)
   set_target_properties(
     ${CMAKE_BENCH_NAME}
-    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${HIPDF_BINARY_DIR}/benchmarks>"
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/benchmarks>"
                INSTALL_RPATH "\$ORIGIN/../../../lib"
   )
   target_link_libraries(
-    ${CMAKE_BENCH_NAME} PRIVATE hipdf_benchmark_common hipdf_datagen nvbench::nvbench
+    ${CMAKE_BENCH_NAME} PRIVATE cudf_benchmark_common cudf_datagen nvbench::nvbench
                                 $<TARGET_NAME_IF_EXISTS:conda_env>
   )
   install(
     TARGETS ${CMAKE_BENCH_NAME}
     COMPONENT testing
-    DESTINATION bin/benchmarks/libhipdf
+    DESTINATION bin/benchmarks/libcudf
     EXCLUDE_FROM_ALL
   )
 endfunction()

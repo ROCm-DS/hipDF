@@ -16,11 +16,11 @@
 function(find_and_configure_libhipcxx)
   # Make sure we install libhipcxx beside our patched version of thrust
   include(GNUInstallDirs)
-  set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/libhipdf")
+  set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/libcudf")
   set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_INCLUDEDIR}/lib")
 
   include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
-  rapids_cpm_libhipcxx(BUILD_EXPORT_SET hipdf-exports INSTALL_EXPORT_SET hipdf-exports)
+  rapids_cpm_libhipcxx(BUILD_EXPORT_SET cudf-exports INSTALL_EXPORT_SET cudf-exports)
 
   if(libhipcxx_SOURCE_DIR)
     # Store where CMake can find our custom Thrust install
@@ -28,8 +28,8 @@ function(find_and_configure_libhipcxx)
     rapids_export_find_package_root(
       INSTALL
       libhipcxx
-      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libhipdf/lib/rapids/cmake/libhipcxx]=]
-      hipdf-exports
+      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/libhipcxx]=]
+      cudf-exports
     )
   endif()
 endfunction()

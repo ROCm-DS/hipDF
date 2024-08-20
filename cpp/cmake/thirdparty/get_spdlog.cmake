@@ -16,8 +16,8 @@
 function(find_and_configure_spdlog)
 
   include(${rapids-cmake-dir}/cpm/spdlog.cmake)
-  rapids_cpm_spdlog(FMT_OPTION "EXTERNAL_FMT_HO" INSTALL_EXPORT_SET hipdf-exports)
-  rapids_export_package(BUILD spdlog hipdf-exports)
+  rapids_cpm_spdlog(FMT_OPTION "EXTERNAL_FMT_HO" INSTALL_EXPORT_SET cudf-exports)
+  rapids_export_package(BUILD spdlog cudf-exports)
 
   if(spdlog_ADDED)
     rapids_export(
@@ -27,7 +27,7 @@ function(find_and_configure_spdlog)
       NAMESPACE spdlog::
     )
     include("${rapids-cmake-dir}/export/find_package_root.cmake")
-    rapids_export_find_package_root(BUILD spdlog [=[${CMAKE_CURRENT_LIST_DIR}]=] hipdf-exports)
+    rapids_export_find_package_root(BUILD spdlog [=[${CMAKE_CURRENT_LIST_DIR}]=] cudf-exports)
   endif()
 endfunction()
 

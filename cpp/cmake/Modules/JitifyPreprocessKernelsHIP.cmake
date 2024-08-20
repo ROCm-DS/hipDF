@@ -26,7 +26,7 @@ function(jit_preprocess_files)
     list(APPEND libhipcxx_includes "-I${inc}")
   endforeach()
   foreach(ARG_FILE ${ARG_FILES})
-    set(ARG_OUTPUT ${HIPDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files/${ARG_FILE}.jit.hpp)
+    set(ARG_OUTPUT ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files/${ARG_FILE}.jit.hpp)
     get_filename_component(jit_output_directory "${ARG_OUTPUT}" DIRECTORY)
     list(APPEND JIT_PREPROCESSED_FILES "${ARG_OUTPUT}")
 
@@ -41,9 +41,9 @@ function(jit_preprocess_files)
       COMMAND
        "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR}
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
-	      ${HIPDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
-        -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ -I${HIPDF_SOURCE_DIR}/include
-	-I${HIPDF_SOURCE_DIR}/src ${libhipcxx_includes} -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
+	      ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
+        -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ -I${CUDF_SOURCE_DIR}/include
+	-I${CUDF_SOURCE_DIR}/src ${libhipcxx_includes} -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}
         --no-replace-pragma-once
       COMMENT "Custom command to JIT-compile files."
     )
@@ -55,7 +55,7 @@ function(jit_preprocess_files)
 endfunction()
 
 jit_preprocess_files(
-	SOURCE_DIRECTORY ${HIPDF_SOURCE_DIR}/src FILES binaryop/jit/kernel.cu transform/jit/kernel.cu rolling/jit/kernel.cu
+	SOURCE_DIRECTORY ${CUDF_SOURCE_DIR}/src FILES binaryop/jit/kernel.cu transform/jit/kernel.cu rolling/jit/kernel.cu
 )
 
 add_custom_target(

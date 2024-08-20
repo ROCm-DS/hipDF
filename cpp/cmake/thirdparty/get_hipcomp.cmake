@@ -17,13 +17,13 @@ function(find_and_configure_hipcomp)
 
   include(${rapids-cmake-dir}/cpm/hipcomp.cmake)
   rapids_cpm_hipcomp(
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
     USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_HIPCOMP}
   )
 
   # Per-thread default stream
-  if(TARGET hipcomp AND HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
+  if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
     target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__)
   endif()
 endfunction()

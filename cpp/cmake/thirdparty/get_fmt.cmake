@@ -16,7 +16,7 @@
 function(find_and_configure_fmt)
 
   include(${rapids-cmake-dir}/cpm/fmt.cmake)
-  rapids_cpm_fmt(INSTALL_EXPORT_SET hipdf-exports BUILD_EXPORT_SET hipdf-exports)
+  rapids_cpm_fmt(INSTALL_EXPORT_SET cudf-exports BUILD_EXPORT_SET cudf-exports)
 endfunction()
 
 find_and_configure_fmt()

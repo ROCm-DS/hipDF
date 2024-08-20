@@ -23,14 +23,14 @@ function(find_and_configure_thrust)
 
   # Make sure we install thrust into the `include/libcudf` subdirectory instead of the default
   include(GNUInstallDirs)
-  set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/libhipdf")
+  set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/libcudf")
   set(CMAKE_INSTALL_LIBDIR "${CMAKE_INSTALL_INCLUDEDIR}/lib")
 
   # Find or install Thrust with our custom set of patches
   rapids_cpm_rocthrust(
     NAMESPACE cudf
-    BUILD_EXPORT_SET hipdf-exports
-    INSTALL_EXPORT_SET hipdf-exports
+    BUILD_EXPORT_SET cudf-exports
+    INSTALL_EXPORT_SET cudf-exports
   )
 
   if(Thrust_SOURCE_DIR)
@@ -38,7 +38,7 @@ function(find_and_configure_thrust)
     include("${rapids-cmake-dir}/export/find_package_root.cmake")
     rapids_export_find_package_root(
       INSTALL Thrust
-      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/thrust]=] hipdf-exports
+      [=[${CMAKE_CURRENT_LIST_DIR}/../../../include/libcudf/lib/rapids/cmake/thrust]=] cudf-exports
     )
   endif()
 endfunction()
