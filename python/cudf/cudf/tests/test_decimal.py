@@ -134,7 +134,7 @@ def test_typecast_from_int_to_decimal(data, from_dtype, to_dtype):
     # results in large unsigned integers (on NVIDIA they happen to be casted to 0).
     # These large integers then do not fit into the Decimal64Dtypes used in this test.
     # This is UB so we take the abs value here if an unsigned integer is used as
-    # from_dtype. See https://github.com/AMD-AI/hipdf/issues/106.
+    # from_dtype. See internal issue #106.
     if(not(from_dtype in SIGNED_TYPES)):
         data = data.abs()
     
