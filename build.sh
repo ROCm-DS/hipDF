@@ -16,79 +16,58 @@ ARGS=$*
 # NOTE: ensure all dir changes are relative to the location of this
 # script, and that this script resides in the repo dir!
 REPODIR=$(cd $(dirname $0); pwd)
-#TODO(HIP/AMD): add more options later
-#VALIDARGS="clean libhipdf hipdf hipdfjar dask_hipdf benchmarks tests libhipdf_kafka hipdf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libhipdf hipdf dask_hipdf libcudf cudf dask_cudf benchmarks tests libhipdf_kafka hipdf_kafka libcudf_kafka cudf_kafka custreamz -v -g -n --ptds -h"
-HELP="$0 [clean] [libhipdf] [hipdf] [dask_hipdf] [libcudf] [cudf] [dask_cudf] [benchmarks] [tests] [-v] [-g] [-n] [--ptds] [-h] [--cmake-args=\\\"<args>\\\"]
+
+# VALIDARGS="clean libcudf cudf cudfjar dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
+VALIDARGS="clean libcudf cudf dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n -l --allgpuarch --ptds -h"
+HELP="$0 [clean] [libcudf] [cudf] [cudfjar] [dask_cudf] [benchmarks] [tests] [libcudf_kafka] [cudf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
-   hipdf|cudf                    - build the cudf Python package
-   libhipdf|libcudf              - build the hipdf C++ code only
-   dask_hipdf|dask_cudf          - build the dask_cudf Python package
+   libcudf                       - build the cudf C++ code only
+   cudf                          - build the cudf Python package
+   cudfjar                       - build cudf JAR with static libcudf using devtoolset toolchain
+   dask_cudf                     - build the dask_cudf Python package
    benchmarks                    - build benchmarks
    tests                         - build tests
-   libcudf_kafka|libhipdf_kafka  - build the libhipdf_kafka C++ code only
-   cudf_kafka|hipdf_kafka        - build the hipdf_kafka Python package
+   libcudf_kafka                 - build the libcudf_kafka C++ code only
+   cudf_kafka                    - build the cudf_kafka Python package
    custreamz                     - build the custreamz Python package
    -v                            - verbose build mode
    -g                            - build for debug
    -n                            - no install step (does not affect Python)
+   --allgpuarch                  - build for all supported GPU architectures
+   --disable_nvtx                - disable inserting NVTX profiling ranges
+   --opensource_nvcomp           - disable use of proprietary nvcomp extensions
+   --show_depr_warn              - show cmake deprecation warnings
    --ptds                        - enable per-thread default stream
+   --build_metrics               - generate build metrics report for libcudf
+   --incl_cache_stats            - include cache statistics in build metrics report
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
 
-
-   default action (no args) is to build and install 'libhipdf' then 'hipdf'
-   then 'dask_hipdf' targets
+   default action (no args) is to build and install 'libcudf' then 'cudf'
+   then 'dask_cudf' targets
 "
-# HELP="$0 [clean] [libhipdf] [hipdf] [hipdfjar] [dask_hipdf] [benchmarks] [tests] [libhipdf_kafka] [hipdf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
-#    clean                         - remove all existing build artifacts and configuration (start
-#                                    over)
-#    libhipdf                       - build the hipdf C++ code only
-#    hipdf                          - build the hipdf Python package
-#    hipdfjar                       - build hipdf JAR with static libhipdf using devtoolset toolchain
-#    dask_hipdf                     - build the dask_hipdf Python package
-#    benchmarks                    - build benchmarks
-#    tests                         - build tests
-#    libhipdf_kafka                 - build the libhipdf_kafka C++ code only
-#    hipdf_kafka                    - build the hipdf_kafka Python package
-#    custreamz                     - build the custreamz Python package
-#    -v                            - verbose build mode
-#    -g                            - build for debug
-#    -n                            - no install step (does not affect Python)
-#    --allgpuarch                  - build for all supported GPU architectures
-#    --disable_nvtx                - disable inserting NVTX profiling ranges
-#    --opensource_nvcomp           - disable use of proprietary nvcomp extensions
-#    --show_depr_warn              - show cmake deprecation warnings
-#    --ptds                        - enable per-thread default stream
-#    --build_metrics               - generate build metrics report for libhipdf
-#    --incl_cache_stats            - include cache statistics in build metrics report
-#    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
-#    -h | --h[elp]                 - print this text
 
-#    default action (no args) is to build and install 'libhipdf' then 'hipdf'
-#    then 'dask_hipdf' targets
-# "
 LIB_BUILD_DIR=${LIB_BUILD_DIR:=${REPODIR}/cpp/build}
 KAFKA_LIB_BUILD_DIR=${KAFKA_LIB_BUILD_DIR:=${REPODIR}/cpp/libcudf_kafka/build}
-HIPDF_KAFKA_BUILD_DIR=${REPODIR}/python/cudf_kafka/build
-HIPDF_BUILD_DIR=${REPODIR}/python/hipdf/build
-DASK_HIPDF_BUILD_DIR=${REPODIR}/python/dask_hipdf/build
+CUDF_KAFKA_BUILD_DIR=${REPODIR}/python/cudf_kafka/build
+CUDF_BUILD_DIR=${REPODIR}/python/cudf/build
+DASK_CUDF_BUILD_DIR=${REPODIR}/python/dask_cudf/build
 CUSTREAMZ_BUILD_DIR=${REPODIR}/python/custreamz/build
-HIPDF_JAR_JAVA_BUILD_DIR="$REPODIR/java/target"
-#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which 
+CUDF_JAR_JAVA_BUILD_DIR="$REPODIR/java/target"
+#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
 #: NOTE(HIP/AMD): We need to use declare -x (or export() to forward the variables to subprocesses such as those related to scikit-build.
 #:                scikit-build checks CXX + CC on Linux, it is used to compile Cython files.
-#: NOTE(HIP/AMD): HIPDF_HIPCC allows to point to specific 'hipcc' implementations that are not part of the $PATH.
+#: NOTE(HIP/AMD): CUDF_HIPCC allows to point to specific 'hipcc' implementations that are not part of the $PATH.
 #: NOTE(HIP/AMD): ROCM_PATH must be set for compiling cudf_kafka in order to specify include folders for the Cython build.
-declare -x CXX=${HIPDF_HIPCC:-hipcc}
-declare -x CC=${HIPDF_HIPCC:-hipcc}
+declare -x CXX=${CUDF_HIPCC:-hipcc}
+declare -x CC=${CUDF_HIPCC:-hipcc}
 declare -x CFLAGS="${CFLAGS} -D__HIP_PLATFORM_AMD__"
 declare -x CXXFLAGS="${CXXFLAGS} -D__HIP_PLATFORM_AMD__"
-declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"} 
+declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"}
 
-BUILD_DIRS="${LIB_BUILD_DIR} ${HIPDF_BUILD_DIR} ${DASK_HIPDF_BUILD_DIR} ${KAFKA_LIB_BUILD_DIR} ${HIPDF_KAFKA_BUILD_DIR} ${CUSTREAMZ_BUILD_DIR} ${HIPDF_JAR_JAVA_BUILD_DIR}"
+BUILD_DIRS="${LIB_BUILD_DIR} ${CUDF_BUILD_DIR} ${DASK_CUDF_BUILD_DIR} ${KAFKA_LIB_BUILD_DIR} ${CUDF_KAFKA_BUILD_DIR} ${CUSTREAMZ_BUILD_DIR} ${CUDF_JAR_JAVA_BUILD_DIR}"
 
 # Set defaults for vars modified by flags to this script
 VERBOSE_FLAG=""
@@ -144,14 +123,14 @@ function buildAll {
 
 function buildLibCudfJniInDocker {
     local cudaVersion="11.5.0"
-    local imageName="hipdf-build:${cudaVersion}-devel-centos7"
+    local imageName="cudf-build:${cudaVersion}-devel-centos7"
     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
     local workspaceDir="/rapids"
     local localMavenRepo=${LOCAL_MAVEN_REPO:-"$HOME/.m2/repository"}
-    local workspaceRepoDir="$workspaceDir/hipdf"
+    local workspaceRepoDir="$workspaceDir/cudf"
     local workspaceMavenRepoDir="$workspaceDir/.m2/repository"
     local workspaceCcacheDir="$workspaceDir/.ccache"
-    mkdir -p "$HIPDF_JAR_JAVA_BUILD_DIR/libhipdf-cmake-build"
+    mkdir -p "$CUDF_JAR_JAVA_BUILD_DIR/libcudf-cmake-build"
     mkdir -p "$HOME/.ccache" "$HOME/.m2"
     nvidia-docker build \
         -f java/ci/Dockerfile.centos7 \
@@ -168,7 +147,7 @@ function buildLibCudfJniInDocker {
         -v "$HOME/.ccache:$workspaceCcacheDir:rw" \
         -v "$REPODIR:$workspaceRepoDir:rw" \
         -v "$localMavenRepo:$workspaceMavenRepoDir:rw" \
-        --workdir "$workspaceRepoDir/java/target/libhipdf-cmake-build" \
+        --workdir "$workspaceRepoDir/java/target/libcudf-cmake-build" \
         ${imageName} \
         scl enable devtoolset-9 \
             "cmake $workspaceRepoDir/cpp \
@@ -179,14 +158,14 @@ function buildLibCudfJniInDocker {
                 -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
                 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                 -DCUDA_STATIC_RUNTIME=ON \
-                -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} \
+                -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
                 -DCMAKE_INSTALL_PREFIX=/usr/local/rapids \
                 -DUSE_NVTX=OFF \
-                -DHIPDF_USE_PROPRIETARY_NVCOMP=ON \
-                -DHIPDF_USE_ARROW_STATIC=ON \
-                -DHIPDF_ENABLE_ARROW_S3=OFF \
+                -DCUDF_USE_PROPRIETARY_NVCOMP=ON \
+                -DCUDF_USE_ARROW_STATIC=ON \
+                -DCUDF_ENABLE_ARROW_S3=OFF \
                 -DBUILD_TESTS=OFF \
-                -DHIPDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
+                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
                 -DRMM_LOGGING_LEVEL=OFF \
                 -DBUILD_SHARED_LIBS=OFF && \
              cmake --build . --parallel ${PARALLEL_LEVEL} && \
@@ -199,12 +178,12 @@ function buildLibCudfJniInDocker {
                                      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
                                      -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
                                      -DCMAKE_CXX_LINKER_LAUNCHER=ccache' \
-                -DHIPDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libhipdf-cmake-build \
+                -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
                 -DCUDA_STATIC_RUNTIME=ON \
-                -DHIPDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
+                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
                 -DUSE_GDS=ON \
-                -DGPU_ARCHS=${HIPDF_CMAKE_HIP_ARCHITECTURES} \
-                -DHIPDF_JNI_LIBHIPDF_STATIC=ON \
+                -DGPU_ARCHS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
+                -DCUDF_JNI_LIBCUDF_STATIC=ON \
                 -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
 }
 
@@ -234,7 +213,7 @@ if hasArg -g; then
 fi
 if hasArg -n; then
     INSTALL_TARGET=""
-    LIBHIPDF_BUILD_DIR=${LIB_BUILD_DIR}
+    LIBCUDF_BUILD_DIR=${LIB_BUILD_DIR}
 fi
 if hasArg --allgpuarch; then
     BUILD_ALL_GPU_ARCH=1
@@ -265,9 +244,9 @@ if hasArg --incl_cache_stats; then
     BUILD_REPORT_INCL_CACHE_STATS=ON
 fi
 
-# Append `-DFIND_HIPDF_CPP=ON` to EXTRA_CMAKE_ARGS unless a user specified the option.
-if [[ "${EXTRA_CMAKE_ARGS}" != *"DFIND_HIPDF_CPP"* ]]; then
-    EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DFIND_HIPDF_CPP=ON"
+# Append `-DFIND_CUDF_CPP=ON` to EXTRA_CMAKE_ARGS unless a user specified the option.
+if [[ "${EXTRA_CMAKE_ARGS}" != *"DFIND_CUDF_CPP"* ]]; then
+    EXTRA_CMAKE_ARGS="${EXTRA_CMAKE_ARGS} -DFIND_CUDF_CPP=ON"
 fi
 
 
@@ -291,23 +270,23 @@ fi
 
 
 ################################################################################
-# Configure, build, and install libhipdf
+# Configure, build, and install libcudf
 
-if buildAll || hasArg libhipdf || hasArg hipdf || hasArg hipdfjar || hasArg libhipdf_kafka; then
+if buildAll || hasArg libcudf || hasArg cudf || hasArg cudfjar || hasArg libcudf_kafka; then
     if (( ${BUILD_ALL_GPU_ARCH} == 0 )); then
-        HIPDF_CMAKE_HIP_ARCHITECTURES="${HIPDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}"
-        if [[ "$HIPDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
+        CUDF_CMAKE_HIP_ARCHITECTURES="${CUDF_CMAKE_HIP_ARCHITECTURES:-NATIVE}"
+        if [[ "$CUDF_CMAKE_HIP_ARCHITECTURES" == "NATIVE" ]]; then
             echo "Building for the architecture of the GPU in the system..."
         else
-            echo "Building for the GPU architecture(s) $HIPDF_CMAKE_HIP_ARCHITECTURES ..."
+            echo "Building for the GPU architecture(s) $CUDF_CMAKE_HIP_ARCHITECTURES ..."
         fi
     else
-        HIPDF_CMAKE_HIP_ARCHITECTURES="RAPIDS"
+        CUDF_CMAKE_HIP_ARCHITECTURES="RAPIDS"
         echo "Building for *ALL* supported GPU architectures..."
     fi
 fi
 
-if buildAll || hasArg libhipdf; then
+if buildAll || hasArg libcudf; then
     # get the current count before the compile starts
     if [[ "$BUILD_REPORT_INCL_CACHE_STATS" == "ON" && -x "$(command -v sccache)" ]]; then
         # zero the sccache statistics
@@ -319,13 +298,13 @@ if buildAll || hasArg libhipdf; then
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
           -DCMAKE_CXX_COMPILER=${CXX} \
           -DCMAKE_C_COMPILER=${CC} \
-          -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} \
+          -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
-          -DHIPDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
+          -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \
           -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
           -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
-          -DHIPDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
+          -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           ${EXTRA_CMAKE_ARGS}
 
@@ -349,9 +328,9 @@ if buildAll || hasArg libhipdf; then
         fi
         MSG="${MSG}<br/>parallel setting: $PARALLEL_LEVEL"
         MSG="${MSG}<br/>parallel build time: $compile_total seconds"
-        if [[ -f "${LIB_BUILD_DIR}/libhipdf.so" ]]; then
-           LIBHIPDF_FS=$(ls -lh ${LIB_BUILD_DIR}/libhipdf.so | awk '{print $5}')
-           MSG="${MSG}<br/>libhipdf.so size: $LIBHIPDF_FS"
+        if [[ -f "${LIB_BUILD_DIR}/libcudf.so" ]]; then
+           LIBCUDF_FS=$(ls -lh ${LIB_BUILD_DIR}/libcudf.so | awk '{print $5}')
+           MSG="${MSG}<br/>libcudf.so size: $LIBCUDF_FS"
         fi
         BMR_DIR=${RAPIDS_ARTIFACTS_DIR:-"${LIB_BUILD_DIR}"}
         echo "Metrics output dir: [$BMR_DIR]"
@@ -367,11 +346,11 @@ if buildAll || hasArg libhipdf; then
     fi
 fi
 
-# Build and install the hipdf Python package
-if buildAll || hasArg hipdf; then
+# Build and install the cudf Python package
+if buildAll || hasArg cudf; then
 
     cd ${REPODIR}/python/cudf
-    SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR} -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} ${EXTRA_CMAKE_ARGS}" \
+    SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR} -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} ${EXTRA_CMAKE_ARGS}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
         python setup.py bdist_wheel
         # python -m pip install --no-build-isolation --no-deps . #: TODO(HIP/AMD): results in a cmake Cache issue, the binary wheel is preferred in any case
@@ -380,31 +359,31 @@ if buildAll || hasArg hipdf; then
 fi
 
 
-# Build and install the dask_hipdf Python package
-if buildAll || hasArg dask_hipdf; then
+# Build and install the dask_cudf Python package
+if buildAll || hasArg dask_cudf; then
 
     cd ${REPODIR}/python/dask_cudf
     python -m pip install --no-build-isolation --no-deps .
 fi
 
-if hasArg hipdfjar; then
+if hasArg cudfjar; then
     buildLibCudfJniInDocker
 fi
 
-# Build libhipdf_kafka library
-if hasArg libhipdf_kafka; then
-    # --trace --graphviz=libhipdf_kafka.dot \
+# Build libcudf_kafka library
+if hasArg libcudf_kafka; then
+    # --trace --graphviz=libcudf_kafka.dot \
     #: NOTE(HIP/AMD) We need to use hipcc as CXX compiler because of CMake target rocthrust->...->hip::device
     cmake -S $REPODIR/cpp/libcudf_kafka -B ${KAFKA_LIB_BUILD_DIR} \
           -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} \
           -DCMAKE_CXX_COMPILER=${CXX} \
           -DCMAKE_C_COMPILER=${CC} \
-          -DCMAKE_HIP_ARCHITECTURES=${HIPDF_CMAKE_HIP_ARCHITECTURES} \
+          -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
           -DUSE_NVTX=${BUILD_NVTX} \
-          -DHIPDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
+          -DCUDF_USE_PROPRIETARY_NVCOMP=${USE_PROPRIETARY_NVCOMP} \
           -DBUILD_TESTS=${BUILD_TESTS} \
           -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
-          -DHIPDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
+          -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           ${EXTRA_CMAKE_ARGS}
 
@@ -417,14 +396,14 @@ if hasArg libhipdf_kafka; then
     fi
 fi
 
-# build hipdf_kafka Python package
-if hasArg hipdf_kafka; then
+# build cudf_kafka Python package
+if hasArg cudf_kafka; then
     cd ${REPODIR}/python/cudf_kafka
     #: NOTE(HIP/AMD) We need to use hipcc as CXX compiler because of CMake target rocthrust->...->hip::device, scikit-build checks CXX on Linux
     #: NOTE(HIP/AMD) Required for D__HIP_PLATFORM_AMD__.
     # declare -x CFLAGS="-D__HIP_PLATFORM_AMD__"
     # declare -x CXXFLAGS="-D__HIP_PLATFORM_AMD__"
-    SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR}" \
+    SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
         python -m pip install --no-build-isolation --no-deps .
 fi
@@ -432,7 +411,7 @@ fi
 # build custreamz Python package
 if hasArg custreamz; then
     cd ${REPODIR}/python/custreamz
-    SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_LIBRARY_PATH=${LIBHIPDF_BUILD_DIR}" \
+    SKBUILD_CONFIGURE_OPTIONS="-DCMAKE_LIBRARY_PATH=${LIBCUDF_BUILD_DIR}" \
         SKBUILD_BUILD_OPTIONS="-j${PARALLEL_LEVEL:-1}" \
         python -m pip install --no-build-isolation --no-deps .
 fi
