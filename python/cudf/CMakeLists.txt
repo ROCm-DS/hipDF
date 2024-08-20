@@ -20,13 +20,13 @@ include(../../fetch_rapids.cmake)
 include(rapids-hip)
 
 if(CUDA_BACKEND)
-  rapids_cuda_init_architectures(hipdf-python)
+  rapids_cuda_init_architectures(cudf-python)
 else()
-  rapids_hip_init_architectures(hipdf-python)
+  rapids_hip_init_architectures(cudf-python)
 endif()
 
 project(
-  hipdf-python
+  cudf-python
   VERSION ${cudf_version}
   LANGUAGES # TODO: Building Python extension modules via the python_extension_module requires the C
             # language to be enabled here. The test project that is built in scikit-build to verify
@@ -63,12 +63,10 @@ if(FIND_CUDF_CPP)
     include(../../cpp/cmake/thirdparty/get_arrow.cmake)
   endif()
 
-  find_package(hipdf ${cudf_version} REQUIRED)
+  find_package(cudf ${cudf_version} REQUIRED)
   #: aliasing to use most of prexisting build system
-  add_library(cudf ALIAS hipdf)
-  add_library(cudf::cudf ALIAS hipdf)
   add_library(nvcomp::nvcomp ALIAS hipcomp)
-  set(cudf_FOUND ${hipdf_FOUND})
+  set(cudf_FOUND ${cudf_FOUND})
 
   # an installed version of libcudf doesn't provide the dlpack headers so we need to download dlpack
   # for the interop.pyx
@@ -105,8 +103,6 @@ if(NOT cudf_FOUND)
 
   add_subdirectory(../../cpp cudf-cpp ${_exclude_from_all})
   #: aliasing to use most of prexisting build system
-  add_library(cudf ALIAS hipdf)
-  add_library(cudf::cudf ALIAS hipdf)
   add_library(nvcomp::nvcomp ALIAS hipcomp)
 
   if(CUDF_BUILD_WHEELS)
@@ -119,7 +115,7 @@ if(NOT cudf_FOUND)
   # library in the cudf directory as a single source of truth and modify the other rpaths
   # appropriately.
   set(cython_lib_dir cudf)
-  install(TARGETS hipdf DESTINATION ${cython_lib_dir}) #: cannot install ALIAS target
+  install(TARGETS cudf DESTINATION ${cython_lib_dir}) #: cannot install ALIAS target
 endif()
 
 rapids_cython_init()
