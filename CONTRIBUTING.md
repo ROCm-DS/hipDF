@@ -155,7 +155,7 @@ conda activate cudf_dev
 > UDF support with Jitify in `libcudf` requires a patched
 > ROCm which is currently only available internally.
 > To activate this feature, pass the option
-> `--cmake-args="\"-DHIPDF_ENABLE_UDF_WITH_JITIFY=ON\""`
+> `--cmake-args="\"-DCUDF_ENABLE_UDF_WITH_JITIFY=ON\""`
 > to the `build.sh` script.
 
 - A `build.sh` script is provided in `$CUDF_HOME`. Running the script with no additional arguments
