@@ -69,38 +69,10 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
    -h | --h[elp]                 - print this text
 
-
    default action (no args) is to build and install 'libcudf' then 'cudf'
    then 'dask_cudf' targets
 "
-# HELP="$0 [clean] [libcudf] [cudf] [cudfjar] [dask_cudf] [benchmarks] [tests] [libcudf_kafka] [cudf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
-#    clean                         - remove all existing build artifacts and configuration (start
-#                                    over)
-#    libcudf                       - build the cudf C++ code only
-#    cudf                          - build the cudf Python package
-#    cudfjar                       - build cudf JAR with static libcudf using devtoolset toolchain
-#    dask_cudf                     - build the dask_cudf Python package
-#    benchmarks                    - build benchmarks
-#    tests                         - build tests
-#    libcudf_kafka                 - build the libcudf_kafka C++ code only
-#    cudf_kafka                    - build the cudf_kafka Python package
-#    custreamz                     - build the custreamz Python package
-#    -v                            - verbose build mode
-#    -g                            - build for debug
-#    -n                            - no install step (does not affect Python)
-#    --allgpuarch                  - build for all supported GPU architectures
-#    --disable_nvtx                - disable inserting NVTX profiling ranges
-#    --opensource_nvcomp           - disable use of proprietary nvcomp extensions
-#    --show_depr_warn              - show cmake deprecation warnings
-#    --ptds                        - enable per-thread default stream
-#    --build_metrics               - generate build metrics report for libcudf
-#    --incl_cache_stats            - include cache statistics in build metrics report
-#    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
-#    -h | --h[elp]                 - print this text
 
-#    default action (no args) is to build and install 'libcudf' then 'cudf'
-#    then 'dask_cudf' targets
-# "
 LIB_BUILD_DIR=${LIB_BUILD_DIR:=${REPODIR}/cpp/build}
 KAFKA_LIB_BUILD_DIR=${KAFKA_LIB_BUILD_DIR:=${REPODIR}/cpp/libcudf_kafka/build}
 CUDF_KAFKA_BUILD_DIR=${REPODIR}/python/cudf_kafka/build
@@ -109,7 +81,7 @@ DASK_CUDF_BUILD_DIR=${REPODIR}/python/dask_cudf/build
 PYLIBCUDF_BUILD_DIR=${REPODIR}/python/pylibcudf/build
 CUSTREAMZ_BUILD_DIR=${REPODIR}/python/custreamz/build
 CUDF_JAR_JAVA_BUILD_DIR="$REPODIR/java/target"
-#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which 
+#: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
 #: NOTE(HIP/AMD): We need to use declare -x (or export() to forward the variables to subprocesses such as those related to scikit-build.
 #:                scikit-build checks CXX + CC on Linux, it is used to compile Cython files.
@@ -119,7 +91,7 @@ declare -x CXX=${CUDF_HIPCC:-hipcc}
 declare -x CC=${CUDF_HIPCC:-hipcc}
 declare -x CFLAGS="${CFLAGS} -D__HIP_PLATFORM_AMD__"
 declare -x CXXFLAGS="${CXXFLAGS} -D__HIP_PLATFORM_AMD__"
-declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"} 
+declare -x ROCM_PATH=${ROCM_PATH:-"/opt/rocm"}
 
 BUILD_DIRS="${LIB_BUILD_DIR} ${CUDF_BUILD_DIR} ${DASK_CUDF_BUILD_DIR} ${KAFKA_LIB_BUILD_DIR} ${CUDF_KAFKA_BUILD_DIR} ${CUSTREAMZ_BUILD_DIR} ${CUDF_JAR_JAVA_BUILD_DIR} ${PYLIBCUDF_BUILD_DIR}"
 
