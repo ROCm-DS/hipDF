@@ -20,7 +20,7 @@ namespace cudf {
 
 namespace detail {
 
-#if defined(HIPDF_USE_PER_THREAD_DEFAULT_STREAM)
+#if defined(CUDF_USE_PER_THREAD_DEFAULT_STREAM)
 rmm::cuda_stream_view const default_stream_value{rmm::cuda_stream_per_thread};
 #else
 rmm::cuda_stream_view const default_stream_value{};

@@ -70,7 +70,7 @@ std::filesystem::path get_cache_dir()
   // Cache path could be empty when env HOME is unset or LIBCUDF_KERNEL_CACHE_PATH is defined to be
   // empty, to disallow use of file cache at runtime.
   if (not kernel_cache_path.empty()) {
-    kernel_cache_path /= std::string{CUDF_STRINGIFY(HIPDF_VERSION)};
+    kernel_cache_path /= std::string{CUDF_STRINGIFY(CUDF_VERSION)};
 
     // Make per device cache based on compute capability. This is to avoid multiple devices of
     // different compute capability to access the same kernel cache.

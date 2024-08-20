@@ -602,7 +602,7 @@ TYPED_TEST(ToArrowNumericScalarTest, Basic)
 struct ToArrowDecimalScalarTest : public cudf::test::BaseFixture {};
 
 // TODO(HIP/AMD): remove this when Decimal128 is fully supported by compiler
-#ifdef HIPDF_ENABLE_DECIMAL128
+#ifdef CUDF_ENABLE_DECIMAL128
 // Only testing Decimal128 because that's the only size cudf and arrow have in common.
 TEST_F(ToArrowDecimalScalarTest, Basic)
 {
