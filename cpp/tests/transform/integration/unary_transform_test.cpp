@@ -70,7 +70,7 @@ __device__ inline void    fdsf   (
   // c = a*a*a*a
   std::string amd_llvm_ir_str = 
     R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libhipdf(ptr %0, float %1) #0 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca float, align 4, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
@@ -170,7 +170,7 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
   // c = a * a - a
   std::string amd_llvm_ir_str = 
     R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libhipdf(ptr %0, i32 %1) #0 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i32 %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca i32, align 4, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
@@ -262,7 +262,7 @@ __device__ inline void f(
   // LLVM IR equivalent to cuda UDF
 std::string amd_llvm_ir_str = 
     R"'''(
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libhipdf(ptr %0, i8 signext %1) #0 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i8 signext %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
   %4 = alloca i8, align 1, addrspace(5)
   %5 = addrspacecast ptr addrspace(5) %3 to ptr
