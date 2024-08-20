@@ -416,14 +416,14 @@ std::string parse_single_function_cuda(std::string const& src, std::string const
 std::string parse_single_function_llvm_ir(std::string const& src, std::string const& function_name)
 {
   // CAUTION(HIP/AMD): In lack of a better method, the function name of the UDF from Numba needs 
-  // to be "udf_funcname_from_numba_to_be_replaced_in_libhipdf", so that we can 
+  // to be "udf_funcname_from_numba_to_be_replaced_in_libcudf", so that we can
   // match against it and replace it with the ones expected by the jitified kernels.
-  std::regex pattern_func_sig("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libhipdf");
-  std::regex pattern_func_name("udf_funcname_from_numba_to_be_replaced_in_libhipdf");
+  std::regex pattern_func_sig("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libcudf");
+  std::regex pattern_func_name("udf_funcname_from_numba_to_be_replaced_in_libcudf");
 
   CUDF_EXPECTS(std::regex_search(src, pattern_func_sig),
               "Could not identify UDF in NUMBA's input LLVM IR. The expected function "
-              "name is \"udf_funcname_from_numba_to_be_replaced_in_libhipdf\"\n");
+              "name is \"udf_funcname_from_numba_to_be_replaced_in_libcudf\"\n");
   
   return std::regex_replace(src, pattern_func_name, function_name);
 }

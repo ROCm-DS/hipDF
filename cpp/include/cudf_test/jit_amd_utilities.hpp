@@ -56,10 +56,10 @@ namespace test {
   std::string adapt_llvm_ir_attributes_for_current_arch(const std::string& llvm_ir);
 
   /**
-   * @brief Indicates whether hipDF was built with support for UDFs through jitify
+   * @brief Indicates whether cuDF was built with support for UDFs through jitify
    * which requires a patched hipRTC (see SWDEV-444584).
    * 
-   * @return True if hipDF was built with support for UDFs through jitify, false otherwise.
+   * @return True if cuDF was built with support for UDFs through jitify, false otherwise.
   */
   inline bool has_udf_jitify_support()
   {

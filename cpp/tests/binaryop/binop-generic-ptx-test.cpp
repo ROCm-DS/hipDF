@@ -56,7 +56,7 @@ define weak void @__cxa_deleted_virtual() #0 {
 }
 
 ; Function Attrs: convergent mustprogress nounwind
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libhipdf(ptr %0, float %1, float %2) #2 {
+define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1, float %2) #2 {
   %4 = alloca ptr, align 8, addrspace(5)
   %5 = alloca float, align 4, addrspace(5)
   %6 = alloca float, align 4, addrspace(5)

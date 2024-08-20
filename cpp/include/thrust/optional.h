@@ -1706,7 +1706,7 @@ public:
     throw bad_optional_access();
   }
 
-    //TODO(HIP/AMD): This is a quick n dirty patch of thrust needed for hipdf
+    //TODO(HIP/AMD): This is a quick n dirty patch of thrust needed for cudf
   /// \return the contained value if there is one, otherwise throws
   /// [bad_optional_access]
   /// \group value

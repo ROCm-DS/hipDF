@@ -26,7 +26,7 @@ struct rolling_udf_ptx {
   {
     OutType ret;
     rolling_udf(&ret, nullptr, nullptr, 0, 0, &in_col[start], count, sizeof(InType)); // NOTE(HIP/AMD): Changed from 0 to nullptr for second & third arguments. 
-                                                                                      // In fact, this is what both CUDA's Numba as well as hipDF's NUMBA expect.
+                                                                                      // In fact, this is what both CUDA's Numba as well as cuDF's NUMBA expect.
     return ret;
   }
 };

@@ -392,7 +392,7 @@ __inline__ __device__ duration_type to_duration(char const* begin, char const* e
     auto const unscaled_subseconds = parse_integer<int64_t>(&cur, end);
     auto const scale               = min(9L, cur - start_subsecond) - 9;
     // TODO(HIP/AMD): the casting looks to be not very safe. 
-    // We need to redefine scale_type in hipdf/cpp/include/cudf/fixed_point/fixed_point.hpp 
+    // We need to redefine scale_type in cudf/cpp/include/cudf/fixed_point/fixed_point.hpp
     // to be of type int64_t (maybe a bug in original cudf?)
     auto const rescaled = numeric::decimal64{unscaled_subseconds, numeric::scale_type{static_cast<numeric::scale_type>(scale)}};
     return duration_ns{rescaled.value()};
