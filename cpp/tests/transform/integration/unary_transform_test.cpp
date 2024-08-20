@@ -34,7 +34,7 @@ struct UnaryOperationIntegrationTest : public cudf::test::BaseFixture {
  protected:
   void SetUp() override
   {
-    if (!cudf::test::has_udf_jitify_support()) { GTEST_SKIP() << "Skipping tests that require support for UDFs with Jitify (patched hipRTC needed, enable support during build of hipDF!)."; }
+    if (!cudf::test::has_udf_jitify_support()) { GTEST_SKIP() << "Skipping tests that require support for UDFs with Jitify (patched hipRTC needed, enable support during build of cuDF!)."; }
   }  
 };
 
