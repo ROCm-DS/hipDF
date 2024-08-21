@@ -226,7 +226,7 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getComputeCapabilityMinor(JNIEnv
   CATCH_STD(env, -2);
 }
 
-JNIEXPORT void JNICALL Java_ai_rapids_cuhip_freeZero(JNIEnv *env, jclass) {
+JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_freeZero(JNIEnv *env, jclass) {
   try {
     cudf::jni::auto_set_device(env);
     CUDF_CUDA_TRY(cudaFree(0));
