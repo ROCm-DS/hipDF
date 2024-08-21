@@ -20,7 +20,7 @@
 
 #include <cudf/utilities/span.hpp>
 
-#include <hipcomp.h>
+#include <cudf/nvcomp.h>
 
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>

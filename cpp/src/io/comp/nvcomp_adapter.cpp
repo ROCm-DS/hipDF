@@ -19,7 +19,7 @@
 #include <cudf/utilities/error.hpp>
 #include <io/utilities/config_utils.hpp>
 
-#include <hipcomp/snappy.h>
+#include <cudf/nvcomp/snappy.h>
 
 #include <mutex>
 
