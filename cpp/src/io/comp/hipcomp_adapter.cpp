@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hipcomp_adapter.hpp"
-#include "hipcomp_adapter.cuh"
+#include "nvcomp_adapter.hpp"
+#include "nvcomp_adapter.cuh"
 
 #include <cudf/utilities/error.hpp>
 #include <io/utilities/config_utils.hpp>

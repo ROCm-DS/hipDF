@@ -32,7 +32,7 @@
 #include <cudf/table/table.hpp>
 #include <cudf/table/table_view.hpp>
 #include <cudf/utilities/span.hpp>
-#include <src/io/comp/hipcomp_adapter.hpp>
+#include <src/io/comp/nvcomp_adapter.hpp>
 
 #include <type_traits>
 

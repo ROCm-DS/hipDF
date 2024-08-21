@@ -15,7 +15,7 @@
  */
 
 #include "io_uncomp.hpp"
-#include "hipcomp_adapter.hpp"
+#include "nvcomp_adapter.hpp"
 #include "unbz2.hpp"  // bz2 uncompress
 
 #include <io/utilities/hostdevice_vector.hpp>

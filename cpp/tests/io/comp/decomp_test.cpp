@@ -16,7 +16,7 @@
 
 #include <io/comp/gpuinflate.hpp>
 #include <io/utilities/hostdevice_vector.hpp>
-#include <src/io/comp/hipcomp_adapter.hpp>
+#include <src/io/comp/nvcomp_adapter.hpp>
 
 #include <cudf/utilities/default_stream.hpp>
 

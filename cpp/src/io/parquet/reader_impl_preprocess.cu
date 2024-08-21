@@ -16,7 +16,7 @@
 
 #include "reader_impl.hpp"
 
-#include <io/comp/hipcomp_adapter.hpp>
+#include <io/comp/nvcomp_adapter.hpp>
 #include <io/utilities/config_utils.hpp>
 #include <io/utilities/time_utils.cuh>
 

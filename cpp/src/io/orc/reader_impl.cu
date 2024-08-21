@@ -25,7 +25,7 @@
 #include "reader_impl.hpp"
 
 #include <io/comp/gpuinflate.hpp>
-#include <io/comp/hipcomp_adapter.hpp>
+#include <io/comp/nvcomp_adapter.hpp>
 #include <io/utilities/config_utils.hpp>
 
 #include <cudf/detail/timezone.hpp>

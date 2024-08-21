@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "hipcomp_adapter.cuh"
+#include "nvcomp_adapter.cuh"
 
 #include <cudf/detail/utilities/integer_utils.hpp>
 

@@ -25,7 +25,7 @@
 #include "parquet_gpu.cuh"
 #include "writer_impl.hpp"
 
-#include <io/comp/hipcomp_adapter.hpp>
+#include <io/comp/nvcomp_adapter.hpp>
 #include <io/statistics/column_statistics.cuh>
 #include <io/utilities/column_utils.cuh>
 #include <io/utilities/config_utils.hpp>
