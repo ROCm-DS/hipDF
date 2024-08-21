@@ -69,7 +69,7 @@ class per_context_cache {
   TableType* find_or_initialize(Initializer const& init)
   {
     int device_id;
-    CUDF_CUDA_TRY(hipGetDevice(&device_id));
+    CUDF_CUDA_TRY(cudaGetDevice(&device_id));
 
     auto finder = cache_.find(device_id);
     if (finder == cache_.end()) {

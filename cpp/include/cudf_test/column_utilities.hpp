@@ -208,7 +208,7 @@ template <typename T, std::enable_if_t<not cudf::is_fixed_point<T>()>* = nullptr
 std::pair<thrust::host_vector<T>, std::vector<bitmask_type>> to_host(column_view c)
 {
   thrust::host_vector<T> host_data(c.size());
-  CUDF_CUDA_TRY(hipMemcpyAsync(host_data.data(), c.data<T>(), c.size() * sizeof(T), hipMemcpyDefault, cudf::get_default_stream().value()));
+  CUDF_CUDA_TRY(cudaMemcpyAsync(host_data.data(), c.data<T>(), c.size() * sizeof(T), cudaMemcpyDefault, cudf::get_default_stream().value()));
   // NOTE(HIP/AMD): bitmask_to_host takes care of synchronizing the stream!
   return {host_data, bitmask_to_host(c)};
 }
@@ -233,7 +233,7 @@ std::pair<thrust::host_vector<T>, std::vector<bitmask_type>> to_host(column_view
   auto host_rep_types = thrust::host_vector<Rep>(c.size());
 
   CUDF_CUDA_TRY(
-    hipMemcpy(host_rep_types.data(), c.begin<Rep>(), c.size() * sizeof(Rep), hipMemcpyDefault));
+    cudaMemcpy(host_rep_types.data(), c.begin<Rep>(), c.size() * sizeof(Rep), cudaMemcpyDefault));
 
   auto to_fp = [&](Rep val) { return T{scaled_integer<Rep>{val, scale_type{c.type().scale()}}}; };
   auto begin = thrust::make_transform_iterator(std::cbegin(host_rep_types), to_fp);

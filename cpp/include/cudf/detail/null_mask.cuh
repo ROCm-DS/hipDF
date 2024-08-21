@@ -168,12 +168,12 @@ size_type inplace_bitmask_binop(Binop op,
   rmm::device_uvector<bitmask_type const*> d_masks(masks.size(), stream, mr);
   rmm::device_uvector<size_type> d_begin_bits(masks_begin_bits.size(), stream, mr);
 
-  CUDF_CUDA_TRY(hipMemcpyAsync(
-    d_masks.data(), masks.data(), masks.size_bytes(), hipMemcpyDefault, stream.value()));
-  CUDF_CUDA_TRY(hipMemcpyAsync(d_begin_bits.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(
+    d_masks.data(), masks.data(), masks.size_bytes(), cudaMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(cudaMemcpyAsync(d_begin_bits.data(),
                                 masks_begin_bits.data(),
                                 masks_begin_bits.size_bytes(),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
 
   auto constexpr block_size = 256;

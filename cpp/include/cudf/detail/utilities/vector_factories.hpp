@@ -53,7 +53,7 @@ rmm::device_uvector<T> make_zeroed_device_uvector_async(std::size_t size,
                                                         rmm::mr::device_memory_resource* mr)
 {
   rmm::device_uvector<T> ret(size, stream, mr);
-  CUDF_CUDA_TRY(hipMemsetAsync(ret.data(), 0, size * sizeof(T), stream.value()));
+  CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(), 0, size * sizeof(T), stream.value()));
   return ret;
 }
 
@@ -74,7 +74,7 @@ rmm::device_uvector<T> make_zeroed_device_uvector_sync(std::size_t size,
                                                        rmm::mr::device_memory_resource* mr)
 {
   rmm::device_uvector<T> ret(size, stream, mr);
-  CUDF_CUDA_TRY(hipMemsetAsync(ret.data(), 0, size * sizeof(T), stream.value()));
+  CUDF_CUDA_TRY(cudaMemsetAsync(ret.data(), 0, size * sizeof(T), stream.value()));
   stream.synchronize();
   return ret;
 }
@@ -97,10 +97,10 @@ rmm::device_uvector<T> make_device_uvector_async(host_span<T const> source_data,
                                                  rmm::mr::device_memory_resource* mr)
 {
   rmm::device_uvector<T> ret(source_data.size(), stream, mr);
-  CUDF_CUDA_TRY(hipMemcpyAsync(ret.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(ret.data(),
                                 source_data.data(),
                                 source_data.size() * sizeof(T),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
   return ret;
 }
@@ -146,10 +146,10 @@ rmm::device_uvector<T> make_device_uvector_async(device_span<T const> source_dat
                                                  rmm::mr::device_memory_resource* mr)
 {
   rmm::device_uvector<T> ret(source_data.size(), stream, mr);
-  CUDF_CUDA_TRY(hipMemcpyAsync(ret.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(ret.data(),
                                 source_data.data(),
                                 source_data.size() * sizeof(T),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
   return ret;
 }
@@ -273,8 +273,8 @@ template <typename T, typename OutContainer>
 OutContainer make_vector_async(device_span<T const> v, rmm::cuda_stream_view stream)
 {
   OutContainer result(v.size());
-  CUDF_CUDA_TRY(hipMemcpyAsync(
-    result.data(), v.data(), v.size() * sizeof(T), hipMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(cudaMemcpyAsync(
+    result.data(), v.data(), v.size() * sizeof(T), cudaMemcpyDefault, stream.value()));
   return result;
 }
 

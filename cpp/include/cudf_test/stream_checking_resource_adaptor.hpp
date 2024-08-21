@@ -167,7 +167,7 @@ class stream_checking_resource_adaptor final : public rmm::mr::device_memory_res
                                (cstream == cudaStreamPerThread))
                             : (cstream != cudf::test::get_default_stream().value());
 #else
-      check_default_stream_ ? ((cstream == hipStreamDefault) || (cstream == hipStreamPerThread))
+      check_default_stream_ ? ((cstream == cudaStreamDefault) || (cstream == cudaStreamPerThread))
                             : (cstream != cudf::test::get_default_stream().value());
 #endif
 

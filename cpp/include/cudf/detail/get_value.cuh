@@ -49,8 +49,8 @@ T get_value(column_view const& col_view, size_type element_index, rmm::cuda_stre
   CUDF_EXPECTS(element_index >= 0 && element_index < col_view.size(),
                "invalid element_index value");
   T result;
-  CUDF_CUDA_TRY(hipMemcpyAsync(
-    &result, col_view.data<T>() + element_index, sizeof(T), hipMemcpyDefault, stream.value()));
+  CUDF_CUDA_TRY(cudaMemcpyAsync(
+    &result, col_view.data<T>() + element_index, sizeof(T), cudaMemcpyDefault, stream.value()));
   stream.synchronize();
   return result;
 }

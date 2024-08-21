@@ -128,7 +128,7 @@ CUDF_HOST_DEVICE inline string_view string_view::max()
   psentinel = &cudf::strings::detail::max_string_sentinel[0];
 #else
   CUDF_CUDA_TRY(
-    hipGetSymbolAddress((void**)&psentinel, cudf::strings::detail::max_string_sentinel));
+    cudaGetSymbolAddress((void**)&psentinel, cudf::strings::detail::max_string_sentinel));
 #endif
   return string_view(psentinel, 4);
 }

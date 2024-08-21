@@ -89,7 +89,7 @@ struct cuda_error : public std::runtime_error, public stacktrace_recorder {
    * @param message Error message
    * @param error CUDA error code
    */
-  cuda_error(std::string const& message, hipError_t const& error)
+  cuda_error(std::string const& message, cudaError_t const& error)
     : std::runtime_error(message), _cudaError(error)
   {
   }
@@ -100,10 +100,10 @@ struct cuda_error : public std::runtime_error, public stacktrace_recorder {
    *
    * @return CUDA error code
    */
-  hipError_t error_code() const { return _cudaError; }
+  cudaError_t error_code() const { return _cudaError; }
 
  protected:
-  hipError_t _cudaError;  //!< CUDA error code
+  cudaError_t _cudaError;  //!< CUDA error code
 };
 
 struct fatal_cuda_error : public cuda_error {
@@ -237,19 +237,19 @@ struct data_type_error : public std::invalid_argument, public stacktrace_recorde
 namespace cudf {
 namespace detail {
 // @cond
-inline void throw_cuda_error(hipError_t error, char const* file, unsigned int line)
+inline void throw_cuda_error(cudaError_t error, char const* file, unsigned int line)
 {
-  // Calls hipGetLastError to clear the error status. It is nearly certain that a fatal error
+  // Calls cudaGetLastError to clear the error status. It is nearly certain that a fatal error
   // occurred if it still returns the same error after a cleanup.
-  hipError_t tmpError = hipGetLastError();
+  cudaError_t tmpError = cudaGetLastError();
   (void)tmpError;
-  auto const last = hipFree(0);
+  auto const last = cudaFree(0);
   auto const msg  = std::string{"CUDA error encountered at: " + std::string{file} + ":" +
                                std::to_string(line) + ": " + std::to_string(error) + " " +
-                               hipGetErrorName(error) + " " + hipGetErrorString(error)};
-  // Call hipDeviceSynchronize to ensure `last` did not result from an asynchronous error.
+                               cudaGetErrorName(error) + " " + cudaGetErrorString(error)};
+  // Call cudaDeviceSynchronize to ensure `last` did not result from an asynchronous error.
   // between two calls.
-  if (error == last && last == hipDeviceSynchronize()) {
+  if (error == last && last == cudaDeviceSynchronize()) {
     throw fatal_cuda_error{"Fatal " + msg, error};
   } else {
     throw cuda_error{msg, error};
@@ -263,13 +263,13 @@ inline void throw_cuda_error(hipError_t error, char const* file, unsigned int li
  * @brief Error checking macro for CUDA runtime API functions.
  *
  * Invokes a CUDA runtime API function call, if the call does not return
- * hipSuccess, invokes hipGetLastError() to clear the error and throws an
+ * cudaSuccess, invokes cudaGetLastError() to clear the error and throws an
  * exception detailing the CUDA error that occurred
  */
 #define CUDF_CUDA_TRY(call)                                                                    \
   do {                                                                                         \
-    hipError_t const status = (call);                                                         \
-    if (hipSuccess != status) { cudf::detail::throw_cuda_error(status, __FILE__, __LINE__); } \
+    cudaError_t const status = (call);                                                         \
+    if (cudaSuccess != status) { cudf::detail::throw_cuda_error(status, __FILE__, __LINE__); } \
   } while (0);
 
 /**
@@ -282,16 +282,16 @@ inline void throw_cuda_error(hipError_t error, char const* file, unsigned int li
  *
  * The intent of this macro is to provide a mechanism for synchronous and
  * deterministic execution for debugging asynchronous CUDA execution. It should
- * be used after any asynchronous CUDA call, e.g., hipMemcpyAsync, or an
+ * be used after any asynchronous CUDA call, e.g., cudaMemcpyAsync, or an
  * asynchronous kernel launch.
  */
 #ifndef NDEBUG
 #define CUDF_CHECK_CUDA(stream)                   \
   do {                                            \
-    CUDF_CUDA_TRY(hipStreamSynchronize(stream)); \
-    CUDF_CUDA_TRY(hipPeekAtLastError());         \
+    CUDF_CUDA_TRY(cudaStreamSynchronize(stream)); \
+    CUDF_CUDA_TRY(cudaPeekAtLastError());         \
   } while (0);
 #else
-#define CUDF_CHECK_CUDA(stream) CUDF_CUDA_TRY(hipPeekAtLastError());
+#define CUDF_CHECK_CUDA(stream) CUDF_CUDA_TRY(cudaPeekAtLastError());
 #endif
 /** @} */
