@@ -140,18 +140,18 @@ void generate_input_tables(key_type* const build_tbl,
 
   // Maximize exposed parallelism while minimizing storage for hiprand state
   int num_blocks_init_build_tbl{-1};
-  CUDF_CUDA_TRY(hipOccupancyMaxActiveBlocksPerMultiprocessor(
+  CUDF_CUDA_TRY(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
     &num_blocks_init_build_tbl, init_build_tbl<key_type, size_type>, block_size, 0));
 
   int num_blocks_init_probe_tbl{-1};
-  CUDF_CUDA_TRY(hipOccupancyMaxActiveBlocksPerMultiprocessor(
+  CUDF_CUDA_TRY(cudaOccupancyMaxActiveBlocksPerMultiprocessor(
     &num_blocks_init_probe_tbl, init_probe_tbl<key_type, size_type>, block_size, 0));
 
   int dev_id{-1};
-  CUDF_CUDA_TRY(hipGetDevice(&dev_id));
+  CUDF_CUDA_TRY(cudaGetDevice(&dev_id));
 
   int num_sms{-1};
-  CUDF_CUDA_TRY(hipDeviceGetAttribute(&num_sms, hipDeviceAttributeMultiprocessorCount, dev_id));
+  CUDF_CUDA_TRY(cudaDeviceGetAttribute(&num_sms, cudaDevAttrMultiProcessorCount, dev_id));
 
   int const num_states =
     num_sms * std::max(num_blocks_init_build_tbl, num_blocks_init_probe_tbl) * block_size;

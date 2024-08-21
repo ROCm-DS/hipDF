@@ -144,8 +144,8 @@ static void bench_multibyte_split(nvbench::state& state,
   }
   if (source_type == data_chunk_source_type::host_pinned) {
     host_pinned_input.resize(static_cast<std::size_t>(device_input.size()));
-    CUDF_CUDA_TRY(hipMemcpy(
-      host_pinned_input.data(), device_input.data(), host_pinned_input.size(), hipMemcpyDefault));
+    CUDF_CUDA_TRY(cudaMemcpy(
+      host_pinned_input.data(), device_input.data(), host_pinned_input.size(), cudaMemcpyDefault));
   }
 
   auto source = [&] {

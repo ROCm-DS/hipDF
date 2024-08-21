@@ -29,32 +29,32 @@ cuda_event_timer::cuda_event_timer(benchmark::State& state,
   // flush all of L2$
   if (flush_l2_cache) {
     int current_device = 0;
-    CUDF_CUDA_TRY(hipGetDevice(&current_device));
+    CUDF_CUDA_TRY(cudaGetDevice(&current_device));
 
     int l2_cache_bytes = 0;
-    CUDF_CUDA_TRY(hipDeviceGetAttribute(&l2_cache_bytes, hipDeviceAttributeL2CacheSize, current_device));
+    CUDF_CUDA_TRY(cudaDeviceGetAttribute(&l2_cache_bytes, cudaDevAttrL2CacheSize, current_device));
 
     if (l2_cache_bytes > 0) {
       int const memset_value = 0;
       rmm::device_buffer l2_cache_buffer(l2_cache_bytes, stream);
       CUDF_CUDA_TRY(
-        hipMemsetAsync(l2_cache_buffer.data(), memset_value, l2_cache_bytes, stream.value()));
+        cudaMemsetAsync(l2_cache_buffer.data(), memset_value, l2_cache_bytes, stream.value()));
     }
   }
 
-  CUDF_CUDA_TRY(hipEventCreate(&start));
-  CUDF_CUDA_TRY(hipEventCreate(&stop));
-  CUDF_CUDA_TRY(hipEventRecord(start, stream.value()));
+  CUDF_CUDA_TRY(cudaEventCreate(&start));
+  CUDF_CUDA_TRY(cudaEventCreate(&stop));
+  CUDF_CUDA_TRY(cudaEventRecord(start, stream.value()));
 }
 
 cuda_event_timer::~cuda_event_timer()
 {
-  CUDF_CUDA_TRY(hipEventRecord(stop, stream.value()));
-  CUDF_CUDA_TRY(hipEventSynchronize(stop));
+  CUDF_CUDA_TRY(cudaEventRecord(stop, stream.value()));
+  CUDF_CUDA_TRY(cudaEventSynchronize(stop));
 
   float milliseconds = 0.0f;
-  CUDF_CUDA_TRY(hipEventElapsedTime(&milliseconds, start, stop));
+  CUDF_CUDA_TRY(cudaEventElapsedTime(&milliseconds, start, stop));
   p_state->SetIterationTime(milliseconds / (1000.0f));
-  CUDF_CUDA_TRY(hipEventDestroy(start));
-  CUDF_CUDA_TRY(hipEventDestroy(stop));
+  CUDF_CUDA_TRY(cudaEventDestroy(start));
+  CUDF_CUDA_TRY(cudaEventDestroy(stop));
 }

@@ -197,7 +197,7 @@ void BM_case(benchmark::State& state, std::string query_arg)
   for (auto _ : state) {
     cuda_event_timer raii(state, true);
     auto result = cudf::strings::get_json_object(scv, json_path);
-    CUDF_CUDA_TRY(hipStreamSynchronize(0));
+    CUDF_CUDA_TRY(cudaStreamSynchronize(0));
   }
 
   // this isn't strictly 100% accurate. a given query isn't necessarily

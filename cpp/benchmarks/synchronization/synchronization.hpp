@@ -100,8 +100,8 @@ class cuda_event_timer {
   ~cuda_event_timer();
 
  private:
-  hipEvent_t start;
-  hipEvent_t stop;
+  cudaEvent_t start;
+  cudaEvent_t stop;
   rmm::cuda_stream_view stream;
   benchmark::State* p_state;
 };

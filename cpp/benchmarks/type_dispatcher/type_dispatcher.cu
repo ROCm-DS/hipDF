@@ -195,7 +195,7 @@ void type_dispatcher_benchmark(::benchmark::State& state)
 
   if (dispatching_type == NO_DISPATCHING) {
     CUDF_CUDA_TRY(
-      hipMemcpy(d_vec.data(), h_vec_p.data(), sizeof(TypeParam*) * n_cols, hipMemcpyDefault));
+      cudaMemcpy(d_vec.data(), h_vec_p.data(), sizeof(TypeParam*) * n_cols, cudaMemcpyDefault));
   }
 
   // Warm up
