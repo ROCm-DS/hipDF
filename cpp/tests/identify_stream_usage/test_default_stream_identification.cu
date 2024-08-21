@@ -21,16 +21,16 @@ __global__ void kernel() { printf("The kernel ran!\n"); }
 
 void test_cudaLaunchKernel()
 {
-  hipStream_t stream;
-  (void)hipStreamCreate(&stream);
+  cudaStream_t stream;
+  (void)cudaStreamCreate(&stream);
   kernel<<<1, 1, 0, stream>>>();
-  hipError_t err{hipDeviceSynchronize()};
-  if (err != hipSuccess) { throw std::runtime_error("Kernel failed on non-default stream!"); }
-  err = hipGetLastError();
-  if (err != hipSuccess) { throw std::runtime_error("Kernel failed on non-default stream!"); }
+  cudaError_t err{cudaDeviceSynchronize()};
+  if (err != cudaSuccess) { throw std::runtime_error("Kernel failed on non-default stream!"); }
+  err = cudaGetLastError();
+  if (err != cudaSuccess) { throw std::runtime_error("Kernel failed on non-default stream!"); }
 
   try {
-   //  (void) hipLaunchKernel((void*)kernel, dim3(1,1,1), dim3(1,1,1), nullptr, 0, 0);
+   //  (void) cudaLaunchKernel((void*)kernel, dim3(1,1,1), dim3(1,1,1), nullptr, 0, 0);
     kernel<<<1, 1>>>();
   } catch (std::runtime_error&) {
     return;

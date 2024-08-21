@@ -24,6 +24,6 @@ inline bool can_do_runtime_jit()
   // as we need support for __int128
 
   int runtime      = 0;
-  auto error_value = hipRuntimeGetVersion(&runtime);
-  return (error_value == hipSuccess) && (runtime >= 11050);
+  auto error_value = cudaRuntimeGetVersion(&runtime);
+  return (error_value == cudaSuccess) && (runtime >= 11050);
 }

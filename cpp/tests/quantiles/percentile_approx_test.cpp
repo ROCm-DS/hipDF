@@ -43,17 +43,17 @@ std::unique_ptr<cudf::column> arrow_percentile_approx(cudf::column_view const& _
   auto sorted_values = sorted_t->get_column(0).view();
 
   std::vector<double> h_values(sorted_values.size());
-  CUDF_CUDA_TRY(hipMemcpy(h_values.data(),
+  CUDF_CUDA_TRY(cudaMemcpy(h_values.data(),
                            sorted_values.data<double>(),
                            sizeof(double) * sorted_values.size(),
-                           hipMemcpyDefault));
+                           cudaMemcpyDefault));
   std::vector<char> h_validity(sorted_values.size());
   if (sorted_values.null_mask() != nullptr) {
     auto validity = cudf::mask_to_bools(sorted_values.null_mask(), 0, sorted_values.size());
-    CUDF_CUDA_TRY(hipMemcpy(h_validity.data(),
+    CUDF_CUDA_TRY(cudaMemcpy(h_validity.data(),
                              (validity->view().data<char>()),
                              sizeof(char) * sorted_values.size(),
-                             hipMemcpyDefault));
+                             cudaMemcpyDefault));
   }
 
   // generate the tdigest
@@ -226,7 +226,7 @@ void simple_test(cudf::data_type input_type, std::vector<std::pair<int, int>> pa
   auto keys = cudf::make_fixed_width_column(
     cudf::data_type{cudf::type_id::INT32}, values->size(), cudf::mask_state::UNALLOCATED);
   CUDF_CUDA_TRY(
-    hipMemset(keys->mutable_view().data<int32_t>(), 0, values->size() * sizeof(int32_t)));
+    cudaMemset(keys->mutable_view().data<int32_t>(), 0, values->size() * sizeof(int32_t)));
 
   // runs both groupby and reduce paths
   std::for_each(params.begin(), params.end(), [&](std::pair<int, int> const& params) {
@@ -248,10 +248,10 @@ void grouped_test(cudf::data_type input_type, std::vector<std::pair<int, int>> p
   auto i      = thrust::make_counting_iterator(0);
   auto h_keys = std::vector<int32_t>(values->size());
   std::transform(i, i + values->size(), h_keys.begin(), group_index{});
-  CUDF_CUDA_TRY(hipMemcpy(keys->mutable_view().data<int32_t>(),
+  CUDF_CUDA_TRY(cudaMemcpy(keys->mutable_view().data<int32_t>(),
                            h_keys.data(),
                            h_keys.size() * sizeof(int32_t),
-                           hipMemcpyDefault));
+                           cudaMemcpyDefault));
 
   std::for_each(params.begin(), params.end(), [&](std::pair<int, int> const& params) {
     percentile_approx_test(
@@ -272,7 +272,7 @@ void simple_with_nulls_test(cudf::data_type input_type, std::vector<std::pair<in
   auto keys = cudf::make_fixed_width_column(
     cudf::data_type{cudf::type_id::INT32}, values->size(), cudf::mask_state::UNALLOCATED);
   CUDF_CUDA_TRY(
-    hipMemset(keys->mutable_view().data<int32_t>(), 0, values->size() * sizeof(int32_t)));
+    cudaMemset(keys->mutable_view().data<int32_t>(), 0, values->size() * sizeof(int32_t)));
 
   // add a null mask
   auto mask = make_null_mask(*values);
@@ -293,10 +293,10 @@ void grouped_with_nulls_test(cudf::data_type input_type, std::vector<std::pair<i
   auto i      = thrust::make_counting_iterator(0);
   auto h_keys = std::vector<int32_t>(values->size());
   std::transform(i, i + values->size(), h_keys.begin(), group_index{});
-  CUDF_CUDA_TRY(hipMemcpy(keys->mutable_view().data<int32_t>(),
+  CUDF_CUDA_TRY(cudaMemcpy(keys->mutable_view().data<int32_t>(),
                            h_keys.data(),
                            h_keys.size() * sizeof(int32_t),
-                           hipMemcpyDefault));
+                           cudaMemcpyDefault));
 
   // add a null mask
   auto mask = make_null_mask(*values);

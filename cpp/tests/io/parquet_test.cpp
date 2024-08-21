@@ -1380,11 +1380,11 @@ class custom_test_data_sink : public cudf::io::data_sink {
     // NOTE(HIP/AMD): adding "this" to the capture clauses fixes a compiler warning with clang
     return std::async(std::launch::deferred, [=, this] {
       char* ptr = nullptr;
-      CUDF_CUDA_TRY(hipHostMalloc(&ptr, size));
-      CUDF_CUDA_TRY(hipMemcpyAsync(ptr, gpu_data, size, hipMemcpyDefault, stream.value()));
+      CUDF_CUDA_TRY(cudaMallocHost(&ptr, size));
+      CUDF_CUDA_TRY(cudaMemcpyAsync(ptr, gpu_data, size, cudaMemcpyDefault, stream.value()));
       stream.synchronize();
       outfile_.write(ptr, size);
-      CUDF_CUDA_TRY(hipHostFree(ptr));
+      CUDF_CUDA_TRY(cudaFreeHost(ptr));
     });
   }
 
@@ -2436,11 +2436,11 @@ class custom_test_memmap_sink : public cudf::io::data_sink {
     // NOTE(HIP/AMD): adding "this" to the capture clauses fixes a compiler warning with clang
     return std::async(std::launch::deferred, [=, this] {
       char* ptr = nullptr;
-      CUDF_CUDA_TRY(hipHostMalloc(&ptr, size));
-      CUDF_CUDA_TRY(hipMemcpyAsync(ptr, gpu_data, size, hipMemcpyDefault, stream.value()));
+      CUDF_CUDA_TRY(cudaMallocHost(&ptr, size));
+      CUDF_CUDA_TRY(cudaMemcpyAsync(ptr, gpu_data, size, cudaMemcpyDefault, stream.value()));
       stream.synchronize();
       mm_writer->host_write(ptr, size);
-      CUDF_CUDA_TRY(hipHostFree(ptr));
+      CUDF_CUDA_TRY(cudaFreeHost(ptr));
     });
   }
 

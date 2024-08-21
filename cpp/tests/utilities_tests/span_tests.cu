@@ -429,7 +429,7 @@ TEST(HostDeviceSpanTest, CanSendToDevice)
   message.host_to_device_sync(cudf::get_default_stream());
 
   char d_message[12];
-  (void)hipMemcpy(d_message, message.device_ptr(), 11, hipMemcpyDefault);
+  (void)cudaMemcpy(d_message, message.device_ptr(), 11, cudaMemcpyDefault);
   d_message[11] = '\0';
 
   EXPECT_EQ(11, strlen(d_message));

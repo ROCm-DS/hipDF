@@ -79,7 +79,7 @@ TEST_F(StringsFactoriesTest, CreateColumnFromPair)
   }
   auto d_strings = cudf::detail::make_device_uvector_sync(
     strings, cudf::get_default_stream(), rmm::mr::get_current_device_resource());
-  CUDF_CUDA_TRY(hipMemcpy(d_buffer.data(), h_buffer.data(), memsize, hipMemcpyDefault));
+  CUDF_CUDA_TRY(cudaMemcpy(d_buffer.data(), h_buffer.data(), memsize, cudaMemcpyDefault));
   auto column = cudf::make_strings_column(d_strings);
   EXPECT_EQ(column->type(), cudf::data_type{cudf::type_id::STRING});
   EXPECT_EQ(column->null_count(), nulls);

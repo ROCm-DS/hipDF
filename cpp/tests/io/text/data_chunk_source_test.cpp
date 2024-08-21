@@ -33,7 +33,7 @@ struct DataChunkSourceTest : public cudf::test::BaseFixture {};
 std::string chunk_to_host(cudf::io::text::device_data_chunk const& chunk)
 {
   std::string result(chunk.size(), '\0');
-  CUDF_CUDA_TRY(hipMemcpy(result.data(), chunk.data(), chunk.size(), hipMemcpyDefault));
+  CUDF_CUDA_TRY(cudaMemcpy(result.data(), chunk.data(), chunk.size(), cudaMemcpyDefault));
   return result;
 }
 

@@ -32,9 +32,9 @@ TEST(ExpectsTest, FalseCondition)
 
 TEST(ExpectsTest, TrueCondition) { EXPECT_NO_THROW(CUDF_EXPECTS(true, "condition is true")); }
 
-TEST(CudaTryTest, Error) { EXPECT_THROW(CUDF_CUDA_TRY(hipErrorLaunchFailure), cudf::cuda_error); }
+TEST(CudaTryTest, Error) { EXPECT_THROW(CUDF_CUDA_TRY(cudaErrorLaunchFailure), cudf::cuda_error); }
 
-TEST(CudaTryTest, Success) { EXPECT_NO_THROW(CUDF_CUDA_TRY(hipSuccess)); }
+TEST(CudaTryTest, Success) { EXPECT_NO_THROW(CUDF_CUDA_TRY(cudaSuccess)); }
 
 TEST(StreamCheck, success) { EXPECT_NO_THROW(CUDF_CHECK_CUDA(0)); }
 
@@ -85,7 +85,7 @@ TEST(DeathTest, CudaFatalError)
   auto call_kernel                      = []() {
     kernel<<<1, 1, 0, cudf::get_default_stream().value()>>>();
     try {
-      CUDF_CUDA_TRY(hipDeviceSynchronize());
+      CUDF_CUDA_TRY(cudaDeviceSynchronize());
     } catch (const cudf::fatal_cuda_error& fe) {
       std::abort();
     }
@@ -110,7 +110,7 @@ TEST(DebugAssertDeathTest, cudf_assert_false)
     // This error invalidates the current device context, so we need to kill
     // the current process. Running with EXPECT_DEATH spawns a new process for
     // each attempted kernel launch
-    if (hipErrorAssert == hipDeviceSynchronize()) { std::abort(); }
+    if (cudaErrorAssert == cudaDeviceSynchronize()) { std::abort(); }
 
     // If we reach this point, the cudf_assert didn't work so we exit normally, which will cause
     // EXPECT_DEATH to fail.
@@ -122,7 +122,7 @@ TEST(DebugAssertDeathTest, cudf_assert_false)
 TEST(DebugAssert, cudf_assert_true)
 {
   assert_true_kernel<<<1, 1>>>();
-  ASSERT_EQ(hipSuccess, hipDeviceSynchronize());
+  ASSERT_EQ(cudaSuccess, cudaDeviceSynchronize());
 }
 
 #endif

@@ -60,9 +60,9 @@ struct TypedColumnTest : public cudf::test::BaseFixture {
     std::vector<char> h_mask(mask.size());
     std::iota(h_mask.begin(), h_mask.end(), char{0});
     CUDF_CUDA_TRY(
-      hipMemcpyAsync(typed_data, h_data.data(), data.size(), hipMemcpyDefault, stream.value()));
+      cudaMemcpyAsync(typed_data, h_data.data(), data.size(), cudaMemcpyDefault, stream.value()));
     CUDF_CUDA_TRY(
-      hipMemcpyAsync(typed_mask, h_mask.data(), mask.size(), hipMemcpyDefault, stream.value()));
+      cudaMemcpyAsync(typed_mask, h_mask.data(), mask.size(), cudaMemcpyDefault, stream.value()));
     _null_count = cudf::detail::null_count(
       static_cast<cudf::bitmask_type*>(mask.data()), 0, _num_elements, stream);
     stream.synchronize();

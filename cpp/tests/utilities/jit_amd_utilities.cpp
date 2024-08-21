@@ -27,13 +27,13 @@ namespace cudf::test {
 
   std::string get_arch_name_of_current_device() {
     hipDevice_t device;
-    hipDeviceProp_t device_prop;
+    cudaDeviceProp device_prop;
     
-    hipError_t ret;
+    cudaError_t ret;
 
-    CUDF_CUDA_TRY(hipGetDevice(&device)); 
+    CUDF_CUDA_TRY(cudaGetDevice(&device));
     
-    CUDF_CUDA_TRY(hipGetDeviceProperties(&device_prop, device));
+    CUDF_CUDA_TRY(cudaGetDeviceProperties(&device_prop, device));
 
     // FIXME(HIP/AMD): this only works for architecture strings with 6 characters
     return std::string(device_prop.gcnArchName, device_prop.gcnArchName+6);

@@ -203,16 +203,16 @@ TEST_F(LogicalStackTest, GroundTruth)
   cudf::detail::hostdevice_vector<SymbolT> top_of_stack_gpu{string_size, stream_view};
   cudf::device_span<SymbolOffsetT> d_stack_op_idx_span{d_stack_op_indexes};
 
-  CUDF_CUDA_TRY(hipMemcpyAsync(d_stack_ops.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(d_stack_ops.data(),
                                stack_symbols.data(),
                                stack_symbols.size() * sizeof(SymbolT),
-                               hipMemcpyDefault,
+                               cudaMemcpyDefault,
                                stream.value()));
 
-  CUDF_CUDA_TRY(hipMemcpyAsync(d_stack_op_indexes.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(d_stack_op_indexes.data(),
                                stack_op_indexes.data(),
                                stack_op_indexes.size() * sizeof(SymbolOffsetT),
-                               hipMemcpyDefault,
+                               cudaMemcpyDefault,
                                stream.value()));
 
   // Run algorithm

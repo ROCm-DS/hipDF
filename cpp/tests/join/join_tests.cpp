@@ -1584,7 +1584,7 @@ TEST_F(JoinTest, HashJoinLargeOutputSize)
   std::size_t col_size = 65567;
   rmm::device_buffer zeroes(col_size * sizeof(int32_t), cudf::get_default_stream());
   CUDF_CUDA_TRY(
-    hipMemsetAsync(zeroes.data(), 0, zeroes.size(), cudf::get_default_stream().value()));
+    cudaMemsetAsync(zeroes.data(), 0, zeroes.size(), cudf::get_default_stream().value()));
   cudf::column_view col_zeros(
     cudf::data_type{cudf::type_id::INT32}, col_size, zeroes.data(), nullptr, 0);
   cudf::table_view tview{{col_zeros}};

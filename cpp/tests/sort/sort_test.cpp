@@ -86,8 +86,8 @@ TYPED_TEST(Sort, WithNullMax)
     // the rest of the values are equivalent and yields random sorted order.
     auto to_host = [](cudf::column_view const& col) {
       thrust::host_vector<int32_t> h_data(col.size());
-      CUDF_CUDA_TRY(hipMemcpy(
-        h_data.data(), col.data<int32_t>(), h_data.size() * sizeof(int32_t), hipMemcpyDefault));
+      CUDF_CUDA_TRY(cudaMemcpy(
+        h_data.data(), col.data<int32_t>(), h_data.size() * sizeof(int32_t), cudaMemcpyDefault));
       return h_data;
     };
     thrust::host_vector<int32_t> h_exp = to_host(expected);
@@ -125,8 +125,8 @@ TYPED_TEST(Sort, WithNullMin)
     // the rest of the values are equivalent and yields random sorted order.
     auto to_host = [](cudf::column_view const& col) {
       thrust::host_vector<int32_t> h_data(col.size());
-      CUDF_CUDA_TRY(hipMemcpy(
-        h_data.data(), col.data<int32_t>(), h_data.size() * sizeof(int32_t), hipMemcpyDefault));
+      CUDF_CUDA_TRY(cudaMemcpy(
+        h_data.data(), col.data<int32_t>(), h_data.size() * sizeof(int32_t), cudaMemcpyDefault));
       return h_data;
     };
     thrust::host_vector<int32_t> h_exp = to_host(expected);
@@ -163,8 +163,8 @@ TYPED_TEST(Sort, WithMixedNullOrder)
     // the rest of the values are equivalent and yields random sorted order.
     auto to_host = [](cudf::column_view const& col) {
       thrust::host_vector<int32_t> h_data(col.size());
-      CUDF_CUDA_TRY(hipMemcpy(
-        h_data.data(), col.data<int32_t>(), h_data.size() * sizeof(int32_t), hipMemcpyDefault));
+      CUDF_CUDA_TRY(cudaMemcpy(
+        h_data.data(), col.data<int32_t>(), h_data.size() * sizeof(int32_t), cudaMemcpyDefault));
       return h_data;
     };
     thrust::host_vector<int32_t> h_exp = to_host(expected);
