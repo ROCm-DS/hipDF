@@ -44,11 +44,7 @@
 #include <cudf/logger.hpp>
 #include <cudf/utilities/error.hpp>
 
-#include <hipcomp/deflate.h>
-#include <hipcomp/gzip.h>
-#include <hipcomp/lz4.h>
-#include <hipcomp/snappy.h>
-#include <hipcomp/zstd.h>
+#include <cudf/nvcomp/snappy.h>
 
 #include <mutex>
 

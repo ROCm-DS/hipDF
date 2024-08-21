@@ -63,7 +63,7 @@
 #include <thrust/iterator/transform_output_iterator.h>
 #include <thrust/tabulate.h>
 
-#include <hipcomp/snappy.h>
+#include <cudf/nvcomp/snappy.h>
 
 #include <memory>
 #include <numeric>
