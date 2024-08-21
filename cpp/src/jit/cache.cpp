@@ -16,7 +16,7 @@
 
 #include <cudf/utilities/error.hpp>
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 #include <jitify2.hpp>
 
 #include <cstddef>

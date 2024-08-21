@@ -19,7 +19,7 @@
 #include <rmm/cuda_stream.hpp>
 #include <rmm/cuda_stream_view.hpp>
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 #include <cstdlib>
 #include <cstring>

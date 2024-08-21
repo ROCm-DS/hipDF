@@ -1,4 +1,4 @@
-#include "hip/hip_runtime.h"
+#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2022-2023, NVIDIA CORPORATION.
  *

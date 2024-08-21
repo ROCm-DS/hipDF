@@ -24,7 +24,7 @@
 #include <cudf/strings/split/split.hpp>
 #include <cudf/strings/strings_column_view.hpp>
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 #include <nvtx3/nvToolsExt.h>
 
 /**

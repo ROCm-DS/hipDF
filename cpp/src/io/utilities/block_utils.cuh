@@ -16,8 +16,8 @@
 
 #pragma once
 #include <cstdint>
-#include <hip/hip_runtime.h>
-#include <hip/hip_runtime_api.h>
+#include <cudf/cuda_runtime.h>
+#include <cudf/cuda_runtime_api.h>
 #include <hip_extensions/hip_cooperative_groups_ext/amd_cooperative_groups_ext.cuh>
 namespace cudf {
 namespace io {

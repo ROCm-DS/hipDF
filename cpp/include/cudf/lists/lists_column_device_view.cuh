@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/types.hpp>

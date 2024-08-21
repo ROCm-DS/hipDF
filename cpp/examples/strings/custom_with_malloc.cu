@@ -22,7 +22,7 @@
 
 #include <rmm/device_uvector.hpp>
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 #include <nvtx3/nvToolsExt.h>
 
 /**

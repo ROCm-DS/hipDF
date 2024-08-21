@@ -16,7 +16,7 @@
 
 #pragma once
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 inline bool can_do_runtime_jit()
 {

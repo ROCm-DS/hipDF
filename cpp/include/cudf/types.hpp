@@ -19,7 +19,7 @@
 //: TODO(HIP/AMD) is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
 #ifdef __HIP_PLATFORM_AMD__
 #define CUDF_HOST_DEVICE __host__ __device__
-#include "hip/hip_runtime.h" //: including "hip/device_functions.h" causes errors
+#include "cudf/cuda_runtime.h" //: including "hip/device_functions.h" causes errors
 #else
 #define CUDF_HOST_DEVICE
 #endif

@@ -24,7 +24,7 @@
 #include <cudf/detail/utilities/vector_factories.hpp>
 #include <cudf/utilities/span.hpp>
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 #include <deque>
 #include <string>

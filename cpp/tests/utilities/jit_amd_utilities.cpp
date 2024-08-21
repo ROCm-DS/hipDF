@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 #include <cudf_test/jit_amd_utilities.hpp>
 

@@ -17,7 +17,7 @@
 #pragma once
 // To avoid https://github.com/NVIDIA/libcudacxx/issues/460
 // in libcudacxx with CTK 12.0/12.1
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 #include <cudf/types.hpp>
 

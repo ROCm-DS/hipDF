@@ -24,7 +24,7 @@
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/span.hpp>
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 #include <cstring>  // memset
 

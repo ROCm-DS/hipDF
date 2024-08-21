@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include <hip/hip_runtime.h>
+#include <cudf/cuda_runtime.h>
 
 #include "assert_unary.h"
 

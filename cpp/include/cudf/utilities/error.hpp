@@ -18,8 +18,8 @@
 
 #include <cudf/detail/utilities/stacktrace.hpp>
 
-#include <hip/hip_runtime.h>
-#include <hip/hip_runtime_api.h>
+#include <cudf/cuda_runtime.h>
+#include <cudf/cuda_runtime_api.h>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
