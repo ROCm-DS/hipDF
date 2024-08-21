@@ -65,33 +65,17 @@ function(ConfigureTest CMAKE_TEST_NAME)
 
   add_executable(${CMAKE_TEST_NAME} ${_CUDF_TEST_UNPARSED_ARGUMENTS})
 
-  if (CUDA_BACKEND)
-    set_target_properties(
-      ${CMAKE_TEST_NAME}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
+  set_target_properties(
+    ${CMAKE_TEST_NAME}
+    PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
                 INSTALL_RPATH "\$ORIGIN/../../../lib"
                 CXX_STANDARD 20
                 CXX_STANDARD_REQUIRED ON
                 # For std:: support of __int128_t. Can be removed once using cuda::std
                 CXX_EXTENSIONS ON
-                CUDA_STANDARD 17
-                CUDA_STANDARD_REQUIRED ON
-    )
-    target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "CUDA_BACKEND" "RMM_USE_CUDA")
-  else ()
-    set_target_properties(
-      ${CMAKE_TEST_NAME}
-      PROPERTIES RUNTIME_OUTPUT_DIRECTORY "$<BUILD_INTERFACE:${CUDF_BINARY_DIR}/gtests>"
-                  INSTALL_RPATH "\$ORIGIN/../../../lib"
-                  CXX_STANDARD 20
-                  CXX_STANDARD_REQUIRED ON
-                  # For std:: support of __int128_t. Can be removed once using cuda::std
-                  CXX_EXTENSIONS ON
-                  HIP_STANDARD 20
-                  HIP_STANDARD_REQUIRED ON
-    )
-    target_compile_definitions( ${CMAKE_TEST_NAME} PRIVATE "HIP_BACKEND" "RMM_USE_HIP")
-  endif()
+                HIP_STANDARD 20
+                HIP_STANDARD_REQUIRED ON
+  )
 
   target_link_libraries(
     ${CMAKE_TEST_NAME}
