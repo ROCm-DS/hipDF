@@ -45,46 +45,17 @@ include(rapids-hip)
 include(rapids-export)
 include(rapids-find)
 
-option(CUDA_BACKEND "Build for CUDA devices. Default configuration builds for AMD devices." OFF)
-
-if(CUDA_BACKEND)
-  rapids_cuda_init_architectures(CUDF)
-else()
-  rapids_hip_init_architectures(CUDF)
-endif()
+rapids_hip_init_architectures(CUDF)
 
 project(
   CUDF
   VERSION "${RAPIDS_VERSION}"
   LANGUAGES C CXX
 )
-
-if(CUDA_BACKEND)
-  project(
-    CUDF 
-    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
-    LANGUAGES C CXX CUDA
-  )
-  enable_language(CUDA)
-  if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 11.5)
-    message(
-      FATAL_ERROR
-        "libcudf requires CUDA Toolkit 11.5+ to compile (nvcc ${CMAKE_CUDA_COMPILER_VERSION} provided)"
-    )
-  endif()
-
-  option(USE_NVTX "Build with NVTX support" ON)
-else()
-  project(
-    CUDF 
-    VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
-    LANGUAGES C CXX HIP
-  )
-  # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
-  # This ensures that those packages are compiled with the same architecture flags.
-  enable_language(HIP)
-  set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
-endif()
+# NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
+# This ensures that those packages are compiled with the same architecture flags.
+enable_language(HIP)
+set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 
 rapids_cmake_write_version_file(include/cudf/version_config.hpp)
 
@@ -297,24 +268,14 @@ endfunction()
 rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
 
 # ##################################################################################################
-# * compiler options ------------------------------------------------------------------------------
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
-if(CUDA_BACKEND)
-  # * compiler options ----------------------------------------------------------------------------
-  rapids_find_package(
-    CUDAToolkit REQUIRED
-    BUILD_EXPORT_SET cudf-exports
-    INSTALL_EXPORT_SET cudf-exports
-  )
-  include(cmake/Modules/ConfigureCUDA.cmake) # set other CUDA compilation flags
-else()
-  rapids_find_package(
-    HIP REQUIRED
-    BUILD_EXPORT_SET cudf-exports
-    INSTALL_EXPORT_SET cudf-exports
-  )
-  include(cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
-endif()
+# * compiler options ----------------------------------------------------------------------------
+rapids_find_package(
+  HIP REQUIRED
+  BUILD_EXPORT_SET cudf-exports
+  INSTALL_EXPORT_SET cudf-exports
+)
+include(cmake/Modules/ConfigureHIP.cmake) # set other HIP compilation flags
 
 # ##################################################################################################
 # * dependencies ----------------------------------------------------------------------------------
@@ -347,11 +308,7 @@ include(cmake/thirdparty/get_nvcomp.cmake)
 # find CCCL before rmm so that we get cudf's patched version of CCCL
 # include(cmake/thirdparty/get_cccl.cmake)
 # find thrust/cub
-if(CUDA_BACKEND)
- include(cmake/thirdparty/get_thrust.cmake)
-else()
- include(cmake/thirdparty/get_rocthrust.cmake)
-endif()
+include(cmake/thirdparty/get_rocthrust.cmake)
 # find rmm
 include(cmake/thirdparty/get_rmm.cmake)
 # find flatbuffers
@@ -368,11 +325,7 @@ if(CUDF_BUILD_TESTUTIL)
 endif()
 
 # preprocess jitify-able kernels
-if(CUDA_BACKEND)
-  include(cmake/Modules/JitifyPreprocessKernels.cmake)
-else()
-  include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
-endif()
+include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
 
 # find KvikIO
 if(CUDA_BACKEND)
@@ -836,7 +789,7 @@ add_library(
   src/text/subword/subword_tokenize.cu
   src/text/subword/wordpiece_tokenizer.cu
   src/text/tokenize.cu
-  src/text/vocabulary_tokenize.cu 
+  src/text/vocabulary_tokenize.cu
   src/transform/bools_to_mask.cu
   src/transform/compute_column.cu
   src/transform/encode.cu
@@ -919,11 +872,6 @@ target_include_directories(
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(cudf PRIVATE "JITIFY_PRINT_LOG=0")
 
-if(CUDA_BACKEND)
-  target_compile_definitions(cudf PRIVATE "RMM_USE_CUDA")
-else()
-  target_compile_definitions(cudf PRIVATE "RMM_USE_HIP")
-endif()
 if(JITIFY_USE_CACHE)
   # Instruct src/jit/cache what version of cudf we are building so it can compute a cal-ver cache
   # directory. We isolate this definition to the single source so it doesn't effect compiling
@@ -981,7 +929,7 @@ target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
 add_dependencies(cudf jitify_preprocess_run)
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
-if(CUDA_BACKEND)
+if(FALSE)
 set(THRUST_LIBRARY cudf::Thrust)
 else()
 set(THRUST_LIBRARY roc::rocthrust)
@@ -1010,7 +958,7 @@ endif()
 rapids_cuda_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
 #TODO(HIP/AMD): do we need a linker script for HIP?
-if(CUDA_BACKEND)
+if(FALSE)
   file(
     WRITE "${CUDF_BINARY_DIR}/fatbin.ld"
     [=[
@@ -1041,7 +989,7 @@ if(CUDF_BUILD_TESTUTIL)
     # other similar features in the future.
     tests/utilities/default_stream.cpp
   )
-  
+
   set_cudftest_default_stream_target()
 
   target_link_libraries(
@@ -1060,17 +1008,10 @@ if(CUDF_BUILD_TESTUTIL)
 
   set_cudftestutil_target()
 
-  if(CUDA_BACKEND)
-    target_compile_options(
-      cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
-                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CUDA>:${CUDF_GPU_FLAGS}>>"
-    )
-  else()
-    target_compile_options(
-      cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
-                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
-    )
-  endif()
+  target_compile_options(
+    cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+                          "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
+  )
 
   target_link_libraries(
     cudftestutil INTERFACE cuco::cuco Threads::Threads cudf cudftest_default_stream
@@ -1150,11 +1091,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
       ${_tgt} PRIVATE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
     )
     target_include_directories(${_tgt} PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
-    if(CUDA_BACKEND)
-      target_link_libraries(${_tgt} PUBLIC CUDA::cudart rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
-    else()
-      target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
-    endif()
+    target_link_libraries(${_tgt} PUBLIC hip::device rmm::rmm rmm::rmm_logger rmm::rmm_logger_impl)
 
     if(CUDF_BUILD_STACKTRACE_DEBUG)
       target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
@@ -1176,7 +1113,7 @@ if(CUDF_BUILD_TESTS)
   include(CTest)
 
   # ctest cuda memcheck
-  if(CUDA_BACKEND)
+  if(FALSE)
     find_program(CUDA_SANITIZER compute-sanitizer)
     set(MEMORYCHECK_COMMAND ${CUDA_SANITIZER})
     set(MEMORYCHECK_TYPE CudaSanitizer)
