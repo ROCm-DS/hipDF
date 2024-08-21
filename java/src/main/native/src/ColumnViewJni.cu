@@ -84,7 +84,7 @@ std::unique_ptr<cudf::column> generate_list_offsets(cudf::column_view const &lis
   auto d_offsets = offsets_view.template begin<int32_t>();
 
   thrust::inclusive_scan(rmm::exec_policy(stream), begin_iter, end_iter, d_offsets + 1);
-  CUDF_CUDA_TRY(hipMemsetAsync(d_offsets, 0, sizeof(int32_t), stream));
+  CUDF_CUDA_TRY(cudaMemsetAsync(d_offsets, 0, sizeof(int32_t), stream));
 
   return offsets_column;
 }

@@ -56,7 +56,7 @@ void auto_set_device(JNIEnv *env) {
 
 /** Fills all the bytes in the buffer 'buf' with 'value'. */
 void device_memset_async(JNIEnv *env, rmm::device_buffer &buf, char value) {
-  cudaError_t cuda_status = hipMemsetAsync((void *)buf.data(), value, buf.size());
+  cudaError_t cuda_status = cudaMemsetAsync((void *)buf.data(), value, buf.size());
   jni_cuda_check(env, cuda_status);
 }
 
@@ -113,8 +113,8 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_memset(JNIEnv *env, jclass, jlon
   JNI_NULL_CHECK(env, dst, "dst memory pointer is null", );
   try {
     cudf::jni::auto_set_device(env);
-    CUDF_CUDA_TRY(hipMemsetAsync((void *)dst, value, count));
-    CUDF_CUDA_TRY(hipStreamSynchronize(0));
+    CUDF_CUDA_TRY(cudaMemsetAsync((void *)dst, value, count));
+    CUDF_CUDA_TRY(cudaStreamSynchronize(0));
   }
   CATCH_STD(env, );
 }
@@ -124,7 +124,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_asyncMemset(JNIEnv *env, jclass,
   JNI_NULL_CHECK(env, dst, "dst memory pointer is null", );
   try {
     cudf::jni::auto_set_device(env);
-    CUDF_CUDA_TRY(hipMemsetAsync((void *)dst, value, count));
+    CUDF_CUDA_TRY(cudaMemsetAsync((void *)dst, value, count));
   }
   CATCH_STD(env, );
 }
@@ -270,7 +270,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_streamSynchronize(JNIEnv *env, j
   try {
     cudf::jni::auto_set_device(env);
     auto stream = reinterpret_cast<cudaStream_t>(jstream);
-    CUDF_CUDA_TRY(hipStreamSynchronize(stream));
+    CUDF_CUDA_TRY(cudaStreamSynchronize(stream));
   }
   CATCH_STD(env, );
 }
@@ -354,8 +354,8 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_memcpyOnStream(JNIEnv *env, jcla
     auto src = reinterpret_cast<void *>(jsrc);
     auto kind = static_cast<cudaMemcpyKind>(jkind);
     auto stream = reinterpret_cast<cudaStream_t>(jstream);
-    CUDF_CUDA_TRY(hipMemcpyAsync(dst, src, count, kind, stream));
-    CUDF_CUDA_TRY(hipStreamSynchronize(stream));
+    CUDF_CUDA_TRY(cudaMemcpyAsync(dst, src, count, kind, stream));
+    CUDF_CUDA_TRY(cudaStreamSynchronize(stream));
   }
   CATCH_STD(env, );
 }
@@ -374,7 +374,7 @@ JNIEXPORT void JNICALL Java_ai_rapids_cudf_Cuda_asyncMemcpyOnStream(JNIEnv *env,
     auto src = reinterpret_cast<void *>(jsrc);
     auto kind = static_cast<cudaMemcpyKind>(jkind);
     auto stream = reinterpret_cast<cudaStream_t>(jstream);
-    CUDF_CUDA_TRY(hipMemcpyAsync(dst, src, count, kind, stream));
+    CUDF_CUDA_TRY(cudaMemcpyAsync(dst, src, count, kind, stream));
   }
   CATCH_STD(env, );
 }
