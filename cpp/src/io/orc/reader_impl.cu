@@ -302,11 +302,11 @@ rmm::device_buffer decompress_stripe_data(
     device_span<device_span<uint8_t>> inflate_out_view{inflate_out.data(), num_compressed_blocks};
     switch (decompressor.compression()) {
       case compression_type::ZLIB:
-        if (hipcomp::is_decompression_disabled(hipcomp::compression_type::DEFLATE)) {
+        if (nvcomp::is_decompression_disabled(nvcomp::compression_type::DEFLATE)) {
           gpuinflate(
             inflate_in_view, inflate_out_view, inflate_res, gzip_header_included::NO, stream);
         } else {
-          hipcomp::batched_decompress(hipcomp::compression_type::DEFLATE,
+          nvcomp::batched_decompress(nvcomp::compression_type::DEFLATE,
                                      inflate_in_view,
                                      inflate_out_view,
                                      inflate_res,
@@ -316,10 +316,10 @@ rmm::device_buffer decompress_stripe_data(
         }
         break;
       case compression_type::SNAPPY:
-        if (hipcomp::is_decompression_disabled(hipcomp::compression_type::SNAPPY)) {
+        if (nvcomp::is_decompression_disabled(nvcomp::compression_type::SNAPPY)) {
           gpu_unsnap(inflate_in_view, inflate_out_view, inflate_res, stream);
         } else {
-          hipcomp::batched_decompress(hipcomp::compression_type::SNAPPY,
+          nvcomp::batched_decompress(nvcomp::compression_type::SNAPPY,
                                      inflate_in_view,
                                      inflate_out_view,
                                      inflate_res,
@@ -329,11 +329,11 @@ rmm::device_buffer decompress_stripe_data(
         }
         break;
       case compression_type::ZSTD:
-        if (auto const reason = hipcomp::is_decompression_disabled(hipcomp::compression_type::ZSTD);
+        if (auto const reason = nvcomp::is_decompression_disabled(nvcomp::compression_type::ZSTD);
             reason) {
           CUDF_FAIL("Decompression error: " + reason.value());
         }
-        hipcomp::batched_decompress(hipcomp::compression_type::ZSTD,
+        nvcomp::batched_decompress(nvcomp::compression_type::ZSTD,
                                    inflate_in_view,
                                    inflate_out_view,
                                    inflate_res,

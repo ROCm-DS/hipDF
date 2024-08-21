@@ -27,12 +27,12 @@
 
 #include <optional>
 
-namespace cudf::io::hipcomp {
+namespace cudf::io::nvcomp {
 
 enum class compression_type { SNAPPY, ZSTD, DEFLATE };
 
 /**
- * @brief Set of parameters that impact whether the use hipCOMP features is enabled.
+ * @brief Set of parameters that impact whether the use nvCOMP features is enabled.
  */
 struct feature_status_parameters {
   int lib_major_version;
@@ -69,9 +69,9 @@ inline bool operator==(feature_status_parameters const& lhs, feature_status_para
 }
 
 /**
- * @brief If a compression type is disabled through hipCOMP, returns the reason as a string.
+ * @brief If a compression type is disabled through nvCOMP, returns the reason as a string.
  *
- * Result cab depend on hipCOMP version and environment variables.
+ * Result cab depend on nvCOMP version and environment variables.
  *
  * @param compression Compression type
  * @param params Optional parameters to query status with different configurations
@@ -81,9 +81,9 @@ inline bool operator==(feature_status_parameters const& lhs, feature_status_para
   compression_type compression, feature_status_parameters params = feature_status_parameters());
 
 /**
- * @brief If a decompression type is disabled through hipCOMP, returns the reason as a string.
+ * @brief If a decompression type is disabled through nvCOMP, returns the reason as a string.
  *
- * Result can depend on hipCOMP version and environment variables.
+ * Result can depend on nvCOMP version and environment variables.
  *
  * @param compression Compression type
  * @param params Optional parameters to query status with different configurations
@@ -137,7 +137,7 @@ void batched_decompress(compression_type compression,
 [[nodiscard]] size_t compress_output_alignment_bits(compression_type compression);
 
 /**
- * @brief Maximum size of uncompressed chunks that can be compressed with hipCOMP.
+ * @brief Maximum size of uncompressed chunks that can be compressed with nvCOMP.
  *
  * @param compression Compression type
  * @returns maximum chunk size
@@ -159,4 +159,4 @@ void batched_compress(compression_type compression,
                       device_span<compression_result> results,
                       rmm::cuda_stream_view stream);
 
-}  // namespace cudf::io::hipcomp
+}  // namespace cudf::io::nvcomp

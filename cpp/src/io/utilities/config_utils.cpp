@@ -53,11 +53,11 @@ bool is_kvikio_enabled() { return get_env_policy() == usage_policy::KVIKIO; }
 
 }  // namespace cufile_integration
 
-namespace hipcomp_integration {
+namespace nvcomp_integration {
 
 namespace {
 /**
- * @brief Defines which hipcomp usage to enable.
+ * @brief Defines which nvcomp usage to enable.
  */
 enum class usage_policy : uint8_t { OFF, STABLE, ALWAYS };
 
@@ -66,11 +66,11 @@ enum class usage_policy : uint8_t { OFF, STABLE, ALWAYS };
  */
 usage_policy get_env_policy()
 {
-  static auto const env_val = getenv_or<std::string>("LIBCUDF_hipcomp_POLICY", "STABLE");
+  static auto const env_val = getenv_or<std::string>("LIBCUDF_nvcomp_POLICY", "STABLE");
   if (env_val == "OFF") return usage_policy::OFF;
   if (env_val == "STABLE") return usage_policy::STABLE;
   if (env_val == "ALWAYS") return usage_policy::ALWAYS;
-  CUDF_FAIL("Invalid LIBCUDF_hipcomp_POLICY value: " + env_val);
+  CUDF_FAIL("Invalid LIBCUDF_nvcomp_POLICY value: " + env_val);
 }
 }  // namespace
 
@@ -78,6 +78,6 @@ bool is_all_enabled() { return get_env_policy() == usage_policy::ALWAYS; }
 
 bool is_stable_enabled() { return is_all_enabled() or get_env_policy() == usage_policy::STABLE; }
 
-}  // namespace hipcomp_integration
+}  // namespace nvcomp_integration
 
 }  // namespace cudf::io::detail

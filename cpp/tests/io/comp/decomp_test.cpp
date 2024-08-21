@@ -119,7 +119,7 @@ struct BrotliDecompressTest : public DecompressTest<BrotliDecompressTest> {
   }
 };
 
-struct hipcompConfigTest : public cudf::test::BaseFixture {};
+struct nvcompConfigTest : public cudf::test::BaseFixture {};
 
 TEST_F(GzipDecompressTest, HelloWorld)
 {
@@ -169,10 +169,10 @@ TEST_F(BrotliDecompressTest, HelloWorld)
   EXPECT_EQ(output, input);
 }
 
-TEST_F(hipcompConfigTest, Compression)
+TEST_F(nvcompConfigTest, Compression)
 {
-  using cudf::io::hipcomp::compression_type;
-  auto const& comp_disabled = cudf::io::hipcomp::is_compression_disabled;
+  using cudf::io::nvcomp::compression_type;
+  auto const& comp_disabled = cudf::io::nvcomp::is_compression_disabled;
 
   EXPECT_FALSE(comp_disabled(compression_type::DEFLATE, {2, 5, 0, true, true, 0}));
   // version 2.5 required
@@ -193,10 +193,10 @@ TEST_F(hipcompConfigTest, Compression)
   EXPECT_TRUE(comp_disabled(compression_type::SNAPPY, {2, 3, 0, false, false, 0}));
 }
 
-TEST_F(hipcompConfigTest, Decompression)
+TEST_F(nvcompConfigTest, Decompression)
 {
-  using cudf::io::hipcomp::compression_type;
-  auto const& decomp_disabled = cudf::io::hipcomp::is_decompression_disabled;
+  using cudf::io::nvcomp::compression_type;
+  auto const& decomp_disabled = cudf::io::nvcomp::is_decompression_disabled;
 
   EXPECT_FALSE(decomp_disabled(compression_type::DEFLATE, {2, 5, 0, true, true, 7}));
   // version 2.5 required

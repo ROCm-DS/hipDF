@@ -288,13 +288,13 @@ rmm::device_buffer decompress_data(datasource& source,
     compressed_data_sizes.host_to_device_async(stream);
 
     cudf::detail::hostdevice_vector<size_t> uncompressed_data_sizes(num_blocks, stream);
-    hipcompStatus_t status =
-      hipcompBatchedSnappyGetDecompressSizeAsync(compressed_data_ptrs.device_ptr(),
+    nvcompStatus_t status =
+      nvcompBatchedSnappyGetDecompressSizeAsync(compressed_data_ptrs.device_ptr(),
                                                 compressed_data_sizes.device_ptr(),
                                                 uncompressed_data_sizes.device_ptr(),
                                                 num_blocks,
                                                 stream.value());
-    CUDF_EXPECTS(status == hipcompStatus_t::hipcompSuccess,
+    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess,
                  "Unable to get uncompressed sizes for snappy compressed blocks");
     uncompressed_data_sizes.device_to_host_sync(stream);
 
@@ -305,8 +305,8 @@ rmm::device_buffer decompress_data(datasource& source,
 
     size_t temp_size;
     status =
-      hipcompBatchedSnappyDecompressGetTempSize(num_blocks, max_uncomp_block_size, &temp_size);
-    CUDF_EXPECTS(status == hipcompStatus_t::hipcompSuccess,
+      nvcompBatchedSnappyDecompressGetTempSize(num_blocks, max_uncomp_block_size, &temp_size);
+    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess,
                  "Unable to get scratch size for snappy decompression");
 
     rmm::device_buffer scratch(temp_size, stream);
@@ -329,9 +329,9 @@ rmm::device_buffer decompress_data(datasource& source,
                      });
 
     rmm::device_uvector<size_t> actual_uncompressed_data_sizes(num_blocks, stream);
-    rmm::device_uvector<hipcompStatus_t> statuses(num_blocks, stream);
+    rmm::device_uvector<nvcompStatus_t> statuses(num_blocks, stream);
 
-    status = hipcompBatchedSnappyDecompressAsync(compressed_data_ptrs.device_ptr(),
+    status = nvcompBatchedSnappyDecompressAsync(compressed_data_ptrs.device_ptr(),
                                                 compressed_data_sizes.device_ptr(),
                                                 uncompressed_data_sizes.device_ptr(),
                                                 actual_uncompressed_data_sizes.data(),
@@ -341,7 +341,7 @@ rmm::device_buffer decompress_data(datasource& source,
                                                 uncompressed_data_ptrs.data(),
                                                 statuses.data(),
                                                 stream);
-    CUDF_EXPECTS(status == hipcompStatus_t::hipcompSuccess, "unable to perform snappy decompression");
+    CUDF_EXPECTS(status == nvcompStatus_t::nvcompSuccess, "unable to perform snappy decompression");
 
     CUDF_EXPECTS(thrust::equal(rmm::exec_policy(stream),
                                uncompressed_data_sizes.d_begin(),
@@ -351,7 +351,7 @@ rmm::device_buffer decompress_data(datasource& source,
     CUDF_EXPECTS(thrust::equal(rmm::exec_policy(stream),
                                statuses.begin(),
                                statuses.end(),
-                               thrust::make_constant_iterator(hipcompStatus_t::hipcompSuccess)),
+                               thrust::make_constant_iterator(nvcompStatus_t::nvcompSuccess)),
                  "Error during snappy decompression");
 
     // Update blocks offsets & sizes to refer to uncompressed data

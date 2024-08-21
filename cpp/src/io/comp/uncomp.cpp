@@ -526,7 +526,7 @@ size_t decompress_zstd(host_span<uint8_t const> src,
   hd_stats[0]   = compression_result{0, compression_status::FAILURE};
   hd_stats.host_to_device_async(stream);
   auto const max_uncomp_page_size = dst.size();
-  hipcomp::batched_decompress(hipcomp::compression_type::ZSTD,
+  nvcomp::batched_decompress(nvcomp::compression_type::ZSTD,
                              hd_srcs,
                              hd_dsts,
                              hd_stats,

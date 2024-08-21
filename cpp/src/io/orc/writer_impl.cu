@@ -95,11 +95,11 @@ namespace {
 /**
  * @brief Translates ORC compression to nvCOMP compression
  */
-auto to_hipcomp_compression_type(CompressionKind compression_kind)
+auto to_nvcomp_compression_type(CompressionKind compression_kind)
 {
-  if (compression_kind == SNAPPY) return hipcomp::compression_type::SNAPPY;
-  if (compression_kind == ZLIB) return hipcomp::compression_type::DEFLATE;
-  if (compression_kind == ZSTD) return hipcomp::compression_type::ZSTD;
+  if (compression_kind == SNAPPY) return nvcomp::compression_type::SNAPPY;
+  if (compression_kind == ZLIB) return nvcomp::compression_type::DEFLATE;
+  if (compression_kind == ZSTD) return nvcomp::compression_type::ZSTD;
   CUDF_FAIL("Unsupported compression type");
 }
 
@@ -125,13 +125,13 @@ constexpr size_t compression_block_size(orc::CompressionKind compression)
 {
   if (compression == orc::CompressionKind::NONE) { return 0; }
 
-  auto const ncomp_type   = to_hipcomp_compression_type(compression);
-  auto const hipcomp_limit = hipcomp::is_compression_disabled(ncomp_type)
+  auto const ncomp_type   = to_nvcomp_compression_type(compression);
+  auto const nvcomp_limit = nvcomp::is_compression_disabled(ncomp_type)
                               ? std::nullopt
-                              : hipcomp::compress_max_allowed_chunk_size(ncomp_type);
+                              : nvcomp::compress_max_allowed_chunk_size(ncomp_type);
 
   constexpr size_t max_block_size = 256 * 1024;
-  return std::min(hipcomp_limit.value_or(max_block_size), max_block_size);
+  return std::min(nvcomp_limit.value_or(max_block_size), max_block_size);
 }
 
 /**
@@ -515,21 +515,21 @@ constexpr size_t RLE_stream_size(TypeKind kind, size_t count)
 auto uncomp_block_alignment(CompressionKind compression_kind)
 {
   if (compression_kind == NONE or
-      hipcomp::is_compression_disabled(to_hipcomp_compression_type(compression_kind))) {
+      nvcomp::is_compression_disabled(to_nvcomp_compression_type(compression_kind))) {
     return 1u;
   }
 
-  return 1u << hipcomp::compress_input_alignment_bits(to_hipcomp_compression_type(compression_kind));
+  return 1u << nvcomp::compress_input_alignment_bits(to_nvcomp_compression_type(compression_kind));
 }
 
 auto comp_block_alignment(CompressionKind compression_kind)
 {
   if (compression_kind == NONE or
-      hipcomp::is_compression_disabled(to_hipcomp_compression_type(compression_kind))) {
+      nvcomp::is_compression_disabled(to_nvcomp_compression_type(compression_kind))) {
     return 1u;
   }
 
-  return 1u << hipcomp::compress_output_alignment_bits(to_hipcomp_compression_type(compression_kind));
+  return 1u << nvcomp::compress_output_alignment_bits(to_nvcomp_compression_type(compression_kind));
 }
 
 /**
@@ -1966,7 +1966,7 @@ size_t max_compression_output_size(CompressionKind compression_kind, uint32_t co
 {
   if (compression_kind == NONE) return 0;
 
-  return compress_max_output_chunk_size(to_hipcomp_compression_type(compression_kind),
+  return compress_max_output_chunk_size(to_nvcomp_compression_type(compression_kind),
                                         compression_blocksize);
 }
 

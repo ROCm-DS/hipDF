@@ -513,8 +513,8 @@ int decode_page_headers(cudf::detail::hostdevice_vector<gpu::ColumnChunkDesc>& c
         gpuinflate(d_comp_in, d_comp_out, d_comp_res_view, gzip_header_included::YES, stream);
         break;
       case parquet::SNAPPY:
-        if (hipcomp_integration::is_stable_enabled()) {
-          hipcomp::batched_decompress(hipcomp::compression_type::SNAPPY,
+        if (nvcomp_integration::is_stable_enabled()) {
+          nvcomp::batched_decompress(nvcomp::compression_type::SNAPPY,
                                      d_comp_in,
                                      d_comp_out,
                                      d_comp_res_view,
@@ -526,7 +526,7 @@ int decode_page_headers(cudf::detail::hostdevice_vector<gpu::ColumnChunkDesc>& c
         }
         break;
       case parquet::ZSTD:
-        hipcomp::batched_decompress(hipcomp::compression_type::ZSTD,
+        nvcomp::batched_decompress(nvcomp::compression_type::ZSTD,
                                    d_comp_in,
                                    d_comp_out,
                                    d_comp_res_view,

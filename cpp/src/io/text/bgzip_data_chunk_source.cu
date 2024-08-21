@@ -46,7 +46,7 @@ namespace {
  * decompressed_begin, decompressed_end] into span tuples of the form [compressed_device_span,
  * decompressed_device_span] based on the provided pointers.
  */
-struct bgzip_hipcomp_transform_functor {
+struct bgzip_nvcomp_transform_functor {
   uint8_t const* compressed_ptr;
   uint8_t* decompressed_ptr;
 
@@ -142,17 +142,17 @@ class bgzip_data_chunk_reader : public data_chunk_reader {
         offset_it,
         offset_it + num_blocks(),
         span_it,
-        bgzip_hipcomp_transform_functor{reinterpret_cast<uint8_t const*>(d_compressed_blocks.data()),
+        bgzip_nvcomp_transform_functor{reinterpret_cast<uint8_t const*>(d_compressed_blocks.data()),
                                        reinterpret_cast<uint8_t*>(d_decompressed_blocks.data())});
       if (decompressed_size() > 0) {
-        if (hipcomp::is_decompression_disabled(hipcomp::compression_type::DEFLATE)) {
+        if (nvcomp::is_decompression_disabled(nvcomp::compression_type::DEFLATE)) {
           gpuinflate(d_compressed_spans,
                      d_decompressed_spans,
                      d_decompression_results,
                      gzip_header_included::NO,
                      stream);
         } else {
-          cudf::io::hipcomp::batched_decompress(cudf::io::hipcomp::compression_type::DEFLATE,
+          cudf::io::nvcomp::batched_decompress(cudf::io::nvcomp::compression_type::DEFLATE,
                                                d_compressed_spans,
                                                d_decompressed_spans,
                                                d_decompression_results,

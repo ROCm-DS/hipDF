@@ -1138,8 +1138,8 @@ TEST_F(OrcReaderTest, SingleInputs)
 
 TEST_F(OrcReaderTest, zstdCompressionRegression)
 {
-  if (cudf::io::hipcomp::is_decompression_disabled(cudf::io::hipcomp::compression_type::ZSTD)) {
-    GTEST_SKIP() << "Newer hipcomp version is required";
+  if (cudf::io::nvcomp::is_decompression_disabled(cudf::io::nvcomp::compression_type::ZSTD)) {
+    GTEST_SKIP() << "Newer nvcomp version is required";
   }
 
   // Test with zstd compressed orc file with high compression ratio.
@@ -1722,9 +1722,9 @@ TEST_F(OrcMetadataReaderTest, TestNested)
 
 TEST_F(OrcReaderTest, ZstdMaxCompressionRate)
 {
-  if (cudf::io::hipcomp::is_decompression_disabled(cudf::io::hipcomp::compression_type::ZSTD) or
-      cudf::io::hipcomp::is_compression_disabled(cudf::io::hipcomp::compression_type::ZSTD)) {
-    GTEST_SKIP() << "Newer hipcomp version is required";
+  if (cudf::io::nvcomp::is_decompression_disabled(cudf::io::nvcomp::compression_type::ZSTD) or
+      cudf::io::nvcomp::is_compression_disabled(cudf::io::nvcomp::compression_type::ZSTD)) {
+    GTEST_SKIP() << "Newer nvcomp version is required";
   }
 
   // Encodes as 64KB of zeros, which compresses to 18 bytes with ZSTD

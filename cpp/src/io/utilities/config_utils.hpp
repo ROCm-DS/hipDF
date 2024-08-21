@@ -64,18 +64,18 @@ bool is_kvikio_enabled();
 
 }  // namespace cufile_integration
 
-namespace hipcomp_integration {
+namespace nvcomp_integration {
 
 /**
- * @brief Returns true if all hipcomp uses are enabled.
+ * @brief Returns true if all nvcomp uses are enabled.
  */
 bool is_all_enabled();
 
 /**
- * @brief Returns true if stable hipcomp use is enabled.
+ * @brief Returns true if stable nvcomp use is enabled.
  */
 bool is_stable_enabled();
 
-}  // namespace hipcomp_integration
+}  // namespace nvcomp_integration
 
 }  // namespace cudf::io::detail

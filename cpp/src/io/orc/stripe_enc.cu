@@ -1332,11 +1332,11 @@ std::optional<writer_compression_statistics> CompressOrcDataStreams(
 
   if (compression == SNAPPY) {
     try {
-      if (hipcomp::is_compression_disabled(hipcomp::compression_type::SNAPPY)) {
+      if (nvcomp::is_compression_disabled(nvcomp::compression_type::SNAPPY)) {
         gpu_snap(comp_in, comp_out, comp_res, stream);
       } else {
-        hipcomp::batched_compress(
-          hipcomp::compression_type::SNAPPY, comp_in, comp_out, comp_res, stream);
+        nvcomp::batched_compress(
+          nvcomp::compression_type::SNAPPY, comp_in, comp_out, comp_res, stream);
       }
     } catch (...) {
       // There was an error in compressing so set an error status for each block
@@ -1350,18 +1350,18 @@ std::optional<writer_compression_statistics> CompressOrcDataStreams(
       CUDF_LOG_WARN("ORC writer: compression failed, writing uncompressed data");
     }
   } else if (compression == ZLIB) {
-    if (auto const reason = hipcomp::is_compression_disabled(hipcomp::compression_type::DEFLATE);
+    if (auto const reason = nvcomp::is_compression_disabled(nvcomp::compression_type::DEFLATE);
         reason) {
       CUDF_FAIL("Compression error: " + reason.value());
     }
-    hipcomp::batched_compress(
-      hipcomp::compression_type::DEFLATE, comp_in, comp_out, comp_res, stream);
+    nvcomp::batched_compress(
+      nvcomp::compression_type::DEFLATE, comp_in, comp_out, comp_res, stream);
   } else if (compression == ZSTD) {
-    if (auto const reason = hipcomp::is_compression_disabled(hipcomp::compression_type::ZSTD);
+    if (auto const reason = nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD);
         reason) {
       CUDF_FAIL("Compression error: " + reason.value());
     }
-    hipcomp::batched_compress(hipcomp::compression_type::ZSTD, comp_in, comp_out, comp_res, stream);
+    nvcomp::batched_compress(nvcomp::compression_type::ZSTD, comp_in, comp_out, comp_res, stream);
   } else if (compression != NONE) {
     CUDF_FAIL("Unsupported compression type");
   }

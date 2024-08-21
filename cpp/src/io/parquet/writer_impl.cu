@@ -984,28 +984,28 @@ void gather_fragment_statistics(device_span<statistics_chunk> frag_stats,
   stream.synchronize();
 }
 
-auto to_hipcomp_compression_type(Compression codec)
+auto to_nvcomp_compression_type(Compression codec)
 {
-  if (codec == Compression::SNAPPY) return hipcomp::compression_type::SNAPPY;
-  if (codec == Compression::ZSTD) return hipcomp::compression_type::ZSTD;
+  if (codec == Compression::SNAPPY) return nvcomp::compression_type::SNAPPY;
+  if (codec == Compression::ZSTD) return nvcomp::compression_type::ZSTD;
   CUDF_FAIL("Unsupported compression type");
 }
 
 auto page_alignment(Compression codec)
 {
   if (codec == Compression::UNCOMPRESSED or
-      hipcomp::is_compression_disabled(to_hipcomp_compression_type(codec))) {
+      nvcomp::is_compression_disabled(to_nvcomp_compression_type(codec))) {
     return 1u;
   }
 
-  return 1u << hipcomp::compress_input_alignment_bits(to_hipcomp_compression_type(codec));
+  return 1u << nvcomp::compress_input_alignment_bits(to_nvcomp_compression_type(codec));
 }
 
 size_t max_compression_output_size(Compression codec, uint32_t compression_blocksize)
 {
   if (codec == Compression::UNCOMPRESSED) return 0;
 
-  return compress_max_output_chunk_size(to_hipcomp_compression_type(codec), compression_blocksize);
+  return compress_max_output_chunk_size(to_nvcomp_compression_type(codec), compression_blocksize);
 }
 
 auto init_page_sizes(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
@@ -1093,12 +1093,12 @@ size_t max_page_bytes(Compression compression, size_t max_page_size_bytes)
 {
   if (compression == parquet::Compression::UNCOMPRESSED) { return max_page_size_bytes; }
 
-  auto const ncomp_type   = to_hipcomp_compression_type(compression);
-  auto const hipcomp_limit = hipcomp::is_compression_disabled(ncomp_type)
+  auto const ncomp_type   = to_nvcomp_compression_type(compression);
+  auto const nvcomp_limit = nvcomp::is_compression_disabled(ncomp_type)
                               ? std::nullopt
-                              : hipcomp::compress_max_allowed_chunk_size(ncomp_type);
+                              : nvcomp::compress_max_allowed_chunk_size(ncomp_type);
 
-  auto max_size = std::min(hipcomp_limit.value_or(max_page_size_bytes), max_page_size_bytes);
+  auto max_size = std::min(nvcomp_limit.value_or(max_page_size_bytes), max_page_size_bytes);
   // page size must fit in a 32-bit signed integer
   return std::min<size_t>(max_size, std::numeric_limits<int32_t>::max());
 }
@@ -1322,19 +1322,19 @@ void encode_pages(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
   gpu::EncodePages(batch_pages, write_v2_headers, comp_in, comp_out, comp_res, stream);
   switch (compression) {
     case parquet::Compression::SNAPPY:
-      if (hipcomp::is_compression_disabled(hipcomp::compression_type::SNAPPY)) {
+      if (nvcomp::is_compression_disabled(nvcomp::compression_type::SNAPPY)) {
         gpu_snap(comp_in, comp_out, comp_res, stream);
       } else {
-        hipcomp::batched_compress(
-          hipcomp::compression_type::SNAPPY, comp_in, comp_out, comp_res, stream);
+        nvcomp::batched_compress(
+          nvcomp::compression_type::SNAPPY, comp_in, comp_out, comp_res, stream);
       }
       break;
     case parquet::Compression::ZSTD: {
-      if (auto const reason = hipcomp::is_compression_disabled(hipcomp::compression_type::ZSTD);
+      if (auto const reason = nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD);
           reason) {
         CUDF_FAIL("Compression error: " + reason.value());
       }
-      hipcomp::batched_compress(hipcomp::compression_type::ZSTD, comp_in, comp_out, comp_res, stream);
+      nvcomp::batched_compress(nvcomp::compression_type::ZSTD, comp_in, comp_out, comp_res, stream);
 
       break;
     }

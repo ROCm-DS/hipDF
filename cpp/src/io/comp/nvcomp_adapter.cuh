@@ -27,7 +27,7 @@
 
 #include <optional>
 
-namespace cudf::io::hipcomp {
+namespace cudf::io::nvcomp {
 
 struct batched_args {
   rmm::device_uvector<void const*> input_data_ptrs;
@@ -43,14 +43,14 @@ struct batched_args {
  * @param[in] outputs List of output buffers
  * @param[in] stream CUDA stream to use
  */
-batched_args create_batched_hipcomp_args(device_span<device_span<uint8_t const> const> inputs,
+batched_args create_batched_nvcomp_args(device_span<device_span<uint8_t const> const> inputs,
                                         device_span<device_span<uint8_t> const> outputs,
                                         rmm::cuda_stream_view stream);
 
 /**
- * @brief Convert hipcomp statuses and output sizes into cuIO compression results.
+ * @brief Convert nvcomp statuses and output sizes into cuIO compression results.
  */
-void update_compression_results(device_span<hipcompStatus_t const> hipcomp_stats,
+void update_compression_results(device_span<nvcompStatus_t const> nvcomp_stats,
                                 device_span<size_t const> actual_output_sizes,
                                 device_span<compression_result> results,
                                 rmm::cuda_stream_view stream);
@@ -76,4 +76,4 @@ void skip_unsupported_inputs(device_span<size_t> input_sizes,
 std::pair<size_t, size_t> max_chunk_and_total_input_size(device_span<size_t const> input_sizes,
                                                          rmm::cuda_stream_view stream);
 
-}  // namespace cudf::io::hipcomp
+}  // namespace cudf::io::nvcomp
