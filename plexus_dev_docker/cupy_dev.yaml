@@ -1,6 +1,0 @@
-channels:
-- conda-forge
-dependencies:
-- python==3.10.13
-- cython==0.29.35
-name: cupy_dev-x86_64.yaml
