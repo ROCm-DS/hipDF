@@ -380,8 +380,8 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
 
   auto streams = cudf::detail::fork_streams(stream, concurrency);
 
-  hipEvent_t last_launch_event;
-  CUDF_CUDA_TRY(hipEventCreate(&last_launch_event));
+  cudaEvent_t last_launch_event;
+  CUDF_CUDA_TRY(cudaEventCreate(&last_launch_event));
 
   auto& read_stream     = streams[0];
   auto& scan_stream     = streams[1];
@@ -415,8 +415,8 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
       tile_multistates,
       tile_offsets);
     // TODO(HIP/AMD): what should be the value of flag? 0?
-    // CUDF_CUDA_TRY(hipStreamWaitEvent(scan_stream.value(), last_launch_event));
-    CUDF_CUDA_TRY(hipStreamWaitEvent(scan_stream.value(), last_launch_event, 0));
+    // CUDF_CUDA_TRY(cudaStreamWaitEvent(scan_stream.value(), last_launch_event));
+    CUDF_CUDA_TRY(cudaStreamWaitEvent(scan_stream.value(), last_launch_event, 0));
 
     if (delimiter.size() == 1) {
       // the single-byte case allows for a much more efficient kernel, so we special-case it
@@ -490,7 +490,7 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
       char_storage.advance_output(output_size, scan_stream);
     }
 
-    CUDF_CUDA_TRY(hipEventRecord(last_launch_event, scan_stream.value()));
+    CUDF_CUDA_TRY(cudaEventRecord(last_launch_event, scan_stream.value()));
 
     std::swap(read_stream, scan_stream);
     base_tile_idx += tiles_in_launch;
@@ -498,7 +498,7 @@ std::unique_ptr<cudf::column> multibyte_split(cudf::io::text::data_chunk_source 
     chunk = std::move(next_chunk);
   }
 
-  CUDF_CUDA_TRY(hipEventDestroy(last_launch_event));
+  CUDF_CUDA_TRY(cudaEventDestroy(last_launch_event));
 
   cudf::detail::join_streams(streams, stream);
 

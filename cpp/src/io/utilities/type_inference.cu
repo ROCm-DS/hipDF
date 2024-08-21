@@ -244,7 +244,7 @@ cudf::io::column_type_histogram infer_column_type(OptionsView const& options,
 
   auto const grid_size = (size + block_size - 1) / block_size;
   auto d_column_info   = rmm::device_scalar<cudf::io::column_type_histogram>(stream);
-  CUDF_CUDA_TRY(hipMemsetAsync(
+  CUDF_CUDA_TRY(cudaMemsetAsync(
     d_column_info.data(), 0, sizeof(cudf::io::column_type_histogram), stream.value()));
 
   infer_column_type_kernel<block_size><<<grid_size, block_size, 0, stream.value()>>>(

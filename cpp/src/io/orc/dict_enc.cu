@@ -65,7 +65,7 @@ void rowgroup_char_counts(device_2dspan<size_type> counts,
   int block_size    = 0;  // suggested thread count to use
   int min_grid_size = 0;  // minimum block count required
   CUDF_CUDA_TRY(
-    hipOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, rowgroup_char_counts_kernel));
+    cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, rowgroup_char_counts_kernel));
   auto const grid_size =
     dim3(cudf::util::div_rounding_up_unsafe<unsigned int>(num_rowgroups, block_size),
          static_cast<unsigned int>(num_str_cols));

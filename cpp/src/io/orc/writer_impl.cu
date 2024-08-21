@@ -706,10 +706,10 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
 
   auto aligned_rgs = hostdevice_2dvector<rowgroup_rows>(
     segmentation.num_rowgroups(), orc_table.num_columns(), stream);
-  CUDF_CUDA_TRY(hipMemcpyAsync(aligned_rgs.base_device_ptr(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(aligned_rgs.base_device_ptr(),
                                 segmentation.rowgroups.base_device_ptr(),
                                 aligned_rgs.count() * sizeof(rowgroup_rows),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
   auto const d_stripes = cudf::detail::make_device_uvector_async(
     segmentation.stripes, stream, rmm::mr::get_current_device_resource());
@@ -1330,16 +1330,16 @@ encoded_footer_statistics finish_statistic_blobs(int num_stripes,
     auto const merge_bytes = stripes_per_col * sizeof(statistics_merge_group);
     for (size_t col = 0; col < num_columns; ++col) {
       CUDF_CUDA_TRY(
-        hipMemcpyAsync(stat_chunks.data() + (num_stripes * col) + num_entries_seen,
+        cudaMemcpyAsync(stat_chunks.data() + (num_stripes * col) + num_entries_seen,
                         per_chunk_stats.stripe_stat_chunks[i].data() + col * stripes_per_col,
                         chunk_bytes,
-                        hipMemcpyDefault,
+                        cudaMemcpyDefault,
                         stream.value()));
       CUDF_CUDA_TRY(
-        hipMemcpyAsync(stats_merge.device_ptr() + (num_stripes * col) + num_entries_seen,
+        cudaMemcpyAsync(stats_merge.device_ptr() + (num_stripes * col) + num_entries_seen,
                         per_chunk_stats.stripe_stat_merge[i].device_ptr() + col * stripes_per_col,
                         merge_bytes,
-                        hipMemcpyDefault,
+                        cudaMemcpyDefault,
                         stream.value()));
     }
     num_entries_seen += stripes_per_col;
@@ -1355,10 +1355,10 @@ encoded_footer_statistics finish_statistic_blobs(int num_stripes,
   }
 
   auto d_file_stats_merge = stats_merge.device_ptr(num_stripe_blobs);
-  CUDF_CUDA_TRY(hipMemcpyAsync(d_file_stats_merge,
+  CUDF_CUDA_TRY(cudaMemcpyAsync(d_file_stats_merge,
                                 file_stats_merge.data(),
                                 num_file_blobs * sizeof(statistics_merge_group),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
 
   auto file_stat_chunks = stat_chunks.data() + num_stripe_blobs;
@@ -1542,7 +1542,7 @@ std::future<void> write_data_stream(gpu::StripeStream const& strm_desc,
       return out_sink->device_write_async(stream_in, length, stream);
     } else {
       CUDF_CUDA_TRY(
-        hipMemcpyAsync(stream_out, stream_in, length, hipMemcpyDefault, stream.value()));
+        cudaMemcpyAsync(stream_out, stream_in, length, cudaMemcpyDefault, stream.value()));
       stream.synchronize();
 
       out_sink->host_write(stream_out, length);
@@ -1589,7 +1589,7 @@ void pushdown_lists_null_mask(orc_column_view const& col,
                               rmm::cuda_stream_view stream)
 {
   // Set all bits - correct unless there's a mismatch between offsets and null mask
-  CUDF_CUDA_TRY(hipMemsetAsync(static_cast<void*>(out_mask.data()),
+  CUDF_CUDA_TRY(cudaMemsetAsync(static_cast<void*>(out_mask.data()),
                                 255,
                                 out_mask.size() * sizeof(bitmask_type),
                                 stream.value()));

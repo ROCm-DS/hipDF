@@ -157,17 +157,17 @@ std::vector<std::string> create_key_strings(char const* h_data,
 {
   auto const num_cols = sorted_info.num_rows();
   std::vector<uint64_t> h_offsets(num_cols);
-  CUDF_CUDA_TRY(hipMemcpyAsync(h_offsets.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(h_offsets.data(),
                                 sorted_info.column(0).data<uint64_t>(),
                                 sizeof(uint64_t) * num_cols,
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
 
   std::vector<uint16_t> h_lens(num_cols);
-  CUDF_CUDA_TRY(hipMemcpyAsync(h_lens.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(h_lens.data(),
                                 sorted_info.column(1).data<uint16_t>(),
                                 sizeof(uint16_t) * num_cols,
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
 
   std::vector<std::string> names(num_cols);
@@ -269,7 +269,7 @@ rmm::device_uvector<uint64_t> find_record_starts(json_reader_options const& read
   // Manually adding an extra row to account for the first row in the file
   if (reader_opts.get_byte_range_offset() == 0) {
     find_result_ptr++;
-    CUDF_CUDA_TRY(hipMemsetAsync(rec_starts.data(), 0ull, sizeof(uint64_t), stream.value()));
+    CUDF_CUDA_TRY(cudaMemsetAsync(rec_starts.data(), 0ull, sizeof(uint64_t), stream.value()));
   }
 
   std::vector<char> chars_to_find{'\n'};
@@ -352,14 +352,14 @@ std::pair<std::vector<std::string>, col_map_ptr_type> get_column_names_and_map(
   uint64_t first_row_len = d_data.size();
   if (rec_starts.size() > 1) {
     // Set first_row_len to the offset of the second row, if it exists
-    CUDF_CUDA_TRY(hipMemcpyAsync(
-      &first_row_len, rec_starts.data() + 1, sizeof(uint64_t), hipMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(cudaMemcpyAsync(
+      &first_row_len, rec_starts.data() + 1, sizeof(uint64_t), cudaMemcpyDefault, stream.value()));
   }
   std::vector<char> first_row(first_row_len);
-  CUDF_CUDA_TRY(hipMemcpyAsync(first_row.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(first_row.data(),
                                 d_data.data(),
                                 first_row_len * sizeof(char),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
   stream.synchronize();
 

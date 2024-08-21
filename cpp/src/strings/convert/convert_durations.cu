@@ -153,10 +153,10 @@ struct format_compiler {
 
     // create program in device memory
     d_items.resize(items.size(), stream);
-    CUDF_CUDA_TRY(hipMemcpyAsync(d_items.data(),
+    CUDF_CUDA_TRY(cudaMemcpyAsync(d_items.data(),
                                   items.data(),
                                   items.size() * sizeof(items[0]),
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
   }
 

@@ -435,10 +435,10 @@ void make_device_json_column(device_span<SymbolT const> input,
     if (!is_array_of_arrays) return parent_node_sentinel;
     auto const list_node_index = is_enabled_lines ? 0 : 1;
     NodeIndexT value;
-    CUDF_CUDA_TRY(hipMemcpyAsync(&value,
+    CUDF_CUDA_TRY(cudaMemcpyAsync(&value,
                                   col_ids.data() + list_node_index,
                                   sizeof(NodeIndexT),
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
     stream.synchronize();
     return value;
@@ -907,10 +907,10 @@ table_with_metadata device_parse_nested_json(device_span<SymbolT const> d_input,
   bool const is_array_of_arrays = [&]() {
     std::array<node_t, 2> h_node_categories = {NC_ERR, NC_ERR};
     auto const size_to_copy                 = std::min(size_t{2}, gpu_tree.node_categories.size());
-    CUDF_CUDA_TRY(hipMemcpyAsync(h_node_categories.data(),
+    CUDF_CUDA_TRY(cudaMemcpyAsync(h_node_categories.data(),
                                   gpu_tree.node_categories.data(),
                                   sizeof(node_t) * size_to_copy,
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
     stream.synchronize();
     if (options.is_enabled_lines()) return h_node_categories[0] == NC_LIST;

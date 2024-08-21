@@ -120,7 +120,7 @@ std::string string_scalar::to_string(rmm::cuda_stream_view stream) const
   std::string result;
   result.resize(_data.size());
   CUDF_CUDA_TRY(
-    hipMemcpyAsync(&result[0], _data.data(), _data.size(), hipMemcpyDefault, stream.value()));
+    cudaMemcpyAsync(&result[0], _data.data(), _data.size(), cudaMemcpyDefault, stream.value()));
   stream.synchronize();
   return result;
 }

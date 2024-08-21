@@ -117,7 +117,7 @@ struct DispatchFSM : DeviceFSMPolicy {
   TransducedOutItT transduced_out_it;
   TransducedIndexOutItT transduced_out_idx_it;
   TransducedCountOutItT d_num_transduced_out_it;
-  hipStream_t stream;
+  cudaStream_t stream;
   int const ptx_version;
 
   //------------------------------------------------------------------------------
@@ -132,7 +132,7 @@ struct DispatchFSM : DeviceFSMPolicy {
                                                    TransducedOutItT transduced_out_it,
                                                    TransducedIndexOutItT transduced_out_idx_it,
                                                    TransducedCountOutItT d_num_transduced_out_it,
-                                                   hipStream_t stream,
+                                                   cudaStream_t stream,
                                                    int ptx_version)
     : d_temp_storage(d_temp_storage),
       temp_storage_bytes(temp_storage_bytes),
@@ -151,7 +151,7 @@ struct DispatchFSM : DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // DISPATCH INTERFACE
   //------------------------------------------------------------------------------
-  HIPCUB_RUNTIME_FUNCTION __forceinline__ static hipError_t Dispatch(
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ static cudaError_t Dispatch(
     void* d_temp_storage,
     size_t& temp_storage_bytes,
     DfaT dfa,
@@ -161,16 +161,16 @@ struct DispatchFSM : DeviceFSMPolicy {
     TransducedOutItT transduced_out_it,
     TransducedIndexOutItT transduced_out_idx_it,
     TransducedCountOutItT d_num_transduced_out_it,
-    hipStream_t stream)
+    cudaStream_t stream)
   {
     using MaxPolicyT = DispatchFSM::MaxPolicy;
 
-    hipError_t error;
+    cudaError_t error;
 
     // Get PTX version
     int ptx_version;
     error = hipcub_extensions::PtxVersion(ptx_version);
-    if (error != hipSuccess) return error;
+    if (error != cudaSuccess) return error;
 
     // Create dispatch functor
     DispatchFSM dispatch(d_temp_storage,
@@ -197,7 +197,7 @@ struct DispatchFSM : DeviceFSMPolicy {
             typename TileStateT,
             typename FstScanTileStateT,
             typename StateVectorT>
-  HIPCUB_RUNTIME_FUNCTION __forceinline__ hipError_t
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
   InvokeDFASimulationKernel(DFASimulationKernelT dfa_kernel,
                             int32_t sm_count,
                             StateIndexT seed_state,
@@ -206,7 +206,7 @@ struct DispatchFSM : DeviceFSMPolicy {
                             FstScanTileStateT fst_tile_state)
 
   {
-    hipError_t error = hipSuccess;
+    cudaError_t error = cudaSuccess;
     hipcub_extensions::KernelConfig dfa_simulation_config;
 
     using PolicyT = typename ActivePolicyT::AgentDFAPolicy;
@@ -229,7 +229,7 @@ struct DispatchFSM : DeviceFSMPolicy {
                                                         d_num_transduced_out_it);
 
     // Check for errors
-    if (HipcubDebug(error = hipPeekAtLastError())) return error;
+    if (HipcubDebug(error = cudaPeekAtLastError())) return error;
 
     return error;
   }
@@ -241,7 +241,7 @@ struct DispatchFSM : DeviceFSMPolicy {
             typename TileStateT,
             typename FstScanTileStateT,
             typename StateVectorT>
-  HIPCUB_RUNTIME_FUNCTION __forceinline__ hipError_t
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
   ComputeStateTransitionVector(uint32_t sm_count,
                                TileStateT tile_state,
                                FstScanTileStateT fst_tile_state,
@@ -276,7 +276,7 @@ struct DispatchFSM : DeviceFSMPolicy {
             typename TileStateT,
             typename FstScanTileStateT,
             typename StateVectorT>
-  HIPCUB_RUNTIME_FUNCTION __forceinline__ hipError_t
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t
   SimulateDFA(uint32_t sm_count,
               TileStateT tile_state,
               FstScanTileStateT fst_tile_state,
@@ -307,20 +307,20 @@ struct DispatchFSM : DeviceFSMPolicy {
   // POLICY INVOCATION
   //------------------------------------------------------------------------------
   template <typename ActivePolicyT>
-  HIPCUB_RUNTIME_FUNCTION __forceinline__ hipError_t Invoke()
+  HIPCUB_RUNTIME_FUNCTION __forceinline__ cudaError_t Invoke()
   {
-    hipError_t error = hipSuccess;
+    cudaError_t error = cudaSuccess;
 
     // Get SM count
     int device_ordinal = -1;
     int sm_count       = -1;
 
     // Get current device
-    error = hipGetDevice(&device_ordinal);
-    if (error != hipSuccess) return error;
+    error = cudaGetDevice(&device_ordinal);
+    if (error != cudaSuccess) return error;
 
-    error = hipDeviceGetAttribute(&sm_count, hipDeviceAttributeMultiprocessorCount, device_ordinal);
-    if (error != hipSuccess) return error;
+    error = cudaDeviceGetAttribute(&sm_count, cudaDevAttrMultiProcessorCount, device_ordinal);
+    if (error != cudaSuccess) return error;
 
     //------------------------------------------------------------------------------
     // DERIVED TYPEDEFS
@@ -379,24 +379,24 @@ struct DispatchFSM : DeviceFSMPolicy {
     // Bytes needed for tile status descriptors (fusing state-transition vector + DFA simulation)
     if constexpr (SINGLE_PASS_STV) {
       error = ScanTileStateT::AllocationSize(num_blocks, allocation_sizes[MEM_SINGLE_PASS_STV]);
-      if (error != hipSuccess) return error;
+      if (error != cudaSuccess) return error;
     }
 
     // Bytes needed for tile status descriptors (DFA simulation pass for output size computation +
     // output-generating pass)
     if constexpr (IS_FST) {
       error = FstScanTileStateT::AllocationSize(num_blocks, allocation_sizes[MEM_FST_OFFSET]);
-      if (error != hipSuccess) return error;
+      if (error != cudaSuccess) return error;
     }
 
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
     error =
       hipcub_extensions::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
-    if (error != hipSuccess) return error;
+    if (error != cudaSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation
-    if (d_temp_storage == NULL) return hipSuccess;
+    if (d_temp_storage == NULL) return cudaSuccess;
 
     // Alias memory for state-transition vectors
     StateVectorT* d_thread_state_transition =
@@ -410,7 +410,7 @@ struct DispatchFSM : DeviceFSMPolicy {
       // Construct the tile status (aliases memory internally et al.)
       error = fst_offset_tile_state.Init(
         num_blocks, allocations[MEM_FST_OFFSET], allocation_sizes[MEM_FST_OFFSET]);
-      if (error != hipSuccess) return error;
+      if (error != cudaSuccess) return error;
       constexpr uint32_t FST_INIT_TPB = 256;
       uint32_t num_fst_init_blocks    = HIPCUB_QUOTIENT_CEILING(num_blocks, FST_INIT_TPB);
       initialization_pass_kernel<<<num_fst_init_blocks, FST_INIT_TPB, 0, stream>>>(
@@ -425,7 +425,7 @@ struct DispatchFSM : DeviceFSMPolicy {
       // Construct the tile status (aliases memory internally et al.)
       error = stv_tile_state.Init(
         num_blocks, allocations[MEM_SINGLE_PASS_STV], allocation_sizes[MEM_SINGLE_PASS_STV]);
-      if (error != hipSuccess) return error;
+      if (error != cudaSuccess) return error;
       constexpr uint32_t STV_INIT_TPB = 256;
       uint32_t num_stv_init_blocks    = HIPCUB_QUOTIENT_CEILING(num_blocks, STV_INIT_TPB);
       initialization_pass_kernel<<<num_stv_init_blocks, STV_INIT_TPB, 0, stream>>>(stv_tile_state,

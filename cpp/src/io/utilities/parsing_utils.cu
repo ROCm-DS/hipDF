@@ -125,7 +125,7 @@ cudf::size_type find_all_from_set(device_span<char const> data,
   int block_size    = 0;  // suggested thread count to use
   int min_grid_size = 0;  // minimum block count required
   CUDF_CUDA_TRY(
-    hipOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, count_and_set_positions<T>));
+    cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, count_and_set_positions<T>));
   int const grid_size = divCeil(data.size(), (size_t)block_size);
 
   auto d_count = cudf::detail::make_zeroed_device_uvector_async<cudf::size_type>(
@@ -152,7 +152,7 @@ cudf::size_type find_all_from_set(host_span<char const> data,
   int block_size    = 0;  // suggested thread count to use
   int min_grid_size = 0;  // minimum block count required
   CUDF_CUDA_TRY(
-    hipOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, count_and_set_positions<T>));
+    cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, count_and_set_positions<T>));
 
   size_t const chunk_count = divCeil(data.size(), max_chunk_bytes);
   for (size_t ci = 0; ci < chunk_count; ++ci) {
@@ -164,7 +164,7 @@ cudf::size_type find_all_from_set(host_span<char const> data,
 
     // Copy chunk to device
     CUDF_CUDA_TRY(
-      hipMemcpyAsync(d_chunk.data(), h_chunk, chunk_bytes, hipMemcpyDefault, stream.value()));
+      cudaMemcpyAsync(d_chunk.data(), h_chunk, chunk_bytes, cudaMemcpyDefault, stream.value()));
 
     for (char key : keys) {
       count_and_set_positions<T>

@@ -1358,10 +1358,10 @@ void encode_pages(hostdevice_2dvector<gpu::EncColumnChunk>& chunks,
   }
 
   auto h_chunks_in_batch = chunks.host_view().subspan(first_rowgroup, rowgroups_in_batch);
-  CUDF_CUDA_TRY(hipMemcpyAsync(h_chunks_in_batch.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(h_chunks_in_batch.data(),
                                 d_chunks_in_batch.data(),
                                 d_chunks_in_batch.flat_view().size_bytes(),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
 
   if (comp_stats.has_value()) {
@@ -2174,10 +2174,10 @@ void writer::impl::write_parquet_data_to_sink(
         } else {
           CUDF_EXPECTS(bounce_buffer.size() >= ck.compressed_size,
                        "Bounce buffer was not properly initialized.");
-          CUDF_CUDA_TRY(hipMemcpyAsync(bounce_buffer.data(),
+          CUDF_CUDA_TRY(cudaMemcpyAsync(bounce_buffer.data(),
                                         dev_bfr + ck.ck_stat_size,
                                         ck.compressed_size,
-                                        hipMemcpyDefault,
+                                        cudaMemcpyDefault,
                                         _stream.value()));
           _stream.synchronize();
           _out_sink[p]->host_write(bounce_buffer.data(), ck.compressed_size);
@@ -2215,10 +2215,10 @@ void writer::impl::write_parquet_data_to_sink(
           // start transfer of the column index
           std::vector<uint8_t> column_idx;
           column_idx.resize(ck.column_index_size);
-          CUDF_CUDA_TRY(hipMemcpyAsync(column_idx.data(),
+          CUDF_CUDA_TRY(cudaMemcpyAsync(column_idx.data(),
                                         ck.column_index_blob,
                                         ck.column_index_size,
-                                        hipMemcpyDefault,
+                                        cudaMemcpyDefault,
                                         _stream.value()));
 
           // calculate offsets while the column index is transferring

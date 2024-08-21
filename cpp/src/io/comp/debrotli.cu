@@ -2052,8 +2052,8 @@ size_t __host__ get_gpu_debrotli_scratch_size(int max_num_inputs)
   int sm_count = 0;
   int dev      = 0;
   uint32_t max_fb_size, min_fb_size, fb_size;
-  CUDF_CUDA_TRY(hipGetDevice(&dev));
-  if (hipSuccess == hipDeviceGetAttribute(&sm_count, hipDeviceAttributeMultiprocessorCount, dev)) {
+  CUDF_CUDA_TRY(cudaGetDevice(&dev));
+  if (cudaSuccess == cudaDeviceGetAttribute(&sm_count, cudaDevAttrMultiProcessorCount, dev)) {
     // printf("%d SMs on device %d\n", sm_count, dev);
     max_num_inputs =
       min(max_num_inputs, sm_count * 3);  // no more than 3 blocks/sm at most due to 32KB smem use
@@ -2099,13 +2099,13 @@ void gpu_debrotli(device_span<device_span<uint8_t const> const> inputs,
   scratch_size = std::min(scratch_size, static_cast<size_t>(0xffff'ffff)); 
   fb_heap_size = (uint32_t)((scratch_size - sizeof(brotli_dictionary_s)) & ~0xf);
 
-  CUDF_CUDA_TRY(hipMemsetAsync(scratch_u8, 0, 2 * sizeof(uint32_t), stream.value()));
+  CUDF_CUDA_TRY(cudaMemsetAsync(scratch_u8, 0, 2 * sizeof(uint32_t), stream.value()));
   // NOTE: The 128KB dictionary copy can have a relatively large overhead since source isn't
   // page-locked
-  CUDF_CUDA_TRY(hipMemcpyAsync(scratch_u8 + fb_heap_size,
+  CUDF_CUDA_TRY(cudaMemcpyAsync(scratch_u8 + fb_heap_size,
                                 get_brotli_dictionary(),
                                 sizeof(brotli_dictionary_s),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
   gpu_debrotli_kernel<<<dim_grid, dim_block, 0, stream.value()>>>(
     inputs, outputs, results, scratch_u8, fb_heap_size);
@@ -2114,8 +2114,8 @@ void gpu_debrotli(device_span<device_span<uint8_t const> const> inputs,
   uint32_t cur = 0;
   printf("heap dump (%d bytes)\n", fb_heap_size);
   while (cur < fb_heap_size && !(cur & 3)) {
-    CUDF_CUDA_TRY(hipMemcpyAsync(
-      &dump[0], scratch_u8 + cur, 2 * sizeof(uint32_t), hipMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(cudaMemcpyAsync(
+      &dump[0], scratch_u8 + cur, 2 * sizeof(uint32_t), cudaMemcpyDefault, stream.value()));
     stream.synchronize();
     printf("@%d: next = %d, size = %d\n", cur, dump[0], dump[1]);
     cur = (dump[0] > cur) ? dump[0] : 0xffff'ffffu;

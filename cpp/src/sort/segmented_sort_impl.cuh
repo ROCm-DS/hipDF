@@ -86,7 +86,7 @@ struct column_fast_sort_fn {
       rmm::device_buffer d_temp_storage;
       size_t temp_storage_bytes = 0;
       if (ascending) {
-        //TODO(HIP/AMD): check hipError_t error return value (StableSortPairs/StableSortPairsDescending is [[nodiscard]])
+        //TODO(HIP/AMD): check cudaError_t error return value (StableSortPairs/StableSortPairsDescending is [[nodiscard]])
         if constexpr (method == sort_method::STABLE) {
           (void) hipcub::DeviceSegmentedSort::StableSortPairs(
             d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);

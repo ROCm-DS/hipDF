@@ -110,16 +110,16 @@ struct dispatch_to_cudf_column {
       bitmask_allocation_size_bytes(static_cast<size_type>(null_bitmap_size * CHAR_BIT));
     auto mask        = std::make_unique<rmm::device_buffer>(allocation_size, stream, mr);
     auto mask_buffer = array.null_bitmap();
-    CUDF_CUDA_TRY(hipMemcpyAsync(mask->data(),
+    CUDF_CUDA_TRY(cudaMemcpyAsync(mask->data(),
                                   reinterpret_cast<uint8_t const*>(mask_buffer->address()),
                                   null_bitmap_size,
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
     // Zero-initialize trailing padding bytes
     auto const num_trailing_bytes = allocation_size - null_bitmap_size;
     if (num_trailing_bytes > 0) {
       auto trailing_bytes = static_cast<uint8_t*>(mask->data()) + null_bitmap_size;
-      CUDF_CUDA_TRY(hipMemsetAsync(trailing_bytes, 0, num_trailing_bytes, stream.value()));
+      CUDF_CUDA_TRY(cudaMemsetAsync(trailing_bytes, 0, num_trailing_bytes, stream.value()));
     }
     return mask;
   }
@@ -143,11 +143,11 @@ struct dispatch_to_cudf_column {
     auto const has_nulls     = skip_mask ? false : array.null_bitmap_data() != nullptr;
     auto col = make_fixed_width_column(type, num_rows, mask_state::UNALLOCATED, stream, mr);
     auto mutable_column_view = col->mutable_view();
-    CUDF_CUDA_TRY(hipMemcpyAsync(
+    CUDF_CUDA_TRY(cudaMemcpyAsync(
       mutable_column_view.data<T>(),
       reinterpret_cast<uint8_t const*>(data_buffer->address()) + array.offset() * sizeof(T),
       sizeof(T) * num_rows,
-      hipMemcpyDefault,
+      cudaMemcpyDefault,
       stream.value()));
     if (has_nulls) {
       auto tmp_mask = get_mask_buffer(array, stream, mr);
@@ -203,11 +203,11 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<numeric::decimal128>
   auto col = make_fixed_width_column(type, num_rows, mask_state::UNALLOCATED, stream, mr);
   auto mutable_column_view = col->mutable_view();
 
-  CUDF_CUDA_TRY(hipMemcpyAsync(
+  CUDF_CUDA_TRY(cudaMemcpyAsync(
     mutable_column_view.data<DeviceType>(),
     reinterpret_cast<uint8_t const*>(data_buffer->address()) + array.offset() * sizeof(DeviceType),
     sizeof(DeviceType) * num_rows,
-    hipMemcpyDefault,
+    cudaMemcpyDefault,
     stream.value()));
 
   auto null_mask = [&] {
@@ -241,10 +241,10 @@ std::unique_ptr<column> dispatch_to_cudf_column::operator()<bool>(
   // mask-to-bools expects the mask to be bitmask_type aligned/padded
   auto data = rmm::device_buffer(
     cudf::bitmask_allocation_size_bytes(data_buffer->size() * CHAR_BIT), stream, mr);
-  CUDF_CUDA_TRY(hipMemcpyAsync(data.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(data.data(),
                                 reinterpret_cast<uint8_t const*>(data_buffer->address()),
                                 data_buffer->size(),
-                                hipMemcpyDefault,
+                                cudaMemcpyDefault,
                                 stream.value()));
   auto out_col = mask_to_bools(static_cast<bitmask_type*>(data.data()),
                                array.offset(),

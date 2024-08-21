@@ -998,8 +998,8 @@ struct packed_split_indices_and_src_buf_info {
       reinterpret_cast<size_type*>(reinterpret_cast<uint8_t*>(d_indices_and_source_info.data()) +
                                    indices_size + src_buf_info_size);
 
-    CUDF_CUDA_TRY(hipMemcpyAsync(
-      d_indices, h_indices, indices_size + src_buf_info_size, hipMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(cudaMemcpyAsync(
+      d_indices, h_indices, indices_size + src_buf_info_size, cudaMemcpyDefault, stream.value()));
   }
 
   size_type const indices_size;
@@ -1044,10 +1044,10 @@ struct packed_partition_buf_size_and_dst_buf_info {
   void copy_to_host()
   {
     // DtoH buf sizes and col info back to the host
-    CUDF_CUDA_TRY(hipMemcpyAsync(h_buf_sizes,
+    CUDF_CUDA_TRY(cudaMemcpyAsync(h_buf_sizes,
                                   d_buf_sizes,
                                   buf_sizes_size + dst_buf_info_size,
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
   }
 
@@ -1094,10 +1094,10 @@ struct packed_src_and_dst_pointers {
 
   void copy_to_device()
   {
-    CUDF_CUDA_TRY(hipMemcpyAsync(d_src_and_dst_buffers.data(),
+    CUDF_CUDA_TRY(cudaMemcpyAsync(d_src_and_dst_buffers.data(),
                                   h_src_and_dst_buffers.data(),
                                   src_bufs_size + dst_bufs_size,
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
   }
 
@@ -1500,10 +1500,10 @@ std::unique_ptr<chunk_iteration_state> chunk_iteration_state::create(
                              batch_byte_size_iter + num_batches + 1,
                              offsets.begin());
 
-      CUDF_CUDA_TRY(hipMemcpyAsync(h_offsets.data(),
+      CUDF_CUDA_TRY(cudaMemcpyAsync(h_offsets.data(),
                                     offsets.data(),
                                     sizeof(std::size_t) * offsets.size(),
-                                    hipMemcpyDefault,
+                                    cudaMemcpyDefault,
                                     stream.value()));
 
       // the next part is working on the CPU, so we want to synchronize here
@@ -1801,10 +1801,10 @@ struct contiguous_split_state {
                           thrust::make_discard_iterator(),
                           dst_valid_count_output_iterator{d_orig_dst_buf_info});
 
-    CUDF_CUDA_TRY(hipMemcpyAsync(h_orig_dst_buf_info,
+    CUDF_CUDA_TRY(cudaMemcpyAsync(h_orig_dst_buf_info,
                                   d_orig_dst_buf_info,
                                   partition_buf_size_and_dst_buf_info->dst_buf_info_size,
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
 
     stream.synchronize();

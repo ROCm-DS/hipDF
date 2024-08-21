@@ -1019,10 +1019,10 @@ std::unique_ptr<column> merge_tdigests(tdigest_column_view const& tdv,
   // bring tdigest offsets back to the host
   auto tdigest_offsets = tdv.centroids().offsets();
   std::vector<size_type> h_inner_offsets(tdigest_offsets.size());
-  CUDF_CUDA_TRY(hipMemcpyAsync(h_inner_offsets.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(h_inner_offsets.data(),
                   tdigest_offsets.begin<size_type>(),
                   sizeof(size_type) * tdigest_offsets.size(),
-                  hipMemcpyDefault,
+                  cudaMemcpyDefault,
                   stream));
 
   stream.synchronize();
@@ -1272,10 +1272,10 @@ std::unique_ptr<column> group_merge_tdigest(column_view const& input,
 
   // bring group offsets back to the host
   std::vector<size_type> h_group_offsets(group_offsets.size());
-  CUDF_CUDA_TRY(hipMemcpyAsync(h_group_offsets.data(),
+  CUDF_CUDA_TRY(cudaMemcpyAsync(h_group_offsets.data(),
                   group_offsets.begin(),
                   sizeof(size_type) * group_offsets.size(),
-                  hipMemcpyDefault,
+                  cudaMemcpyDefault,
                   stream));
 
   return merge_tdigests(tdv,

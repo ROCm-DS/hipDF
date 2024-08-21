@@ -143,7 +143,7 @@ class hostdevice_vector {
   void host_to_device_async(rmm::cuda_stream_view stream)
   {
     CUDF_CUDA_TRY(
-      hipMemcpyAsync(device_ptr(), host_ptr(), size_bytes(), hipMemcpyDefault, stream.value()));
+      cudaMemcpyAsync(device_ptr(), host_ptr(), size_bytes(), cudaMemcpyDefault, stream.value()));
   }
 
   void host_to_device_sync(rmm::cuda_stream_view stream)
@@ -155,7 +155,7 @@ class hostdevice_vector {
   void device_to_host_async(rmm::cuda_stream_view stream)
   {
     CUDF_CUDA_TRY(
-      hipMemcpyAsync(host_ptr(), device_ptr(), size_bytes(), hipMemcpyDefault, stream.value()));
+      cudaMemcpyAsync(host_ptr(), device_ptr(), size_bytes(), cudaMemcpyDefault, stream.value()));
   }
 
   void device_to_host_sync(rmm::cuda_stream_view stream)

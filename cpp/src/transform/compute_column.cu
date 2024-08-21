@@ -105,10 +105,10 @@ std::unique_ptr<column> compute_column(table_view const& table,
   // Configure kernel parameters
   auto const& device_expression_data = parser.device_expression_data;
   int device_id;
-  CUDF_CUDA_TRY(hipGetDevice(&device_id));
+  CUDF_CUDA_TRY(cudaGetDevice(&device_id));
   int shmem_limit_per_block;
   CUDF_CUDA_TRY(
-    hipDeviceGetAttribute(&shmem_limit_per_block, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id));
+    cudaDeviceGetAttribute(&shmem_limit_per_block, cudaDevAttrMaxSharedMemoryPerBlock, device_id));
   auto constexpr MAX_BLOCK_SIZE = 128;
   auto const block_size =
     parser.shmem_per_thread != 0

@@ -76,7 +76,7 @@ std::unique_ptr<column> create_chars_child_column(cudf::size_type total_bytes,
 // :0:/long_pathname_so_that_rpms_can_package_the_debug_info/src/external/clr/hipamd/src/hip_global.cpp:56
 // : 212493713327 us: [pid:276317 tid:0x7fe0902b3a80] Cannot create GlobalVar Obj for symbol:
 // _ZN4cudf7strings6detail12_GLOBAL__N_125character_codepoint_flagsE
-// The seg fault happens when calling hipMemcpyToSymbol inside get_character_flags_table
+// The seg fault happens when calling cudaMemcpyToSymbol inside get_character_flags_table
 // namespace { // <= TODO(HIP/AMD): Here is the disabled namespace
 // The device variables are
 // created here to avoid using a singleton that may cause issues with RMM initialize/finalize. See
@@ -99,9 +99,9 @@ character_flags_table_type const* get_character_flags_table()
 {
   return d_character_codepoint_flags.find_or_initialize([&](void) {
     character_flags_table_type* table = nullptr;
-    CUDF_CUDA_TRY(hipMemcpyToSymbol(
+    CUDF_CUDA_TRY(cudaMemcpyToSymbol(
       HIP_SYMBOL(character_codepoint_flags), g_character_codepoint_flags, sizeof(g_character_codepoint_flags)));
-    CUDF_CUDA_TRY(hipGetSymbolAddress((void**)&table, character_codepoint_flags));
+    CUDF_CUDA_TRY(cudaGetSymbolAddress((void**)&table, character_codepoint_flags));
     return table;
   });
 }
@@ -113,9 +113,9 @@ character_cases_table_type const* get_character_cases_table()
 {
   return d_character_cases_table.find_or_initialize([&](void) {
     character_cases_table_type* table = nullptr;
-    CUDF_CUDA_TRY(hipMemcpyToSymbol(
+    CUDF_CUDA_TRY(cudaMemcpyToSymbol(
       HIP_SYMBOL(character_cases_table), g_character_cases_table, sizeof(g_character_cases_table)));
-    CUDF_CUDA_TRY(hipGetSymbolAddress((void**)&table, character_cases_table));
+    CUDF_CUDA_TRY(cudaGetSymbolAddress((void**)&table, character_cases_table));
     return table;
   });
 }
@@ -127,9 +127,9 @@ special_case_mapping const* get_special_case_mapping_table()
 {
   return d_special_case_mappings.find_or_initialize([&](void) {
     special_case_mapping* table = nullptr;
-    CUDF_CUDA_TRY(hipMemcpyToSymbol(
+    CUDF_CUDA_TRY(cudaMemcpyToSymbol(
       HIP_SYMBOL(character_special_case_mappings),g_special_case_mappings,sizeof(g_special_case_mappings)));
-    CUDF_CUDA_TRY(hipGetSymbolAddress((void**)&table, character_special_case_mappings));
+    CUDF_CUDA_TRY(cudaGetSymbolAddress((void**)&table, character_special_case_mappings));
     return table;
   });
 }

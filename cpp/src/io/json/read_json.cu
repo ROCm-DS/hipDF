@@ -77,8 +77,8 @@ rmm::device_uvector<char> ingest_raw_input(host_span<std::unique_ptr<datasource>
         } else {
           h_buffers.emplace_back(source->host_read(range_offset, data_size));
           auto const& h_buffer = h_buffers.back();
-          CUDF_CUDA_TRY(hipMemcpyAsync(
-            destination, h_buffer->data(), h_buffer->size(), hipMemcpyDefault, stream.value()));
+          CUDF_CUDA_TRY(cudaMemcpyAsync(
+            destination, h_buffer->data(), h_buffer->size(), cudaMemcpyDefault, stream.value()));
           bytes_read += h_buffer->size();
         }
         delimiter_map.push_back(bytes_read);

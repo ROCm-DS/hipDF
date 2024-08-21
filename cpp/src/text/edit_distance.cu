@@ -227,7 +227,7 @@ std::unique_ptr<cudf::column> edit_distance_matrix(cudf::strings_column_view con
   // HIP: We changed size_of(cudf::size_type) to sizeof(std::ptrdiff_t) to set the correct number of bytes
   // Otherwise, only half of the requested bytes are set to 0 and thus we get wrong results.
   // internal issue 89
-  CUDF_CUDA_TRY(hipMemsetAsync(d_offsets, 0, n_upper * sizeof(std::ptrdiff_t), stream.value()));
+  CUDF_CUDA_TRY(cudaMemsetAsync(d_offsets, 0, n_upper * sizeof(std::ptrdiff_t), stream.value()));
   thrust::for_each_n(
     rmm::exec_policy(stream),
     thrust::make_counting_iterator<cudf::size_type>(0),

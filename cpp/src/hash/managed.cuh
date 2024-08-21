@@ -22,22 +22,22 @@ struct managed {
   static void* operator new(size_t n)
   {
     void* ptr          = nullptr;
-    hipError_t result = hipMallocManaged(&ptr, n);
-    if (hipSuccess != result || 0 == ptr) throw std::bad_alloc();
+    cudaError_t result = cudaMallocManaged(&ptr, n);
+    if (cudaSuccess != result || 0 == ptr) throw std::bad_alloc();
     return ptr;
   }
 
   static void operator delete(void* ptr) noexcept
   {
-    auto const free_result = hipFree(ptr);
-    assert(free_result == hipSuccess);
+    auto const free_result = cudaFree(ptr);
+    assert(free_result == cudaSuccess);
   }
 };
 
-inline bool isPtrManaged(hipPointerAttribute_t attr)
+inline bool isPtrManaged(cudaPointerAttributes attr)
 {
 #if CUDART_VERSION >= 10000
-  return (attr.type == hipMemoryTypeManaged);
+  return (attr.type == cudaMemoryTypeManaged);
 #else
   return attr.isManaged;
 #endif

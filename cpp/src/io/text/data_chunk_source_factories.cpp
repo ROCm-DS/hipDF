@@ -31,7 +31,7 @@ namespace cudf::io::text {
 namespace {
 
 struct host_ticket {
-  hipEvent_t event;
+  cudaEvent_t event;
   cudf::detail::pinned_host_vector<char> buffer;
 };
 
@@ -47,14 +47,14 @@ class datasource_chunk_reader : public data_chunk_reader {
   {
     // create an event to track the completion of the last device-to-host copy.
     for (auto& ticket : _tickets) {
-      CUDF_CUDA_TRY(hipEventCreate(&(ticket.event)));
+      CUDF_CUDA_TRY(cudaEventCreate(&(ticket.event)));
     }
   }
 
   ~datasource_chunk_reader() override
   {
     for (auto& ticket : _tickets) {
-      CUDF_CUDA_TRY(hipEventDestroy(ticket.event));
+      CUDF_CUDA_TRY(cudaEventDestroy(ticket.event));
     }
   }
 
@@ -81,7 +81,7 @@ class datasource_chunk_reader : public data_chunk_reader {
       _next_ticket_idx = (_next_ticket_idx + 1) % num_tickets;
 
       // synchronize on the last host-to-device copy, so we don't clobber the host buffer.
-      CUDF_CUDA_TRY(hipEventSynchronize(h_ticket.event));
+      CUDF_CUDA_TRY(cudaEventSynchronize(h_ticket.event));
 
       // resize the host buffer as necessary to contain the requested number of bytes
       if (h_ticket.buffer.size() < read_size) { h_ticket.buffer.resize(read_size); }
@@ -89,11 +89,11 @@ class datasource_chunk_reader : public data_chunk_reader {
       _source->host_read(_offset, read_size, reinterpret_cast<uint8_t*>(h_ticket.buffer.data()));
 
       // copy the host-pinned data on to device
-      CUDF_CUDA_TRY(hipMemcpyAsync(
-        chunk.data(), h_ticket.buffer.data(), read_size, hipMemcpyDefault, stream.value()));
+      CUDF_CUDA_TRY(cudaMemcpyAsync(
+        chunk.data(), h_ticket.buffer.data(), read_size, cudaMemcpyDefault, stream.value()));
 
       // record the host-to-device copy.
-      CUDF_CUDA_TRY(hipEventRecord(h_ticket.event, stream.value()));
+      CUDF_CUDA_TRY(cudaEventRecord(h_ticket.event, stream.value()));
     }
 
     _offset += read_size;
@@ -122,14 +122,14 @@ class istream_data_chunk_reader : public data_chunk_reader {
   {
     // create an event to track the completion of the last device-to-host copy.
     for (auto& ticket : _tickets) {
-      CUDF_CUDA_TRY(hipEventCreate(&(ticket.event)));
+      CUDF_CUDA_TRY(cudaEventCreate(&(ticket.event)));
     }
   }
 
   ~istream_data_chunk_reader() override
   {
     for (auto& ticket : _tickets) {
-      CUDF_CUDA_TRY(hipEventDestroy(ticket.event));
+      CUDF_CUDA_TRY(cudaEventDestroy(ticket.event));
     }
   }
 
@@ -145,7 +145,7 @@ class istream_data_chunk_reader : public data_chunk_reader {
     _next_ticket_idx = (_next_ticket_idx + 1) % num_tickets;
 
     // synchronize on the last host-to-device copy, so we don't clobber the host buffer.
-    CUDF_CUDA_TRY(hipEventSynchronize(h_ticket.event));
+    CUDF_CUDA_TRY(cudaEventSynchronize(h_ticket.event));
 
     // resize the host buffer as necessary to contain the requested number of bytes
     if (h_ticket.buffer.size() < read_size) { h_ticket.buffer.resize(read_size); }
@@ -160,11 +160,11 @@ class istream_data_chunk_reader : public data_chunk_reader {
     auto chunk = rmm::device_uvector<char>(read_size, stream);
 
     // copy the host-pinned data on to device
-    CUDF_CUDA_TRY(hipMemcpyAsync(
-      chunk.data(), h_ticket.buffer.data(), read_size, hipMemcpyDefault, stream.value()));
+    CUDF_CUDA_TRY(cudaMemcpyAsync(
+      chunk.data(), h_ticket.buffer.data(), read_size, cudaMemcpyDefault, stream.value()));
 
     // record the host-to-device copy.
-    CUDF_CUDA_TRY(hipEventRecord(h_ticket.event, stream.value()));
+    CUDF_CUDA_TRY(cudaEventRecord(h_ticket.event, stream.value()));
 
     // return the device buffer so it can be processed.
     return std::make_unique<device_uvector_data_chunk>(std::move(chunk));
@@ -200,11 +200,11 @@ class host_span_data_chunk_reader : public data_chunk_reader {
     auto chunk = rmm::device_uvector<char>(read_size, stream);
 
     // copy the host data to device
-    CUDF_CUDA_TRY(hipMemcpyAsync(  //
+    CUDF_CUDA_TRY(cudaMemcpyAsync(  //
       chunk.data(),
       _data.data() + _position,
       read_size,
-      hipMemcpyDefault,
+      cudaMemcpyDefault,
       stream.value()));
 
     _position += read_size;

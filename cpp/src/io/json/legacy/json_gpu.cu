@@ -527,7 +527,7 @@ void convert_json_to_columns(parse_options_view const& opts,
 {
   int block_size;
   int min_grid_size;
-  CUDF_CUDA_TRY(hipOccupancyMaxPotentialBlockSize(
+  CUDF_CUDA_TRY(cudaOccupancyMaxPotentialBlockSize(
     &min_grid_size, &block_size, convert_data_to_columns_kernel));
 
   int const grid_size = (row_offsets.size() + block_size - 1) / block_size;
@@ -560,7 +560,7 @@ std::vector<cudf::io::column_type_histogram> detect_data_types(
   int block_size;
   int min_grid_size;
   CUDF_CUDA_TRY(
-    hipOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, detect_data_types_kernel));
+    cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, detect_data_types_kernel));
 
   auto d_column_infos = [&]() {
     if (do_set_null_count) {
@@ -602,7 +602,7 @@ void collect_keys_info(parse_options_view const& options,
   int block_size;
   int min_grid_size;
   CUDF_CUDA_TRY(
-    hipOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, collect_keys_info_kernel));
+    cudaOccupancyMaxPotentialBlockSize(&min_grid_size, &block_size, collect_keys_info_kernel));
 
   // Calculate actual block count to use based on records count
   int const grid_size = (row_offsets.size() + block_size - 1) / block_size;

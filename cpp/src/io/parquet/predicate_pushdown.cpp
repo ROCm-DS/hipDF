@@ -437,10 +437,10 @@ std::optional<std::vector<std::vector<size_type>>> aggregate_reader_metadata::fi
   auto num_bitmasks = num_bitmask_words(predicate.size());
   std::vector<bitmask_type> host_bitmask(num_bitmasks, ~bitmask_type{0});
   if (predicate.nullable()) {
-    CUDF_CUDA_TRY(hipMemcpyAsync(host_bitmask.data(),
+    CUDF_CUDA_TRY(cudaMemcpyAsync(host_bitmask.data(),
                                   predicate.null_mask(),
                                   num_bitmasks * sizeof(bitmask_type),
-                                  hipMemcpyDefault,
+                                  cudaMemcpyDefault,
                                   stream.value()));
   }
   auto validity_it = cudf::detail::make_counting_transform_iterator(

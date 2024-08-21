@@ -61,7 +61,7 @@ template <typename DfaT,
           typename TransducedIndexOutItT,
           typename TransducedCountOutItT,
           typename OffsetT>
-hipError_t DeviceTransduce(void* d_temp_storage,
+cudaError_t DeviceTransduce(void* d_temp_storage,
                             size_t& temp_storage_bytes,
                             DfaT dfa,
                             SymbolItT d_chars_in,
@@ -70,7 +70,7 @@ hipError_t DeviceTransduce(void* d_temp_storage,
                             TransducedIndexOutItT transduced_out_idx_it,
                             TransducedCountOutItT d_num_transduced_out_it,
                             uint32_t seed_state = 0,
-                            hipStream_t stream = 0)
+                            cudaStream_t stream = 0)
 {
   using DispatchDfaT = detail::DispatchFSM<DfaT,
                                            SymbolItT,
