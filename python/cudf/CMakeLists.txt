@@ -19,11 +19,7 @@ set(cudf_version 23.10.00)
 include(../../fetch_rapids.cmake)
 include(rapids-hip)
 
-if(CUDA_BACKEND)
-  rapids_cuda_init_architectures(cudf-python)
-else()
-  rapids_hip_init_architectures(cudf-python)
-endif()
+rapids_hip_init_architectures(cudf-python)
 
 project(
   cudf-python
