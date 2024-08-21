@@ -161,8 +161,7 @@ class stream_checking_resource_adaptor final : public rmm::mr::device_memory_res
   {
     auto cstream{stream.value()};
     auto const invalid_stream =
-// TODO(HIP/AMD): Check if we can use hipStreamLegacy with ROCm 6.2.0
-#ifdef CUDA_BACKEND
+#if defined(cudaStreamLegacy)
       check_default_stream_ ? ((cstream == cudaStreamDefault) || (cstream == cudaStreamLegacy) ||
                                (cstream == cudaStreamPerThread))
                             : (cstream != cudf::test::get_default_stream().value());
