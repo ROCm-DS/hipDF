@@ -185,7 +185,7 @@ rapids_cpm_init()
 # find jitify
 include(cmake/thirdparty/get_jitify.cmake)
 # find hipCOMP
-include(cmake/thirdparty/get_hipcomp.cmake)
+include(cmake/thirdparty/get_nvcomp.cmake)
 # find thrust/cub
 include(cmake/thirdparty/get_rocthrust.cmake)
 # find rmm
@@ -195,9 +195,9 @@ include(cmake/thirdparty/get_arrow.cmake)
 # find dlpack
 include(cmake/thirdparty/get_dlpack.cmake)
 # find libhip++
-include(cmake/thirdparty/get_libhipcxx.cmake)
+include(cmake/thirdparty/get_libcudacxx.cmake)
 # find cuCollections Should come after including thrust and libhipcxx
-include(cmake/thirdparty/get_hipcollections.cmake)
+include(cmake/thirdparty/get_cucollections.cmake)
 # find or install GoogleTest
 if(CUDF_BUILD_TESTUTIL)
   include(cmake/thirdparty/get_gtest.cmake)
@@ -370,8 +370,8 @@ add_library(
   src/io/comp/cpu_unbz2.cpp
   src/io/comp/debrotli.cu
   src/io/comp/gpuinflate.cu
-  src/io/comp/hipcomp_adapter.cpp
-  src/io/comp/hipcomp_adapter.cu
+  src/io/comp/nvcomp_adapter.cpp
+  src/io/comp/nvcomp_adapter.cu
   src/io/comp/snap.cu
   src/io/comp/statistics.cu
   src/io/comp/uncomp.cpp
