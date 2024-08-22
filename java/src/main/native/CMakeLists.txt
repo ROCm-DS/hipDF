@@ -57,7 +57,6 @@ project(
   LANGUAGES C CXX HIP
 )
 
-
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
@@ -117,6 +116,7 @@ rapids_cmake_build_type("Release")
 
 # ##################################################################################################
 # * CUDF ------------------------------------------------------------------------------------------
+
 set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
 rapids_find_package(cudf REQUIRED)
 
@@ -132,7 +132,6 @@ if(NOT DEFINED hipcomp_DIR)
 endif()
 rapids_find_package(hipcomp REQUIRED)
 
-message(STATUS "CUDF CPP BUILD DIR ${CUDF_CPP_BUILD_DIR}")
 # ##################################################################################################
 # * find JNI -------------------------------------------------------------------------------------
 
@@ -215,10 +214,8 @@ endif()
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
 
-
 target_include_directories(
   cudfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
-                  "../../../../cpp/include"
                  "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
 )
 
@@ -297,11 +294,7 @@ if(CUDA_STATIC_RUNTIME)
 else()
   # Tell CMake what CUDA language runtime to use
   set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
-  set_target_properties(hipcomp::hipcomp PROPERTIES HIP_RUNTIME_LIBRARY Shared)
 endif()
-
-# Dynamically build and link hipcomp
-
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------

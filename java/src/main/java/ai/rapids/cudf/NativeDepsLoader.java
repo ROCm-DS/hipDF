@@ -49,7 +49,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-//import java.util.Arrays;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -79,7 +79,7 @@ public class NativeDepsLoader {
    */
   private static final String[][] loadOrder = new String[][]{
       new String[]{
-          "nvcomp"
+          "hipcomp"
       }, 
       new String[]{
           "cudf"

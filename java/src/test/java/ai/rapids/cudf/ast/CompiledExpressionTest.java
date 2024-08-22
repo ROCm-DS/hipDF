@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-// MIT License
-//
-// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 package ai.rapids.cudf.ast;
 
 import ai.rapids.cudf.ColumnVector;
@@ -60,10 +38,8 @@ import java.util.stream.Stream;
 
 import static ai.rapids.cudf.AssertUtils.assertColumnsAreEqual;
 
-import org.junit.jupiter.api.Disabled;
-
 public class CompiledExpressionTest extends CudfTestBase {
-  @Disabled
+  @Test
   public void testColumnReferenceTransform() {
     try (Table t = new Table.TestBuilder().column(5, 4, 3, 2, 1).column(6, 7, 8, null, 10).build()) {
       // use an implicit table reference
@@ -82,7 +58,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   public void testInvalidColumnReferenceTransform() {
     // Verify that computeColumn throws when passed an expression operating on TableReference.RIGHT.
     ColumnReference expr = new ColumnReference(1, TableReference.RIGHT);
@@ -92,7 +68,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   public void testBooleanLiteralTransform() {
     try (Table t = new Table.TestBuilder().column(true, false, null).build()) {
       Literal expr = Literal.ofBoolean(true);
@@ -384,7 +360,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testUnaryShortOperationTransform() {
     Short[] input = new Short[] { -5, 4, null, 2, 1 };
     try (Table t = new Table.TestBuilder().column(input).build()) {
@@ -624,7 +600,7 @@ public class CompiledExpressionTest extends CudfTestBase {
     }
   }
 
-  @Disabled
+  @Test
   void testMismatchedBinaryOperationTypes() {
     // verify expression fails to transform if operands are not the same type
     BinaryOperation expr = new BinaryOperation(BinaryOperator.ADD,
