@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
 import java.util.EnumSet;
 import java.util.List;
 import java.util.stream.Stream;
@@ -432,7 +433,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createBooleanParams") 
+  @MethodSource("createBooleanParams")
   void testBoolean(ReductionAggregation op, Boolean[] values,
       HostColumnVector.DataType type, Object expectedObject, Double delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -444,7 +445,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createByteParams")   
+  @MethodSource("createByteParams")
   void testByte(ReductionAggregation op, Byte[] values,
       HostColumnVector.DataType type, Object expectedObject, Double delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -456,7 +457,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createShortParams")   
+  @MethodSource("createShortParams")
   void testShort(ReductionAggregation op, Short[] values,
       HostColumnVector.DataType type, Object expectedObject, Double delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -467,7 +468,7 @@ class ReductionTest extends CudfTestBase {
   }
 
   @ParameterizedTest
-  @MethodSource("createIntParams")   
+  @MethodSource("createIntParams")
   void testInt(ReductionAggregation op, Integer[] values,
       HostColumnVector.DataType type, Object expectedObject, Double delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -479,7 +480,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createLongParams")   
+  @MethodSource("createLongParams")
   void testLong(ReductionAggregation op, Long[] values,
       HostColumnVector.DataType type, Object expectedObject, Double delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -490,7 +491,7 @@ class ReductionTest extends CudfTestBase {
   }
 
   @ParameterizedTest
-  @MethodSource("createFloatParams")   
+  @MethodSource("createFloatParams")
   void testFloat(ReductionAggregation op, Float[] values,
       HostColumnVector.DataType type, Object expectedObject, Float delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -502,7 +503,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createDoubleParams")   
+  @MethodSource("createDoubleParams")
   void testDouble(ReductionAggregation op, Double[] values,
       HostColumnVector.DataType type, Object expectedObject, Double delta) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -514,7 +515,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createTimestampDaysParams")   
+  @MethodSource("createTimestampDaysParams")
   void testTimestampDays(ReductionAggregation op, Integer[] values,
       HostColumnVector.DataType type, Object expectedObject) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -526,7 +527,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createTimestampSecondsParams")  
+  @MethodSource("createTimestampSecondsParams")
   void testTimestampSeconds(ReductionAggregation op, Long[] values,
       HostColumnVector.DataType type, Object expectedObject) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -538,7 +539,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createTimestampMilliSecondsParams")  
+  @MethodSource("createTimestampMilliSecondsParams")
   void testTimestampMilliseconds(ReductionAggregation op, Long[] values,
       HostColumnVector.DataType type, Object expectedObject) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -550,7 +551,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createTimestampMicroSecondsParams")  
+  @MethodSource("createTimestampMicroSecondsParams")
   void testTimestampMicroseconds(ReductionAggregation op, Long[] values,
       HostColumnVector.DataType type, Object expectedObject) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -562,7 +563,7 @@ class ReductionTest extends CudfTestBase {
 
   @Tag("noSanitizer")
   @ParameterizedTest
-  @MethodSource("createTimestampNanoSecondsParams")  
+  @MethodSource("createTimestampNanoSecondsParams")
   void testTimestampNanoseconds(ReductionAggregation op, Long[] values,
       HostColumnVector.DataType type, Object expectedObject) {
     try (Scalar expected = buildExpectedScalar(op, type, expectedObject);
@@ -573,7 +574,7 @@ class ReductionTest extends CudfTestBase {
   }
 
   @ParameterizedTest
-  @MethodSource("createFloatArrayParams") 
+  @MethodSource("createFloatArrayParams")
   void testFloatArray(ReductionAggregation op, List<Float>[] values,
       HostColumnVector.DataType type, Object expectedObject, Float delta) {
     HostColumnVector.DataType listType = new HostColumnVector.ListType(
@@ -585,7 +586,7 @@ class ReductionTest extends CudfTestBase {
     }
   }
 
-  @Test  
+  @Test
   void testWithSetOutputType() {
     try (Scalar expected = Scalar.fromLong(1 * 2 * 3 * 4L);
          ColumnVector cv = ColumnVector.fromBytes(new byte[]{1, 2, 3, 4});

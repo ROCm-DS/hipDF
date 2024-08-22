@@ -18,6 +18,7 @@ package ai.rapids.cudf;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 /**
  * Test for operations on tables with large row counts.
  */

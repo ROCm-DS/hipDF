@@ -18,7 +18,6 @@
 
 package ai.rapids.cudf;
 
-
 import ai.rapids.cudf.HostColumnVector.BasicType;
 import ai.rapids.cudf.HostColumnVector.Builder;
 import ai.rapids.cudf.HostColumnVector.DataType;
@@ -43,8 +42,6 @@ import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Disabled;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -77,7 +74,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
 public class TableTest extends CudfTestBase {
   private static final HostMemoryAllocator hostMemoryAllocator = DefaultHostMemoryAllocator.get();
 
@@ -90,6 +86,7 @@ public class TableTest extends CudfTestBase {
   private static final File TEST_ALL_TYPES_PLAIN_AVRO_FILE = TestUtils.getResourceAsFile("alltypes_plain.avro");
   private static final File TEST_SIMPLE_CSV_FILE = TestUtils.getResourceAsFile("simple.csv");
   private static final File TEST_SIMPLE_JSON_FILE = TestUtils.getResourceAsFile("people.json");
+  private static final File TEST_JSON_ERROR_FILE = TestUtils.getResourceAsFile("people_with_invalid_lines.json");
 
   private static final Schema CSV_DATA_BUFFER_SCHEMA = Schema.builder()
       .column(DType.INT32, "A")
@@ -312,7 +309,6 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  //@Test
   @Test
   void testReadJSONFile() {
     Schema schema = Schema.builder()
@@ -328,6 +324,39 @@ public class TableTest extends CudfTestBase {
         .build();
         Table table = Table.readJSON(schema, opts, TEST_SIMPLE_JSON_FILE)) {
       assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadJSONFileWithInvalidLines() {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "name")
+            .column(DType.INT32, "age")
+            .build();
+
+    // test with recoverWithNulls=true
+    {
+      JSONOptions opts = JSONOptions.builder()
+              .withLines(true)
+              .withRecoverWithNull(true)
+              .build();
+      try (Table expected = new Table.TestBuilder()
+              .column("Michael", "Andy", null, "Justin")
+              .column(null, 30, null, 19)
+              .build();
+           Table table = Table.readJSON(schema, opts, TEST_JSON_ERROR_FILE)) {
+        assertTablesAreEqual(expected, table);
+      }
+    }
+
+    // test with recoverWithNulls=false
+    {
+      JSONOptions opts = JSONOptions.builder()
+              .withLines(true)
+              .withRecoverWithNull(false)
+              .build();
+      assertThrows(CudfException.class, () ->
+        Table.readJSON(schema, opts, TEST_JSON_ERROR_FILE));
     }
   }
 
@@ -3141,8 +3170,8 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test // fails with:  NULL for Column 0 Row 15 ==> expected: <true> but was: <false>
-  void DPasses() {
+  @Test
+  void testChunkedPackTwoPasses() {
     // this test packes ~2MB worth of long into a 1MB bounce buffer
     // this is 3 iterations because of the validity buffer
     Long[] longs = new Long[256*1024];
@@ -4009,7 +4038,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testCreateTDigestReduction() {
     try (Table t1 = new Table.TestBuilder()
             .column(100, 150, 160, 70, 110, 160)
@@ -4035,7 +4064,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testMergeTDigestReduction() {
     StructType centroidStruct = new StructType(false,
             new BasicType(false, DType.FLOAT64), // mean
@@ -4100,6 +4129,115 @@ public class TableTest extends CudfTestBase {
     }
   }
 
+  @Test
+  void testGroupbyHistogram() {
+    StructType histogramStruct = new StructType(false,
+        new BasicType(false, DType.INT32), // values
+        new BasicType(false, DType.INT64)); // frequencies
+    ListType histogramList = new ListType(false, histogramStruct);
+
+    // key = 0: values = [2, 2, -3, -2, 2]
+    // key = 1: values = [2, 0, 5, 2, 1]
+    // key = 2: values = [-3, 1, 1, 2, 2]
+    try (Table input = new Table.TestBuilder()
+        .column(2, 0, 2, 1, 1, 1, 0, 0, 0, 1, 2, 2, 1, 0, 2)
+        .column(-3, 2, 1, 2, 0, 5, 2, -3, -2, 2, 1, 2, 1, 2, 2)
+        .build();
+         Table result = input.groupBy(0)
+             .aggregate(GroupByAggregation.histogram().onColumn(1));
+         Table sortedResult = result.orderBy(OrderByArg.asc(0));
+         ColumnVector sortedOutHistograms = sortedResult.getColumn(1).listSortRows(false, false);
+
+         ColumnVector expectedKeys = ColumnVector.fromInts(0, 1, 2);
+         ColumnVector expectedHistograms = ColumnVector.fromLists(histogramList,
+             Arrays.asList(new StructData(-3, 1L), new StructData(-2, 1L), new StructData(2, 3L)),
+             Arrays.asList(new StructData(0, 1L), new StructData(1, 1L), new StructData(2, 2L),
+                 new StructData(5, 1L)),
+             Arrays.asList(new StructData(-3, 1L), new StructData(1, 2L), new StructData(2, 2L)))
+    ) {
+      assertColumnsAreEqual(expectedKeys, sortedResult.getColumn(0));
+      assertColumnsAreEqual(expectedHistograms, sortedOutHistograms);
+    }
+  }
+
+  @Test
+  void testGroupbyMergeHistogram() {
+    StructType histogramStruct = new StructType(false,
+        new BasicType(false, DType.INT32), // values
+        new BasicType(false, DType.INT64)); // frequencies
+    ListType histogramList = new ListType(false, histogramStruct);
+
+    // key = 0: histograms = [[<-3, 1>, <-2, 1>, <2, 3>], [<0, 1>, <1, 1>], [<-3, 3>, <0, 1>, <1, 2>]]
+    // key = 1: histograms = [[<-2, 1>, <1, 3>, <2, 2>], [<0, 2>, <1, 1>, <2, 2>]]
+    try (Table input = new Table.TestBuilder()
+        .column(0, 1, 0, 1, 0)
+        .column(histogramStruct,
+            new StructData[]{new StructData(-3, 1L), new StructData(-2, 1L), new StructData(2, 3L)},
+            new StructData[]{new StructData(-2, 1L), new StructData(1, 3L), new StructData(2, 2L)},
+            new StructData[]{new StructData(0, 1L), new StructData(1, 1L)},
+            new StructData[]{new StructData(0, 2L), new StructData(1, 1L), new StructData(2, 2L)},
+            new StructData[]{new StructData(-3, 3L), new StructData(0, 1L), new StructData(1, 2L)})
+        .build();
+         Table result = input.groupBy(0)
+             .aggregate(GroupByAggregation.mergeHistogram().onColumn(1));
+         Table sortedResult = result.orderBy(OrderByArg.asc(0));
+         ColumnVector sortedOutHistograms = sortedResult.getColumn(1).listSortRows(false, false);
+
+         ColumnVector expectedKeys = ColumnVector.fromInts(0, 1);
+         ColumnVector expectedHistograms = ColumnVector.fromLists(histogramList,
+             Arrays.asList(new StructData(-3, 4L), new StructData(-2, 1L), new StructData(0, 2L),
+                           new StructData(1, 3L), new StructData(2, 3L)),
+             Arrays.asList(new StructData(-2, 1L), new StructData(0, 2L), new StructData(1, 4L),
+                           new StructData(2, 4L)))
+    ) {
+      assertColumnsAreEqual(expectedKeys, sortedResult.getColumn(0));
+      assertColumnsAreEqual(expectedHistograms, sortedOutHistograms);
+    }
+  }
+
+  @Test
+  void testReductionHistogram() {
+    StructType histogramStruct = new StructType(false,
+        new BasicType(false, DType.INT32), // values
+        new BasicType(false, DType.INT64)); // frequencies
+
+    try (ColumnVector input = ColumnVector.fromInts(-3, 2, 1, 2, 0, 5, 2, -3, -2, 2, 1);
+         Scalar result = input.reduce(ReductionAggregation.histogram(), DType.LIST);
+         ColumnVector resultCV = result.getListAsColumnView().copyToColumnVector();
+         Table resultTable = new Table(resultCV);
+         Table sortedResult = resultTable.orderBy(OrderByArg.asc(0));
+
+         ColumnVector expectedHistograms = ColumnVector.fromStructs(histogramStruct,
+             new StructData(-3, 2L), new StructData(-2, 1L), new StructData(0, 1L),
+             new StructData(1, 2L), new StructData(2, 4L), new StructData(5, 1L))
+    ) {
+      assertColumnsAreEqual(expectedHistograms, sortedResult.getColumn(0));
+    }
+  }
+
+  @Test
+  void testReductionMergeHistogram() {
+    StructType histogramStruct = new StructType(false,
+        new BasicType(false, DType.INT32), // values
+        new BasicType(false, DType.INT64)); // frequencies
+
+    try (ColumnVector input = ColumnVector.fromStructs(histogramStruct,
+             new StructData(-3, 2L), new StructData(2, 1L), new StructData(1, 1L),
+             new StructData(2, 2L), new StructData(0, 4L), new StructData(5, 1L),
+             new StructData(2, 2L), new StructData(-3, 3L), new StructData(-2, 5L),
+             new StructData(2, 3L), new StructData(1, 4L));
+         Scalar result = input.reduce(ReductionAggregation.mergeHistogram(), DType.LIST);
+         ColumnVector resultCV = result.getListAsColumnView().copyToColumnVector();
+         Table resultTable = new Table(resultCV);
+         Table sortedResult = resultTable.orderBy(OrderByArg.asc(0));
+
+         ColumnVector expectedHistograms = ColumnVector.fromStructs(histogramStruct,
+             new StructData(-3, 5L), new StructData(-2, 5L), new StructData(0, 4L),
+             new StructData(1, 5L), new StructData(2, 8L), new StructData(5, 1L))
+    ) {
+      assertColumnsAreEqual(expectedHistograms, sortedResult.getColumn(0));
+    }
+  }
   @Test
   void testGroupByMinMaxDecimal() {
     try (Table t1 = new Table.TestBuilder()
@@ -4292,7 +4430,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Needs Scalar
+  @Test
   void testWindowingCount() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4330,7 +4468,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testWindowingMin() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4371,7 +4509,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingMax() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4412,7 +4550,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingSum() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4442,7 +4580,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingRowNumber() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4527,7 +4665,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingCollectList() {
     RollingAggregation aggCollectWithNulls = RollingAggregation.collectList(NullPolicy.INCLUDE);
     RollingAggregation aggCollect = RollingAggregation.collectList();
@@ -4603,7 +4741,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingCollectSet() {
     RollingAggregation aggCollect = RollingAggregation.collectSet();
     RollingAggregation aggCollectWithEqNulls = RollingAggregation.collectSet(NullPolicy.INCLUDE,
@@ -4712,7 +4850,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingLead() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4933,7 +5071,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testWindowingLag() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5152,7 +5290,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   void testWindowingMean() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
         .column( 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3) // GBY Key
@@ -5627,7 +5765,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test   // Scalar
+  @Test
   void testRangeWindowingWithoutGroupByColumns() {
     try (Table unsorted = new Table.TestBuilder()
         .column(             7, 5, 1, 9, 7, 9, 8, 2, 8, 0, 6, 6, 8) // Agg Column
@@ -5669,7 +5807,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  //Scalar
+  @Test
   void testRangeWindowingOrderByUnsupportedDataTypeExceptions() {
     try (Table table = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5693,7 +5831,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testInvalidWindowTypeExceptions() {
     try (Scalar one = Scalar.fromInt(1);
          Table table = new Table.TestBuilder()
@@ -5721,7 +5859,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testRangeWindowingCountUnboundedPreceding() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5765,7 +5903,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testRangeWindowingWithStringOrderByColumn() {
     final String X = null;
     final int orderIndex = 3; // Index of order-by column.
@@ -5817,7 +5955,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  //Scalar
+  @Test
   void testRangeWindowingCountUnboundedASCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5906,7 +6044,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  //Scalar
+  @Test
   void testRangeWindowingCountUnboundedDESCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6001,7 +6139,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testRangeWindowingCountUnboundedASCWithNullsLast() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6089,7 +6227,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  //Scalar
+  @Test
   void testRangeWindowingCountUnboundedDESCWithNullsLast() {
     Integer X = null;
     try (Table unsorted = new Table.TestBuilder()
@@ -6214,7 +6352,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testRangeWindowsWithDecimalOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6319,7 +6457,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testRangeWindowsWithFloatOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
             .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -7478,7 +7616,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalars
+  @Test
   void testScatterScalars() {
     try (Scalar s1 = Scalar.fromInt(0);
          Scalar s2 = Scalar.fromString("A");
@@ -8064,7 +8202,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // Scalar
+  @Test
   void testParquetWriteMap() throws IOException {
     ParquetWriterOptions options = ParquetWriterOptions.builder()
         .withMapColumn(mapColumn("my_map",
@@ -8713,7 +8851,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test  // fails with  Null Count For Column 0 ==> expected: <1> but was: <4>
+  @Test
   void fixedWidthRowsRoundTripWide() {
     TestBuilder tb = new TestBuilder();
     IntStream.range(0, 10).forEach(i -> tb.column(3l, 9l, 4l, 2l, 20l, null));
@@ -8747,7 +8885,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test @Disabled // hangs
+  @Test
   void fixedWidthRowsRoundTrip() {
     try (Table origTable = new TestBuilder()
         .column(3l, 9l, 4l, 2l, 20l, null)

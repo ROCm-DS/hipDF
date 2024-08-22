@@ -20,6 +20,7 @@ package ai.rapids.cudf;
 import ai.rapids.cudf.HostColumnVector.Builder;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;

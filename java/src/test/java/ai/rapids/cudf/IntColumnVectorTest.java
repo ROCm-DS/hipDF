@@ -151,7 +151,7 @@ public class IntColumnVectorTest extends CudfTestBase {
     }
   }
 
-  @Test 
+  @Test
   public void testCastToInt() {
     try (ColumnVector doubleColumnVector = ColumnVector.fromDoubles(new double[]{4.3, 3.8, 8});
          ColumnVector shortColumnVector = ColumnVector.fromShorts(new short[]{100});

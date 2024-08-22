@@ -26,7 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.ArrayList;
-//import java.util.Arrays;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -54,19 +54,16 @@ public class NativeDepsLoader {
    * stage are guaranteed to have finished loading before any dependencies in
    * subsequent stages are loaded.
    */
-  private static String[][] loadOrder = new String[][]{
-     new String[]{
-          "nvcomp_bitcomp", "nvcomp_gdeflate"
-      }, 
-     new String[]{
-          "nvcomp"
-      }, 
+  private static final String[][] loadOrder = new String[][]{
       new String[]{
-          "hipdf"
-      },
-      new String[]{
-          "hipdfjni"
-      }
+      "hipdf"
+    },
+    new String[]{
+      "hipdfjni"
+    },
+    new String[]{
+      "hipcomp"
+    } 
   };
 
   private static final String[][] noNVRAMLoadOrder = new String[][] {
@@ -91,10 +88,6 @@ public class NativeDepsLoader {
   public static synchronized void loadNativeDeps() {
     if (!loaded) {
       try {
-        if (System.getProperty("NO_NVRAM") != null) {
-          loadOrder = noNVRAMLoadOrder;
-        }
-
         loadNativeDeps(loadOrder);
         loaded = true;
       } catch (Throwable t) {

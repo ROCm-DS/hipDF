@@ -57,7 +57,6 @@ project(
   LANGUAGES C CXX HIP
 )
 
-
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
@@ -102,8 +101,6 @@ set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_CUDA_DEFINITIONS "")
 set(CMAKE_CXX_FLAGS "-DHIPDF_ENABLE_DECIMAL128")
 
-#set(HIPDF_ENABLE_DECIMAL128 "ON")
-
 rapids_find_package(HIP REQUIRED)
 include(ConfigureCUDA) # set other CUDA compilation flags
 
@@ -119,6 +116,7 @@ rapids_cmake_build_type("Release")
 
 # ##################################################################################################
 # * CUDF ------------------------------------------------------------------------------------------
+
 set(hipdf_ROOT "${CUDF_CPP_BUILD_DIR}")
 rapids_find_package(hipdf REQUIRED)
 
@@ -130,7 +128,6 @@ if(NOT DEFINED hipcomp_DIR)
 endif()
 rapids_find_package(hipcomp REQUIRED)
 
-message(STATUS "CUDF CPP BUILD DIR ${CUDF_CPP_BUILD_DIR}")
 # ##################################################################################################
 # * find JNI -------------------------------------------------------------------------------------
 
@@ -146,10 +143,10 @@ endif()
 # ##################################################################################################
 # * GDS/cufile ------------------------------------------------------------------------------------
 
-# if(USE_GDS)
-#   message(STATUS "Building with GPUDirect Storage (GDS)/cuFile support")
-#   find_package(cuFile REQUIRED)
-# endif()
+if(USE_GDS)
+  message(STATUS "Building with GPUDirect Storage (GDS)/cuFile support")
+  find_package(cuFile REQUIRED)
+endif()
 
 # ##################################################################################################
 # * library targets -------------------------------------------------------------------------------
@@ -206,10 +203,8 @@ endif()
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
 
-
 target_include_directories(
   hipdfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
-                  "../../../../cpp/include"
                  "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
 )
 
@@ -226,7 +221,6 @@ set_target_properties(
              CXX_STANDARD 17
              CXX_STANDARD_REQUIRED ON
              CUDA_STANDARD 17
-	     # HIPDF_ENABLE_DECIMAL128 ON
              CUDA_STANDARD_REQUIRED ON
              POSITION_INDEPENDENT_CODE ON
              INTERFACE_POSITION_INDEPENDENT_CODE ON
@@ -242,21 +236,21 @@ target_compile_definitions(
                  "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_CUDA_DEFINITIONS}>"
 )
 
-# if(USE_GDS)
-#   add_library(cufilejni src/CuFileJni.cpp)
-#   set_target_properties(
-#     cufilejni
-#     PROPERTIES BUILD_RPATH "\$ORIGIN"
-#                INSTALL_RPATH "\$ORIGIN"
-#                # set target compile options
-#                CXX_STANDARD 17
-#                CXX_STANDARD_REQUIRED ON
-#                POSITION_INDEPENDENT_CODE ON
-#                INTERFACE_POSITION_INDEPENDENT_CODE ON
-#   )
-#   target_include_directories(cufilejni PRIVATE "${cuFile_INCLUDE_DIRS}")
-#   target_link_libraries(cufilejni PRIVATE hipdfjni "${cuFile_LIBRARIES}")
-# endif()
+if(USE_GDS)
+  add_library(cufilejni src/CuFileJni.cpp)
+  set_target_properties(
+    cufilejni
+    PROPERTIES BUILD_RPATH "\$ORIGIN"
+               INSTALL_RPATH "\$ORIGIN"
+               # set target compile options
+               CXX_STANDARD 17
+               CXX_STANDARD_REQUIRED ON
+               POSITION_INDEPENDENT_CODE ON
+               INTERFACE_POSITION_INDEPENDENT_CODE ON
+  )
+  target_include_directories(cufilejni PRIVATE "${cuFile_INCLUDE_DIRS}")
+  target_link_libraries(cufilejni PRIVATE hipdfjni "${cuFile_LIBRARIES}")
+endif()
 
 # ##################################################################################################
 # * link libraries --------------------------------------------------------------------------------
@@ -285,22 +279,18 @@ if(CUDA_STATIC_RUNTIME)
 else()
   # Tell CMake what CUDA language runtime to use
   set_target_properties(hipdfjni PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
-  set_target_properties(hipcomp::hipcomp PROPERTIES HIP_RUNTIME_LIBRARY Shared)
 endif()
-
-# Dynamically build and link hipcomp
-
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------
 if(TARGET hipcomp::hipcomp)
- add_custom_command(
+  add_custom_command(
    TARGET hipdfjni
-   PRE_LINK
-   COMMAND
+    PRE_LINK
+    COMMAND
      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hipcomp::hipcomp> #$<TARGET_FILE:hipcomp::hipcomp_gdeflate>
      #$<TARGET_FILE:hipcomp::hipcomp_bitcomp> 
      "${PROJECT_BINARY_DIR}"
    COMMENT "Copying hipcomp libraries to ${PROJECT_BINARY_DIR}"
- )
+  )
 endif()
