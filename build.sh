@@ -119,8 +119,7 @@ INSTALL_PREFIX=${INSTALL_PREFIX:=${PREFIX:=${CONDA_PREFIX}}}
 PARALLEL_LEVEL=${PARALLEL_LEVEL:=$(nproc)}
 
 function hasArg {
-    (( ${NUMARGS} != 0 )) && (echo " ${ARGS} ${ARGS//cudf/cudf} " | grep -q " $1 ") #: NOTE(HIP/AMD): Allows '*cudf*' build parameters instead of '*cudf' ones.
-    #: (( ${NUMARGS} != 0 )) && (echo " ${ARGS} ${ARGS//cudf/cudf}" | grep -q " $1 ") #: NOTE(HIP/AMD): The opposite variant would help to minimize changes to original 'build.sh'
+    (( ${NUMARGS} != 0 )) && (echo " ${ARGS} " | grep -q " $1 ")
 }
 
 function cmakeArgs {
