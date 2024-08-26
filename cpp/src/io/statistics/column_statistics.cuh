@@ -270,14 +270,11 @@ __device__ void cooperative_load(T& destination, T const* source = nullptr)
 {
   using load_type = std::conditional_t<((sizeof(T) % sizeof(uint32_t)) == 0), uint32_t, uint8_t>;
   if (source == nullptr) {
-    //: TODO(HIP/AMD): type derivation with auto keyword (auto i) fails presently with hipcc/HIP AMD, causing
-    //: UB behaviour (the code is not copying the data correctly). See issue https://github.com/AMD-AI/hipdf/issues/85.
-    for (size_t i = threadIdx.x; i < (sizeof(T) / sizeof(load_type)); i += blockDim.x) {
+    for (auto i = threadIdx.x; i < (sizeof(T) / sizeof(load_type)); i += blockDim.x) {
       reinterpret_cast<load_type*>(&destination)[i] = load_type{0};
     }
   } else {
-    //: TODO(HIP/AMD): auto does not work here correctly and yields erroneous results/segfaults, see SWDEV-443265
-    for (size_t i = threadIdx.x; i < sizeof(T) / sizeof(load_type); i += blockDim.x) {
+    for (auto i = threadIdx.x; i < sizeof(T) / sizeof(load_type); i += blockDim.x) {
       reinterpret_cast<load_type*>(&destination)[i] = reinterpret_cast<load_type const*>(source)[i];
     }
   }
