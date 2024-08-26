@@ -44,8 +44,6 @@ function(find_and_configure_hipcomp)
   endif()
   rapids_cpm_hipcomp(${export_args} USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_NVCOMP})
 
-  target_compile_definitions(hipcomp PRIVATE CG_WORKAROUND) #TODO(HIP/AMD): This is required to work around SWDEV-440342, remove when resolved
-
   # Per-thread default stream
   target_compile_definitions(hipcomp PRIVATE "CG_WORKAROUND") # TODO(HIP): Remove it later
   if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
