@@ -93,7 +93,7 @@ struct scan_tile_state_view {
     while ((status = tile_status[offset].load(cuda::memory_order_relaxed)) ==
            scan_tile_status::invalid) {}
 
-    //: TODO(HIP/AMD): This threadfence is necessary, as the subsequent ThreadLoad
+    //: NOTE(HIP/AMD): This threadfence is necessary, as the subsequent ThreadLoad
     // otherwise appears re-ordered before the loading of the atomic flag in line 68,
     // thus resulting in the return of an invalid prefix. 
     // See: internal issue 71

@@ -1487,7 +1487,6 @@ class device_row_comparator {
       column_device_view rcol = rhs.slice(rhs_element_index, 1);
       while (lcol.type().id() == type_id::STRUCT || lcol.type().id() == type_id::LIST) {
         if (check_nulls) {
-          //TODO(HIP/AMD)-
           auto lvalid = detail::make_validity_iterator<true>(lcol);
           auto rvalid = detail::make_validity_iterator<true>(rcol);
           if (nulls_are_equal == null_equality::UNEQUAL) {
