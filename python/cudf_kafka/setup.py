@@ -125,7 +125,7 @@ extensions = [
         ),
         #: TODO(HIP/AMD): We should use the same library names as cuDF to not break build systems
         #: libraries=["cudf", "cudf_kafka"],
-        libraries=["hipdf", "cudf_kafka"],
+        libraries=["cudf", "cudf_kafka"],
         language="c++",
         extra_compile_args=["-std=c++17", "-DFMT_HEADER_ONLY=1"],
     )
