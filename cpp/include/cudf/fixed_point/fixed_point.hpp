@@ -339,9 +339,7 @@ class fixed_point {
    *
    * @return The underlying value of the `fixed_point` number
    */
-  // TODO(HIP/AMD): This is a hotfix to fix two failing PARQUET unit tests
-  // with ROCm 6.2, please see internal issue 143.
-  CUDF_HOST_DEVICE __attribute__((noinline)) rep value() const { return _value; }
+  CUDF_HOST_DEVICE inline rep value() const { return _value; }
 
   /**
    * @brief Method that returns the scale of the `fixed_point` number
