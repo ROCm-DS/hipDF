@@ -3,7 +3,7 @@
     "libhipcxx" : {
       "version" : "1.0",
       "git_url" : "https://$ENV{GITHUB_PASS}@github.com/AMD-AI/libhipcxx",
-      "git_tag" : "dev"
+      "git_tag" : "fix_cmake_install_new"
     },
     "hipco" : {
       "version" : "1.0",
