@@ -858,7 +858,6 @@ if(HIPDF_BUILD_TESTUTIL)
 
   # Needs to be static so that we support usage of static builds of gtest which doesn't compile with
   # fPIC enabled and therefore can't be embedded into shared libraries.
-  #TODO(HIP/AMD)
   add_library(
     hipdftestutil STATIC
     tests/io/metadata_utilities.cpp

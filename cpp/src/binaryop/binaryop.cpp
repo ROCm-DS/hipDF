@@ -161,7 +161,6 @@ void binary_operation(mutable_column_view& out,
     cuda_source = cudf::jit::parse_single_function_ptx(udf, "GENERIC_BINARY_OP", output_type_name);
   }
 
-  //TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
                               .instantiate(output_type_name,  // list of template arguments
                                            cudf::type_to_name(lhs.type()),
