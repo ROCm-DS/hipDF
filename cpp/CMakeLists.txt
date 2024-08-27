@@ -994,6 +994,8 @@ install(DIRECTORY ${CUDF_SOURCE_DIR}/include/cudf ${CUDF_SOURCE_DIR}/include/cud
                   ${CUDF_SOURCE_DIR}/include/nvtext DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+install(DIRECTORY ${CUDF_SOURCE_DIR}/include/hip_extensions DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
 if(CUDF_BUILD_STREAMS_TEST_UTIL)
   install(TARGETS cudf_identify_stream_usage_mode_cudf DESTINATION ${lib_dir})
   install(TARGETS cudf_identify_stream_usage_mode_testing DESTINATION ${lib_dir})
