@@ -167,7 +167,7 @@ struct data_type_error : public std::invalid_argument, public stacktrace_recorde
 /** 
 * @brief Macro indicating that a exception has happened in a device code.
 * HIP: Added this macro to throw exception on the device code.
-*  Used in round_up_safe in hipdf/cpp/include/cudf/detail/utilities/integer_utils.hpp.
+*  Used in round_up_safe in cudf/cpp/include/cudf/detail/utilities/integer_utils.hpp.
 */ 
 #define CUDF_EXP_ON_DEVICE(msg)         \
   do {                                  \

@@ -201,7 +201,7 @@ constexpr CUDF_HOST_DEVICE inline bitmask_type set_most_significant_bits(size_ty
 }
 
 // HIP: This method is the 32 bit version of set_most_significant_bits which is defined at line 171.
-// This method is only used in hipdf/cpp/src/copying/contiguous_split.hip in copy_buffer method.
+// This method is only used in cudf/cpp/src/copying/contiguous_split.hip in copy_buffer method.
 // We added this implementation to avoid overwritting copy_buffer.
 /**
  * @brief Returns a bitmask word with the `n` most significant bits set.
