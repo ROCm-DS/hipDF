@@ -301,10 +301,7 @@ class numeric_scalar : public detail::fixed_width_scalar<T> {
  */
 template <typename T>
 class fixed_point_scalar : public scalar {
- // TODO(HIP/AMD): We disable this check to not break the cython build of scalar.pyx if 
- // DECIMAL128 is not available. This is part of a temporary workaround for 
- // https://github.com/AMD-AI/hipdf/issues/3.
- // static_assert(is_fixed_point<T>(), "Unexpected non-fixed_point type.");
+ static_assert(is_fixed_point<T>(), "Unexpected non-fixed_point type.");
 
  public:
   using rep_type   = typename T::rep;  ///< The representation type of the fixed_point number.
