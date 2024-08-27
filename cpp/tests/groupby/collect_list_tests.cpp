@@ -132,7 +132,7 @@ TYPED_TEST(groupby_collect_list_test, CollectListsWithNullExclusion)
 
   cudf::test::fixed_width_column_wrapper<K, int32_t> expect_keys{1, 2, 3, 4};
 
-  //TODO(HIP/AMD): the original code uses {LCW{}} only, but fails due to https://github.com/AMD-AI/hipdf/issues/23
+  //TODO(HIP/AMD): the original code uses {LCW{}} only, but fails due to internal issue 23
   // LCW expect_vals{{{1, 2}}, {LCW{}}, {{9, 10}, {11}}, {}};
   LCW expect_vals{{{1, 2}}, LCW({LCW{}}), {{9, 10}, {11}}, {}};
 

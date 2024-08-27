@@ -71,7 +71,7 @@ struct scan_tile_state_view {
     //: NOTE(HIP/AMD): This threadfence is necessary, as the subsequent ThreadLoad
     // otherwise appears re-ordered before the loading of the atomic flag in line 68,
     // thus resulting in the return of an invalid prefix. 
-    // See: https://github.com/AMD-AI/hipdf/issues/71
+    // See: internal issue 71
     __threadfence();
 
     if (status == scan_tile_status::partial) {

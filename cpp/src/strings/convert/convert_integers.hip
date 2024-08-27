@@ -53,7 +53,7 @@ template <typename IntegerType>
 struct string_to_integer_check_fn {
   // TODO(HIP/AMD): It seems that the compiler optimizes the operator overloading.
   // Added __attribute__((optnone)) as a workaround for now.
-  // https://github.com/AMD-AI/hipdf/issues/50
+  // internal issue 50
   __attribute__((optnone)) 
   __device__ bool operator()(thrust::pair<string_view, bool> const& p) const
   {

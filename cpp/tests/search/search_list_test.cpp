@@ -389,19 +389,19 @@ TEST_F(ListBinarySearch, ListWithNulls)
       lcw{-17},                 // 2
     };
 
-    // TODO(HIP/AMD): list construction issue, see https://github.com/AMD-AI/hipdf/issues/23
+    // TODO(HIP/AMD): list construction issue, see internal issue 23
     auto const col2 = lcw({
       lcw{27},                  // 0
       lcw{{null}, null_at(0)},  // 1
       lcw{},                    // 2
     });
 
-    // TODO(HIP/AMD): list construction issue, see https://github.com/AMD-AI/hipdf/issues/23
+    // TODO(HIP/AMD): list construction issue, see internal issue 23
     auto const val1 = lcw({
       lcw{87},
     });
 
-    // TODO(HIP/AMD): list construction issue, see https://github.com/AMD-AI/hipdf/issues/23
+    // TODO(HIP/AMD): list construction issue, see internal issue 23
     auto const val2 = lcw({
       lcw{},
     });

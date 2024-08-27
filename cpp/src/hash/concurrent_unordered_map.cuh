@@ -540,7 +540,7 @@ class concurrent_unordered_map {
       hipPointerAttribute_t hashtbl_values_ptr_attributes;
       hipError_t status =
         hipPointerGetAttributes(&hashtbl_values_ptr_attributes, m_hashtbl_values);
-      // https://github.com/AMD-AI/hipdf/issues/86
+      // internal issue 86
       // SWDEV-444830
       // HIP: If capacity == 0, m_hashtbl_values is nullptr 
       // and hipPointerGetAttributes returns hipErrorInvalidValue.
