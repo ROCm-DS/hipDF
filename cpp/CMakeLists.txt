@@ -36,6 +36,9 @@
 
 cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
 
+# NOTE(HIP/AMD): make *.cu files HIP lang files
+set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../overrides.cmake")
+
 include(../fetch_rapids.cmake)
 #include(../rapids_config.cmake) #TODO(HIP/AMD): is this the same file as fetch_rapids.cmake?
 include(rapids-cmake)
@@ -58,9 +61,9 @@ project(
   VERSION "${RAPIDS_VERSION}"
   LANGUAGES C CXX
 )
+
 # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
 # This ensures that those packages are compiled with the same architecture flags.
-enable_language(HIP)
 set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 
 rapids_cmake_write_version_file(include/cudf/version_config.hpp)
