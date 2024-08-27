@@ -24,6 +24,10 @@
 
 #include "hipcomp/snappy.h"
 
+#ifndef nvcompStatus_t
+# define nvcompStatus_t hipcompStatus_t
+#endif
+
 #ifndef nvcompBatchedSnappyCompressAsync
 #  define nvcompBatchedSnappyCompressAsync hipcompBatchedSnappyCompressAsync
 #endif
