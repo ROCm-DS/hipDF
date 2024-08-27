@@ -36,6 +36,9 @@
 
 cmake_minimum_required(VERSION 3.26.4 FATAL_ERROR)
 
+# NOTE(HIP/AMD): make *.cu files HIP lang files
+set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../overrides.cmake")
+
 include(../fetch_rapids.cmake)
 include(rapids-cmake)
 include(rapids-cpm)
@@ -57,9 +60,9 @@ project(
   VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
   LANGUAGES C CXX HIP
 )
+
 # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
 # This ensures that those packages are compiled with the same architecture flags.
-enable_language(HIP)
 set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
 # option(USE_NVTX "Build with NVTX support" ON)
 

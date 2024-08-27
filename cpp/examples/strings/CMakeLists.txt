@@ -2,6 +2,9 @@
 
 cmake_minimum_required(VERSION 3.26.4)
 
+# NOTE(HIP/AMD): make *.cu files HIP lang files
+set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../../../overrides.cmake")
+
 project(
   strings_examples
   VERSION 0.0.1
