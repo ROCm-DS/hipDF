@@ -146,7 +146,7 @@ def compile_udf(udf, type_signature, **options):
     # We haven't compiled a function like this before, so need to fall back to
     # compilation with Numba
     # TODO(HIP/AMD): On AMD backend, we need to give LLVM IR UDF function a specific name.
-    # This kind of postprocessing could also be done in libhipdf.
+    # This kind of postprocessing could also be done in libcudf.
     ptx_code, return_type = cuda.compile_ptx_for_current_device(
         udf, type_signature, device=True, **options
     )

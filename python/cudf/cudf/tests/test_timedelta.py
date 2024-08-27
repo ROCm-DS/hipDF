@@ -505,7 +505,7 @@ def test_timedelta_series_ops_with_scalars(data, other_scalars, dtype, op):
 
 # TODO(HIP/AMD):
 # The operation x % 0 is undefined behavior.
-# It is used by libhipdf (PyMod) in this test case for reverse=true.
+# It is used by libcudf (PyMod) in this test case for reverse=true.
 # On CUDA, x % 0 returns -1, so the test fails expectedly (that is why it
 # originally is marked as xfail).
 # With HIP/AMD, x % 0 == x holds which matches Pandas' behavior.
@@ -636,7 +636,7 @@ def test_timedelta_series_ops_with_cudf_scalars(data, cpu_scalar, dtype, op):
 
 # TODO(HIP/AMD):
 # The operation x % 0 is undefined behavior.
-# It is used by libhipdf (PyMod) in this test case for reverse=true.
+# It is used by libcudf (PyMod) in this test case for reverse=true.
 # On CUDA, x % 0 returns -1, so the test fails expectedly (that is why it
 # originally is marked as xfail).
 # With HIP/AMD, x % 0 == x holds which matches Pandas' behavior.
