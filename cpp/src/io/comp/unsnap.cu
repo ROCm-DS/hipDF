@@ -750,10 +750,7 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
 {
   dim3 dim_block(128, 1);           // 4 warps per stream, 1 stream per block
   dim3 dim_grid(inputs.size(), 1);  // TODO: Check max grid dimensions vs max expected count
-  // FIXME(HIP/AMD): with the template kernel, we would run into the error "reproducer_struct\.cu:16:30: error: initialization is not supported for __shared__ variables.
-  // unsnap_kernel<128><<<dim_grid, dim_block, 0, stream.value()>>>(inputs, outputs, results);
-
-  unsnap_kernel<<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
+  unsnap_kernel<128><<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
 }
 
 }  // namespace cudf::io::detail
