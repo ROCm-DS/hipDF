@@ -362,7 +362,7 @@ inline auto parse_cudf_test_opts(int argc, char** argv)
       "rmm_mode",
       "RMM allocation mode",
       cxxopts::value<std::string>()->default_value(default_rmm_mode));
-    // `new_hipdf_default` means that cudf::get_default_stream has been patched,
+    // `new_cudf_default` means that cudf::get_default_stream has been patched,
     // so we raise errors anywhere that a CUDA default stream is observed
     // instead of cudf::get_default_stream(). This corresponds to compiling
     // identify_stream_usage with STREAM_MODE_TESTING=OFF (must do both at the
@@ -406,10 +406,10 @@ inline auto parse_cudf_test_opts(int argc, char** argv)
     rmm::mr::set_current_device_resource(resource.get());                                     \
                                                                                               \
     auto const stream_mode = cmd_opts["stream_mode"].as<std::string>();                       \
-    if ((stream_mode == "new_hipdf_default") || (stream_mode == "new_testing_default")) {      \
+    if ((stream_mode == "new_cudf_default") || (stream_mode == "new_testing_default")) {      \
       auto const stream_error_mode       = cmd_opts["stream_error_mode"].as<std::string>();   \
       auto const error_on_invalid_stream = (stream_error_mode == "error");                    \
-      auto const check_default_stream    = (stream_mode == "new_hipdf_default");               \
+      auto const check_default_stream    = (stream_mode == "new_cudf_default");               \
       auto adaptor                       = make_stream_checking_resource_adaptor(             \
         resource.get(), error_on_invalid_stream, check_default_stream); \
       rmm::mr::set_current_device_resource(&adaptor);                                         \
