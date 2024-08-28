@@ -99,7 +99,6 @@ set(CUDF_CXX_FLAGS "")
 set(CUDF_CUDA_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_CUDA_DEFINITIONS "")
-set(CMAKE_CXX_FLAGS "-DHIPDF_ENABLE_DECIMAL128")
 
 rapids_find_package(HIP REQUIRED)
 include(ConfigureCUDA) # set other CUDA compilation flags
