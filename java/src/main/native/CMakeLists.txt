@@ -166,9 +166,9 @@ add_library(
   src/ContiguousTableJni.cpp
   src/HashJoinJni.cpp
   src/HostMemoryBufferNativeUtilsJni.cpp
-  # src/NvcompJni.cpp
-  # src/NvtxRangeJni.cpp # TODO(HIP/AMD): Enable them later
-  # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable them later
+  src/NvcompJni.cpp
+  # src/NvtxRangeJni.cpp # TODO(HIP/AMD): Enable these tests when NVTX/rocTX is supported
+  # src/NvtxUniqueRangeJni.cpp # TODO(HIP/AMD): Enable these tests when NVTX/rocTX is supported
   src/PackedColumnMetadataJni.cpp
   src/RmmJni.cpp
   src/ScalarJni.cpp
@@ -176,7 +176,7 @@ add_library(
   src/aggregation128_utils.hip
   src/maps_column_view.hip
   src/row_conversion.hip
-  # src/check_nvcomp_output_sizes.hip # TODO(HIP/AMD): Enable them later
+  src/check_nvcomp_output_sizes.hip 
 )
 
 # Disable NVTX if necessary
