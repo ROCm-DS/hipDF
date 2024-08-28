@@ -99,6 +99,7 @@ set(CUDF_CXX_FLAGS "")
 set(CUDF_CUDA_FLAGS "")
 set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_CUDA_DEFINITIONS "")
+set(CUDF_CUDA_FLAGS "-Wno-c++11-narrowing-const-reference")
 
 rapids_find_package(HIP REQUIRED)
 include(ConfigureCUDA) # set other CUDA compilation flags
