@@ -20,45 +20,4 @@ namespace cudf {
 
 std::string type_to_name(data_type type) { return type_dispatcher(type, type_to_name_impl{}); }
 
-std::string type_to_jitsafe_name(data_type type) {
-    std::string result = type_to_name(type);
-
-    if constexpr(HIP_PLATFORM_AMD) {
-      // TODO(HIP/AMD): make substitutions here to account for the way in which hiprtc/comgr internally calls/keeps track of 
-      // the mapping between mangled/demangled names.
-      // Please see https://ontrack-internal.amd.com/browse/SWDEV-379212 and the doxygen documentation of this function
-      // for more details.
-      
-      if(result == "int8_t") {
-        result = "signed char";
-      }
-      else if(result == "int16_t") {
-        result = "short";
-      }
-      else if(result == "int32_t") {
-        result = "int";
-      }
-      else if(result == "int64_t") {
-        result = "long long";
-      }
-      else if(result == "uint8_t") {
-        result = "unsigned char";
-      }
-      else if(result == "uint16_t") {
-        result = "unsigned short";
-      }
-      else if(result == "uint32_t") {
-        result = "unsigned int";
-      }
-      else if(result == "uint64_t") {
-        result = "unsigned long long";
-      }
-      else if(result == "cudf::timestamp_us") {
-        result = "hip::std::__4::chrono::time_point<hip::std::__4::chrono::system_clock, hip::std::__4::chrono::duration<long long, hip::std::__4::ratio<1ll, 1000000ll> > >";
-      }
-      //TODO(HIP/AMD): Are there any other substitutions that need to be made?
-    }
-    return result;
-}
-
 }  // namespace cudf

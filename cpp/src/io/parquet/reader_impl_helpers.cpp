@@ -116,11 +116,7 @@ type_id to_type_id(SchemaElement const& schema,
           return type_id::DECIMAL64;
         }
         if (schema.type_length <= static_cast<int32_t>(sizeof(__int128_t))) {
-#ifdef HIPDF_ENABLE_DECIMAL128
           return type_id::DECIMAL128;
-#else
-          CUDF_FAIL("HipDF has not been built with DECIMAL128 support!");
-#endif
         }
       }
       if (physical == parquet::BYTE_ARRAY) {
@@ -131,11 +127,7 @@ type_id to_type_id(SchemaElement const& schema,
           return type_id::DECIMAL64;
         } 
         else {
-#ifdef HIPDF_ENABLE_DECIMAL128
-          return type_id::DECIMAL128;
-#else
-          CUDF_FAIL("HipDF has not been built with DECIMAL128 support!");
-#endif
+           return type_id::DECIMAL128;
         }
       }
       CUDF_FAIL("Invalid representation of decimal type");

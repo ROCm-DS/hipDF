@@ -121,7 +121,7 @@ class byte_array_view {
    * @return true if this byte_array_view is ordered before rhs
    */
   //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
-  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // __attribute__((noinline)) works around this issue. See internal issue 93 and SWDEV-445786.
   // To be resolved in upcoming ROCm release. 
   [[nodiscard]] __attribute__((noinline)) __device__ inline bool operator<(byte_array_view const& rhs) const
   {
@@ -134,7 +134,7 @@ class byte_array_view {
    * @return true if rhs is ordered before this byte_array_view
    */
   //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
-  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // __attribute__((noinline)) works around this issue. See internal issue 93 and SWDEV-445786.
   // To be resolved in upcoming ROCm release. 
   [[nodiscard]] __attribute__((noinline)) __device__ inline bool operator>(byte_array_view const& rhs) const
   {
@@ -148,7 +148,7 @@ class byte_array_view {
    * @return true if this byte_array_view is ordered before rhs
    */
   //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
-  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // __attribute__((noinline)) works around this issue. See internal issue 93 and SWDEV-445786.
   // To be resolved in upcoming ROCm release. 
   [[nodiscard]]  __attribute__((noinline)) __device__ inline bool operator<=(byte_array_view const& rhs) const
   {
@@ -161,7 +161,7 @@ class byte_array_view {
    * @return true if rhs is ordered before this byte_array_view
    */
   //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
-  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // __attribute__((noinline)) works around this issue. See internal issue 93 and SWDEV-445786.
   // To be resolved in upcoming ROCm release. 
   [[nodiscard]]  __attribute__((noinline)) __device__ inline bool operator>=(byte_array_view const& rhs) const
   {
@@ -174,7 +174,7 @@ class byte_array_view {
    * @return An empty byte_array_view
    */
   //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
-  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // __attribute__((noinline)) works around this issue. See internal issue 93 and SWDEV-445786.
   // To be resolved in upcoming ROCm release. 
   [[nodiscard]] __attribute__((noinline)) __device__ inline static byte_array_view min() { return byte_array_view(); }
 
@@ -184,7 +184,7 @@ class byte_array_view {
    * @return A byte_array_view value which represents the largest possible byte_array_view
    */
   //: TODO(HIP/AMD): Some unit tests are failing with segfaults as compare() is called with invalid members (e.g. invalid ptrs are dereferenced).
-  // __attribute__((noinline)) works around this issue. See issue https://github.com/AMD-AI/hipdf/issues/93 and https://ontrack-internal.amd.com/browse/SWDEV-445786.
+  // __attribute__((noinline)) works around this issue. See internal issue 93 and SWDEV-445786.
   // To be resolved in upcoming ROCm release. 
   [[nodiscard]]  __attribute__((noinline)) __device__ inline static byte_array_view max()
   {

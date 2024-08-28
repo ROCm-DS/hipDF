@@ -263,7 +263,7 @@ struct ScanTileState<T, true>
             // Hipcub APIs are used to collect info from all threads in all blocks.
             // If the result produced by one thread in a block is not seen by another thread in a different block,
             // then the computed hipcub operation is not correct and threads may result in a busy waiting state.
-            // Might be related to https://github.com/AMD-AI/hipdf/issues/71
+            // Might be related to internal issue 71
             __threadfence(); // prevent hoisting loads from loop
             TxnWord alias = hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(d_tile_descriptors + TILE_STATUS_PADDING + tile_idx);
             tile_descriptor = reinterpret_cast<TileDescriptor&>(alias);

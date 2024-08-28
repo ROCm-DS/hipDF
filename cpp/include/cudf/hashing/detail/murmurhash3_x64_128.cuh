@@ -212,7 +212,6 @@ MurmurHash3_x64_128<numeric::decimal64>::result_type
   return compute(key.value());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <>
 MurmurHash3_x64_128<numeric::decimal128>::result_type
   __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal128>::operator()(
@@ -220,6 +219,5 @@ MurmurHash3_x64_128<numeric::decimal128>::result_type
 {
   return compute(key.value());
 }
-#endif
 
 }  // namespace cudf::hashing::detail

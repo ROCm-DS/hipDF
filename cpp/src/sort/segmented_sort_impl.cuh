@@ -48,15 +48,9 @@ struct column_fast_sort_fn {
    */
   static bool is_fast_sort_supported(column_view const& col)
   {
-#if HIPDF_ENABLE_DECIMAL128
     return !col.has_nulls() and
            (cudf::is_integral(col.type()) ||
             (cudf::is_fixed_point(col.type()) and (col.type().id() != type_id::DECIMAL128)));
-#else
-    return !col.has_nulls() and
-           (cudf::is_integral(col.type()) ||
-            (cudf::is_fixed_point(col.type())));
-#endif
   }
 
   /**

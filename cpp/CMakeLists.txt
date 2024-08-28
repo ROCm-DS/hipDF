@@ -70,8 +70,6 @@ option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks
 option(BUILD_SHARED_LIBS "Build hipDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(HIPDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
-option(HIPDF_ENABLE_DECIMAL128 "Enables support for DECIMAL128 datatype (requires patched ROCm!)" OFF)
-option(HIPDF_HAS_ROCPRIM_PATCH "Set to true if rocPRIM patch is available to fix https://github.com/AMD-AI/hipdf/issues/30 (segfaults/wrong results with rmm::exec_policy)" OFF)
 option(HIPDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libhipdf" ON)
 mark_as_advanced(HIPDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt HIPDF_USE_PROPRIETARY_NVCOMP is not used.
@@ -246,7 +244,7 @@ if(CUDA_BACKEND)
 else()
   if(HIPDF_ENABLE_UDF_WITH_JITIFY)
   # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
-  # see https://ontrack-internal.amd.com/browse/SWDEV-444584
+  # see SWDEV-444584
   include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
   endif()
 endif()
@@ -708,6 +706,12 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
                               PROPERTIES COMPILE_FLAGS "-DNDEBUG")
 endif()
 
+# TODO(HIP/AMD): This is a workaround for a compiler issue in ROCm 6.2. To be removed again later.
+# See internal issue 143.
+set_source_files_properties(
+  src/io/parquet/page_enc.hip
+PROPERTIES COMPILE_FLAGS "-mllvm --force-attribute=_ZN6thrust4copyINS_6detail5seq_tENS_16reverse_iteratorIPKcEEPhEET1_RKNS1_21execution_policy_baseIT_EET0_SE_S8_:noinline")
+
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
 # in how conda builds glibc
 set_source_files_properties(
@@ -736,14 +740,6 @@ target_include_directories(
 
 if(HIPDF_ENABLE_UDF_WITH_JITIFY)
 target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_UDF_WITH_JITIFY")
-endif()
-
-if(HIPDF_ENABLE_DECIMAL128)
-target_compile_definitions(hipdf PRIVATE "HIPDF_ENABLE_DECIMAL128")
-endif()
-
-if(HIPDF_HAS_ROCPRIM_PATCH)
-target_compile_definitions(hipdf PRIVATE "HIPDF_HAS_ROCPRIM_PATCH")
 endif()
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
@@ -790,7 +786,7 @@ target_compile_definitions(hipdf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBH
 # Compile stringified JIT sources first
 if(HIPDF_ENABLE_UDF_WITH_JITIFY)
   # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
-  # see https://ontrack-internal.amd.com/browse/SWDEV-444584
+  # see SWDEV-444584
 add_dependencies(hipdf jitify_preprocess_run)
 endif()
 
@@ -862,7 +858,6 @@ if(HIPDF_BUILD_TESTUTIL)
 
   # Needs to be static so that we support usage of static builds of gtest which doesn't compile with
   # fPIC enabled and therefore can't be embedded into shared libraries.
-  #TODO(HIP/AMD)
   add_library(
     hipdftestutil STATIC
     tests/io/metadata_utilities.cpp

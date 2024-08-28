@@ -149,10 +149,8 @@ constexpr decltype(auto) arrow_type_dispatcher(arrow::DataType const& dtype,
       return f.template operator()<arrow::StringType>(std::forward<Ts>(args)...);
     case arrow::Type::LIST:
       return f.template operator()<arrow::ListType>(std::forward<Ts>(args)...);
-    #ifdef HIPDF_ENABLE_DECIMAL128
     case arrow::Type::DECIMAL128:
       return f.template operator()<arrow::Decimal128Type>(std::forward<Ts>(args)...);
-    #endif
     case arrow::Type::STRUCT:
       return f.template operator()<arrow::StructType>(std::forward<Ts>(args)...);
     default: {

@@ -71,7 +71,7 @@ std::unique_ptr<column> create_chars_child_column(cudf::size_type total_bytes,
   return make_numeric_column(
     data_type{type_id::INT8}, total_bytes, mask_state::UNALLOCATED, stream, mr);
 }
-// TODO(HIP/AMD): https://github.com/AMD-AI/hipdf/issues/49
+// TODO(HIP/AMD): internal issue 49
 // TODO(HIP/AMD): We disabled this namespace as it causes a runtime error:
 // :0:/long_pathname_so_that_rpms_can_package_the_debug_info/src/external/clr/hipamd/src/hip_global.cpp:56
 // : 212493713327 us: [pid:276317 tid:0x7fe0902b3a80] Cannot create GlobalVar Obj for symbol:

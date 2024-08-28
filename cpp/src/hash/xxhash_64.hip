@@ -228,14 +228,12 @@ hash_value_type __device__ inline XXHash_64<numeric::decimal64>::operator()(
   return compute(key.value());
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <>
 hash_value_type __device__ inline XXHash_64<numeric::decimal128>::operator()(
   numeric::decimal128 const& key) const
 {
   return compute(key.value());
 }
-#endif
 
 /**
  * @brief Computes the hash value of a row in the given table.

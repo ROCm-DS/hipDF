@@ -1284,7 +1284,9 @@ class device_row_comparator {
    * @param rhs_index The index of the row in the `rhs` table to examine
    * @return `true` if row from the `lhs` table is equal to the row in the `rhs` table
    */
-  __host__ __device__ constexpr bool operator()(size_type const lhs_index,
+  // TODO(HIP/AMD): Disabling inlining is necessary to avoid that several unit tests deadlock/give wrong results
+  // on ROCm 6.2 (WAR). This is only a temporary workaround and should be disabled later. See internal issue 142.
+  __host__ __device__ __attribute__((noinline)) constexpr bool operator()(size_type const lhs_index,
                                        size_type const rhs_index) const noexcept
   {
     auto equal_elements = [=](column_device_view l, column_device_view r) {
@@ -1395,7 +1397,6 @@ class device_row_comparator {
       column_device_view rcol = rhs.slice(rhs_element_index, 1);
       while (lcol.type().id() == type_id::STRUCT || lcol.type().id() == type_id::LIST) {
         if (check_nulls) {
-          //TODO(HIP/AMD)-
           auto lvalid = detail::make_validity_iterator<true>(lcol);
           auto rvalid = detail::make_validity_iterator<true>(rcol);
           if (nulls_are_equal == null_equality::UNEQUAL) {
@@ -1802,7 +1803,9 @@ class device_row_hasher {
    * @param row_index The row index to compute the hash value of
    * @return The hash value of the row
    */
-  __host__ __device__ auto operator()(size_type row_index) const noexcept
+  // TODO(HIP/AMD): Disabling optimization is necessary to avoid that JOIN_TEST hangs/ gives wrong results
+  // on ROCm 6.2 (WAR). This is only a temporary workaround and should be disabled later. See internal issue 142.
+  __host__ __device__ __attribute__((optnone)) auto operator()(size_type row_index) const noexcept
   {
     auto it = thrust::make_transform_iterator(_table.begin(), [=](auto const& column) {
       return cudf::type_dispatcher<dispatch_storage_type>(

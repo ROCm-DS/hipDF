@@ -149,7 +149,7 @@ struct ops2_wrapper {
   __device__ void operator()(size_type i)
   {
     if constexpr (!has_common_type_v<TypeLhs, TypeRhs> and
-                  hip::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) { //TODO(HIP/AMD): this is an instance of the issue https://github.com/AMD-AI/hipdf/issues/8,
+                  hip::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) { //TODO(HIP/AMD): this is an instance of the internal issue 8,
                                                                                 //if the underlying root cause has been fixed, this change may be reverted
       TypeLhs x   = lhs.element<TypeLhs>(is_lhs_scalar ? 0 : i);
       TypeRhs y   = rhs.element<TypeRhs>(is_rhs_scalar ? 0 : i);

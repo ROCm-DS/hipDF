@@ -143,7 +143,7 @@ void binary_operation(mutable_column_view& out,
 #ifndef HIPDF_ENABLE_UDF_WITH_JITIFY
   CUDF_FAIL("UDF support with Jitify has not been enabled at build time (option HIPDF_ENABLE_UDF_WITH_JITIFY). It requires an internal patched hipRTC on AMD backend\n");
 #else
-  std::string const output_type_name = cudf::type_to_jitsafe_name(out.type());
+  std::string const output_type_name = cudf::type_to_name(out.type());
 
   std::string cuda_source;
   std::string parsed_llvm_ir;
@@ -151,9 +151,9 @@ void binary_operation(mutable_column_view& out,
     cuda_source = "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
                 + output_type_name +"*"
                 + ","
-                + cudf::type_to_jitsafe_name(lhs.type())
+                + cudf::type_to_name(lhs.type())
                 + ","
-                + cudf::type_to_jitsafe_name(rhs.type())
+                + cudf::type_to_name(rhs.type())
                 + ");"; 
     parsed_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_BINARY_OP");
   }
@@ -161,11 +161,10 @@ void binary_operation(mutable_column_view& out,
     cuda_source = cudf::jit::parse_single_function_ptx(udf, "GENERIC_BINARY_OP", output_type_name);
   }
 
-  //TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_name = jitify2::reflection::Template("cudf::binops::jit::kernel_v_v")
                               .instantiate(output_type_name,  // list of template arguments
-                                           cudf::type_to_jitsafe_name(lhs.type()),
-                                           cudf::type_to_jitsafe_name(rhs.type()),
+                                           cudf::type_to_name(lhs.type()),
+                                           cudf::type_to_name(rhs.type()),
                                            std::string("cudf::binops::jit::UserDefinedOp"));
 
   std::string architecture_str = HIP_PLATFORM_AMD ? "--offload-arch=gfx." : "-arch=sm.";

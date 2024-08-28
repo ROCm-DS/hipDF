@@ -57,7 +57,7 @@ namespace test {
 
   /**
    * @brief Indicates whether hipDF was built with support for UDFs through jitify
-   * which requires a patched hipRTC (see https://ontrack-internal.amd.com/browse/SWDEV-444584).
+   * which requires a patched hipRTC (see SWDEV-444584).
    * 
    * @return True if hipDF was built with support for UDFs through jitify, false otherwise.
   */

@@ -348,14 +348,12 @@ TEST_F(OrcWriterTest, MultiColumn)
   auto col4_data = random_values<float>(num_rows);
   auto col5_data = random_values<double>(num_rows);
   auto col6_vals = random_values<int64_t>(num_rows);
-#ifdef HIPDF_ENABLE_DECIMAL128
   auto col6_data = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
     return numeric::decimal128{col6_vals[i], numeric::scale_type{12}};
   });
   auto col7_data = cudf::detail::make_counting_transform_iterator(0, [&](auto i) {
     return numeric::decimal128{col6_vals[i], numeric::scale_type{-12}};
   });
-#endif
 
   bool_col col0(col0_data.begin(), col0_data.end());
   int8_col col1(col1_data.begin(), col1_data.end());
@@ -363,11 +361,8 @@ TEST_F(OrcWriterTest, MultiColumn)
   int32_col col3(col3_data.begin(), col3_data.end());
   float32_col col4(col4_data.begin(), col4_data.end());
   float64_col col5(col5_data.begin(), col5_data.end());
-
-#ifdef HIPDF_ENABLE_DECIMAL128
   dec128_col col6(col6_data, col6_data + num_rows);
   dec128_col col7(col7_data, col7_data + num_rows);
-#endif
 
   list_col<int64_t> col8{
     {9, 8}, {7, 6, 5}, {}, {4}, {3, 2, 1, 0}, {20, 21, 22, 23, 24}, {}, {66, 666}, {}, {-1, -2}};
@@ -375,11 +370,7 @@ TEST_F(OrcWriterTest, MultiColumn)
   int32_col child_col{48, 27, 25, 31, 351, 351, 29, 15, -1, -99};
   struct_col col9{child_col};
 
-#ifdef HIPDF_ENABLE_DECIMAL128
   table_view expected({col0, col1, col2, col3, col4, col5, col6, col7, col8, col9});
-#else
-  table_view expected({col0, col1, col2, col3, col4, col5, col8, col9});
-#endif
 
   cudf::io::table_input_metadata expected_metadata(expected);
   expected_metadata.column_metadata[0].set_name("bools");
@@ -388,15 +379,10 @@ TEST_F(OrcWriterTest, MultiColumn)
   expected_metadata.column_metadata[3].set_name("int32s");
   expected_metadata.column_metadata[4].set_name("floats");
   expected_metadata.column_metadata[5].set_name("doubles");
-#ifdef HIPDF_ENABLE_DECIMAL128  
   expected_metadata.column_metadata[6].set_name("decimal_pos_scale");
   expected_metadata.column_metadata[7].set_name("decimal_neg_scale");
   expected_metadata.column_metadata[8].set_name("lists");
   expected_metadata.column_metadata[9].set_name("structs");
-#else
-  expected_metadata.column_metadata[6].set_name("lists");
-  expected_metadata.column_metadata[7].set_name("structs");
-#endif
 
   auto filepath = temp_env->get_temp_filepath("OrcMultiColumn.orc");
   cudf::io::orc_writer_options out_opts =
@@ -1532,7 +1518,6 @@ TEST_F(OrcReaderTest, NestedColumnSelection)
   ASSERT_EQ("field_b", result.metadata.schema_info[0].children[0].name);
 }
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 TEST_F(OrcReaderTest, DecimalOptions)
 {
   constexpr auto num_rows = 10;
@@ -1613,7 +1598,6 @@ TEST_F(OrcWriterTest, DecimalOptionsNested)
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(result.tbl->view().column(0).child(1).child(0).child(0),
                                       result.tbl->view().column(0).child(1).child(0).child(1));
 }
-#endif
 
 TEST_F(OrcReaderTest, EmptyColumnsParam)
 {

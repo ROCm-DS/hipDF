@@ -1047,11 +1047,7 @@ static __device__ int Decode_Decimals(orc_bytestream_s* bs,
           return (v * kPow5i[abs_scale]) << abs_scale;
         } else {
           auto const abs_scale = min(-scale, 27);
-#if HIPDF_ENABLE_DECIMAL128
           return (v / kPow5i[abs_scale]) >> abs_scale;
-#else
-          printf("Error: Trying to decode a decimal using int128_t division, which requires hipDF to be built with DECIMAL128 support.\n");
-#endif
         }
       }();
       if (dtype_id == type_id::DECIMAL32) {

@@ -1273,9 +1273,9 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
     case aggregation::Kind::PTX:
       if constexpr (HIP_PLATFORM_AMD) {
         cuda_source = "extern \"C\" __device__ void rolling_udf("
-             + cudf::type_to_jitsafe_name(output->type()) + "*,"
+             + cudf::type_to_name(output->type()) + "*,"
              + "void*, void*, long long, long long, "
-             + "const " + cudf::type_to_jitsafe_name(input.type()) + "*,"
+             + "const " + cudf::type_to_name(input.type()) + "*,"
              + "long long, long long);";
         
         parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf_agg._source,
@@ -1298,8 +1298,8 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   //: TODO(HIP/AMD): use type_to_name once hipRTC has been fixed
   std::string kernel_name =
     jitify2::reflection::Template("cudf::rolling::jit::gpu_rolling_new")  //
-      .instantiate(cudf::type_to_jitsafe_name(input.type()),  // list of template arguments
-                   cudf::type_to_jitsafe_name(output->type()),
+      .instantiate(cudf::type_to_name(input.type()),  // list of template arguments
+                   cudf::type_to_name(output->type()),
                    udf_agg._operator_name,
                    preceding_window_str.c_str(),
                    following_window_str.c_str());

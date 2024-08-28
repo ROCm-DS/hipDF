@@ -107,18 +107,11 @@ using id_to_type = typename id_to_type_impl<Id>::type;
  * @tparam T The literal type that is stored on the host
  */
 // clang-format off
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <typename T>
 using device_storage_type_t =
   std::conditional_t<std::is_same_v<numeric::decimal32,  T>, int32_t,
   std::conditional_t<std::is_same_v<numeric::decimal64,  T>, int64_t,
   std::conditional_t<std::is_same_v<numeric::decimal128, T>, __int128_t, T>>>;
-#else
-template <typename T>
-using device_storage_type_t =
-  std::conditional_t<std::is_same_v<numeric::decimal32,  T>, int32_t,
-  std::conditional_t<std::is_same_v<numeric::decimal64,  T>, int64_t, T>>;
-#endif
 // clang-format on
 
 /**
@@ -133,14 +126,9 @@ using device_storage_type_t =
 template <typename T>
 constexpr bool type_id_matches_device_storage_type(type_id id)
 {
-#ifdef HIPDF_ENABLE_DECIMAL128
   return (id == type_id::DECIMAL32 && std::is_same_v<T, int32_t>) ||
          (id == type_id::DECIMAL64 && std::is_same_v<T, int64_t>) ||
          (id == type_id::DECIMAL128 && std::is_same_v<T, __int128_t>) || id == type_to_id<T>();
-#else 
-  return (id == type_id::DECIMAL32 && std::is_same_v<T, int32_t>) ||
-         (id == type_id::DECIMAL64 && std::is_same_v<T, int64_t>) || id == type_to_id<T>();
-#endif
 }
 
 /**
@@ -195,9 +183,7 @@ CUDF_TYPE_MAPPING(cudf::string_view, type_id::STRING)
 CUDF_TYPE_MAPPING(cudf::list_view, type_id::LIST)
 CUDF_TYPE_MAPPING(numeric::decimal32, type_id::DECIMAL32)
 CUDF_TYPE_MAPPING(numeric::decimal64, type_id::DECIMAL64)
-#ifdef HIPDF_ENABLE_DECIMAL128
 CUDF_TYPE_MAPPING(numeric::decimal128, type_id::DECIMAL128)
-#endif
 CUDF_TYPE_MAPPING(cudf::struct_view, type_id::STRUCT)
 
 /**
@@ -270,13 +256,11 @@ struct type_to_scalar_type_impl<numeric::decimal64> {
   using ScalarDeviceType = cudf::fixed_point_scalar_device_view<numeric::decimal64>;
 };
 
-#ifdef HIPDF_ENABLE_DECIMAL128
 template <>
 struct type_to_scalar_type_impl<numeric::decimal128> {
   using ScalarType       = cudf::fixed_point_scalar<numeric::decimal128>;
   using ScalarDeviceType = cudf::fixed_point_scalar_device_view<numeric::decimal128>;
 };
-#endif
 
 template <>  // TODO: this is a temporary solution for make_pair_iterator
 struct type_to_scalar_type_impl<cudf::dictionary32> {
@@ -538,11 +522,9 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) type_dispatcher(cudf::
     case type_id::DECIMAL64:
        return f.template operator()<typename IdTypeMap<type_id::DECIMAL64>::type>(
          std::forward<Ts>(args)...);
-#ifdef HIPDF_ENABLE_DECIMAL128
     case type_id::DECIMAL128:
       return f.template operator()<typename IdTypeMap<type_id::DECIMAL128>::type>(
         std::forward<Ts>(args)...);
-#endif
     case type_id::STRUCT:
       return f.template operator()<typename IdTypeMap<type_id::STRUCT>::type>(
         std::forward<Ts>(args)...);
@@ -628,22 +610,6 @@ CUDF_HOST_DEVICE __forceinline__ constexpr decltype(auto) double_type_dispatcher
  * @return Name of the type
  */
 std::string type_to_name(data_type type);
-
-/**
- * @brief Return a jitsafe name for a given type that can be used to
- * instantiate a JIT-compiled template kernel.
- * 
- * @note HIPRTC/comgr internally keeps track of variables such as "int64_t"
- * as "long long" and "int32_t" as "int". Hence, if name expressions that use
- *  strings like "int32_t" or "int64_t" are passed to hipRTC/comgr for a template
- * instantiation, the demangled names  (that contain e.g.,  "int" or "long long") 
- * cannot be found, leading to errors in the JIT-compilation process. This will be resolved with
- *  https://ontrack-internal.amd.com/browse/SWDEV-379212.
- *
- * @param type The `data_type`
- * @return Jitsafe name of the type
- */
-std::string type_to_jitsafe_name(data_type type);
 
 /** @} */  // end of group
 }  // namespace cudf

@@ -50,9 +50,9 @@ std::unique_ptr<column> rolling_window(column_view const& input,
     // TODO: In future, might need to clamp preceding/following to column boundaries.
     return cudf::detail::rolling_window_udf(input,
                                             preceding_window.begin<size_type>(),
-                                            "int*", //: TODO(HIP/AMD): The original code uses "cudf::size_type*", we use the underlying type to work around https://ontrack-internal.amd.com/browse/SWDEV-379212
+                                            "cudf::size_type*",
                                             following_window.begin<size_type>(),
-                                            "int*", //: TODO(HIP/AMD): The original code uses "cudf::size_type*", we use the underlying type to work around https://ontrack-internal.amd.com/browse/SWDEV-379212
+                                            "cudf::size_type*",
                                             min_periods,
                                             agg,
                                             stream,
