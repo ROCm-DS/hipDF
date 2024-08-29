@@ -85,7 +85,7 @@ namespace test {
   inline bool has_udf_jitify_support()
   {
     bool udf_enabled = false;
-  #ifdef HIPDF_ENABLE_UDF_WITH_JITIFY
+  #ifdef CUDF_ENABLE_UDF_WITH_JITIFY
     udf_enabled = true;
   #endif
     return udf_enabled;
