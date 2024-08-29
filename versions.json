@@ -2,13 +2,13 @@
   "packages" : {
     "libhipcxx" : {
       "version" : "1.0",
-      "git_url" : "https://$ENV{GITHUB_PASS}@github.com/AMD-AI/libhipcxx",
-      "git_tag" : "fix_cmake_install_new"
+      "git_url" : "https://github.com/ROCm/libhipcxx",
+      "git_tag" : "main"
     },
     "hipco" : {
       "version" : "1.0",
-      "git_url" : "https://$ENV{GITHUB_PASS}@github.com/AMD-AI/hipCollections",
-      "git_tag" : "feat/external-rapids-cmake"
+      "git_url" : "https://github.com/ROCm/hipCollections",
+      "git_tag" : "main"
     },
     "hipcomp" : {
       "version" : "2.2.0",
