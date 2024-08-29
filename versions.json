@@ -3,12 +3,12 @@
     "libhipcxx" : {
       "version" : "1.0",
       "git_url" : "https://github.com/ROCm/libhipcxx",
-      "git_tag" : "dev"
+      "git_tag" : "main"
     },
     "hipco" : {
       "version" : "1.0",
-      "git_url" : "https://github.com/rocm/hipCollections",
-      "git_tag" : "main-fix-cmakelists.txt"
+      "git_url" : "https://github.com/ROCm/hipCollections",
+      "git_tag" : "main"
     },
     "hipcomp" : {
       "version" : "2.2.0",
