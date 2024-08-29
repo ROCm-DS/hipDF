@@ -198,6 +198,25 @@ CUDF_HOST_DEVICE inline constexpr T shift(T const& val, scale_type const& scale)
   return left_shift<Rep, Rad>(val, scale);
 }
 
+/** @brief This function safely converts a floating-point value of type T to a representation type Rep.
+ *  It is intended to be used when converting a floating-point value to an integer representation,
+ *  treating an overflow where the floating point type does not fit into the integer representation
+ *  type specially.
+ *  
+ *  Note: This is a WAR for internal issue 106 on AMD platform.
+ *  @param val A floating-point value of type T to be converted to type Rep.
+ *  @return The converted value of type Rep.
+ */
+template <typename Rep, typename T>
+CUDF_HOST_DEVICE inline Rep safe_cast_fp_to_rep(T val) {
+  if(val >= static_cast<T>(std::numeric_limits<Rep>::max())) {
+    return std::numeric_limits<Rep>::max();
+  }
+  else {
+    return static_cast<Rep>(val);
+  }
+}
+
 }  // namespace detail
 
 /**
@@ -261,7 +280,7 @@ class fixed_point {
             typename hip::std::enable_if_t<hip::std::is_floating_point<T>() &&
                                             is_supported_representation_type<Rep>()>* = nullptr>
   CUDF_HOST_DEVICE inline explicit fixed_point(T const& value, scale_type const& scale)
-    : _value{static_cast<Rep>(detail::shift<Rep, Rad>(value, scale))}, _scale{scale}
+    : _value{detail::safe_cast_fp_to_rep<rep, T>(detail::shift<Rep, Rad>(value, scale))}, _scale{scale}
   {
   }
 
