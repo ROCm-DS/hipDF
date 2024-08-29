@@ -750,7 +750,7 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
 
       auto const stripe_idx     = idx % stripes.size();
       auto const stripe         = stripes[stripe_idx];
-      auto const parent_col_idx = columns[col_idx].parent_index.value();
+      auto const parent_col_idx = THRUST_OPTIONAL_VALUE(columns[col_idx].parent_index);
       auto const parent_column  = columns[parent_col_idx];
       auto const stripe_end     = stripe.first + stripe.size;
 
@@ -1911,7 +1911,7 @@ encoder_decimal_info decimal_chunk_sizes(orc_table_view& orc_table,
                          auto const pushdown_mask = [&]() -> cudf::bitmask_type const* {
                            auto const parent_index = d_cols[col_idx].parent_index;
                            if (!parent_index.has_value()) return nullptr;
-                           return d_cols[parent_index.value()].pushdown_mask;
+                           return d_cols[THRUST_OPTIONAL_VALUE(parent_index)].pushdown_mask;
                          }();
 
                          if (col.is_null(idx) or not bit_value_or(pushdown_mask, idx, true))

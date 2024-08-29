@@ -169,7 +169,7 @@ __device__ DecimalType parse_decimal(char const* iter, char const* iter_end, int
   int32_t exp_ten = 0;
   if ((iter < iter_end) && (*iter == 'e' || *iter == 'E')) {
     ++iter;
-    if (iter < iter_end) { exp_ten = parse_exponent<false>(iter, iter_end).value(); }
+    if (iter < iter_end) { exp_ten = THRUST_OPTIONAL_VALUE(parse_exponent<false>(iter, iter_end)); }
   }
   exp_ten += exp_offset;
 

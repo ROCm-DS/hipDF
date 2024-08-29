@@ -939,7 +939,7 @@ __launch_bounds__(block_size) __global__
     string_view const str = col.element<string_view>(tid);
     size_type output_size = 0;
     if (str.size_bytes() > 0) {
-      char* dst = out_buf.has_value() ? out_buf.value() + output_offsets[tid] : nullptr;
+      char* dst = out_buf.has_value() ? THRUST_OPTIONAL_VALUE(out_buf) + output_offsets[tid] : nullptr;
       size_t const dst_size =
         out_buf.has_value() ? output_offsets[tid + 1] - output_offsets[tid] : 0;
 
@@ -960,7 +960,7 @@ __launch_bounds__(block_size) __global__
       bitmask_type mask = hip_extensions::__ballot_sync(active_threads, is_valid);
       // 0th lane of the warp writes the validity
       if (!(tid % warpSize)) {
-        out_validity.value()[cudf::word_index(tid)] = mask;
+        THRUST_OPTIONAL_VALUE(out_validity)[cudf::word_index(tid)] = mask;
         warp_valid_count += __POPC(mask);
       }
     }
@@ -973,7 +973,7 @@ __launch_bounds__(block_size) __global__
   if (out_valid_count) {
     size_type block_valid_count =
       cudf::detail::single_lane_block_sum_reduce<block_size, 0>(warp_valid_count);
-    if (threadIdx.x == 0) { atomicAdd(out_valid_count.value(), block_valid_count); }
+    if (threadIdx.x == 0) { atomicAdd(THRUST_OPTIONAL_VALUE(out_valid_count), block_valid_count); }
   }
 }
 
