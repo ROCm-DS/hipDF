@@ -798,7 +798,7 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   auto const pushdown_mask = [&]() -> cudf::bitmask_type const* {
     auto const parent_index = s->chunk.column->parent_index;
     if (!parent_index.has_value()) return nullptr;
-    return chunks[parent_index.value()][0].column->pushdown_mask;
+    return chunks[THRUST_OPTIONAL_VALUE(parent_index)][0].column->pushdown_mask;
   }();
 
   encode_null_mask<block_size>(s, pushdown_mask, temp_storage.scan_u32, t);

@@ -63,6 +63,8 @@
 #include <cstdint>
 #include <iterator>
 
+#include <thrust/optional.h>
+
 /**
  * @file
  * @brief Type declarations for libcudf.
@@ -77,6 +79,17 @@ class device_buffer;
 }  // namespace rmm
 
 namespace CUDF_EXPORT cudf {
+
+#ifdef __HIP_PLATFORM_AMD__
+template<typename T>
+CUDF_HOST_DEVICE T THRUST_OPTIONAL_VALUE(thrust::optional<T> opt)
+{
+    return opt.value_or(T{});
+}
+#else
+#define THRUST_OPTIONAL_VALUE(opt) opt.value()
+#endif
+
 // Forward declaration
 class column;
 class column_view;

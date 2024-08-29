@@ -685,9 +685,9 @@ struct check_datetime_format {
 
     // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust, need to file a
     // ticket
-    auto const year  = dateparts.value().year;
-    auto const month = static_cast<uint32_t>(dateparts.value().month);
-    auto const day   = static_cast<uint32_t>(dateparts.value().day);
+    auto const year  = THRUST_OPTIONAL_VALUE(dateparts).year;
+    auto const month = static_cast<uint32_t>(THRUST_OPTIONAL_VALUE(dateparts).month);
+    auto const day   = static_cast<uint32_t>(THRUST_OPTIONAL_VALUE(dateparts).day);
     return cuda::std::chrono::year_month_day(cuda::std::chrono::year{year},
                                             cuda::std::chrono::month{month},
                                             cuda::std::chrono::day{day})
@@ -871,8 +871,9 @@ struct datetime_formatter_fn {
         case 'a':    // weekday abbreviated
         case 'A': {  // weekday full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          // TODO(HIP): thrust::optional::value() requires a patched version of rocthrust
-          auto const day_of_week = cuda::std::chrono::year_month_weekday(days.value()).weekday().c_encoding();
+          // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust
+          auto const day_of_week =
+            cuda::std::chrono::year_month_weekday(THRUST_OPTIONAL_VALUE(days)).weekday().c_encoding();
           auto const day_idx =
             day_of_week + offset_weekdays + (item.value == 'a' ? days_in_week : 0);
           if (day_idx < d_format_names.size())
@@ -882,8 +883,9 @@ struct datetime_formatter_fn {
         case 'b':    // month abbreviated
         case 'B': {  // month full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          // TODO(HIP): thrust::optional::value requires a patched version of rocthrust
-          auto const month =  static_cast<uint32_t>(cuda::std::chrono::year_month_day(days.value()).month());
+          // TODO(HIP/AMD): thrust::optional::value requires a patched version of rocthrust
+          auto const month =
+            static_cast<uint32_t>(cuda::std::chrono::year_month_day(THRUST_OPTIONAL_VALUE(days)).month());
           auto const month_idx =
             month - 1 + offset_months + (item.value == 'b' ? months_in_year : 0);
           if (month_idx < d_format_names.size())
