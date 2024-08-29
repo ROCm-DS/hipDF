@@ -29,7 +29,7 @@
 //                the project.
 
 // PTDS
-#ifdef CUDA_API_PER_THREAD_DEFAULT_STREAM
+#if defined(CUDA_API_PER_THREAD_DEFAULT_STREAM) && !defined(HIP_API_PER_THREAD_DEFAULT_STREAM)
   #define HIP_API_PER_THREAD_DEFAULT_STREAM
 #endif
 
