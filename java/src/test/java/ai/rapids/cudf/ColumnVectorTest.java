@@ -3716,7 +3716,7 @@ public class ColumnVectorTest extends CudfTestBase {
     );
   }
 
-  @Test @Disabled // TODO(HIP/AMD): Disabled the test for now. Should be enabled later!
+  @Test
   void testCastDoubleToDecimal() {
     testCastNumericToDecimalsAndBack(DType.FLOAT64, false, 0,
         () -> ColumnVector.fromBoxedDoubles(1.0, 2.1, -3.23, null, 2.41281, (double) Long.MAX_VALUE),
