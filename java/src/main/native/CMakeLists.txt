@@ -181,11 +181,11 @@ add_library(
 
 # Disable NVTX if necessary
 if(NOT USE_NVTX)
-  target_compile_definitions(hipdfjni PUBLIC NVTX_DISABLE)
+  target_compile_definitions(cudfjni PUBLIC NVTX_DISABLE)
 endif()
 
 if(CUDF_JNI_ENABLE_PROFILING)
-  target_compile_definitions(hipdfjni PRIVATE CUDF_JNI_ENABLE_PROFILING)
+  target_compile_definitions(cudfjni PRIVATE CUDF_JNI_ENABLE_PROFILING)
 endif()
 
 if(CUDF_JNI_LIBCUDF_STATIC AND BUILD_SHARED_LIBS)
@@ -194,17 +194,17 @@ if(CUDF_JNI_LIBCUDF_STATIC AND BUILD_SHARED_LIBS)
   # after cudf has loaded, the JNI code and libcudf.a will be combined into libcudf.so. A stub
   # library will be created for libcudfjni.so that will simply require libcudf.so for backwards
   # compatibility with software that expects to find libcudfjni.so at runtime.
-  set_target_properties(hipdfjni PROPERTIES OUTPUT_NAME "hipdf")
-  add_library(hipdfjnistub SHARED src/emptyfile.cpp)
-  set_target_properties(hipdfjnistub PROPERTIES OUTPUT_NAME "hipdfjni")
-  target_link_libraries(hipdfjnistub -Wl,--no-as-needed hipdfjni -Wl,--as-needed)
+  set_target_properties(cudfjni PROPERTIES OUTPUT_NAME "cudf")
+  add_library(cudfjnistub SHARED src/emptyfile.cpp)
+  set_target_properties(cudfjnistub PROPERTIES OUTPUT_NAME "cudfjni")
+  target_link_libraries(cudfjnistub -Wl,--no-as-needed cudfjni -Wl,--as-needed)
 endif()
 
 # ##################################################################################################
 # * include paths ---------------------------------------------------------------------------------
 
 target_include_directories(
-  hipdfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
+  cudfjni PUBLIC "${CMAKE_BINARY_DIR}/include" "${CMAKE_SOURCE_DIR}/include"
                  "${CMAKE_SOURCE_DIR}/src" "${JNI_INCLUDE_DIRS}"
 )
 
@@ -214,7 +214,7 @@ target_include_directories(
 
 # Override RPATH for cudfjni
 set_target_properties(
-  hipdfjni
+  cudfjni
   PROPERTIES BUILD_RPATH "\$ORIGIN"
              INSTALL_RPATH "\$ORIGIN"
              # set target compile options
@@ -227,12 +227,12 @@ set_target_properties(
 )
 
 target_compile_options(
-  hipdfjni PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
+  cudfjni PRIVATE "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>"
                   "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_CUDA_FLAGS}>"
 )
 
 target_compile_definitions(
-  hipdfjni PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
+  cudfjni PUBLIC "$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_DEFINITIONS}>"
                  "$<$<COMPILE_LANGUAGE:HIP>:${CUDF_CUDA_DEFINITIONS}>"
 )
 
@@ -249,22 +249,22 @@ if(USE_GDS)
                INTERFACE_POSITION_INDEPENDENT_CODE ON
   )
   target_include_directories(cufilejni PRIVATE "${cuFile_INCLUDE_DIRS}")
-  target_link_libraries(cufilejni PRIVATE hipdfjni "${cuFile_LIBRARIES}")
+  target_link_libraries(cufilejni PRIVATE cudfjni "${cuFile_LIBRARIES}")
 endif()
 
 # ##################################################################################################
 # * link libraries --------------------------------------------------------------------------------
 
-set(CUDF_LINK PUBLIC hipdf::hipdf)
+set(CUDF_LINK PUBLIC cudf::cudf)
 if(CUDF_JNI_LIBCUDF_STATIC)
   # Whole-link libcudf.a into the shared library but not its dependencies
-  set(CUDF_LINK PRIVATE -Wl,--whole-archive hipdf::hipdf -Wl,--no-whole-archive PUBLIC hipdf::hipdf)
+  set(CUDF_LINK PRIVATE -Wl,--whole-archive cudf::cudf -Wl,--no-whole-archive PUBLIC cudf::cudf)
 endif()
 
 # When nvcomp is installed we need to use nvcomp::nvcomp but from the cudf build directory it will
 # just be nvcomp.
 target_link_libraries(
-  hipdfjni ${CUDF_LINK} PRIVATE $<TARGET_NAME_IF_EXISTS:hipcomp>
+  cudfjni ${CUDF_LINK} PRIVATE $<TARGET_NAME_IF_EXISTS:hipcomp>
                                $<TARGET_NAME_IF_EXISTS:hipcomp::hipcomp>
 )
 
@@ -275,22 +275,21 @@ target_link_libraries(
 
 if(CUDA_STATIC_RUNTIME)
   # Tell CMake what CUDA language runtime to use
-  set_target_properties(hipdfjni PROPERTIES CUDA_RUNTIME_LIBRARY Static)
+  set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Static)
 else()
   # Tell CMake what CUDA language runtime to use
-  set_target_properties(hipdfjni PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
+  set_target_properties(cudfjni PROPERTIES CUDA_RUNTIME_LIBRARY Shared)
 endif()
 
 # ##################################################################################################
 # * install shared libraries ----------------------------------------------------------------------
 if(TARGET hipcomp::hipcomp)
   add_custom_command(
-   TARGET hipdfjni
+    TARGET cudfjni
     PRE_LINK
     COMMAND
-     ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hipcomp::hipcomp> #$<TARGET_FILE:hipcomp::hipcomp_gdeflate>
-     #$<TARGET_FILE:hipcomp::hipcomp_bitcomp> 
-     "${PROJECT_BINARY_DIR}"
-   COMMENT "Copying hipcomp libraries to ${PROJECT_BINARY_DIR}"
+      ${CMAKE_COMMAND} -E copy $<TARGET_FILE:hipcomp::hipcomp>
+      "${PROJECT_BINARY_DIR}"
+    COMMENT "Copying hipcomp libraries to ${PROJECT_BINARY_DIR}"
   )
 endif()
