@@ -863,10 +863,6 @@ if(CUDF_BUILD_TESTUTIL)
     target_compile_definitions(cudftestutil PUBLIC "CUDF_ENABLE_UDF_WITH_JITIFY")
   endif()
 
-  if(CUDF_ENABLE_DECIMAL128)
-    target_compile_definitions(cudftestutil PUBLIC "CUDF_ENABLE_DECIMAL128")
-  endif()
-
   target_compile_options(
     cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
