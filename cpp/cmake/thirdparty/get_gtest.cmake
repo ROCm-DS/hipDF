@@ -17,7 +17,7 @@ function(find_and_configure_gtest)
   include(${rapids-cmake-dir}/cpm/gtest.cmake)
 
   # Find or install GoogleTest
-  rapids_cpm_gtest(BUILD_EXPORT_SET hipdf-testing-exports INSTALL_EXPORT_SET hipdf-testing-exports)
+  rapids_cpm_gtest(BUILD_EXPORT_SET cudf-testing-exports INSTALL_EXPORT_SET cudf-testing-exports)
 
   if(GTest_ADDED)
     rapids_export(
