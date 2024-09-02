@@ -117,8 +117,8 @@ rapids_cmake_build_type("Release")
 # ##################################################################################################
 # * CUDF ------------------------------------------------------------------------------------------
 
-set(hipdf_ROOT "${CUDF_CPP_BUILD_DIR}")
-rapids_find_package(hipdf REQUIRED)
+set(cudf_ROOT "${CUDF_CPP_BUILD_DIR}")
+rapids_find_package(cudf REQUIRED)
 
 # ##################################################################################################
 # * nvcomp------------------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ endif()
 # * library targets -------------------------------------------------------------------------------
 
 add_library(
-  hipdfjni
+  cudfjni
   src/Aggregation128UtilsJni.cpp
   src/AggregationJni.cpp
   src/ChunkedPackJni.cpp
@@ -161,7 +161,7 @@ add_library(
   src/CudaJni.cpp
   src/ColumnVectorJni.cpp
   src/ColumnViewJni.cpp
-  src/ColumnViewJni.hip
+  src/ColumnViewJni.cu
   src/CompiledExpression.cpp
   src/ContiguousTableJni.cpp
   src/HashJoinJni.cpp
@@ -173,10 +173,10 @@ add_library(
   src/RmmJni.cpp
   src/ScalarJni.cpp
   src/TableJni.cpp
-  src/aggregation128_utils.hip
-  src/maps_column_view.hip
-  src/row_conversion.hip
-  src/check_nvcomp_output_sizes.hip 
+  src/aggregation128_utils.cu
+  src/maps_column_view.cu
+  src/row_conversion.cu
+  src/check_nvcomp_output_sizes.cu
 )
 
 # Disable NVTX if necessary
