@@ -56,10 +56,10 @@ public class NativeDepsLoader {
    */
   private final static String[][] loadOrder = new String[][]{
     new String[]{
-      "hipdf"
+      "cudf"
     },
     new String[]{
-      "hipdfjni"
+      "cudfjni"
     },
     new String[]{
       "hipcomp"

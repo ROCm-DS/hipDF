@@ -20,10 +20,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ai.rapids</groupId>
-    <artifactId>hipdf</artifactId>
+    <artifactId>cudf</artifactId>
     <version>23.10.0-SNAPSHOT</version>
 
-    <name>hipdfjni</name>
+    <name>cudfjni</name>
     <description>
         This project provides java bindings for cudf, to be able to process large amounts of data on a GPU.
         This is still a work in progress so some APIs may change until the 1.0 release.
@@ -511,15 +511,15 @@
                             <source>
                                 def sout = new StringBuffer(), serr = new StringBuffer()
                                 //This only works on linux
-                                def proc = 'ldd ${native.build.path}/libhipdfjni.so'.execute()
+                                def proc = 'ldd ${native.build.path}/libcudfjni.so'.execute()
                                 proc.consumeProcessOutput(sout, serr)
                                 proc.waitForOrKill(10000)
-                                def libhipdf = ~/libhipdf.*\\.so\\s+=>\\s+(.*)libhipdf.*\\.so\\s+.*/
-                                def cudfm = libhipdf.matcher(sout)
+                                def libcudf = ~/libcudf.*\\.so\\s+=>\\s+(.*)libcudf.*\\.so\\s+.*/
+                                def cudfm = libcudf.matcher(sout)
                                 if (cudfm.find()) {
-                                    pom.properties['native.hipdf.path'] = cudfm.group(1)
+                                    pom.properties['native.cudf.path'] = cudfm.group(1)
                                 } else {
-                                    fail("Could not find cudf as a dependency of libhipdfjni out> $sout err> $serr")
+                                    fail("Could not find cudf as a dependency of libcudfjni out> $sout err> $serr")
                                 }
 
                                 def nvccout = new StringBuffer(), nvccerr = new StringBuffer()
@@ -587,7 +587,7 @@
                                 <resource>
                                     <directory>${native.build.path}</directory>
                                     <includes>
-                                        <include>libhipdfjni.so</include>
+                                        <include>libcudfjni.so</include>
                                         <include>libcufilejni.so</include>
                                         <include>libhipcomp.so</include> 
                                     <!--   <include>libnvcomp_gdeflate.so</include> -->
@@ -596,9 +596,9 @@
                                 </resource>
                                 <resource>
                                     <!--Set by groovy script-->
-                                    <directory>${native.hipdf.path}</directory>
+                                    <directory>${native.cudf.path}</directory>
                                     <includes>
-                                        <include>libhipdf.so</include>
+                                        <include>libcudf.so</include>
                                     </includes>
                                 </resource>
                             </resources>
