@@ -60,16 +60,7 @@ namespace detail {
 namespace {  // anonymous namespace
 template <typename _TargetT>
 struct unary_cast {
-  // NOTE(HIP/AMD): We treat casts from floating point types to integral types specially, 
-  // as the cast behaviour from nan float to an integer is UB in C++.
-  // This fixes the unit test test_isin_numeric in test_series.py (for the Python backend),
-  // in which this UB is triggered by casting a nan floating point value to an int64.
-  // On AMD GPUs, the result of this cast operation happens to be 0 which (by chance) matches 
-  // the value of the input data in the unit test. This result would make the test fail,
-  // as "static_cast<long>(nan) != 0" is expected by the test (which is the case on CUDA).
-  // In the below code, we therefore explicitly handle the casts of nan values
-  // to integer values, thus addressing the UB.
-  // Yet, this may have to be revisited later in case it has a non-negligible impact on performance.
+  // NOTE(HIP/AMD): We treat casts from floating point and double types to long specially (see below).
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
@@ -80,7 +71,8 @@ struct unary_cast {
   {
     return static_cast<TargetT>(element);
   }
-
+  // NOTE(HIP/AMD): We need this specialization to avoid errors in Spark-rapids tests:
+  // "Test all supported casts with in-range values" in spark-rapids/tests/src/test/scala/com/nvidia/spark/rapids/CastOpSuite.scala
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
