@@ -87,6 +87,12 @@
 #ifndef cuDeviceGetAttribute
 #  define cuDeviceGetAttribute hipDeviceGetAttribute
 #endif
+#ifndef cudaDeviceAttributeComputeCapabilityMajor
+#  define cudaDeviceAttributeComputeCapabilityMajor hipDeviceAttributeComputeCapabilityMajor
+#endif
+#ifndef cudaDeviceAttributeComputeCapabilityMinor
+#  define cudaDeviceAttributeComputeCapabilityMinor hipDeviceAttributeComputeCapabilityMinor
+#endif
 #ifndef cudaDeviceGetAttribute
 #  define cudaDeviceGetAttribute hipDeviceGetAttribute
 #endif
@@ -132,6 +138,9 @@
 #ifndef cudaErrorLaunchFailure
 #  define cudaErrorLaunchFailure hipErrorLaunchFailure
 #endif
+#ifndef cudaErrorNotReady
+#  define cudaErrorNotReady hipErrorNotReady
+#endif
 #ifndef CUresult
 #  define CUresult hipError_t
 #endif
@@ -149,6 +158,9 @@
 #endif
 #ifndef cudaErrorUnknown
 #  define cudaErrorUnknown hipErrorUnknown
+#endif
+#ifndef cudaEventBlockingSync
+#  define cudaEventBlockingSync hipEventBlockingSync
 #endif
 #ifndef cudaEventCreate
 #  define cudaEventCreate hipEventCreate
@@ -179,6 +191,9 @@
 #endif
 #ifndef cudaEventSynchronize
 #  define cudaEventSynchronize hipEventSynchronize
+#endif
+#ifndef cudaEventQuery
+#  define cudaEventQuery hipEventQuery
 #endif
 #ifndef CUevent
 #  define CUevent hipEvent_t
@@ -267,6 +282,9 @@
 #ifndef cudaHostUnregister
 #  define cudaHostUnregister hipHostUnregister
 #endif
+#ifndef cudaInvalidDeviceId
+#  define cudaInvalidDeviceId hipInvalidDeviceId
+#endif 
 #ifndef cudaLaunchCooperativeKernel
 #  define cudaLaunchCooperativeKernel hipLaunchCooperativeKernel
 #endif
@@ -393,11 +411,17 @@
 #ifndef cudaStreamCreate
 #  define cudaStreamCreate hipStreamCreate
 #endif
+#ifndef cudaStreamCreateWithFlags
+#  define cudaStreamCreateWithFlags hipStreamCreateWithFlags
+#endif
 #ifndef CU_STREAM_DEFAULT
 #  define CU_STREAM_DEFAULT hipStreamDefault
 #endif
 #ifndef cudaStreamDefault
 #  define cudaStreamDefault hipStreamDefault
+#endif
+#ifndef cudaStreamNonBlocking
+#  define cudaStreamNonBlocking hipStreamNonBlocking
 #endif
 #ifndef CU_STREAM_PER_THREAD
 #  define CU_STREAM_PER_THREAD hipStreamPerThread
