@@ -37,7 +37,7 @@
 // SOFTWARE.
 
 #include <cudf/utilities/error.hpp>
-
+#include <cudf/cuda_runtime.h>
 #include <rmm/device_buffer.hpp>
 
 #ifdef CUDF_JNI_ENABLE_PROFILING
