@@ -42,6 +42,7 @@ function(find_and_configure_hipcomp)
     BUILD_EXPORT_SET cudf-exports
     INSTALL_EXPORT_SET cudf-exports
     USE_PROPRIETARY_BINARY ${CUDF_USE_PROPRIETARY_HIPCOMP}
+    BUILD_STATIC OFF
   )
 
   # Per-thread default stream
