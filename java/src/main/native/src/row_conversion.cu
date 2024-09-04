@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "hip/hip_runtime.h"
+#include <cudf/cuda_runtime.h>
 // #include <cooperative_groups.h>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/iterator.cuh>
@@ -1734,7 +1735,7 @@ std::vector<std::unique_ptr<column>> convert_to_rows(
   CUDF_CUDA_TRY(cudaGetDevice(&device_id));
   int total_shmem_in_bytes;
   CUDF_CUDA_TRY(
-      cudaDeviceGetAttribute(&total_shmem_in_bytes, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id));
+      cudaDeviceGetAttribute(&total_shmem_in_bytes, cudaDevAttrMaxSharedMemoryPerBlock, device_id));
 
 #if !defined(__CUDA_ARCH__) && !defined(__HIP_PLATFORM_AMD__) // __host__ code.
   // Need to reduce total shmem available by the size of barriers in the kernel's shared memory
@@ -2071,7 +2072,7 @@ std::unique_ptr<table> convert_from_rows(lists_column_view const &input,
   CUDF_CUDA_TRY(cudaGetDevice(&device_id));
   int total_shmem_in_bytes;
   CUDF_CUDA_TRY(
-      cudaDeviceGetAttribute(&total_shmem_in_bytes, hipDeviceAttributeMaxSharedMemoryPerBlock, device_id));
+      cudaDeviceGetAttribute(&total_shmem_in_bytes, cudaDevAttrMaxSharedMemoryPerBlock, device_id));
 
 #if !defined(__CUDA_ARCH__) && !defined(__HIP_PLATFORM_AMD__) // __host__ code.
   // Need to reduce total shmem available by the size of barriers in the kernel's shared memory
