@@ -41,9 +41,7 @@
 
 #include <rmm/device_uvector.hpp>
 
-#include <hipcomp.h>
-#include <hipcomp/lz4.h>
-//#include <hipcomp/zstd.h>
+#include <cudf/nvcomp.h>
 
 namespace {
 

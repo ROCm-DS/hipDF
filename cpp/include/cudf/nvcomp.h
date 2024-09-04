@@ -57,6 +57,27 @@
 #ifndef nvcompBatchedDeflateDefaultOpts
 #  define nvcompBatchedDeflateDefaultOpts hipcompBatchedDeflateDefaultOpts
 #endif
+#ifndef nvcompBatchedLZ4CompressAsync
+#  define nvcompBatchedLZ4CompressAsync hipcompBatchedLZ4CompressAsync
+#endif
+#ifndef nvcompBatchedLZ4CompressGetTempSize
+#  define nvcompBatchedLZ4CompressGetTempSize hipcompBatchedLZ4CompressGetTempSize
+#endif
+#ifndef nvcompBatchedLZ4CompressGetMaxOutputChunkSize
+# define nvcompBatchedLZ4CompressGetMaxOutputChunkSize hipcompBatchedLZ4CompressGetMaxOutputChunkSize
+#endif
+#ifndef nvcompBatchedLZ4DecompressAsync
+#  define nvcompBatchedLZ4DecompressAsync hipcompBatchedLZ4DecompressAsync
+#endif
+#ifndef nvcompBatchedLZ4GetDecompressSizeAsync
+#  define nvcompBatchedLZ4GetDecompressSizeAsync hipcompBatchedLZ4GetDecompressSizeAsync
+#endif
+#ifndef nvcompBatchedLZ4DecompressGetTempSize
+#  define nvcompBatchedLZ4DecompressGetTempSize hipcompBatchedLZ4DecompressGetTempSize
+#endif
+#ifndef nvcompBatchedLZ4DefaultOpts
+#  define nvcompBatchedLZ4DefaultOpts hipcompBatchedLZ4DefaultOpts
+#endif
 #ifndef nvcompBatchedZstdCompressAsync
 #  define nvcompBatchedZstdCompressAsync hipcompBatchedZstdCompressAsync
 #endif
