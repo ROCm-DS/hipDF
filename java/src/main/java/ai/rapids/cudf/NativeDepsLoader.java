@@ -74,6 +74,10 @@ public class NativeDepsLoader {
    */
   public static synchronized void loadNativeDeps() {
     if (!loaded) {
+      // FIXME(HIP/AMD): We circumvent the original way of loading dependencies
+      // with loadNativeDeps(loadOrder) here as it causes runtime errors
+      // when launching kernels through the HIP
+      // runtime. If this is problematic, we need to revisit this later.
       try {
         Arrays.asList(loadOrder).stream().forEach(s -> {
           for (String lib:s) {
