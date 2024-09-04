@@ -73,10 +73,31 @@ struct unary_cast {
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
-    std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>())>* = nullptr>
+    std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>() && 
+                     !((hip::std::is_same<SourceT, float>() || hip::std::is_same<SourceT, double>()) && hip::std::is_same<TargetT, long>())
+                     )>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return (hip::std::isnan(element)) ? hip::std::numeric_limits<TargetT>::max() : static_cast<TargetT>(element);
+    return static_cast<TargetT>(element);
+  }
+
+  template <
+    typename SourceT,
+    typename TargetT                                                                = _TargetT,
+    std::enable_if_t<((hip::std::is_same<SourceT, float>() || hip::std::is_same<SourceT, double>())  && hip::std::is_same<TargetT, long>())>* = nullptr>
+  __device__ inline TargetT operator()(SourceT const element)
+  {
+    if(hip::std::isinf(element) && element < 0){
+      return hip::std::numeric_limits<TargetT>::min();
+    } else if((hip::std::isinf(element) && element > 0) || hip::std::isnan(element)){
+      return hip::std::numeric_limits<TargetT>::max();
+    } else if(static_cast<SourceT>(element) >= static_cast<SourceT>(hip::std::numeric_limits<TargetT>::max())){
+      return hip::std::numeric_limits<TargetT>::max();
+    } else if(static_cast<SourceT>(element) <= static_cast<SourceT>(hip::std::numeric_limits<TargetT>::min())){
+      return hip::std::numeric_limits<TargetT>::min();
+    } else{
+      return static_cast<TargetT>(element);
+    }
   }
 
   template <
