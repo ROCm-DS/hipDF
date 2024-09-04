@@ -77,10 +77,31 @@ struct unary_cast {
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
-    std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>())>* = nullptr>
+    std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>() && 
+                     !((cuda::std::is_same<SourceT, float>() || cuda::std::is_same<SourceT, double>()) && cuda::std::is_same<TargetT, long>())
+                     )>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return (cuda::std::isnan(element)) ? cuda::std::numeric_limits<TargetT>::max() : static_cast<TargetT>(element);
+    return static_cast<TargetT>(element);
+  }
+
+  template <
+    typename SourceT,
+    typename TargetT                                                                = _TargetT,
+    std::enable_if_t<((cuda::std::is_same<SourceT, float>() || cuda::std::is_same<SourceT, double>())  && cuda::std::is_same<TargetT, long>())>* = nullptr>
+  __device__ inline TargetT operator()(SourceT const element)
+  {
+    if(cuda::std::isinf(element) && element < 0){
+      return cuda::std::numeric_limits<TargetT>::min();
+    } else if((cuda::std::isinf(element) && element > 0) || cuda::std::isnan(element)){
+      return cuda::std::numeric_limits<TargetT>::max();
+    } else if(static_cast<SourceT>(element) >= static_cast<SourceT>(cuda::std::numeric_limits<TargetT>::max())){
+      return cuda::std::numeric_limits<TargetT>::max();
+    } else if(static_cast<SourceT>(element) <= static_cast<SourceT>(cuda::std::numeric_limits<TargetT>::min())){
+      return cuda::std::numeric_limits<TargetT>::min();
+    } else{
+      return static_cast<TargetT>(element);
+    }
   }
 
   template <
