@@ -60,14 +60,14 @@ project(
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
 
-option(USE_NVTX "Build with NVTX support" OFF)
+option(USE_NVTX "Build with NVTX support" OFF)  # TODO(HIP/AMD): this option is currently not supported
 option(BUILD_SHARED_LIBS "Build cuDF JNI shared libraries" ON)
 option(BUILD_TESTS "Configure CMake to build tests" ON)
 option(CUDF_USE_PER_THREAD_DEFAULT_STREAM "Build with per-thread default stream" OFF)
 option(CUDA_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 option(USE_GDS "Build with GPUDirect Storage (GDS)/cuFile support" OFF)
 option(CUDF_JNI_LIBCUDF_STATIC "Link with libcudf.a" OFF)
-option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" OFF) # TODO(HIP/AMD): enable
+option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" OFF) # TODO(HIP/AMD): this option is currently not supported
 option(CUDA_STATIC_CUFILE "Statically link cuFile" OFF)
 
 message(VERBOSE "CUDF_JNI: Build with NVTX support: ${USE_NVTX}")
