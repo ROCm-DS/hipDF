@@ -36,20 +36,13 @@
 
 # This function finds nvbench and applies any needed patches.
 function(find_and_configure_hipbench)
-rapids_cpm_find(
-  nvbench 1.0.0
-  GIT_REPOSITORY https://$ENV{GITHUB_USER}:$ENV{GITHUB_PASS}@github.com/AMD-AI/hipbench
-  GIT_TAG dev
-  GIT_SHALLOW TRUE
-  )
+  include(${rapids-cmake-dir}/cpm/nvbench.cmake)
+  #: include(${rapids-cmake-dir}/cpm/package_override.cmake)
 
-  # include(${rapids-cmake-dir}/cpm/nvbench.cmake)
-  # include(${rapids-cmake-dir}/cpm/package_override.cmake)
+  #: set(cudf_patch_dir "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches")
+  #: rapids_cpm_package_override("${cudf_patch_dir}/nvbench_override.json")
 
-  # set(cudf_patch_dir "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches")
-  # rapids_cpm_package_override("${cudf_patch_dir}/nvbench_override.json")
-
-  # rapids_cpm_nvbench()
+  rapids_cpm_nvbench()
 
 endfunction()
 
