@@ -225,8 +225,8 @@ CUDF_HOST_DEVICE inline constexpr T shift(T const& val, scale_type const& scale)
  */
 template <typename Rep, typename T>
 CUDF_HOST_DEVICE inline Rep safe_cast_fp_to_rep(T val) {
-  if(val >= static_cast<T>(std::numeric_limits<Rep>::max())) {
-    return std::numeric_limits<Rep>::max();
+  if(val >= static_cast<T>(cuda::std::numeric_limits<Rep>::max())) {
+    return cuda::std::numeric_limits<Rep>::max();
   }
   else {
     return static_cast<Rep>(val);
