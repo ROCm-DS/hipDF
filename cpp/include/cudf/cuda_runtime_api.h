@@ -450,6 +450,9 @@
 #ifndef CUDA_SUCCESS
 #  define CUDA_SUCCESS hipSuccess
 #endif
+#ifndef cudaMemcpyDeviceToDevice
+#  define cudaMemcpyDeviceToDevice hipMemcpyDeviceToDevice
+#endif
 #ifndef cudaSuccess
 #  define cudaSuccess hipSuccess
 #endif
