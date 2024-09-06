@@ -550,13 +550,13 @@ __global__ void copy_to_rows_fixed_width_optimized(
         if (input_nm[col_index]) {
           if (bit_is_set(input_nm[col_index], row_index)) {
 #ifdef __HIP_PLATFORM_AMD__ 
-            atomicOr(valid_int, 1 << int_bit_offset);
+            atomicOr(valid_int, 1L << int_bit_offset);
 #else
             atomicOr_block(valid_int, 1 << int_bit_offset);
 #endif
           } else {
 #ifdef __HIP_PLATFORM_AMD__
-            atomicAnd(valid_int, ~(1 << int_bit_offset));
+            atomicAnd(valid_int, ~(1L << int_bit_offset));
 #else
             atomicAnd_block(valid_int, ~(1 << int_bit_offset));
 #endif
@@ -564,7 +564,7 @@ __global__ void copy_to_rows_fixed_width_optimized(
         } else {
 #ifdef __HIP_PLATFORM_AMD__
           // It is valid so just set the bit
-          atomicOr(valid_int, 1 << int_bit_offset);
+          atomicOr(valid_int, 1L << int_bit_offset);
 #else
           atomicOr_block(valid_int, 1 << int_bit_offset);
 #endif
