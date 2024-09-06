@@ -22,7 +22,11 @@
 
 #pragma once
 
+// NOTE(HIP/AMD): inclusion of this header into jitified programs
+// causes duplicate symbol definition errors for HIP headers/hiprtc_runtime.h.
+#ifndef __HIPCC_RTC__
 #include <hip/hip_runtime_api.h>
+#endif
 
 // NOTE(HIP/AMD): For the time being, we do not use reverse hipification header files
 //                for hipcub/cub and hip/curand as their usage is limited across
