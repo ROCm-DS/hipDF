@@ -257,6 +257,7 @@ include(cmake/thirdparty/get_spdlog.cmake)
 if(NOT BUILD_SHARED_LIBS)
   include("${rapids-cmake-dir}/export/find_package_file.cmake")
   list(APPEND METADATA_KINDS BUILD INSTALL)
+  # FIXME(HIP/AMD): re-add KvikIO AMD equivalent when it becomes available
   list(APPEND dependencies ZLIB hipcomp)
   if(TARGET cufile::cuFile_interface)
     list(APPEND dependencies cuFile)
