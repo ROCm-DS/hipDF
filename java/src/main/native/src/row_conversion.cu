@@ -79,7 +79,7 @@ using namespace hip_extensions;
 
 #include "row_conversion.hpp"
 
-#if defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700
+#if (defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700) && !defined(__HIP_PLATFORM_AMD__)
 #define ASYNC_MEMCPY_SUPPORTED
 #endif
 
