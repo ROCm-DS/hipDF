@@ -40,7 +40,7 @@
 
 #include "compiled/binary_ops.hpp"
 #ifdef CUDF_ENABLE_UDF_WITH_JITIFY
-#include <jit_preprocessed_files/binaryop/jit/kernel.hip.jit.hpp>
+#include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
 #endif
 
 #include <jit/cache.hpp>
@@ -192,10 +192,10 @@ void binary_operation(mutable_column_view& out,
   jitify2::Kernel kernel; 
   // CAUTION(TODO/HIP): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog)
   if constexpr(HIP_PLATFORM_AMD) {
-    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_hip_jit)
+    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {}, &parsed_llvm_ir);   
   } else {
-    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_hip_jit)
+    kernel = cudf::jit::get_program_cache(*binaryop_jit_kernel_cu_jit)
       .get_kernel(kernel_name, {}, {{"binaryop/jit/operation-udf.hpp", cuda_source}}, {architecture_str}, {});
   }
   kernel->configure_1d_max_occupancy(0, 0, 0, stream.value())

@@ -45,7 +45,7 @@
 #include <cudf/utilities/type_dispatcher.hpp>
 
 #ifdef CUDF_ENABLE_UDF_WITH_JITIFY
-#include <jit_preprocessed_files/transform/jit/kernel.hip.jit.hpp>
+#include <jit_preprocessed_files/transform/jit/kernel.cu.jit.hpp>
 #endif
 
 #include <jit/cache.hpp>
@@ -100,18 +100,18 @@ void unary_operation(mutable_column_view output,
 
   if(is_ptx) {
     if constexpr(HIP_PLATFORM_AMD) {
-      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_hip_jit)
+      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
         .get_kernel(
           kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir); 
     }
     else {
-      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_hip_jit)
+      kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
         .get_kernel(
           kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
     }
   }
   else {
-    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_hip_jit)
+    kernel = cudf::jit::get_program_cache(*transform_jit_kernel_cu_jit)
       .get_kernel(
         kernel_name, {}, {{"transform/jit/operation-udf.hpp", cuda_source}}, {architecture_string}); 
   }

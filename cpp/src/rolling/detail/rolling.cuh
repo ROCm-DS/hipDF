@@ -71,7 +71,7 @@
 #include <jit/util.hpp>
 
 #ifdef CUDF_ENABLE_UDF_WITH_JITIFY
-#include <jit_preprocessed_files/rolling/jit/kernel.hip.jit.hpp>
+#include <jit_preprocessed_files/rolling/jit/kernel.cu.jit.hpp>
 #endif
 
 #include <rmm/cuda_stream_view.hpp>
@@ -1331,16 +1331,16 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   if(udf_agg.kind==aggregation::Kind::PTX) {
     // CAUTION(HIP/AMD): We do assume here that the LLVM IR provided has been compiled for the current architecture (needs to match the architecture of kernel_prog, otherwise linker error will happen)
     if constexpr(HIP_PLATFORM_AMD) {
-      kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_hip_jit)
+      kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {}, &parsed_udf_llvm_ir);
     }
     else {
-      kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_hip_jit)
+      kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
         .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string});
     }
   } 
   else {
-    kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_hip_jit)
+    kernel = cudf::jit::get_program_cache(*rolling_jit_kernel_cu_jit)
        .get_kernel(  kernel_name, {}, {{"rolling/jit/operation-udf.hpp", cuda_source}}, {architecture_string}, {});
   }
 
