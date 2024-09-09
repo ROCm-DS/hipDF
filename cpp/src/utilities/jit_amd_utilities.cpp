@@ -38,7 +38,7 @@
 
 #include <cudf/cuda_runtime.h>
 
-#include <cudf_test/jit_amd_utilities.hpp>
+#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/utilities/error.hpp>
 
@@ -46,7 +46,7 @@
 #include <regex>
 
 
-namespace cudf::test {
+namespace cudf {
 
   std::string get_arch_name_of_current_device() {
     hipDevice_t device;

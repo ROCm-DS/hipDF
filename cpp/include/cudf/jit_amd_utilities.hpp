@@ -24,8 +24,6 @@
 
 namespace cudf {
 
-namespace test {
-
   /**
   * @brief Returns the name of the current AMD gfx GPU architecture as a string (e.g. gfx90a for MI200).
   *
@@ -61,5 +59,4 @@ namespace test {
   */
   std::string adapt_llvm_ir_attributes_for_current_arch(const std::string& llvm_ir);
 
-}  // namespace test
 }  // namespace cudf

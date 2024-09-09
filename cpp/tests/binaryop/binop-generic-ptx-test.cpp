@@ -42,7 +42,7 @@
 #include <tests/binaryop/binop-fixture.hpp>
 #include <tests/binaryop/util/runtime_support.h>
 
-#include <cudf_test/jit_amd_utilities.hpp>
+#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/binaryop.hpp>
@@ -121,7 +121,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !12 = !{!"float", !9, i64 0}
 	)'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
 
   char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
@@ -245,7 +245,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !14 = !{!"long", !9, i64 0}
     )'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b
@@ -376,7 +376,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !14 = !{!"long", !9, i64 0}
 	)'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b*b
