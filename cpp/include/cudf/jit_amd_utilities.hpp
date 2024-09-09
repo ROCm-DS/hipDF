@@ -39,8 +39,6 @@
 
 namespace cudf {
 
-namespace test {
-
   /**
   * @brief Returns the name of the current AMD gfx GPU architecture as a string (e.g. gfx90a for MI200).
   *
@@ -90,5 +88,4 @@ namespace test {
   #endif
     return udf_enabled;
   }
-}  // namespace test
 }  // namespace cudf

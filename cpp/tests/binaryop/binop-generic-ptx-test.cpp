@@ -43,7 +43,7 @@
 #include <tests/binaryop/util/operation.h>
 #include <tests/binaryop/util/runtime_support.h>
 
-#include <cudf_test/jit_amd_utilities.hpp>
+#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/binaryop.hpp>
@@ -52,7 +52,7 @@ struct BinaryOperationGenericPTXTest : public BinaryOperationTest {
  protected:
   void SetUp() override
   {
-    if (!cudf::test::has_udf_jitify_support() || !can_do_runtime_jit()) { GTEST_SKIP() << "Skipping tests that require 11.5 runtime (CUDA) or a patched hipRTC (AMD)."; }
+    if (!cudf::has_udf_jitify_support() || !can_do_runtime_jit()) { GTEST_SKIP() << "Skipping tests that require 11.5 runtime (CUDA) or a patched hipRTC (AMD)."; }
   }
 };
 
@@ -122,7 +122,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !12 = !{!"float", !9, i64 0}
 	)'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
 
   char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
@@ -246,7 +246,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !14 = !{!"long", !9, i64 0}
     )'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b
@@ -377,7 +377,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !14 = !{!"long", !9, i64 0}
 	)'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   char const* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   // c = a*a*a + b*b

@@ -43,7 +43,7 @@
 #include <cudf_test/cudf_gtest.hpp>
 #include <cudf_test/iterator_utilities.hpp>
 #include <cudf_test/type_lists.hpp>
-#include <cudf_test/jit_amd_utilities.hpp>
+#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
@@ -1240,7 +1240,7 @@ struct RollingTestUdf : public cudf::test::BaseFixture {
   protected:
     void SetUp() override
     {
-      if (!cudf::test::has_udf_jitify_support()) { GTEST_SKIP() << "Skipping tests that require support for UDFs with Jitify (patched hipRTC needed, enable support during build of cuDF!)."; }
+      if (!cudf::has_udf_jitify_support()) { GTEST_SKIP() << "Skipping tests that require support for UDFs with Jitify (patched hipRTC needed, enable support during build of cuDF!)."; }
     }
 
     const std::string cuda_func{
@@ -1482,7 +1482,7 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::test::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
+  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
 
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
