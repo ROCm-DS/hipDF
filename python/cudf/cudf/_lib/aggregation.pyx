@@ -206,7 +206,7 @@ cdef class RollingAggregation:
         nb_type = numpy_support.from_dtype(kwargs['dtype'])
         type_signature = (nb_type[:],)
         # TODO(HIP/AMD): hardcoding this name because the hipdf backend will search for it to identify the UDF in the code 
-        compiled_op = cudautils.compile_udf(op, type_signature, name="udf_funcname_from_numba_to_be_replaced_in_libhipdf")
+        compiled_op = cudautils.compile_udf(op, type_signature, name="udf_funcname_from_numba_to_be_replaced_in_libcudf")
         output_np_dtype = cudf.dtype(compiled_op[1])
         cpp_str = compiled_op[0].encode('UTF-8')
         if output_np_dtype not in SUPPORTED_NUMPY_TO_LIBCUDF_TYPES:
