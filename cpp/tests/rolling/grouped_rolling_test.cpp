@@ -43,6 +43,7 @@
 #include <cudf_test/cudf_gtest.hpp>
 #include <cudf_test/iterator_utilities.hpp>
 #include <cudf_test/type_lists.hpp>
+#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
@@ -355,6 +356,8 @@ class GroupedRollingTest : public cudf::test::BaseFixture {
                  following_window,
                  min_periods,
                  *cudf::make_row_number_aggregation<cudf::rolling_aggregation>());
+
+    if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_func = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_func);
 
 // TODO(HIP/AMD): Skipping these tests if UDF support is not enabled during build (an internal patched hipRTC is needed).
 // Ideally, we could use gtest's skipping facilities here, but this would disable the prior tests, too.
