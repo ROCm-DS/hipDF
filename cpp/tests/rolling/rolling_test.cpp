@@ -43,7 +43,6 @@
 #include <cudf_test/cudf_gtest.hpp>
 #include <cudf_test/iterator_utilities.hpp>
 #include <cudf_test/type_lists.hpp>
-#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
@@ -53,6 +52,7 @@
 #include <cudf/rolling.hpp>
 #include <cudf/unary.hpp>
 #include <cudf/utilities/bit.hpp>
+#include <cudf/utilities/jit_amd_utilities.hpp>
 #include <cudf/utilities/traits.hpp>
 #include <src/rolling/detail/rolling.hpp>
 
@@ -1481,8 +1481,6 @@ TEST_F(RollingTestUdf, StaticWindow)
   output = cudf::rolling_window(input, 2, 2, 4, *cuda_udf_agg);
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
-
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
 
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
