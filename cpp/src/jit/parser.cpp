@@ -457,14 +457,28 @@ std::string parse_single_function_llvm_ir(std::string const& src, std::string co
   // CAUTION(HIP/AMD): In lack of a better method, the function name of the UDF from Numba needs 
   // to be "udf_funcname_from_numba_to_be_replaced_in_libcudf", so that we can 
   // match against it and replace it with the ones expected by the jitified kernels.
-  std::regex pattern_func_sig("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libcudf");
-  std::regex pattern_func_name("udf_funcname_from_numba_to_be_replaced_in_libcudf");
+  // The reason for this is that we get multiple device functions as LLVM IR from Numba and 
+  // we need to identify the UDF among these device functions so that we can properly link it 
+  // to the jitified kernel.
+  const std::regex pattern_func_sig_numba("define hidden .* @udf_funcname_from_numba_to_be_replaced_in_libcudf");
+  const std::regex pattern_func_name_numba("udf_funcname_from_numba_to_be_replaced_in_libcudf");
+  const std::regex pattern_func_sig_name("define hidden void (@\\w+)");
 
-  CUDF_EXPECTS(std::regex_search(src, pattern_func_sig),
-              "Could not identify UDF in NUMBA's input LLVM IR. The expected function "
-              "name is \"udf_funcname_from_numba_to_be_replaced_in_libcudf\"\n");
+  std::smatch func_sig_name_matches;
   
-  return std::regex_replace(src, pattern_func_name, function_name);
+  // For NUMBA LLVM IR input
+  if(std::regex_search(src, pattern_func_sig_numba)) {
+    return std::regex_replace(src, pattern_func_name_numba, function_name);
+  }
+  // For other input, we simply search for the first function in the LLVM IR and assume it to be the UDF
+  else if(std::regex_search(src, func_sig_name_matches, pattern_func_sig_name)) {
+    std::string result = src;
+    return result.replace(src.find(func_sig_name_matches[1]), func_sig_name_matches[1].length(), "@"+function_name); 
+  }
+  else{
+    CUDF_FAIL("Could not identify UDF input LLVM IR. For LLVM IR from Numba, the expected function "
+              "name is \"udf_funcname_from_numba_to_be_replaced_in_libcudf\"\n");
+  } 
 }
 
 }  // namespace jit
