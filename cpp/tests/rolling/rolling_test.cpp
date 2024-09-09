@@ -44,7 +44,6 @@
 #include <cudf_test/random.hpp>
 #include <cudf_test/testing_main.hpp>
 #include <cudf_test/type_lists.hpp>
-#include <cudf/jit_amd_utilities.hpp>
 
 #include <cudf/types.hpp>
 #include <cudf/aggregation.hpp>
@@ -1474,7 +1473,6 @@ TEST_F(RollingTestUdf, StaticWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   // Test NUMBA UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
     cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
