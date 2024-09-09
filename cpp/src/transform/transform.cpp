@@ -44,6 +44,8 @@
 #include <cudf/detail/nvtx/ranges.hpp>
 #include <cudf/detail/transform.hpp>
 #include <cudf/null_mask.hpp>
+#include <cudf/utilities/default_stream.hpp>
+#include <cudf/utilities/jit_amd_utilities.hpp>
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
 
@@ -77,6 +79,7 @@ void unary_operation(mutable_column_view output,
                 + cudf::type_to_name(input.type())
                 + ");";
     parsed_udf_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_UNARY_OP");
+    parsed_udf_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_udf_llvm_ir);
   }
   else if(is_ptx && !HIP_PLATFORM_AMD) {
     cuda_source = cudf::jit::parse_single_function_ptx(udf,  //

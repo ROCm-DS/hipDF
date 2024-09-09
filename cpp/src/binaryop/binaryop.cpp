@@ -54,6 +54,7 @@
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/traits.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
+#include <cudf/utilities/jit_amd_utilities.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
 
@@ -174,6 +175,7 @@ void binary_operation(mutable_column_view& out,
                 + cudf::type_to_name(rhs.type())
                 + ");"; 
     parsed_llvm_ir = cudf::jit::parse_single_function_llvm_ir(udf, "GENERIC_BINARY_OP");
+    parsed_llvm_ir = cudf::adapt_llvm_ir_attributes_for_current_arch(parsed_llvm_ir);
   }
   else {
     cuda_source = cudf::jit::parse_single_function_ptx(udf, "GENERIC_BINARY_OP", output_type_name);
