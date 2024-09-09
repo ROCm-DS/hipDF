@@ -83,23 +83,46 @@ public class ColumnVectorTest extends CudfTestBase {
   static final double NEGATIVE_DOUBLE_NAN_UPPER_RANGE = Double.longBitsToDouble(0xffffffffffffffffL);
 
   // c = a * a - a
-  static String ptx = "***(" +
-      "      .func _Z1fPii(" +
-      "        .param .b64 _Z1fPii_param_0," +
-      "        .param .b32 _Z1fPii_param_1" +
-      "  )" +
-      "  {" +
-      "        .reg .b32       %r<4>;" +
-      "        .reg .b64       %rd<3>;" +
-      "    ld.param.u64    %rd1, [_Z1fPii_param_0];" +
-      "    ld.param.u32    %r1, [_Z1fPii_param_1];" +
-      "    cvta.to.global.u64      %rd2, %rd1;" +
-      "    mul.lo.s32      %r2, %r1, %r1;" +
-      "    sub.s32         %r3, %r2, %r1;" +
-      "    st.global.u32   [%rd2], %r3;" +
-      "    ret;" +
-      "  }" +
-      ")***";
+  static String llvmir = 
+  " ; Function Attrs: convergent mustprogress noinline nounwind \n"+
+  " define hidden void @f(ptr noundef %output, i32 noundef %input) #2 { \n"+
+  " entry: \n"+
+  "   %output.addr = alloca ptr, align 8, addrspace(5) \n"+
+  "   %input.addr = alloca i32, align 4, addrspace(5) \n"+
+  "   %output.addr.ascast = addrspacecast ptr addrspace(5) %output.addr to ptr \n"+
+  "   %input.addr.ascast = addrspacecast ptr addrspace(5) %input.addr to ptr \n"+
+  "   store ptr %output, ptr %output.addr.ascast, align 8, !tbaa !6 \n"+
+  "   store i32 %input, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+  "   %0 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+  "   %1 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+  "   %mul = mul nsw i32 %0, %1 \n"+
+  "   %2 = load i32, ptr %input.addr.ascast, align 4, !tbaa !10 \n"+
+  "   %sub = sub nsw i32 %mul, %2 \n"+
+  "   %3 = load ptr, ptr %output.addr.ascast, align 8, !tbaa !6 \n"+
+  "   store i32 %sub, ptr %3, align 4, !tbaa !10 \n"+
+  "   ret void \n"+
+  " } \n"+
+  "  \n"+
+  " attributes #0 = { convergent mustprogress noreturn nounwind \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"gfx90a\" \"target-features\"=\"+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64\" } \n"+
+  " attributes #1 = { cold noreturn nounwind memory(inaccessiblemem: write) } \n"+
+  " attributes #2 = { convergent mustprogress noinline nounwind \"no-trapping-math\"=\"true\" \"stack-protector-buffer-size\"=\"8\" \"target-cpu\"=\"gfx90a\" \"target-features\"=\"+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64\" } \n"+
+  "  \n"+
+  " !llvm.module.flags = !{!0, !1, !2, !3} \n"+
+  " !llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4} \n"+
+  " !opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5} \n"+
+  "  \n"+
+  " !0 = !{i32 1, !\"amdgpu_code_object_version\", i32 500} \n"+
+  " !1 = !{i32 1, !\"amdgpu_printf_kind\", !\"hostcall\"} \n"+
+  " !2 = !{i32 1, !\"wchar_size\", i32 4} \n"+
+  " !3 = !{i32 8, !\"PIC Level\", i32 2} \n"+
+  " !4 = !{!\"clang version 18.0.0git\"} \n"+
+  " !5 = !{i32 2, i32 0} \n"+
+  " !6 = !{!7, !7, i64 0} \n"+
+  " !7 = !{!\"any pointer\", !8, i64 0} \n"+
+  " !8 = !{!\"omnipotent char\", !9, i64 0} \n"+
+  " !9 = !{!\"Simple C++ TBAA\"} \n"+
+  " !10 = !{!11, !11, i64 0} \n" +
+  " !11 = !{!\"int\", !8, i64 0}";
 
   static String cuda = "__device__ inline void f(" +
       "int* output," +
@@ -108,10 +131,11 @@ public class ColumnVectorTest extends CudfTestBase {
       "*output = input*input - input;" +
       "}";
 
-  @Test @Disabled // TODO(HIP/AMD): Disabled the test for now. Should be enabled later!
+  @Test @Disabled// TODO(HIP/AMD): Disabled the test for now as per default, CUDF_ENABLE_UDF_WITH_JITIFY is not supported yet.
+                 // This test should be enabled later once the required ROCm support is available.
   void testTransformVector() {
     try (ColumnVector cv = ColumnVector.fromBoxedInts(2,3,null,4);
-         ColumnVector cv1 = cv.transform(ptx, true);
+         ColumnVector cv1 = cv.transform(llvmir, true);
          ColumnVector cv2 = cv.transform(cuda, false);
          ColumnVector expected = ColumnVector.fromBoxedInts(2*2-2, 3*3-3, null, 4*4-4)) {
       assertColumnsAreEqual(expected, cv1);
