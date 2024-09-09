@@ -44,7 +44,8 @@
 
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_wrapper.hpp>
-#include <cudf/jit_amd_utilities.hpp>
+#include <cudf/utilities/jit_amd_utilities.hpp>
+
 #include <cudf/types.hpp>
 #include <cudf/detail/iterator.cuh>
 #include <cudf/transform.hpp>
@@ -129,8 +130,6 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 !11 = !{!12, !12, i64 0}
 !12 = !{!"float", !9, i64 0}
     )'''";
-
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
 
   const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
@@ -228,7 +227,6 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 !12 = !{!"int", !9, i64 0}
     )'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   char const* ptx =
@@ -339,7 +337,6 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 !11 = !{!9, !9, i64 0} 
     )'''";
 
-  if constexpr(cudf::HIP_PLATFORM_AMD) amd_llvm_ir_str = cudf::adapt_llvm_ir_attributes_for_current_arch(amd_llvm_ir_str);
   const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   char const ptx[] =

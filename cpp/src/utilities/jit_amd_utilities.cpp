@@ -38,7 +38,7 @@
 
 #include <cudf/cuda_runtime.h>
 
-#include <cudf/jit_amd_utilities.hpp>
+#include <cudf/utilities/jit_amd_utilities.hpp>
 #include <cudf/utilities/error.hpp>
 
 #include <string>
