@@ -52,6 +52,10 @@ using namespace hip_extensions;
 
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/iterator.cuh>
+// NOTE(HIP/AMD): the null mask header include comes from upgrading
+// this source code file to a more recent variant from the upstream
+// spark-rapids-jni. The current file will be moved from cuDF
+// into spark-rapids-jni in a future code release. 
 #include <cudf/detail/null_mask.hpp>
 #include <cudf/detail/sequence.hpp>
 #include <cudf/detail/utilities/cuda.cuh>
