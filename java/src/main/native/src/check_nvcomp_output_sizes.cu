@@ -35,7 +35,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-#ifndef NVTX_DISABLE
+#ifndef NVTX_DISABLE  //FIXME(HIP/AMD): re-enable once rocTX integration is done
 #include <cudf/detail/nvtx/nvtx3.hpp>
 #endif
 #include <cudf/utilities/error.hpp>
