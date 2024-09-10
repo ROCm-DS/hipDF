@@ -83,10 +83,14 @@ using namespace hip_extensions;
 
 #include "row_conversion.hpp"
 
+// TODO(HIP/AMD): libhipcxx does not support barrier, hence we cannot support
+// async memory copies at the moment.
 #if (defined(__CUDA_ARCH__) && __CUDA_ARCH__ >= 700) && !defined(__HIP_PLATFORM_AMD__)
 #define ASYNC_MEMCPY_SUPPORTED
 #endif
 
+// TODO(HIP/AMD): libhipcxx does not support barrier, hence we cannot support
+// async memory copies at the moment.
 #if (!defined(__CUDA_ARCH__) || defined(ASYNC_MEMCPY_SUPPORTED)) && !defined(__HIP_PLATFORM_AMD__)
 #include <cuda/barrier>
 #endif // #if !defined(__CUDA_ARCH__) || defined(ASYNC_MEMCPY_SUPPORTED)
@@ -604,6 +608,9 @@ __global__ void copy_to_rows_fixed_width_optimized(
 #ifdef ASYNC_MEMCPY_SUPPORTED
 #define MEMCPY(dst, src, size, barrier) cuda::memcpy_async(dst, src, size, barrier)
 #else
+// TODO(HIP/AMD): libhipcxx does not support cuda::barrier,
+// so we have to remove the barrier argument here.
+// #define MEMCPY(dst, src, size, barrier) memcpy(dst, src, size)
 #define MEMCPY(dst, src, size) memcpy(dst, src, size)
 #endif // ASYNC_MEMCPY_SUPPORTED
 
