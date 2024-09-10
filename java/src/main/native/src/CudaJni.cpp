@@ -231,7 +231,7 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getComputeCapabilityMajor(JNIEnv
     CUDF_CUDA_TRY(::cudaGetDevice(&device));
     int attribute_value;
     CUDF_CUDA_TRY(
-        ::cudaDeviceGetAttribute(&attribute_value, cudaDeviceAttributeComputeCapabilityMajor, device));
+        ::cudaDeviceGetAttribute(&attribute_value, ::cudaDevAttrComputeCapabilityMajor, device));
     return attribute_value;
   }
   CATCH_STD(env, -2);
@@ -244,7 +244,7 @@ JNIEXPORT jint JNICALL Java_ai_rapids_cudf_Cuda_getComputeCapabilityMinor(JNIEnv
     CUDF_CUDA_TRY(::cudaGetDevice(&device));
     int attribute_value;
     CUDF_CUDA_TRY(
-        ::cudaDeviceGetAttribute(&attribute_value, cudaDeviceAttributeComputeCapabilityMinor, device));
+        ::cudaDeviceGetAttribute(&attribute_value, ::cudaDevAttrComputeCapabilityMinor, device));
     return attribute_value;
   }
   CATCH_STD(env, -2);
