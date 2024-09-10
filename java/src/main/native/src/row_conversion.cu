@@ -1282,7 +1282,7 @@ static int calc_fixed_width_kernel_dims(const size_type num_columns, const size_
   // in the x dimension because we use atomic operations at the block
   // level when writing validity data out to main memory, and that would
   // need to change if we split a word of validity data between blocks.
-  int const y_block_size = min(util::div_rounding_up_safe(num_columns, 4), 1024/cudf::detail::warp_size);
+  int const y_block_size = min(util::div_rounding_up_safe(num_columns, 4), 1024/cudf::detail::warp_size /*NUM_WARPS_IN_BLOCK*/);
   int const x_possible_block_size = 1024 / y_block_size;
   // 48KB is the default setting for shared memory per block according to the cuda tutorials (64KB on HIP/AMD)
   // If someone configures the GPU to only have 16 KB this might not work.
