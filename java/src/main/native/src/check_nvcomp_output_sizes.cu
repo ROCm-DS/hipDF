@@ -40,7 +40,7 @@
 
 #include <cudf/utilities/error.hpp>
 
-#ifndef NVTX_DISABLE
+#ifndef NVTX_DISABLE //FIXME(HIP/AMD): re-enable once rocTX integration is done
 #include <nvtx3/nvtx3.hpp>
 #endif
 #include <thrust/device_ptr.h>
