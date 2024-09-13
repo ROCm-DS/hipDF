@@ -56,8 +56,8 @@ Please see the [Demo Docker Repository](https://hub.docker.com/r/rapidsai/rapids
 
 ### ROCM/GPU requirements
 
-* ROCm HIP SDK compilers version 6.0.2+
-* Officially supported architecture (gfx90a only).
+* ROCm HIP SDK compilers version 6.2+
+* Officially supported architecture (gfx90a, gfx942, gfx1100).
 * For UDFs through Jitify (required for some BINARYOP, ROLLING and TRANSFORM APIs): A patched ROCm version is required (currently available internally only).
 
 ### CUDA/GPU requirements
