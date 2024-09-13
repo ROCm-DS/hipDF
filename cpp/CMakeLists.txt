@@ -68,6 +68,29 @@ if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*c
   message(FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers.")
 endif()
 
+# NOTE(HIP/AMD): for compatibility with existing build scripts,
+# we explicitly treat unsupported CMake operations here.
+# Some of them may be silently ignored, but the default is to exit the CMake build configuration.
+# This options makes the build ignore unsupported but enabled CMake options and proceed.
+if($ENV{CUDF_CMAKE_IGNORE_UNSUPPORTED_OPTIONS})
+  set(IGNORE_UNSUPPORTED_OPTIONS ON)
+else()
+  set(IGNORE_UNSUPPORTED_OPTIONS OFF)
+endif()
+
+# Helper function to handle unsupported cmake options.
+function(handle_unsupported_cmake_option option_name force_exit)
+  if(${option_name} AND ${force_exit})
+    message(FATAL_ERROR "${option_name} option is not supported. Please disable it and reconfigure the project.")
+  endif()
+  if(${option_name} AND NOT ${force_exit} AND ${IGNORE_UNSUPPORTED_OPTIONS})
+    message(WARNING "${option_name} option is not supported. Disabling ${option_name} and proceeding with build.")
+    set(${option_name} OFF CACHE BOOL "" FORCE)
+  endif()
+  if(${option_name} AND NOT ${force_exit} AND NOT ${IGNORE_UNSUPPORTED_OPTIONS})
+    message(FATAL_ERROR "${option_name} option is not supported. To proceed with build, disable ${option_name} or set the environment variable CUDF_CMAKE_IGNORE_UNSUPPORTED_OPTIONS to \"ON\".")
+  endif()
+endfunction()
 
 # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
 # This ensures that those packages are compiled with the same architecture flags.
