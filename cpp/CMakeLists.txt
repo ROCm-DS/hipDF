@@ -94,7 +94,8 @@ endfunction()
 # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
 # This ensures that those packages are compiled with the same architecture flags.
 set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
-# option(USE_NVTX "Build with NVTX support" ON)
+option(USE_NVTX "Build with NVTX support" OFF)
+handle_unsupported_cmake_option("USE_NVTX" FALSE)
 
 # Needed because GoogleBenchmark changes the state of FindThreads.cmake, causing subsequent runs to
 # have different values for the `Threads::Threads` target. Setting this flag ensures
@@ -113,7 +114,8 @@ option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt CUDF_USE_PROPRIETARY_NVCOMP is not used.
-# option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
+option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" OFF)
+handle_unsupported_cmake_option("CUDF_USE_PROPRIETARY_NVCOMP" TRUE)
 option(CUDF_USE_ARROW_STATIC "Build and statically link Arrow libraries" OFF)
 option(CUDF_ENABLE_ARROW_ORC "Build the Arrow ORC adapter" OFF)
 option(CUDF_ENABLE_ARROW_PYTHON "Find (or build) Arrow with Python support" OFF)
@@ -138,9 +140,11 @@ option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated 
 option(GPU_ENABLE_LINEINFO
        "Generate line-number information for GPU device code." OFF
 )
+handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
 option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
 option(GPU_STATIC_RUNTIME "Statically link the CUDA/HIP runtime" OFF)
+handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
