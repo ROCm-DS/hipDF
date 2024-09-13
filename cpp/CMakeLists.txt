@@ -62,6 +62,13 @@ project(
   LANGUAGES C CXX
 )
 
+# NOTE(HIP/AMD): required for rocThrust
+if(NOT (CMAKE_CXX_COMPILER MATCHES ".*hipcc$" OR CMAKE_CXX_COMPILER MATCHES ".*clang\\+\\+")
+  OR NOT (CMAKE_C_COMPILER MATCHES ".*hipcc$" OR CMAKE_C_COMPILER MATCHES ".*clang\\+\\+"))
+  message(FATAL_ERROR "On ROCm platform 'hipcc' or HIP-aware clang must be used as C/C++ compilers.")
+endif()
+
+
 # NOTE(AMD/HIP): Some dependencies may not use rapids-cmake to set architecture flags.
 # This ensures that those packages are compiled with the same architecture flags.
 set(AMDGPU_TARGETS ${CMAKE_HIP_ARCHITECTURES})
