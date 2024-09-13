@@ -37,6 +37,11 @@ if(GPU_WARNINGS_AS_ERRORS)
   list(APPEND CUDF_GPU_FLAGS -Werror -Wno-c++11-narrowing-const-reference -Wno-deprecated  -Wno-pass-failed -Wno-implicit-conversion-floating-point-to-bool ) #FIXME(HIP): WAR for some transformation passes failing in hipcub, might degrade performance; accept implicit conversion of math operations to integer types like bool
 endif()
 
+if(DISABLE_DEPRECATION_WARNINGS)
+  list(APPEND CUDF_CXX_FLAGS -Wno-deprecated-declarations)
+  list(APPEND CUDF_GPU_FLAGS -Wno-deprecated-declarations)
+endif()
+
 if(GPU_ENABLE_LINEINFO)
   #TODO 
   message(FATAL_ERROR "CUDF does not support line-number information for hip platform")
