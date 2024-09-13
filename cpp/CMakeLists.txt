@@ -105,7 +105,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 # ##################################################################################################
 # * build options ---------------------------------------------------------------------------------
-
+option(USE_NVTX "Build with NVTX support" OFF)
+handle_unsupported_cmake_option("USE_NVTX" FALSE)
 option(BUILD_TESTS "Configure CMake to build tests" OFF)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
@@ -113,9 +114,10 @@ option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
-#TODO(HIP/AMD) : FIX wrt CUDF_USE_PROPRIETARY_NVCOMP is not used.
-# option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" ON)
-# option(CUDF_EXPORT_NVCOMP "Export NVCOMP as a dependency" ON)
+option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" OFF)
+handle_unsupported_cmake_option("CUDF_USE_PROPRIETARY_NVCOMP" TRUE)
+option(CUDF_EXPORT_NVCOMP "Export NVCOMP as a dependency" ON)
+handle_unsupported_cmake_option("CUDF_EXPORT_NVCOMP" TRUE)
 option(CUDF_LARGE_STRINGS_DISABLED "Build with large string support disabled" OFF)
 mark_as_advanced(CUDF_LARGE_STRINGS_DISABLED)
 option(
@@ -137,10 +139,13 @@ option(DISABLE_DEPRECATION_WARNINGS "Disable warnings generated from deprecated 
 option(GPU_ENABLE_LINEINFO
        "Generate line-number information for GPU device code." OFF
 )
+handle_unsupported_cmake_option("GPU_ENABLE_LINEINFO" FALSE)
 option(GPU_WARNINGS_AS_ERRORS "Enable -Werror=all-warnings for all GPU compilation" ON)
 # cudart can be statically linked or dynamically linked. The python ecosystem wants dynamic linking
 option(GPU_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
+handle_unsupported_cmake_option("GPU_STATIC_RUNTIME" TRUE)
 option(CUDA_STATIC_CUFILE "Statically link cuFile" OFF)
+handle_unsupported_cmake_option("CUDA_STATIC_CUFILE" TRUE)
 
 set(DEFAULT_CUDF_BUILD_STREAMS_TEST_UTIL ON)
 if(GPU_STATIC_RUNTIME OR NOT BUILD_SHARED_LIBS)
