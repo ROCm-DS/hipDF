@@ -57,7 +57,7 @@ rapids_hip_init_architectures(CUDF)
 # during project call (project call is essentially calling back rapids-cmake to determine+set architecture)
 project(
   CUDF
-  VERSION 23.10.00 #TODO(HIP/AMD): which version to choose?
+  VERSION 23.10.00
   LANGUAGES C CXX HIP
 )
 
