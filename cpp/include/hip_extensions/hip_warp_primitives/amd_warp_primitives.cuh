@@ -32,7 +32,7 @@
 #define WAVEFRONT_SIZE __AMDGCN_WAVEFRONT_SIZE
 #endif
 
-#if !(__gfx1010__ || __gfx1011__ || __gfx1012__ || __gfx1030__ || __gfx1031__)
+#if !(__gfx1010__ || __gfx1011__ || __gfx1012__ || __gfx1030__ || __gfx1031__ || __gfx1100__)
 #if WAVEFRONT_SIZE != 64
 #error "WAVEFRONT_SIZE 64 required"
 #endif
