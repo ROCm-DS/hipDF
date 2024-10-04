@@ -53,14 +53,8 @@ namespace gpu {
 namespace {
 
 constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
-// NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
-// gpuDecodeLevels typically decodes more values per run
-// due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
-// (with batch size 32).
-// Some buffer space is needed to avoid that the rolling buffer
-// wraps around and overwrites values that haven't been consumed
-// yet (by the output warp/wavefront) which would result in failing decoding.
-constexpr int rolling_buf_size  = (cudf::detail::warp_size/32) * decode_block_size;
+constexpr int rolling_buf_size  = decode_block_size * 2;
+
 /**
  * @brief Output a string descriptor
  *
@@ -511,7 +505,7 @@ __global__ void __launch_bounds__(decode_block_size)
 
   // skipped_leaf_values will always be 0 for flat hierarchies.
   uint32_t skipped_leaf_values = s->page.skipped_leaf_values;
-  while (!s->error &&
+  while (s->error == 0 &&
          (s->input_value_count < s->num_input_values || s->src_pos < s->nz_count)) {
     int target_pos;
     int src_pos = s->src_pos;
