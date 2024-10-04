@@ -146,8 +146,7 @@ type_id to_type_id(SchemaElement const& schema,
           return type_id::DECIMAL32;
         } else if (decimal_precision <= MAX_DECIMAL64_PRECISION) {
           return type_id::DECIMAL64;
-        } 
-        else {
+        } else {
            return type_id::DECIMAL128;
         }
       }
