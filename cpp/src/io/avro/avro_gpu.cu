@@ -38,6 +38,7 @@
 // SOFTWARE.
 
 #include "avro_gpu.hpp"
+#include <cudf/detail/utilities/cuda.cuh>
 #include "io/utilities/block_utils.cuh"
 
 #include <rmm/cuda_stream_view.hpp>
@@ -356,7 +357,7 @@ avro_decode_row(schemadesc_s const* schema,
  * @param[in] min_row_size Minimum size in bytes of a row
  */
 // blockDim {32,num_warps,1}
-CUDF_KERNEL void __launch_bounds__(num_warps * warpSize, 2)
+CUDF_KERNEL void __launch_bounds__(num_warps * cudf::detail::warp_size, 2)
   gpuDecodeAvroColumnData(device_span<block_desc_s const> blocks,
                           schemadesc_s* schema_g,
                           device_span<string_index_pair const> global_dictionary,
@@ -373,7 +374,7 @@ CUDF_KERNEL void __launch_bounds__(num_warps * warpSize, 2)
 
   // Fetch schema into shared mem if possible
   if (schema_len <= max_shared_schema_len) {
-    for (int i = threadIdx.y * warpSize + threadIdx.x; i < schema_len; i += num_warps * warpSize) {
+    for (int i = threadIdx.y * cudf::detail::warp_size + threadIdx.x; i < schema_len; i += num_warps * cudf::detail::warp_size) {
       g_shared_schema[i] = schema_g[i];
     }
     __syncthreads();
@@ -399,10 +400,10 @@ CUDF_KERNEL void __launch_bounds__(num_warps * warpSize, 2)
 
     if (cur + min_row_size * rows_remaining == end) {
       // We're dealing with predictable fixed-size rows, which means we can
-      // process up to warpSize rows (warp-width) at a time.  This will be the case
+      // process up to cudf::detail::warp_size rows (warp-width) at a time.  This will be the case
       // when we're dealing with fixed-size data, e.g. of floats or doubles,
       // which are always 4 or 8 bytes respectively.
-      nrows = min(rows_remaining, warpSize);
+      nrows = min(rows_remaining, cudf::detail::warp_size);
       cur += threadIdx.x * min_row_size;
     } else {
       // We're dealing with variable-size data, so only one row can be processed
@@ -462,7 +463,7 @@ void DecodeAvroColumnData(device_span<block_desc_s const> blocks,
                           rmm::cuda_stream_view stream)
 {
   // num_warps warps per threadblock
-  dim3 const dim_block(warpSize, num_warps);
+  dim3 const dim_block(cudf::detail::warp_size, num_warps);
   // 1 warp per datablock, num_warps datablocks per threadblock
   dim3 const dim_grid((blocks.size() + num_warps - 1) / num_warps, 1);
 

@@ -39,7 +39,6 @@
 #include "error.hpp"
 #include "io/utilities/block_utils.cuh"
 #include "parquet_gpu.hpp"
-
 #include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
@@ -626,7 +625,7 @@ void __host__ DecodePageHeaders(ColumnChunkDesc* chunks,
                                 rmm::cuda_stream_view stream)
 {
   //: TODO(HIP/AMD): does it make sense to use less warps/threads on AMD backend?
-  dim3 dim_block(4 * warpSize, 1);
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
 
   gpuDecodePageHeaders<<<dim_grid, dim_block, sizeof(byte_stream_s) * 4, stream.value()>>>(

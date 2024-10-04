@@ -100,7 +100,7 @@ constexpr int32_t NO_TRUNC_STATS = 0;
 constexpr size_t MIN_STATS_SCRATCH_SIZE = sizeof(__int128_t);
 
 // mask to determine lane id
-constexpr uint32_t WARP_MASK = warpSize - 1;
+constexpr uint32_t WARP_MASK = cudf::detail::warp_size - 1;
 
 // currently 64k - 1
 constexpr uint32_t MAX_GRID_Y_SIZE = (1 << 16) - 1;
@@ -514,7 +514,7 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
                        device_span<PageFragment const> fragments)
 {
   uint32_t const lane_id = threadIdx.x & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / warpSize);
+  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
@@ -1095,7 +1095,7 @@ inline __device__ void PackLiteralsRoundRobin(
   // Scratch space to temporarily write to. Needed because we will use atomics to write 32 bit
   // words but the destination mem may not be a multiple of 4 bytes.
   // TODO (dm): This assumes blockdim = 128. Reduce magic numbers.
-  constexpr uint32_t NUM_THREADS  = 4 * warpSize; // this needs to match gpuEncodePages block_size parameter
+  constexpr uint32_t NUM_THREADS  = 4 * cudf::detail::warp_size; // this needs to match gpuEncodePages block_size parameter
   constexpr uint32_t NUM_BYTES    = (NUM_THREADS * MAX_DICT_BITS) >> 3;
   constexpr uint32_t SCRATCH_SIZE = NUM_BYTES / sizeof(uint32_t);
   __shared__ uint32_t scratch[SCRATCH_SIZE];
@@ -1166,7 +1166,7 @@ inline __device__ void PackLiterals(
  * @param[in] numvals Total count of input values
  * @param[in] nbits number of bits per symbol (1..16)
  * @param[in] flush nonzero if last batch in block
- * @param[in] t thread id (0.. 4 * warpSize -1)
+ * @param[in] t thread id (0.. 4 * cudf::detail::warp_size -1)
  */
 static __device__ void RleEncode(
   rle_page_enc_state_s* s, uint32_t numvals, uint32_t nbits, uint32_t flush, uint32_t t)
@@ -1434,7 +1434,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
       __syncthreads();
       while (s->rle_numvals < s->page.num_rows) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nrows       = min(s->page.num_rows - rle_numvals, warpSize * 4);
+        uint32_t nrows       = min(s->page.num_rows - rle_numvals, cudf::detail::warp_size * 4);
         auto row             = s->page.start_row + rle_numvals + t;
         // Definition level encodes validity. Checks the valid map and if it is valid, then sets the
         // def_lvl accordingly and sets it in s->vals which is then given to RleEncode to encode
@@ -1511,7 +1511,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
       size_type col_last_val_idx   = s->col.level_offsets[s->col.num_rows];
       while (s->rle_numvals < s->page.num_values) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * warpSize);
+        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * cudf::detail::warp_size);
         uint32_t idx         = page_first_val_idx + rle_numvals + t;
         uint32_t lvl_val =
           (rle_numvals + t < s->page.num_values && idx < col_last_val_idx) ? lvl_val_data[idx] : 0;
@@ -2017,7 +2017,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
   }
 
   // save RLE length if necessary
-  if (s->rle_len_pos != nullptr && t < warpSize) {
+  if (s->rle_len_pos != nullptr && t < cudf::detail::warp_size) {
     // size doesn't include the 4 bytes for the length
     auto const rle_size = static_cast<uint32_t>(s->cur - s->rle_len_pos) - RLE_LENGTH_FIELD_LEN;
     if (t < RLE_LENGTH_FIELD_LEN) { s->rle_len_pos[t] = rle_size >> (t * 8); }
@@ -2527,7 +2527,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
 
 constexpr int decide_compression_warps_in_block = 4;
 constexpr int decide_compression_block_size =
-  decide_compression_warps_in_block * warpSize;
+  decide_compression_warps_in_block * cudf::detail::warp_size;
 
 // blockDim(decide_compression_block_size, 1, 1)
 CUDF_KERNEL void __launch_bounds__(decide_compression_block_size)
@@ -2538,8 +2538,8 @@ CUDF_KERNEL void __launch_bounds__(decide_compression_block_size)
   using warp_reduce = hipcub::WarpReduce<uint32_t>;
   __shared__ typename warp_reduce::TempStorage temp_storage[decide_compression_warps_in_block][2];
 
-  auto const lane_id  = threadIdx.x % warpSize;
-  auto const warp_id  = threadIdx.x / warpSize;
+  auto const lane_id  = threadIdx.x % cudf::detail::warp_size;
+  auto const warp_id  = threadIdx.x / cudf::detail::warp_size;
   auto const chunk_id = blockIdx.x * decide_compression_warps_in_block + warp_id;
 
   if (chunk_id >= chunks.size()) { return; }
@@ -2554,7 +2554,7 @@ CUDF_KERNEL void __launch_bounds__(decide_compression_block_size)
   uint32_t compressed_data_size   = 0;
   uint32_t encodings              = 0;
   auto const num_pages            = ck_g[warp_id].num_pages;
-  for (auto page_id = lane_id; page_id < num_pages; page_id += warpSize) {
+  for (auto page_id = lane_id; page_id < num_pages; page_id += cudf::detail::warp_size) {
     auto const& curr_page     = ck_g[warp_id].pages[page_id];
     auto const page_data_size = curr_page.data_size;
     uncompressed_data_size += page_data_size;

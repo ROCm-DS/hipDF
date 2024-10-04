@@ -979,7 +979,7 @@ __launch_bounds__(block_size) CUDF_KERNEL
     if (out_validity.has_value()) {
       bitmask_type mask = __ballot_sync(active_threads, is_valid);
       // 0th lane of the warp writes the validity
-      if (!(tid % warpSize)) {
+      if (!(tid % cudf::detail::warp_size)) {
         THRUST_OPTIONAL_VALUE(out_validity)[cudf::word_index(tid)] = mask;
         warp_valid_count += __POPC(mask);
       }

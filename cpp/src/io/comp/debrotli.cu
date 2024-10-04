@@ -81,6 +81,7 @@ THE SOFTWARE.
 #include "io/utilities/block_utils.cuh"
 
 #include <cudf/detail/utilities/cuda.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/utilities/error.hpp>
 
 #include <rmm/cuda_stream_view.hpp>
@@ -1885,7 +1886,7 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
       distance_code = shuffle(distance_code);
       if (distance_code > 0) {
         // Copy
-        for (uint32_t i = t; i < copy_length; i += warpSize) {
+        for (uint32_t i = t; i < copy_length; i += cudf::detail::warp_size) {
           uint8_t const* src =
             out + pos + ((i >= (uint32_t)distance_code) ? (i % (uint32_t)distance_code) : i) -
             distance_code;
@@ -1898,9 +1899,9 @@ static __device__ void ProcessCommands(debrotli_state_s* s, brotli_dictionary_s 
         if (t < copy_length) {
           b            = src[t];
           out[pos + t] = b;
-          if (warpSize + t < copy_length) {
-            b                 = src[warpSize + t];
-            out[pos + warpSize + t] = b;
+          if (cudf::detail::warp_size + t < copy_length) {
+            b                 = src[cudf::detail::warp_size + t];
+            out[pos + cudf::detail::warp_size + t] = b;
           }
         }
       }
@@ -2016,7 +2017,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 2)
           __syncthreads();
           if (!s->error) {
             // Warp0: Decode compressed block, warps 1..7 are all idle (!)
-            if (t < warpSize)
+            if (t < cudf::detail::warp_size)
               ProcessCommands(s, reinterpret_cast<brotli_dictionary_s*>(scratch + scratch_size), t);
             __syncthreads();
           }

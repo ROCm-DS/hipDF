@@ -52,7 +52,7 @@ namespace cg = cooperative_groups;
 
 namespace {
 
-constexpr int decode_block_size = 4 * warpSize; //need to have four WARPS/wavefronts for decoding algorithm
+constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
 // NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
 // gpuDecodeLevels typically decodes more values per run
 // due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
@@ -60,7 +60,7 @@ constexpr int decode_block_size = 4 * warpSize; //need to have four WARPS/wavefr
 // Some buffer space is needed to avoid that the rolling buffer
 // wraps around and overwrites values that haven't been consumed
 // yet (by the output warp/wavefront) which would result in failing decoding.
-constexpr int rolling_buf_size  = (warpSize/32) * decode_block_size;
+constexpr int rolling_buf_size  = (cudf::detail::warp_size/32) * decode_block_size;
 /**
  * @brief Kernel for computing the BYTE_STREAM_SPLIT column data stored in the pages
  *
@@ -280,13 +280,13 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
   bool const has_repetition = s->col.max_level[level_type::REPETITION] > 0;
 
   if (s->dict_base) {
-    out_thread0 = (s->dict_bits > 0) ? 2 * warpSize  : warpSize;
+    out_thread0 = (s->dict_bits > 0) ? 2 * cudf::detail::warp_size  : cudf::detail::warp_size;
   } else {
     switch (s->col.physical_type) {
       case BOOLEAN: [[fallthrough]];
       case BYTE_ARRAY: [[fallthrough]];
-      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 2 * warpSize; break;
-      default: out_thread0 = warpSize;
+      case FIXED_LEN_BYTE_ARRAY: out_thread0 = 2 * cudf::detail::warp_size; break;
+      default: out_thread0 = cudf::detail::warp_size;
     }
   }
 
@@ -307,7 +307,7 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                        s->nz_count + (decode_block_size - out_thread0));
     } else {
       target_pos = min(s->nz_count, src_pos + decode_block_size - out_thread0);
-      if (out_thread0 > warpSize) { target_pos = min(target_pos, s->dict_pos); }
+      if (out_thread0 > cudf::detail::warp_size) { target_pos = min(target_pos, s->dict_pos); }
     }
     // this needs to be here to prevent warp 3 modifying src_pos before all threads have read it
     __syncthreads();

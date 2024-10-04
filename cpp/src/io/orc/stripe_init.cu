@@ -39,7 +39,7 @@
 #include "orc_gpu.hpp"
 
 #include <cudf/io/orc_types.hpp>
-
+#include <cudf/detail/utilities/cuda.cuh>
 #include <rmm/cuda_stream_view.hpp>
 
 #include <hipcub/hipcub.hpp>
@@ -72,9 +72,9 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
 {
   extern __shared__ compressed_stream_s strm_g[];
 
-  compressed_stream_s* const s = &strm_g[threadIdx.x / warpSize];
-  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / warpSize);
-  int lane_id                  = threadIdx.x % warpSize;
+  compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
+  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  int lane_id                  = threadIdx.x % cudf::detail::warp_size;
 
   if (strm_id < num_streams && lane_id == 0) { s->info = strm_info[strm_id]; }
 
@@ -170,9 +170,9 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
 {
   extern __shared__ compressed_stream_s strm_g[];
 
-  compressed_stream_s* const s = &strm_g[threadIdx.x / warpSize];
-  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / warpSize);
-  int lane_id                  = threadIdx.x % warpSize;
+  compressed_stream_s* const s = &strm_g[threadIdx.x / cudf::detail::warp_size];
+  int strm_id                  = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  int lane_id                  = threadIdx.x % cudf::detail::warp_size;
 
   if (strm_id < num_streams && lane_id == 0) s->info = strm_info[strm_id];
 
@@ -212,7 +212,7 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8)
       // block
       if (uncompressed_actual < uncompressed_estimated) {
         // warp-level memmove
-        for (int i = lane_id; i < (int)uncompressed_size_actual; i += warpSize) {
+        for (int i = lane_id; i < (int)uncompressed_size_actual; i += cudf::detail::warp_size) {
           uncompressed_actual[i] = uncompressed_estimated[i];
         }
       }
@@ -498,7 +498,7 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseRowGr
   }
   __syncthreads();
   while (s->rowgroup_start < s->rowgroup_end) {
-    int num_rowgroups = min(s->rowgroup_end - s->rowgroup_start, 4 * warpSize);
+    int num_rowgroups = min(s->rowgroup_end - s->rowgroup_start, 4 * cudf::detail::warp_size);
     int rowgroup_size4, t4, t32;
 
     s->rowgroups[t].chunk_id = chunk_id;
@@ -517,7 +517,7 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseRowGr
     rowgroup_size4 = sizeof(RowGroup) / sizeof(uint32_t);
     t4             = t & 3;
     t32            = t >> 2;
-    for (int i = t32; i < num_rowgroups; i += warpSize) {
+    for (int i = t32; i < num_rowgroups; i += cudf::detail::warp_size) {
       auto const num_rows =
         (use_base_stride) ? rowidx_stride
                           : row_groups[(s->rowgroup_start + i) * num_columns + col_idx].num_rows;
