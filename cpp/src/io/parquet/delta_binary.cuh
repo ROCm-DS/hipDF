@@ -82,7 +82,7 @@ using zigzag128_t = int64_t;
 // Some buffer space is needed to avoid that the rolling buffer
 // wraps around and overwrites values that haven't been consumed
 // yet (by the output warp/wavefront) which would result in failing decoding.
-#ifdef __HIP_PLATFORM_AMD__
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32) 
 constexpr int delta_rolling_buf_size = 256;
 #else
 constexpr int delta_rolling_buf_size = 128;
@@ -246,7 +246,6 @@ struct delta_binary_decoder {
     // NOTE(HIP/AMD): Pay extra attention to rounding up if 
     // batch_len==64 (on AMD) and values_per_mb==32
     uint32_t const num_pass = (values_per_mb + batch_len - 1) / batch_len;
- 
     auto d_start = cur_mb_start;
 
     // NOTE(HIP/AMD): On AMD, it may happen that batch_len==values_per_mb==32, so we need
