@@ -1079,7 +1079,7 @@ __launch_bounds__(block_size) CUDF_KERNEL
       input, default_outputs, output, start, end, i);
 
     // set the mask
-    cudf::bitmask_type const result_mask{__ballot_sync(active_threads, output_is_valid)};
+    cudf::bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync(active_threads, output_is_valid))};
 
     // only one thread writes the mask
     if (0 == threadIdx.x % cudf::detail::warp_size) {
