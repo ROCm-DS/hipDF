@@ -53,14 +53,8 @@ namespace cg = cooperative_groups;
 namespace {
 
 constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
-// NOTE(HIP): We have to use a higher rolling buffer size for AMD backend as
-// gpuDecodeLevels typically decodes more values per run
-// due to using a batch size of 64 (= wavefront size) than on NVIDIA backend
-// (with batch size 32).
-// Some buffer space is needed to avoid that the rolling buffer
-// wraps around and overwrites values that haven't been consumed
-// yet (by the output warp/wavefront) which would result in failing decoding.
-constexpr int rolling_buf_size  = (cudf::detail::warp_size/32) * decode_block_size;
+constexpr int rolling_buf_size  = decode_block_size * 2;
+
 /**
  * @brief Kernel for computing the BYTE_STREAM_SPLIT column data stored in the pages
  *
