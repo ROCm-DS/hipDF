@@ -68,6 +68,7 @@ Mark Adler    madler@alumni.caltech.edu
 #include "gpuinflate.hpp"
 #include "io_uncomp.hpp"
 #include <hipcub/hipcub.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 
 #include <io/utilities/block_utils.cuh>
 
@@ -829,7 +830,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
 
     auto const symt     = (t < batch_len) ? b[t] : 256;
     auto const lit_mask = ballot(symt >= 256);
-    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, warpSize)); //TODO(HIP/AMD): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
+    auto pos            = static_cast<uint8_t>(min((__FFS(lit_mask) - 1) & 0xff, cudf::detail::warp_size)); //TODO(HIP/AMD): static_cast safe here (WAR for compiler error)?, also: check mask, warp size and __ffs invocation
 
     if (t == 0) { s->x.batch_len[batch] = 0; }
 
@@ -854,7 +855,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
       // Process subsequent literals, if any
       if (!((lit_mask >> pos) & 1)) {
         len    = min((__FFS(lit_mask >> pos) - 1) & 0xff, batch_len);
-        symbol = shuffle(symt, (pos + t) & (warpSize-1));
+        symbol = shuffle(symt, (pos + t) & (cudf::detail::warp_size-1));
         if (t < len && out + t < outend) { out[t] = symbol; }
         out += len;
         pos += len;
@@ -992,11 +993,11 @@ __device__ void prefetch_warp(volatile inflate_state_s* s, int t)
   while (shuffle((t == 0) ? s->pref.run : 0)) {
     auto cur_lo = (int32_t)(size_t)cur_p;
     int do_pref =
-      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - warpSize * 4 - 4) : 0);
+      shuffle((t == 0) ? (cur_lo - *(volatile int32_t*)&s->cur < prefetch_size - cudf::detail::warp_size * 4 - 4) : 0);
     if (do_pref) {
       uint8_t const* p             = cur_p + 4 * t;
       *prefetch_addr32(s->pref, p) = (p < end) ? *reinterpret_cast<uint32_t const*>(p) : 0;
-      cur_p += 4 * warpSize;
+      cur_p += 4 * cudf::detail::warp_size;
       __threadfence_block();
       hip_extensions::__syncwarp();
       if (!t) {
@@ -1136,7 +1137,7 @@ __global__ void __launch_bounds__(block_size)
       if (t < batch_count) { state->x.batch_len[t] = 0; }
       __syncthreads();
       // decode data until end-of-block code
-      if (t < 1 * warpSize) {
+      if (t < 1 * cudf::detail::warp_size) {
         // WARP0: decode variable-length symbols
         if (!t) {
           // Thread0: decode symbols (single threaded)
@@ -1145,14 +1146,14 @@ __global__ void __launch_bounds__(block_size)
           state->pref.run = 0;
 #endif
         }
-      } else if (t < 2 * warpSize) {
+      } else if (t < 2 * cudf::detail::warp_size) {
         // WARP1: perform LZ77 using length and distance codes from WARP0
-        process_symbols(state, t & (warpSize-1));
+        process_symbols(state, t & (cudf::detail::warp_size-1));
       }
 #if ENABLE_PREFETCH
-      else if (t < 3 * warpSize) {
+      else if (t < 3 * cudf::detail::warp_size) {
         // WARP2: Prefetcher: prefetch data for WARP0
-        prefetch_warp(state, t & (warpSize-1));
+        prefetch_warp(state, t & (cudf::detail::warp_size-1));
       }
 #endif
       // else WARP3: idle
@@ -1255,7 +1256,7 @@ void gpuinflate(device_span<device_span<uint8_t const> const> inputs,
   // Wavefront1/warp1: processes the decoded symbols and write them into the output stream
   // Wavefront2/warp2: prefetch data for warp0
   // Wavefront3/warp3: copy uncompressed data
-  constexpr int block_size = warpSize * 4;  // Threads per block
+  constexpr int block_size = cudf::detail::warp_size * 4;  // Threads per block
   if (inputs.size() > 0) {
     inflate_kernel<block_size>
       <<<inputs.size(), block_size, 0, stream.value()>>>(inputs, outputs, results, parse_hdr);

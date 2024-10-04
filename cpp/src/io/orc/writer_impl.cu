@@ -821,12 +821,12 @@ std::vector<std::vector<rowgroup_rows>> calculate_aligned_rowgroup_bounds(
           // Find word in which we finish the search for missing bits (guaranteed to be available)
           while (bits_to_borrow != 0) {
             auto const mask = cudf::detail::get_mask_offset_word(
-              parent_column.pushdown_mask, 0, borrow_end, borrow_end + warpSize);
+              parent_column.pushdown_mask, 0, borrow_end, borrow_end + cudf::detail::warp_size);
             auto const valid_in_word = __POPC(mask);
 
             if (valid_in_word > bits_to_borrow) break;
             bits_to_borrow -= valid_in_word;
-            borrow_end += warpSize;
+            borrow_end += cudf::detail::warp_size;
           }
 
           // Find the last of the missing bits (guaranteed to be available)

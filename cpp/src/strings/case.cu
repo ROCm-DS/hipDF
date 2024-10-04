@@ -169,8 +169,8 @@ struct count_bytes_fn {
 
   __device__ void operator()(size_type idx) const
   {
-    auto const str_idx  = idx / warpSize;
-    auto const lane_idx = idx % warpSize;
+    auto const str_idx  = idx / cudf::detail::warp_size;
+    auto const lane_idx = idx % cudf::detail::warp_size;
 
     // initialize the output for the atomicAdd
     if (lane_idx == 0) { d_offsets[str_idx] = 0; }
@@ -182,7 +182,7 @@ struct count_bytes_fn {
     auto const str_ptr = d_str.data();
 
     size_type size = 0;
-    for (auto i = lane_idx; i < d_str.size_bytes(); i += warpSize) {
+    for (auto i = lane_idx; i < d_str.size_bytes(); i += cudf::detail::warp_size) {
       auto const chr = str_ptr[i];
       if (is_utf8_continuation_char(chr)) { continue; }
       char_utf8 u8 = 0;
@@ -276,7 +276,7 @@ std::unique_ptr<column> convert_case(strings_column_view const& input,
   count_bytes_fn counter{ccfn, *d_strings, d_offsets};
   auto const count_itr = thrust::make_counting_iterator<size_type>(0);
   thrust::for_each_n(
-    rmm::exec_policy(stream), count_itr, input.size() * warpSize, counter);
+    rmm::exec_policy(stream), count_itr, input.size() * cudf::detail::warp_size, counter);
 
   // convert sizes to offsets
   auto const bytes =

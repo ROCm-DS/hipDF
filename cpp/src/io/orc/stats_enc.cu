@@ -40,6 +40,7 @@
 #include <io/utilities/block_utils.cuh>
 
 #include <cudf/io/orc_types.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/strings/detail/convert/fixed_point_to_string.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
@@ -48,7 +49,7 @@ namespace cudf::io::orc::gpu {
 
 using strings::detail::fixed_point_string_size;
 
-constexpr unsigned int init_threads_per_group = warpSize;
+constexpr unsigned int init_threads_per_group = cudf::detail::warp_size;
 constexpr unsigned int init_groups_per_block  = 4;
 constexpr unsigned int init_threads_per_block = init_threads_per_group * init_groups_per_block;
 
@@ -263,7 +264,7 @@ __device__ std::pair<int64_t, int32_t> split_nanosecond_timestamp(int64_t nano_c
  *  optional bool hasNull = 10;
  * }
  */
-constexpr unsigned int encode_threads_per_chunk = warpSize;
+constexpr unsigned int encode_threads_per_chunk = cudf::detail::warp_size;
 constexpr unsigned int encode_chunks_per_block  = 4;
 constexpr unsigned int encode_threads_per_block =
   encode_threads_per_chunk * encode_chunks_per_block;

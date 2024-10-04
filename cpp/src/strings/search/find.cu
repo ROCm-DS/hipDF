@@ -144,10 +144,10 @@ __global__ void finder_warp_parallel_fn(column_device_view const d_strings,
 {
   size_type const idx = static_cast<size_type>(threadIdx.x + blockIdx.x * blockDim.x);
 
-  if (idx >= (d_strings.size() * warpSize)) { return; }
+  if (idx >= (d_strings.size() * cudf::detail::warp_size)) { return; }
 
-  auto const str_idx  = idx / warpSize;
-  auto const lane_idx = idx % warpSize;
+  auto const str_idx  = idx / cudf::detail::warp_size;
+  auto const lane_idx = idx % cudf::detail::warp_size;
 
   if (d_strings.is_null(str_idx)) { return; }
 
@@ -172,7 +172,7 @@ __global__ void finder_warp_parallel_fn(column_device_view const d_strings,
   // each thread compares the target with the thread's individual starting byte
   size_type position = forward ? std::numeric_limits<size_type>::max() : -1;
   for (auto itr = begin + lane_idx; itr + d_target.size_bytes() <= end;
-       itr += warpSize) {
+       itr += cudf::detail::warp_size) {
     if (d_target.compare(d_str.data() + itr, d_target.size_bytes()) == 0) {
       position = itr;
       if (forward) break;
@@ -210,7 +210,7 @@ void find_utility(strings_column_view const& input,
   if ((input.chars_size() / (input.size() - input.null_count())) > AVG_CHAR_BYTES_THRESHOLD) {
     // warp-per-string runs faster for longer strings (but not shorter ones)
     constexpr int block_size = 256;
-    cudf::detail::grid_1d grid{input.size() * warpSize, block_size};
+    cudf::detail::grid_1d grid{input.size() * cudf::detail::warp_size, block_size};
     finder_warp_parallel_fn<TargetIterator, forward>
       <<<grid.num_blocks, grid.num_threads_per_block, 0, stream.value()>>>(
         *d_strings, target_itr, start, stop, d_results);
@@ -375,18 +375,18 @@ __global__ void contains_warp_parallel_fn(column_device_view const d_strings,
   using warp_reduce   = hipcub::WarpReduce<bool>;
   __shared__ typename warp_reduce::TempStorage temp_storage;
 
-  if (idx >= (d_strings.size() * warpSize)) { return; }
+  if (idx >= (d_strings.size() * cudf::detail::warp_size)) { return; }
 
-  auto const str_idx  = idx / warpSize;
-  auto const lane_idx = idx % warpSize;
+  auto const str_idx  = idx / cudf::detail::warp_size;
+  auto const lane_idx = idx % cudf::detail::warp_size;
   if (d_strings.is_null(str_idx)) { return; }
   // get the string for this warp
   auto const d_str = d_strings.element<string_view>(str_idx);
   // each thread of the warp will check just part of the string
   auto found = false;
-  for (auto i = static_cast<size_type>(idx % warpSize);
+  for (auto i = static_cast<size_type>(idx % cudf::detail::warp_size);
        !found && (i + d_target.size_bytes()) < d_str.size_bytes();
-       i += warpSize) {
+       i += cudf::detail::warp_size) {
     // check the target matches this part of the d_str data
     if (d_target.compare(d_str.data() + i, d_target.size_bytes()) == 0) { found = true; }
   }
@@ -421,7 +421,7 @@ std::unique_ptr<column> contains_warp_parallel(strings_column_view const& input,
     // launch warp per string
     auto const d_strings     = column_device_view::create(input.parent(), stream);
     constexpr int block_size = 256;
-    cudf::detail::grid_1d grid{input.size() * warpSize, block_size};
+    cudf::detail::grid_1d grid{input.size() * cudf::detail::warp_size, block_size};
     contains_warp_parallel_fn<<<grid.num_blocks, grid.num_threads_per_block, 0, stream.value()>>>(
       *d_strings, d_target, results_view.data<bool>());
   }

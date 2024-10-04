@@ -90,12 +90,12 @@ __global__ void minhash_kernel(cudf::column_device_view const d_strings,
 {
   auto const idx = static_cast<std::size_t>(threadIdx.x + blockIdx.x * blockDim.x);
   if (idx >= (static_cast<std::size_t>(d_strings.size()) *
-              static_cast<std::size_t>(warpSize))) {
+              static_cast<std::size_t>(cudf::detail::warp_size))) {
     return;
   }
 
-  auto const str_idx  = static_cast<cudf::size_type>(idx / warpSize);
-  auto const lane_idx = static_cast<cudf::size_type>(idx % warpSize);
+  auto const str_idx  = static_cast<cudf::size_type>(idx / cudf::detail::warp_size);
+  auto const lane_idx = static_cast<cudf::size_type>(idx % cudf::detail::warp_size);
 
   if (d_strings.is_null(str_idx)) { return; }
 
@@ -113,7 +113,7 @@ __global__ void minhash_kernel(cudf::column_device_view const d_strings,
   auto const end   = d_str.data() + d_str.size_bytes();
 
   // each lane hashes 'width' substrings of d_str
-  for (auto itr = begin; itr < end; itr += warpSize) {
+  for (auto itr = begin; itr < end; itr += cudf::detail::warp_size) {
     if (cudf::strings::detail::is_utf8_continuation_char(*itr)) { continue; }
     auto const check_str =  // used for counting 'width' characters
       cudf::string_view(itr, static_cast<cudf::size_type>(thrust::distance(itr, end)));
@@ -173,7 +173,7 @@ std::unique_ptr<cudf::column> minhash_fn(cudf::strings_column_view const& input,
   auto d_hashes = hashes->mutable_view().data<hash_value_type>();
 
   constexpr int block_size = 256;
-  cudf::detail::grid_1d grid{input.size() * warpSize, block_size};
+  cudf::detail::grid_1d grid{input.size() * cudf::detail::warp_size, block_size};
   minhash_kernel<HashFunction><<<grid.num_blocks, grid.num_threads_per_block, 0, stream.value()>>>(
     *d_strings, seeds, width, d_hashes);
 

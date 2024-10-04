@@ -123,7 +123,7 @@ __global__ void materialize_merged_bitmask_kernel(
     bitmask_type const result_mask{static_cast<bitmask_type>(hip_extensions::__ballot_sync(active_threads, source_bit_is_valid))};
 
     // Only one thread writes output
-    if (0 == threadIdx.x % warpSize) { out_validity[word_index(destination_row)] = result_mask; }
+    if (0 == threadIdx.x % cudf::detail::warp_size) { out_validity[word_index(destination_row)] = result_mask; }
 
     tid += stride;
     active_threads = hip_extensions::__ballot_sync(active_threads, tid < num_destination_rows);

@@ -45,6 +45,7 @@
 
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/detail/utilities/integer_utils.hpp>
+#include <cudf/detail/utilities/cuda.cuh>
 #include <cudf/lists/lists_column_view.hpp>
 #include <cudf/utilities/bit.hpp>
 
@@ -74,7 +75,7 @@ constexpr bool zero_pll_war = true;
 struct byterle_enc_state_s {
   uint32_t literal_run;
   uint32_t repeat_run;
-  volatile bitmask_type rpt_map[(512 / warpSize) + 1];
+  volatile bitmask_type rpt_map[(512 / cudf::detail::warp_size) + 1];
 };
 
 struct intrle_enc_state_s {
@@ -84,12 +85,12 @@ struct intrle_enc_state_s {
   uint32_t literal_w;
   uint32_t hdr_bytes;
   uint32_t pl_bytes;
-  volatile bitmask_type delta_map[(512 / warpSize) + 1];
+  volatile bitmask_type delta_map[(512 / cudf::detail::warp_size) + 1];
 };
 
 struct strdata_enc_state_s {
   uint32_t char_count;
-  uint32_t lengths_red[(512 / warpSize)];
+  uint32_t lengths_red[(512 / cudf::detail::warp_size)];
   char const* str_data[512];
 };
 
@@ -227,11 +228,11 @@ static __device__ uint32_t ByteRLE(
           uint32_t literal_run_ofs = __FFS(mask) - 1;
           literal_run += literal_run_ofs;
           repeat_run = __FFS(~((rpt_map >> literal_run_ofs) >> 1));
-          if (repeat_run + literal_run_ofs == warpSize) {
+          if (repeat_run + literal_run_ofs == cudf::detail::warp_size) {
             while (next == LANE_MASK_ALL) {
               uint32_t next_idx = ((literal_run + repeat_run) >> LOG2_WARPSIZE) + 1;
-              next              = (next_idx < 512 / warpSize) ? s->u.byterle.rpt_map[next_idx] : 0;
-              repeat_run += warpSize;
+              next              = (next_idx < 512 / cudf::detail::warp_size) ? s->u.byterle.rpt_map[next_idx] : 0;
+              repeat_run += cudf::detail::warp_size;
             }
             repeat_run += __FFS(~next) - 1;
           }
@@ -243,7 +244,7 @@ static __device__ uint32_t ByteRLE(
           break;
         }
         rpt_map = next;
-        literal_run += warpSize;
+        literal_run += cudf::detail::warp_size;
       }
       if (repeat_run >= 130) {
         // Limit large runs to multiples of 130
@@ -413,19 +414,19 @@ static __device__ uint32_t IntegerRLE(
           uint32_t literal_run_ofs = __FFS(delta_map) - 1;
           literal_run += literal_run_ofs;
           delta_run = __FFS(~((delta_map >> literal_run_ofs) >> 1));
-          if (literal_run_ofs + delta_run == warpSize) {
+          if (literal_run_ofs + delta_run == cudf::detail::warp_size) {
             for (;;) {
               uint32_t delta_idx = (literal_run + delta_run) >> LOG2_WARPSIZE;
-              delta_map          = (delta_idx < 512 / warpSize) ? s->u.intrle.delta_map[delta_idx] : 0;
+              delta_map          = (delta_idx < 512 / cudf::detail::warp_size) ? s->u.intrle.delta_map[delta_idx] : 0;
               if (delta_map != LANE_MASK_ALL) break;
-              delta_run += warpSize;
+              delta_run += cudf::detail::warp_size;
             }
             delta_run += __FFS(~delta_map) - 1;
           }
           delta_run += 2;
           break;
         }
-        literal_run += warpSize;
+        literal_run += cudf::detail::warp_size;
         delta_map = s->u.intrle.delta_map[(literal_run >> LOG2_WARPSIZE)];
       }
       literal_run             = min(literal_run, maxvals);
@@ -611,14 +612,14 @@ static __device__ void StoreStringData(uint8_t* dst,
   // Start with summing up all the lengths
   uint32_t pos = len;
   uint32_t wt  = t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
-  for (uint64_t n = 1; n < warpSize; n <<= 1) {
+  for (uint64_t n = 1; n < cudf::detail::warp_size; n <<= 1) {
     uint32_t tmp = shuffle(pos, (wt & ~n) | (n - 1));
     pos += (wt & n) ? tmp : 0;
   }
   if (wt == LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE)) { strenc->lengths_red[t >> LOG2_WARPSIZE] = pos; }
   dst += pos - len;
   __syncthreads();
-  constexpr int nwarps = (512 / warpSize);
+  constexpr int nwarps = (512 / cudf::detail::warp_size);
   if (t < 2 * nwarps) {
     uint32_t wlen = (wt < nwarps) ? strenc->lengths_red[wt] : 0;
     uint32_t wpos = wlen;

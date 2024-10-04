@@ -1087,7 +1087,7 @@ __launch_bounds__(block_size) __global__
     cudf::bitmask_type const result_mask{hip_extensions::__ballot_sync(active_threads, output_is_valid)};
 
     // only one thread writes the mask
-    if (0 == threadIdx.x % warpSize) {
+    if (0 == threadIdx.x % cudf::detail::warp_size) {
       output.set_mask_word(cudf::word_index(i), result_mask);
       warp_valid_count += __POPC(result_mask);
     }

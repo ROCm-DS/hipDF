@@ -169,7 +169,7 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
       bitmask_type const new_word = hip_extensions::__ballot_sync(active_mask, bit_is_set);
 
       // First thread writes bitmask word
-      if (threadIdx.x % warpSize == 0) {
+      if (threadIdx.x % cudf::detail::warp_size == 0) {
         output_mask[word_index(output_index)] = new_word;
       }
 

@@ -81,7 +81,7 @@ constexpr int32_t NO_TRUNC_STATS = 0;
 constexpr size_t MIN_STATS_SCRATCH_SIZE = sizeof(__int128_t);
 
 // mask to determine lane id
-constexpr uint32_t WARP_MASK = warpSize - 1;
+constexpr uint32_t WARP_MASK = cudf::detail::warp_size - 1;
 
 // currently 64k - 1
 constexpr uint32_t MAX_GRID_Y_SIZE = (1 << 16) - 1;
@@ -328,13 +328,13 @@ __global__ void __launch_bounds__(block_size)
   if (t == 0) { frag[blockIdx.x] = s->frag; }
 }
 
-// blockDim {4 * warpSize,1,1}
-__global__ void __launch_bounds__(4 * warpSize)
+// blockDim {4 * cudf::detail::warp_size,1,1}
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitFragmentStats(device_span<statistics_group> groups,
                        device_span<PageFragment const> fragments)
 {
   uint32_t const lane_id = threadIdx.x & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / warpSize);
+  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
@@ -348,8 +348,8 @@ __global__ void __launch_bounds__(4 * warpSize)
   }
 }
 
-// blockDim {4 * warpSize,1,1}
-__global__ void __launch_bounds__(4 * warpSize)
+// blockDim {4 * cudf::detail::warp_size,1,1}
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuInitPages(device_2dspan<EncColumnChunk> chunks,
                device_span<gpu::EncPage> pages,
                device_span<size_type> page_sizes,
@@ -380,7 +380,7 @@ __global__ void __launch_bounds__(4 * warpSize)
     page_g = {};
   }
   __syncthreads();
-  if (t < warpSize) {
+  if (t < cudf::detail::warp_size) {
     uint32_t fragments_in_chunk  = 0;
     uint32_t rows_in_page        = 0;
     uint32_t values_in_page      = 0;
@@ -741,7 +741,7 @@ inline __device__ void PackLiteralsRoundRobin(
   // Scratch space to temporarily write to. Needed because we will use atomics to write 32 bit
   // words but the destination mem may not be a multiple of 4 bytes.
   // TODO (dm): This assumes blockdim = 128. Reduce magic numbers.
-  constexpr uint32_t NUM_THREADS  = 4 * warpSize; // this needs to match gpuEncodePages block_size parameter
+  constexpr uint32_t NUM_THREADS  = 4 * cudf::detail::warp_size; // this needs to match gpuEncodePages block_size parameter
   constexpr uint32_t NUM_BYTES    = (NUM_THREADS * MAX_DICT_BITS) >> 3;
   constexpr uint32_t SCRATCH_SIZE = NUM_BYTES / sizeof(uint32_t);
   __shared__ uint32_t scratch[SCRATCH_SIZE];
@@ -812,7 +812,7 @@ inline __device__ void PackLiterals(
  * @param[in] numvals Total count of input values
  * @param[in] nbits number of bits per symbol (1..16)
  * @param[in] flush nonzero if last batch in block
- * @param[in] t thread id (0.. 4 * warpSize -1)
+ * @param[in] t thread id (0.. 4 * cudf::detail::warp_size -1)
  */
 static __device__ void RleEncode(
   page_enc_state_s* s, uint32_t numvals, uint32_t nbits, uint32_t flush, uint32_t t)
@@ -828,16 +828,16 @@ static __device__ void RleEncode(
       uint32_t rle_rpt_count, max_rpt_count;
       if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { s->rpt_map[t >> LOG2_WARPSIZE] = mask; }
       __syncthreads();
-      if (t < warpSize) {
+      if (t < cudf::detail::warp_size) {
         bitmask_type c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
         if (!t) {
           uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
-            last_idx * warpSize + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
+            last_idx * cudf::detail::warp_size + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
         }
       }
       __syncthreads();
-      max_rpt_count = min(numvals - rle_pos, 4 * warpSize);
+      max_rpt_count = min(numvals - rle_pos, 4 * cudf::detail::warp_size);
       rle_rpt_count = s->rle_rpt_count;
       rle_run += rle_rpt_count << 1;
       rle_pos += rle_rpt_count;
@@ -857,11 +857,11 @@ static __device__ void RleEncode(
       uint32_t v0      = s->vals[pos & (rle_buffer_size - 1)];
       uint32_t v1      = s->vals[(pos + 1) & (rle_buffer_size - 1)];
       bitmask_type mask    = ballot(pos + 1 < numvals && v0 == v1);
-      uint32_t maxvals = min(numvals - rle_pos, 4 * warpSize);
+      uint32_t maxvals = min(numvals - rle_pos, 4 * cudf::detail::warp_size);
       uint32_t rle_lit_count, rle_rpt_count;
       if (!(t & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { s->rpt_map[t >> LOG2_WARPSIZE] = mask; }
       __syncthreads();
-      if (t < warpSize) {
+      if (t < cudf::detail::warp_size) {
         // Repeat run can only start on a multiple of 8 values
         uint32_t idx8        = (t * 8) >> LOG2_WARPSIZE;
         uint32_t pos8        = (t * 8) & LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE);
@@ -888,7 +888,7 @@ static __device__ void RleEncode(
                 rpt_len += __FFS(mask) - 1;
                 break;
               }
-              rpt_len += warpSize;
+              rpt_len += cudf::detail::warp_size;
               idx_cur++;
             }
           }
@@ -1025,7 +1025,7 @@ __device__ auto julian_days_with_time(int64_t v)
 
 // blockDim(128, 1, 1)
 template <int block_size>
-__global__ void __launch_bounds__(4 * warpSize, 8)
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
   gpuEncodePages(device_span<gpu::EncPage> pages,
                  device_span<device_span<uint8_t const>> comp_in,
                  device_span<device_span<uint8_t>> comp_out,
@@ -1080,7 +1080,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
       __syncthreads();
       while (s->rle_numvals < s->page.num_rows) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nrows       = min(s->page.num_rows - rle_numvals, warpSize * 4);
+        uint32_t nrows       = min(s->page.num_rows - rle_numvals, cudf::detail::warp_size * 4);
         auto row             = s->page.start_row + rle_numvals + t;
         // Definition level encodes validity. Checks the valid map and if it is valid, then sets the
         // def_lvl accordingly and sets it in s->vals which is then given to RleEncode to encode
@@ -1116,7 +1116,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
         RleEncode(s, rle_numvals, def_lvl_bits, (rle_numvals == s->page.num_rows), t);
         __syncthreads();
       }
-      if (t < warpSize) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur       = s->cur;
         uint8_t* const rle_out   = s->rle_out;
         uint32_t const rle_bytes = static_cast<uint32_t>(rle_out - cur) - (is_v2 ? 0 : 4);
@@ -1149,7 +1149,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
       size_type col_last_val_idx   = s->col.level_offsets[s->col.num_rows];
       while (s->rle_numvals < s->page.num_values) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * warpSize);
+        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * cudf::detail::warp_size);
         uint32_t idx         = page_first_val_idx + rle_numvals + t;
         uint32_t lvl_val =
           (rle_numvals + t < s->page.num_values && idx < col_last_val_idx) ? lvl_val_data[idx] : 0;
@@ -1159,7 +1159,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
         RleEncode(s, rle_numvals, nbits, (rle_numvals == s->page.num_values), t);
         __syncthreads();
       }
-      if (t < warpSize) {
+      if (t < cudf::detail::warp_size) {
         uint8_t* const cur       = s->cur;
         uint8_t* const rle_out   = s->rle_out;
         uint32_t const rle_bytes = static_cast<uint32_t>(rle_out - cur) - (is_v2 ? 0 : 4);
@@ -1213,7 +1213,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
   __syncthreads();
   uint32_t num_valid = 0;
   for (uint32_t cur_val_idx = 0; cur_val_idx < s->page.num_leaf_values;) {
-    uint32_t nvals = min(s->page.num_leaf_values - cur_val_idx, 4 * warpSize);
+    uint32_t nvals = min(s->page.num_leaf_values - cur_val_idx, 4 * cudf::detail::warp_size);
     uint32_t len, pos;
 
     auto [is_valid, val_idx] = [&]() {
@@ -1423,7 +1423,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
   uint32_t const valid_count = block_reduce(temp_storage.reduce_storage).Sum(num_valid);
 
   // save RLE length if necessary
-  if (s->rle_len_pos != nullptr && t < warpSize) {
+  if (s->rle_len_pos != nullptr && t < cudf::detail::warp_size) {
     // size doesn't include the 4 bytes for the length
     auto const rle_size = static_cast<uint32_t>(s->cur - s->rle_len_pos) - RLE_LENGTH_FIELD_LEN;
     if (t < RLE_LENGTH_FIELD_LEN) { s->rle_len_pos[t] = rle_size >> (t * 8); }
@@ -1465,7 +1465,7 @@ __global__ void __launch_bounds__(4 * warpSize, 8)
 
 constexpr int decide_compression_warps_in_block = 4;
 constexpr int decide_compression_block_size =
-  decide_compression_warps_in_block * warpSize;
+  decide_compression_warps_in_block * cudf::detail::warp_size;
 
 // blockDim(decide_compression_block_size, 1, 1)
 __global__ void __launch_bounds__(decide_compression_block_size)
@@ -1476,8 +1476,8 @@ __global__ void __launch_bounds__(decide_compression_block_size)
   using warp_reduce = hipcub::WarpReduce<uint32_t>;
   __shared__ typename warp_reduce::TempStorage temp_storage[decide_compression_warps_in_block][2];
 
-  auto const lane_id  = threadIdx.x % warpSize;
-  auto const warp_id  = threadIdx.x / warpSize;
+  auto const lane_id  = threadIdx.x % cudf::detail::warp_size;
+  auto const warp_id  = threadIdx.x / cudf::detail::warp_size;
   auto const chunk_id = blockIdx.x * decide_compression_warps_in_block + warp_id;
 
   if (chunk_id >= chunks.size()) { return; }
@@ -1492,7 +1492,7 @@ __global__ void __launch_bounds__(decide_compression_block_size)
   uint32_t compressed_data_size   = 0;
   uint32_t encodings              = 0;
   auto const num_pages            = ck_g[warp_id].num_pages;
-  for (auto page_id = lane_id; page_id < num_pages; page_id += warpSize) {
+  for (auto page_id = lane_id; page_id < num_pages; page_id += cudf::detail::warp_size) {
     auto const& curr_page     = ck_g[warp_id].pages[page_id];
     auto const page_data_size = curr_page.max_data_size;
     auto const lvl_bytes      = curr_page.def_lvl_bytes + curr_page.rep_lvl_bytes;
@@ -2302,8 +2302,8 @@ void InitFragmentStatistics(device_span<statistics_group> groups,
                             rmm::cuda_stream_view stream)
 {
   int const num_fragments = fragments.size();
-  int const dim = util::div_rounding_up_safe(num_fragments, warpSize * 4 / warpSize);
-  gpuInitFragmentStats<<<dim, 4 * warpSize, 0, stream.value()>>>(groups, fragments);
+  int const dim = util::div_rounding_up_safe(num_fragments, cudf::detail::warp_size * 4 / cudf::detail::warp_size);
+  gpuInitFragmentStats<<<dim, 4 * cudf::detail::warp_size, 0, stream.value()>>>(groups, fragments);
 }
 
 void InitEncoderPages(device_2dspan<EncColumnChunk> chunks,
@@ -2322,7 +2322,7 @@ void InitEncoderPages(device_2dspan<EncColumnChunk> chunks,
 {
   auto num_rowgroups = chunks.size().first;
   dim3 dim_grid(num_columns, num_rowgroups);  // 1 threadblock per rowgroup
-  gpuInitPages<<<dim_grid, 4 * warpSize, sizeof(statistics_merge_group), stream.value()>>>(chunks,
+  gpuInitPages<<<dim_grid, 4 * cudf::detail::warp_size, sizeof(statistics_merge_group), stream.value()>>>(chunks,
                                                      pages,
                                                      page_sizes,
                                                      comp_page_sizes,
@@ -2347,7 +2347,7 @@ void EncodePages(device_span<gpu::EncPage> pages,
   // A page is part of one column. This is launching 1 block per page. 1 block will exclusively
   // deal with one datatype.
   //: TODO(HIP/AMD): decrease this to 128 threads like on CUDA for better performance?
-  gpuEncodePages<4 * warpSize><<<num_pages, 4 * warpSize, 0, stream.value()>>>(
+  gpuEncodePages<4 * cudf::detail::warp_size><<<num_pages, 4 * cudf::detail::warp_size, 0, stream.value()>>>(
     pages, comp_in, comp_out, comp_results, write_v2_headers);
 }
 

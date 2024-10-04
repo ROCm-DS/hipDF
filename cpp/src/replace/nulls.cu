@@ -91,7 +91,7 @@ __global__ void replace_nulls_strings(cudf::column_device_view input,
 
   cudf::bitmask_type active_mask = cudf::LANE_MASK_ALL;
   active_mask          = hip_extensions::__ballot_sync(active_mask, i < nrows);
-  auto const lane_id{threadIdx.x % warpSize};
+  auto const lane_id{threadIdx.x % cudf::detail::warp_size};
   uint32_t valid_sum{0};
 
   while (i < nrows) {
@@ -144,7 +144,7 @@ __global__ void replace_nulls(cudf::column_device_view input,
 
   cudf::bitmask_type active_mask = cudf::LANE_MASK_ALL;
   active_mask          = hip_extensions::__ballot_sync(active_mask, i < nrows);
-  auto const lane_id{threadIdx.x % warpSize};
+  auto const lane_id{threadIdx.x % cudf::detail::warp_size};
   uint32_t valid_sum{0};
 
   while (i < nrows) {

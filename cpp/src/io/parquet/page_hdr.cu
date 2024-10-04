@@ -39,6 +39,7 @@
 #include "parquet_gpu.hpp"
 #include <io/utilities/block_utils.cuh>
 #include <thrust/tuple.h>
+#include <cudf/detail/utilities/cuda.cuh>
 
 #include <rmm/cuda_stream_view.hpp>
 
@@ -379,16 +380,16 @@ struct gpuParsePageHeader {
  * @param[in] chunks List of column chunks
  * @param[in] num_chunks Number of column chunks
  */
-// blockDim {4 * warpSize,1,1}
-__global__ void __launch_bounds__(4 * warpSize)
+// blockDim {4 * cudf::detail::warp_size,1,1}
+__global__ void __launch_bounds__(4 * cudf::detail::warp_size)
   gpuDecodePageHeaders(ColumnChunkDesc* chunks, int32_t num_chunks)
 {
   gpuParsePageHeader parse_page_header;
   extern __shared__ byte_stream_s bs_g[];
 
-  int lane_id             = threadIdx.x % warpSize;
-  int chunk               = (blockIdx.x * 4) + (threadIdx.x / warpSize);
-  byte_stream_s* const bs = &bs_g[threadIdx.x / warpSize];
+  int lane_id             = threadIdx.x % cudf::detail::warp_size;
+  int chunk               = (blockIdx.x * 4) + (threadIdx.x / cudf::detail::warp_size);
+  byte_stream_s* const bs = &bs_g[threadIdx.x / cudf::detail::warp_size];
 
   if (chunk < num_chunks and lane_id == 0) bs->ck = chunks[chunk];
   __syncthreads();
@@ -538,7 +539,7 @@ void __host__ DecodePageHeaders(ColumnChunkDesc* chunks,
                                 rmm::cuda_stream_view stream)
 {
   //: TODO(HIP/AMD): does it make sense to use less warps/threads on AMD backend?
-  dim3 dim_block(4 * warpSize, 1);
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);
   dim3 dim_grid((num_chunks + 3) >> 2, 1);  // 1 chunk per warp, 4 warps per block
   gpuDecodePageHeaders<<<dim_grid, dim_block, sizeof(byte_stream_s) * 4, stream.value()>>>(chunks, num_chunks);
 }
