@@ -609,7 +609,10 @@ __global__ void parse_fn_string_parallel(str_tuple_it str_tuples,
         using ErrorReduce = hipcub::BlockReduce<bool, BLOCK_SIZE>;
         __shared__ typename ErrorReduce::TempStorage temp_storage_error;
         __shared__ bool error_reduced;
-        error_reduced = ErrorReduce(temp_storage_error).Sum(error);  // TODO use hipcub::LogicalOR.
+        // NOTE(HIP/AMD): Only thread 0 delivers correct result and should write shared memory location
+        bool error_reduced_local = ErrorReduce(temp_storage_error).Sum(error);  // TODO use hipcub::LogicalOR.
+        if(lane==0)
+          error_reduced = error_reduced_local;
         // only valid in thread0, so shared memory is used for broadcast.
         __syncthreads();
         error = error_reduced;
