@@ -1226,8 +1226,11 @@ static __device__ void RleEncode(
         bitmask_type m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
         bitmask_type m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
         uint32_t needed_mask = kRleRunMask[nbits - 1];
-        //: TODO(HIP/AMD): make this portable for CUDA backend
+#if !defined(CUDF_USE_WAVESIZE_32)
         mask                 = ballot((::cudf::detail::__m_funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
+#else
+        mask                 = ballot((__funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
+#endif
         if (!t) {
           uint32_t rle_run_start = (mask != 0) ? min((__FFS(mask) - 1) * 8, maxvals) : maxvals;
           uint32_t rpt_len       = 0;
