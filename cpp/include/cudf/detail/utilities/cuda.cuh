@@ -56,7 +56,12 @@ namespace detail {
  * @brief Size of a warp in a CUDA kernel.
  */
 #if defined(__HIP_PLATFORM_AMD__)
+#ifndef CUDF_USE_WAVESIZE_32
 static constexpr size_type warp_size{64};
+#else
+// for RDNA3/gfx1100
+static constexpr size_type warp_size{32};
+#endif
 #else
 static constexpr size_type warp_size{32};
 #endif
