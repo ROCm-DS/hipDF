@@ -1240,8 +1240,11 @@ static __device__ void RleEncode(
             while (idx_cur < 4) {
               m0   = (idx_cur < 4) ? s->rpt_map[idx_cur] : 0;
               m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
-              //: TODO(HIP/AMD): make this portable for CUDA backend
+#if !defined(CUDF_USE_WAVESIZE_32)
               mask = ~::cudf::detail::__m_funnelshift_r(m0, m1, idx_ofs);
+#else
+              mask = ~__funnelshift_r(m0, m1, idx_ofs);
+#endif
               if (mask != 0) {
                 rpt_len += __FFS(mask) - 1;
                 break;
