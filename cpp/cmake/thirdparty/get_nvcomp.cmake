@@ -49,6 +49,11 @@ function(find_and_configure_hipcomp)
   if(TARGET hipcomp AND CUDF_USE_PER_THREAD_DEFAULT_STREAM)
     target_compile_definitions(hipcomp PRIVATE CUDA_API_PER_THREAD_DEFAULT_STREAM HIP_API_PER_THREAD_DEFAULT_STREAM __HIP_API_PER_THREAD_DEFAULT_STREAM__)
   endif()
+
+  # Wave size 32
+  if(TARGET hipcomp AND CUDF_USE_WAVESIZE_32)
+    target_compile_definitions(hipcomp PRIVATE USE_WAVESIZE_32)
+  endif()
 endfunction()
 
 find_and_configure_hipcomp()
