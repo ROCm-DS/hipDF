@@ -54,7 +54,6 @@ namespace {
 
 constexpr int decode_block_size = 4 * cudf::detail::warp_size; //need to have four WARPS/wavefronts for decoding algorithm
 constexpr int rolling_buf_size  = decode_block_size * 2;
-
 /**
  * @brief Kernel for computing the BYTE_STREAM_SPLIT column data stored in the pages
  *

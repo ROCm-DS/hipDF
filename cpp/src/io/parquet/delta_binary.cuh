@@ -79,7 +79,7 @@ constexpr int max_delta_mini_block_size = 64;
 // wraps around and overwrites values that haven't been consumed
 // yet (by the output warp/wavefront) which would result in failing decoding.
 //TODO(HIP/AMD): Revisit this size.
-#ifdef __HIP_PLATFORM_AMD__
+#ifdef __HIP_PLATFORM_AMD__ && !defined(CUDF_USE_WAVESIZE_32) 
 constexpr int delta_rolling_buf_size = 4 * max_delta_mini_block_size;
 #else
 constexpr int delta_rolling_buf_size = 2 * max_delta_mini_block_size;
@@ -273,7 +273,6 @@ struct delta_binary_decoder {
     // NOTE(HIP/AMD): Pay extra attention to rounding up if 
     // batch_len==64 (on AMD) and values_per_mb==32
     uint32_t const num_pass = (values_per_mb + batch_len - 1) / batch_len;
- 
     auto d_start = cur_mb_start;
 
     // NOTE(HIP/AMD): On AMD, it may happen that batch_len==values_per_mb==32, so we need
