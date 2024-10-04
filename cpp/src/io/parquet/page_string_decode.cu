@@ -52,7 +52,7 @@ namespace {
 constexpr int preprocess_block_size = 512;
 //: TODO(HIP/AMD): Investigate if it makes sense to use 128 threads on AMD backend like on CUDA
 constexpr int decode_block_size     = 4 * cudf::detail::warp_size;
-constexpr int rolling_buf_size      = decode_block_size;
+constexpr int rolling_buf_size      = decode_block_size * 2;
 constexpr int preproc_buf_size      = LEVEL_DECODE_BUF_SIZE;
 
 /**
