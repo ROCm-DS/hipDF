@@ -1265,7 +1265,7 @@ __device__ inline bitmask_type get_mask_offset_word(bitmask_type const* __restri
     next_word = source[source_word_index + 1];
   }
 
-#ifndef CUDF_USE_WAVESIZE_32
+#ifndef CUDF_USE_WARPSIZE_32
   //TODO(HIP/AMD): optimize the funnelshift.
   return __m_funnelshift_r(curr_word, next_word, source_begin_bit);
 #else 

@@ -868,7 +868,7 @@ static __device__ void RleEncode(
         bitmask_type m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
         bitmask_type m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
         uint32_t needed_mask = kRleRunMask[nbits - 1];
-#if !defined(CUDF_USE_WAVESIZE_32)
+#if !defined(CUDF_USE_WARPSIZE_32)
         mask                 = ballot((::cudf::detail::__m_funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
 #else
         mask                 = ballot((__funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
@@ -882,7 +882,7 @@ static __device__ void RleEncode(
             while (idx_cur < 4) {
               m0   = (idx_cur < 4) ? s->rpt_map[idx_cur] : 0;
               m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
-#if !defined(CUDF_USE_WAVESIZE_32)
+#if !defined(CUDF_USE_WARPSIZE_32)
               mask = ~::cudf::detail::__m_funnelshift_r(m0, m1, idx_ofs);
 #else
               mask = ~__funnelshift_r(m0, m1, idx_ofs);

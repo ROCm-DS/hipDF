@@ -82,7 +82,7 @@ using zigzag128_t = int64_t;
 // Some buffer space is needed to avoid that the rolling buffer
 // wraps around and overwrites values that haven't been consumed
 // yet (by the output warp/wavefront) which would result in failing decoding.
-#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32) 
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
 constexpr int delta_rolling_buf_size = 256;
 #else
 constexpr int delta_rolling_buf_size = 128;

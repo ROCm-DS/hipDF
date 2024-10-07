@@ -79,7 +79,7 @@ option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(CUDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
-option(CUDF_USE_WAVESIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
+option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt CUDF_USE_PROPRIETARY_NVCOMP is not used.
@@ -147,7 +147,7 @@ message(
   "CUDF: Enable the -lineinfo option for nvcc (useful for cuda-memcheck / profiler): ${GPU_ENABLE_LINEINFO}"
 )
 message(VERBOSE "CUDF: Statically link the CUDA/HIP runtime: ${GPU_STATIC_RUNTIME}")
-message(VERBOSE "CUDF: Build with warp size 32 (for RDNA3): ${CUDF_USE_WAVESIZE_32}")
+message(VERBOSE "CUDF: Build with warp size 32 (for RDNA3): ${CUDF_USE_WARPSIZE_32}")
 
 # Set a default build type if none was specified
 rapids_cmake_build_type("Release")
@@ -738,8 +738,8 @@ if(CUDF_ENABLE_UDF_WITH_JITIFY)
 target_compile_definitions(cudf PRIVATE "CUDF_ENABLE_UDF_WITH_JITIFY")
 endif()
 
-if(CUDF_USE_WAVESIZE_32)
-target_compile_definitions(cudf PUBLIC "CUDF_USE_WAVESIZE_32")
+if(CUDF_USE_WARPSIZE_32)
+target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
 endif()
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
