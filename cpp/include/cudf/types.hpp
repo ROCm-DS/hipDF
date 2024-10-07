@@ -139,7 +139,7 @@ class mutable_table_view;
 #endif
 
 using size_type         = int32_t;   ///< Row index type for columns and tables
-#ifdef CUDF_USE_WAVESIZE_32
+#ifdef CUDF_USE_WARPSIZE_32
 using bitmask_type      = uint32_t;  ///< Bitmask type stored as 32-bit unsigned integer
 #else
 using bitmask_type      = uint64_t;  ///< Bitmask type stored as 64-bit unsigned integer
@@ -151,7 +151,7 @@ using char_utf8         = uint32_t;  ///< UTF-8 characters are 1-4 bytes
 constexpr unsigned bitmask_size_in_bits = sizeof(bitmask_type)*8;
 
 #ifdef __HIP_PLATFORM_AMD__
-#ifdef CUDF_USE_WAVESIZE_32
+#ifdef CUDF_USE_WARPSIZE_32
 constexpr unsigned LOG2_WARPSIZE = 5;  ///< Logarithm to base 2 of wavefront size 32
 #else
 constexpr unsigned LOG2_WARPSIZE = 6;  ///< Logarithm to base 2 of wavefront size 64

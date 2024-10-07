@@ -101,7 +101,7 @@ struct lut_arr {
 
 /// 4 batches of 32 symbols
 constexpr int log2_batch_count = 2;  // 1..5
-#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32)
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
 //: results in BATCH_SIZE 64
 constexpr int log2_batch_size  =  6; 
 #else
@@ -124,7 +124,7 @@ struct xwarp_s {
 #define ENABLE_PREFETCH 1
 
 #if ENABLE_PREFETCH
-#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WAVESIZE_32)
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
 // TODO(HIP/AMD): Fine-tune these parameters.
 // We need a prefetch size of >=2^10 = 1024 bytes here.
 // At batch_size = 2^6 = 64 for HIP AMD backend, wavefront 0

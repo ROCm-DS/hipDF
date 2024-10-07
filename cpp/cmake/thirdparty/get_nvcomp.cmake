@@ -50,8 +50,8 @@ function(find_and_configure_hipcomp)
   endif()
 
   # Wave size 32
-  if(TARGET hipcomp AND CUDF_USE_WAVESIZE_32)
-    target_compile_definitions(hipcomp PRIVATE USE_WAVESIZE_32)
+  if(TARGET hipcomp AND CUDF_USE_WARPSIZE_32)
+    target_compile_definitions(hipcomp PRIVATE USE_WARPSIZE_32)
   endif()
 endfunction()
 

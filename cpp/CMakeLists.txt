@@ -80,7 +80,7 @@ option(BUILD_TESTS "Configure CMake to build tests" OFF)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
-option(CUDF_USE_WAVESIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
+option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt CUDF_USE_PROPRIETARY_NVCOMP is not used.
@@ -154,7 +154,7 @@ message(VERBOSE "CUDF: Statically link the CUDA runtime: ${GPU_STATIC_RUNTIME}")
 message(VERBOSE
         "CUDF: Build with remote IO (e.g. AWS S3) support through KvikIO: ${CUDF_KVIKIO_REMOTE_IO}"
 )
-message(VERBOSE "CUDF: Build with warp size 32 (for RDNA3): ${CUDF_USE_WAVESIZE_32}")
+message(VERBOSE "CUDF: Build with warp size 32 (for RDNA3): ${CUDF_USE_WARPSIZE_32}")
 
 # Set a default build type if none was specified
 rapids_cmake_build_type("Release")
@@ -884,8 +884,8 @@ target_include_directories(
   INTERFACE "$<INSTALL_INTERFACE:include>"
 )
 
-if(CUDF_USE_WAVESIZE_32)
-target_compile_definitions(cudf PUBLIC "CUDF_USE_WAVESIZE_32")
+if(CUDF_USE_WARPSIZE_32)
+target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
 endif()
 
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
