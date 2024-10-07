@@ -64,6 +64,7 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf
    --show_depr_warn              - show cmake deprecation warnings
    --ptds                        - enable per-thread default stream
    --disable_large_strings       - disable large strings support
+   --warpsize32                  - enable build for warpsize 32 (e.g. on gfx1100)
    --build_metrics               - generate build metrics report for libcudf
    --incl_cache_stats            - include cache statistics in build metrics report
    --cmake-args=\\\"<args>\\\"   - pass arbitrary list of CMake configuration options (escape all quotes in argument)
@@ -111,6 +112,7 @@ BUILD_REPORT_INCL_CACHE_STATS=OFF
 BUILD_DISABLE_LARGE_STRINGS=OFF
 USE_PROPRIETARY_NVCOMP=ON
 PYTHON_ARGS_FOR_INSTALL="-m pip install --no-build-isolation --no-deps --config-settings rapidsai.disable-cuda=true"
+USE_WARPSIZE_32=OFF
 
 # Set defaults for vars that may not have been defined externally
 #  FIXME: if INSTALL_PREFIX is not set, check PREFIX, then check
@@ -264,6 +266,9 @@ fi
 if hasArg --ptds; then
     BUILD_PER_THREAD_DEFAULT_STREAM=ON
 fi
+if hasArg --warpsize32; then
+    USE_WARPSIZE_32=ON
+fi
 if hasArg --build_metrics; then
     BUILD_REPORT_METRICS=ON
 fi
@@ -335,6 +340,7 @@ if buildAll || hasArg libcudf; then
           -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
           -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
           -DCUDF_LARGE_STRINGS_DISABLED=${BUILD_DISABLE_LARGE_STRINGS} \
+	      -DCUDF_USE_WARPSIZE_32=${USE_WARPSIZE_32} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           ${EXTRA_CMAKE_ARGS}
 
@@ -425,6 +431,7 @@ if hasArg libcudf_kafka; then
           -DBUILD_TESTS=${BUILD_TESTS} \
           -DDISABLE_DEPRECATION_WARNINGS=${BUILD_DISABLE_DEPRECATION_WARNINGS} \
           -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
+	  -DCUDF_USE_WARPSIZE_32=${USE_WARPSIZE_32} \
           -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           ${EXTRA_CMAKE_ARGS}
 
