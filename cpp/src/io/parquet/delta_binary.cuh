@@ -273,6 +273,7 @@ struct delta_binary_decoder {
     // NOTE(HIP/AMD): Pay extra attention to rounding up if 
     // batch_len==64 (on AMD) and values_per_mb==32
     uint32_t const num_pass = (values_per_mb + batch_len - 1) / batch_len;
+
     auto d_start = cur_mb_start;
 
     // NOTE(HIP/AMD): On AMD, it may happen that batch_len==values_per_mb==32, so we need
@@ -305,7 +306,7 @@ struct delta_binary_decoder {
             }
             // NOTE(HIP/AMD): Need extra treatment for mb_bits==64, as shift operation is UB in this case
             // zigzag128_t is currently a 64bit type (int64_t)
-            delta &= (mb_bits==64) ?  LANE_MASK_ALL : (static_cast<zigzag128_t>(1) << mb_bits) - 1;
+            delta &= (mb_bits==64) ?  0xffffffffffffffffUL : (static_cast<zigzag128_t>(1) << mb_bits) - 1;
           }           
         }
 
