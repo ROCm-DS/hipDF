@@ -138,8 +138,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 1)
           stats_len = pb_fldlen_common + pb_fld_hdrlen + 3 * (pb_fld_hdrlen + pb_fldlen_float64);
           break;
         case dtype_decimal64:
-        case dtype_decimal128: 
-        {
+        case dtype_decimal128: {
           auto const scale    = groups[idx].col_dtype.scale();
           auto const min_size = fixed_point_string_size(chunks[idx].min_value.d128_val, scale);
           auto const max_size = fixed_point_string_size(chunks[idx].max_value.d128_val, scale);
