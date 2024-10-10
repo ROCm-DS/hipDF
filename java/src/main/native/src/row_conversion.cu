@@ -116,7 +116,7 @@ constexpr auto NUM_STRING_ROWS_PER_BLOCK_FROM_ROWS = 64;
 constexpr auto MIN_STRING_BLOCKS = 32;
 constexpr auto MAX_STRING_BLOCKS = MAX_BATCH_SIZE;
 
-#ifdef __HIP_PLATFORM_AMD__
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
 constexpr auto NUM_WARPS_IN_BLOCK = 16;
 #else
 constexpr auto NUM_WARPS_IN_BLOCK = 32;
