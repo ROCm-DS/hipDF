@@ -109,7 +109,6 @@ option(BUILD_TESTS "Configure CMake to build tests" OFF)
 option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks" OFF)
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
-option(CUDF_ENABLE_UDF_WITH_JITIFY "Enables UDF support with Jitify for ROLLING, TRANSFORM, BINARYOP APIs (requires patched ROCm!)" OFF)
 option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
@@ -271,11 +270,7 @@ if(CUDF_BUILD_TESTUTIL)
 endif()
 
 # preprocess jitify-able kernels
-if(CUDF_ENABLE_UDF_WITH_JITIFY)
-# TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
-# see SWDEV-444584
 include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
-endif()
 
 if(FALSE)# CUDA only
 # find cuFile
@@ -768,10 +763,6 @@ target_include_directories(
   INTERFACE "$<INSTALL_INTERFACE:include>"
 )
 
-if(CUDF_ENABLE_UDF_WITH_JITIFY)
-target_compile_definitions(cudf PRIVATE "CUDF_ENABLE_UDF_WITH_JITIFY")
-endif()
-
 if(CUDF_USE_WARPSIZE_32)
 target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
 endif()
@@ -813,11 +804,7 @@ target_compile_definitions(cudf PRIVATE "RMM_LOGGING_LEVEL=LIBCUDF_LOGGING_LEVEL
 target_compile_definitions(cudf PUBLIC "SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_${LIBCUDF_LOGGING_LEVEL}")
 
 # Compile stringified JIT sources first
-if(CUDF_ENABLE_UDF_WITH_JITIFY)
-  # TODO(HIP/AMD): jitify_preprocessing only works with a patched version of hiprtc/CLR
-  # see SWDEV-444584
 add_dependencies(cudf jitify_preprocess_run)
-endif()
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(FALSE)
@@ -897,12 +884,6 @@ if(CUDF_BUILD_TESTUTIL)
   )
 
   set_cudftestutil_target()
-
-  # TODO(HIP/AMD): This activates UDF-related unit tests if UDF/Jitify support
-  # is enabled (requires patched hipRTC)
-  if(CUDF_ENABLE_UDF_WITH_JITIFY)
-    target_compile_definitions(cudftestutil PUBLIC "CUDF_ENABLE_UDF_WITH_JITIFY")
-  endif()
 
   target_compile_options(
     cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"

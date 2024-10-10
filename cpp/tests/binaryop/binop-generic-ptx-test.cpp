@@ -52,7 +52,7 @@ struct BinaryOperationGenericPTXTest : public BinaryOperationTest {
  protected:
   void SetUp() override
   {
-    if (!cudf::has_udf_jitify_support() || !can_do_runtime_jit()) { GTEST_SKIP() << "Skipping tests that require 11.5 runtime (CUDA) or a patched hipRTC (AMD)."; }
+    if (!can_do_runtime_jit()) { GTEST_SKIP() << "Skipping tests that require 11.5 runtime (CUDA)."; }
   }
 };
 

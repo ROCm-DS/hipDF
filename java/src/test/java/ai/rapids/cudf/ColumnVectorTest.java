@@ -131,8 +131,7 @@ public class ColumnVectorTest extends CudfTestBase {
       "*output = input*input - input;" +
       "}";
 
-  @Test @Disabled// TODO(HIP/AMD): Disabled the test for now as per default, CUDF_ENABLE_UDF_WITH_JITIFY is not supported yet.
-                 // This test should be enabled later once the required ROCm support is available.
+  @Test
   void testTransformVector() {
     try (ColumnVector cv = ColumnVector.fromBoxedInts(2,3,null,4);
          ColumnVector cv1 = cv.transform(llvmir, true);

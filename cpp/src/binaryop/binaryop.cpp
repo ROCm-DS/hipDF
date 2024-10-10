@@ -39,9 +39,7 @@
 // SOFTWARE.
 
 #include "compiled/binary_ops.hpp"
-#ifdef CUDF_ENABLE_UDF_WITH_JITIFY
 #include <jit_preprocessed_files/binaryop/jit/kernel.cu.jit.hpp>
-#endif
 
 #include <jit/cache.hpp>
 #include <jit/parser.hpp>
@@ -162,9 +160,7 @@ void binary_operation(mutable_column_view& out,
                       std::string const& udf,
                       rmm::cuda_stream_view stream)
 {
-#ifndef CUDF_ENABLE_UDF_WITH_JITIFY
-  CUDF_FAIL("UDF support with Jitify has not been enabled at build time (option CUDF_ENABLE_UDF_WITH_JITIFY). It requires an internal patched hipRTC on AMD backend\n");
-#else
+
   std::string const output_type_name = cudf::type_to_name(out.type());
 
   std::string cuda_source;
@@ -205,7 +201,6 @@ void binary_operation(mutable_column_view& out,
             cudf::jit::get_data_ptr(out),
             cudf::jit::get_data_ptr(lhs),
             cudf::jit::get_data_ptr(rhs));
-#endif // CUDF_ENABLE_UDF_WITH_JITIFY
 }
 }  // namespace jit
 

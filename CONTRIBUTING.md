@@ -150,14 +150,6 @@ conda activate cudf_dev
 > `$ export CXX=hipcc`
 > 
 
-> **Note** (Compiling UDF support with jitify for AMD GPUs): 
->
-> UDF support with Jitify in `libcudf` requires a patched
-> ROCm which is currently only available internally.
-> To activate this feature, pass the option
-> `--cmake-args="\"-DCUDF_ENABLE_UDF_WITH_JITIFY=ON\""`
-> to the `build.sh` script.
-
 - A `build.sh` script is provided in `$CUDF_HOME`. Running the script with no additional arguments
   will install the `libcudf`, `cudf` and `dask_cudf` libraries. By default, the libraries are
   installed to the `$CONDA_PREFIX` directory. To install into a different location, set the location
