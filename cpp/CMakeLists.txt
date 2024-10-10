@@ -731,12 +731,6 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
                               PROPERTIES COMPILE_FLAGS "-DNDEBUG")
 endif()
 
-# TODO(HIP/AMD): This is a workaround for a compiler issue in ROCm 6.2. To be removed again later.
-# See internal issue 143.
-set_source_files_properties(
-  src/io/parquet/page_enc.cu
-PROPERTIES COMPILE_FLAGS "-mllvm --force-attribute=_ZN6thrust4copyINS_6detail5seq_tENS_16reverse_iteratorIPKcEEPhEET1_RKNS1_21execution_policy_baseIT_EET0_SE_S8_:noinline")
-
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
 # in how conda builds glibc
 set_source_files_properties(
