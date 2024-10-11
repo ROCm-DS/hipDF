@@ -99,7 +99,7 @@ __launch_bounds__(block_size) CUDF_KERNEL
     // update validity
     if (has_nulls) {
       // the final validity mask for this warp
-      bitmask_type warp_mask = __ballot_sync(LANE_MASK_ALL, opt_value.has_value());
+      bitmask_type warp_mask = __ballot_sync((uint64_t) LANE_MASK_ALL, opt_value.has_value());
       // only one guy in the warp needs to update the mask and count
       if (lane_id == 0) {
         out.set_mask_word(warp_cur, warp_mask);

@@ -157,7 +157,7 @@ CUDF_KERNEL void materialize_merged_bitmask_kernel(
 
   auto tid = detail::grid_1d::global_thread_id();
 
-  bitmask_type active_threads = __ballot_sync(LANE_MASK_ALL, tid < num_destination_rows);
+  bitmask_type active_threads = __ballot_sync((uint64_t) LANE_MASK_ALL, tid < num_destination_rows);
 
   while (tid < num_destination_rows) {
     auto const destination_row     = static_cast<size_type>(tid);
@@ -174,13 +174,13 @@ CUDF_KERNEL void materialize_merged_bitmask_kernel(
     // bitmask element
     // TODO(HIP/AMD): error: non-constant-expression cannot be narrowed from type 'lane_mask' 
     // (aka 'unsigned long long') to 'bitmask_type' (aka 'unsigned int') in initializer list [-Wc++11-narrowing]
-    bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync(active_threads, source_bit_is_valid))};
+    bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync((uint64_t) active_threads, source_bit_is_valid))};
 
     // Only one thread writes output
     if (0 == threadIdx.x % cudf::detail::warp_size) { out_validity[word_index(destination_row)] = result_mask; }
 
     tid += stride;
-    active_threads = __ballot_sync(active_threads, tid < num_destination_rows);
+    active_threads = __ballot_sync((uint64_t) active_threads, tid < num_destination_rows);
   }
 }
 

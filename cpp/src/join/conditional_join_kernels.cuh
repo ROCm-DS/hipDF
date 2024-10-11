@@ -301,7 +301,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
 
   auto outer_row_index = cudf::detail::grid_1d::global_thread_id<block_size>();
 
-  bitmask_type const activemask = __ballot_sync(cudf::LANE_MASK_ALL, outer_row_index < outer_num_rows);
+  bitmask_type const activemask = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, outer_row_index < outer_num_rows); // FIXME(HIP/AMD): WAR for SWDEV-490930
 
   auto evaluator = cudf::ast::detail::expression_evaluator<has_nulls>(
     left_table, right_table, device_expression_data);
@@ -343,7 +343,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
 
       // flush output cache if next iteration does not fit
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
-      auto const flush_mask = __ballot_sync(activemask, do_flush);
+      auto const flush_mask = __ballot_sync((uint64_t) activemask, do_flush); // FIXME(HIP/AMD): WAR for SWDEV-490930
       if (do_flush) {
         flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                          max_size,
@@ -392,7 +392,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
-    auto const flush_mask = __ballot_sync(activemask, do_flush);
+    auto const flush_mask = __ballot_sync((uint64_t) activemask, do_flush); // FIXME(HIP/AMD): WAR for SWDEV-490930
     if (do_flush) {
       flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                        max_size,

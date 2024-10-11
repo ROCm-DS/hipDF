@@ -149,7 +149,7 @@ CUDF_KERNEL void replace_kernel(cudf::column_device_view input,
   auto const stride = cudf::detail::grid_1d::grid_stride();
 
   cudf::bitmask_type active_mask  = cudf::LANE_MASK_ALL;
-  active_mask          = __ballot_sync(active_mask, tid < nrows);
+  active_mask          = __ballot_sync((uint64_t) active_mask, tid < nrows);
   auto const lane_id{threadIdx.x % cudf::detail::warp_size};
   uint32_t valid_sum{0};
 
@@ -172,7 +172,7 @@ CUDF_KERNEL void replace_kernel(cudf::column_device_view input,
 
     /* output valid counts calculations*/
     if (input_has_nulls or replacement_has_nulls) {
-      cudf::bitmask_type bitmask = __ballot_sync(active_mask, output_is_valid);
+      cudf::bitmask_type bitmask = __ballot_sync((uint64_t) active_mask, output_is_valid);
       if (0 == lane_id) {
         output.set_mask_word(cudf::word_index(idx), bitmask);
         valid_sum += cudf::__POPC(bitmask);
@@ -180,7 +180,7 @@ CUDF_KERNEL void replace_kernel(cudf::column_device_view input,
     }
 
     tid += stride;
-    active_mask = __ballot_sync(active_mask, tid < nrows);
+    active_mask = __ballot_sync((uint64_t) active_mask, tid < nrows);
   }
   if (input_has_nulls or replacement_has_nulls) {
     // Compute total valid count for this block and add it to global count
