@@ -148,7 +148,7 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
   size_type warp_valid_count           = 0;
 
   bitmask_type active_mask;
-  if (Nullable) { active_mask = __ballot_sync(LANE_MASK_ALL, output_index < output_size); }
+  if (Nullable) { active_mask = __ballot_sync((uint64_t) LANE_MASK_ALL, output_index < output_size); }
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
     auto const offset_it            = thrust::prev(thrust::upper_bound(
@@ -166,7 +166,7 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
 
     if (Nullable) {
       bool const bit_is_set       = input_view.is_valid(offset_index);
-      bitmask_type const new_word = __ballot_sync(active_mask, bit_is_set);
+      bitmask_type const new_word = __ballot_sync((uint64_t) active_mask, bit_is_set);
 
       // First thread writes bitmask word
       if (threadIdx.x % cudf::detail::warp_size == 0) {
@@ -177,7 +177,7 @@ __global__ void fused_concatenate_string_offset_kernel(column_device_view const*
     }
 
     output_index += blockDim.x * gridDim.x;
-    if (Nullable) { active_mask = __ballot_sync(active_mask, output_index < output_size); }
+    if (Nullable) { active_mask = __ballot_sync((uint64_t) active_mask, output_index < output_size); }
   }
 
   // Fill final offsets index with total size of char data
