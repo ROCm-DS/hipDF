@@ -54,11 +54,22 @@ namespace cudf {
     cudaError_t ret;
 
     CUDF_CUDA_TRY(cudaGetDevice(&device));
-    
     CUDF_CUDA_TRY(cudaGetDeviceProperties(&device_prop, device));
 
-    // FIXME(HIP/AMD): this only works for architecture strings with 6 characters
-    return std::string(device_prop.gcnArchName, device_prop.gcnArchName+6);
+    const std::regex gfx_arch_pattern("(gfx[0-9a-fA-F]+)(:[-+:\\w]+)?");
+
+    std::smatch match;
+    std::string full_arch_name(device_prop.gcnArchName);
+    std::string short_arch_name;
+    
+    if (std::regex_search(full_arch_name, match, gfx_arch_pattern)) {
+      short_arch_name = match[1].str(); // Extract the first capture group
+    }
+    else {
+      CUDF_FAIL("Cannot determine target architecture name of current device!");
+    }
+
+    return short_arch_name;
   }
 
   std::string get_llvm_ir_target_features_for_arch(const std::string& arch_name) {
@@ -91,9 +102,9 @@ namespace cudf {
     std::string target_features = get_llvm_ir_target_features_for_current_arch();
     std::string target_cpu = "\"target-cpu\"=\"" + get_arch_name_of_current_device();
 
-    std::regex target_feat_pattern("\"target-features\"=\"[^\"]+");
+    const std::regex target_feat_pattern("\"target-features\"=\"[^\"]+");
 
-    std::regex target_cpu_pattern("\"target-cpu\"=\"[^\"]+");
+    const std::regex target_cpu_pattern("\"target-cpu\"=\"[^\"]+");
 
     std::string result = std::regex_replace(llvm_ir, target_feat_pattern, "\"target-features\"=\"" + target_features);
     result = std::regex_replace(result, target_cpu_pattern, target_cpu);
