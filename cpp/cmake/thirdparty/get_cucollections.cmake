@@ -45,3 +45,8 @@ function(find_and_configure_hipcollections)
 endfunction()
 
 find_and_configure_hipcollections()
+
+# Wave size 32
+if(TARGET hipco AND CUDF_USE_WARPSIZE_32)
+	target_compile_definitions(hipco INTERFACE HIPCO_USE_WARPSIZE_32)
+endif()
