@@ -371,7 +371,7 @@ if(CUDF_BUILD_TESTUTIL)
 endif()
 
 # preprocess jitify-able kernels
-include(cmake/Modules/JitifyPreprocessKernelsHIP.cmake)
+include(cmake/Modules/JitifyPreprocessKernels.cmake)
 
 # find KvikIO
 if(CUDA_BACKEND)
