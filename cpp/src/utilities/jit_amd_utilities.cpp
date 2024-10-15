@@ -109,7 +109,7 @@ namespace cudf {
     std::string result = std::regex_replace(llvm_ir, target_feat_pattern, "\"target-features\"=\"" + target_features);
     result = std::regex_replace(result, target_cpu_pattern, target_cpu);
 
-    return llvm_ir;
+    return result;
 
   }
 }  // namespace cudf::detail
