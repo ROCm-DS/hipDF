@@ -101,6 +101,8 @@ set(CUDF_CXX_DEFINITIONS "")
 set(CUDF_CUDA_DEFINITIONS "")
 set(CUDF_CUDA_FLAGS "-Wno-c++11-narrowing-const-reference")
 
+add_compile_definitions(HIP_ENABLE_WARP_SYNC_BUILTINS)
+
 rapids_find_package(HIP REQUIRED)
 include(ConfigureCUDA) # set other CUDA compilation flags
 
