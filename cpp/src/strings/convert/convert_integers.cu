@@ -363,7 +363,7 @@ struct from_integers_fn {
     char* d_buffer    = d_chars + d_offsets[idx];
     integer_to_string(value, d_buffer);
   }
-
+  __attribute__((optnone))
   __device__ void operator()(size_type idx)
   {
     if (d_integers.is_null(idx)) {
