@@ -38,7 +38,7 @@ ARGS=$*
 REPODIR=$(cd $(dirname $0); pwd)
 
 # VALIDARGS="clean libcudf cudf cudfjar dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n -l --allgpuarch --disable_nvtx --opensource_nvcomp  --show_depr_warn --ptds -h --build_metrics --incl_cache_stats"
-VALIDARGS="clean libcudf cudf dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n -l --allgpuarch --ptds --warpsize32 -h"
+VALIDARGS="clean libcudf cudf cudfjar dask_cudf benchmarks tests libcudf_kafka cudf_kafka custreamz -v -g -n -l --allgpuarch --ptds --warpsize32 -h"
 HELP="$0 [clean] [libcudf] [cudf] [cudfjar] [dask_cudf] [benchmarks] [tests] [libcudf_kafka] [cudf_kafka] [custreamz] [-v] [-g] [-n] [-h] [--cmake-args=\\\"<args>\\\"]
    clean                         - remove all existing build artifacts and configuration (start
                                    over)
@@ -222,11 +222,14 @@ function buildLibCudfJniInDocker {
                                      -DCMAKE_C_COMPILER=hipcc \
                                      -DCMAKE_CXX_COMPILER=hipcc' \
                 -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
+                -DCUDF_JNI_ENABLE_PROFILING=NO \
+                -DfailIfNoTests=false \
+                -Dio.netty.tryReflectionSetAccessible=true \
                 -DCUDA_STATIC_RUNTIME=ON \
                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
                 -DUSE_GDS=OFF \
                 -DGPU_ARCHS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
-                -DCUDF_JNI_LIBCUDF_STATIC=OFF \
+                -DCUDF_JNI_LIBCUDF_STATIC=ON \
                 -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
 }
 
