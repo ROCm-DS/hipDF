@@ -231,11 +231,14 @@ function buildLibCudfJniInDocker {
                                      -DCMAKE_C_COMPILER=hipcc \
                                      -DCMAKE_CXX_COMPILER=hipcc' \
                 -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
+                -DCUDF_JNI_ENABLE_PROFILING=NO \
+                -DfailIfNoTests=false \
+                -Dio.netty.tryReflectionSetAccessible=true \
                 -DCUDA_STATIC_RUNTIME=ON \
                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
                 -DUSE_GDS=OFF \
                 -DGPU_ARCHS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
-                -DCUDF_JNI_LIBCUDF_STATIC=OFF \
+                -DCUDF_JNI_LIBCUDF_STATIC=ON \
                 -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
 }
 
