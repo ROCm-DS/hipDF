@@ -14,23 +14,70 @@
 # limitations under the License.
 #
 
+# MIT License
+#
+# Modifications Copyright (C) 2024 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 ###
 # Build the image for cudf development environment.
 #
 # Arguments: CUDA_VERSION=11.X.Y
 #
 ###
-ARG CUDA_VERSION=11.8.0
-FROM nvidia/cuda:$CUDA_VERSION-devel-centos7
+ARG ROCM_VERSION=6.2
+ARG OS_RELEASE=22.04
+ARG TARGETPLATFORM=linux/amd64
+# TODO(HIP/AMD): enable multi-platform build
+FROM --platform=$TARGETPLATFORM rocm/dev-ubuntu-${OS_RELEASE}:${ROCM_VERSION}-complete
+ARG TOOLSET_VERSION=11
 
 ### Install basic requirements
-ARG DEVTOOLSET_VERSION=11
-RUN yum install -y centos-release-scl
-RUN yum install -y devtoolset-${DEVTOOLSET_VERSION} epel-release
-RUN yum install -y git zlib-devel maven tar wget patch ninja-build
+# pin urllib3<2.0 for https://github.com/psf/requests/issues/6432
+RUN apt-get update && apt-get install -y  gcc-${TOOLSET_VERSION} openjdk-11-jdk python3 pip zlib1g-dev maven tar wget patch ninja-build git && \
+  python3 -m pip install requests 'urllib3<2.0'
+
+# Set environment variable to suppress interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set build argument to handle conditional timezone setting
+ARG SET_TIMEZONE
+
+# Install sudo and tzdata if needed
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+
+# Check if SET_TIMEZONE is set and set the timezone accordingly
+RUN if [ ! -z "${SET_TIMEZONE}" ]; then \
+        TZ=Etc/UTC && \
+        ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+        echo $TZ > /etc/timezone; \
+    fi
+
+# Install tzdata without unnecessary recommendations
+RUN apt-get install -y --no-install-recommends tzdata
+
+# Clean up to reduce image size
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ## pre-create the CMAKE_INSTALL_PREFIX folder, set writable by any user for Jenkins
-RUN mkdir /usr/local/rapids && mkdir /rapids && chmod 777 /usr/local/rapids && chmod 777 /rapids
+RUN mkdir -m 777 /usr/local/rapids $HOME/rapids
 
 ARG CMAKE_VERSION=3.26.4
 RUN cd /usr/local/ && wget --quiet https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz && \
@@ -46,11 +93,20 @@ RUN cd /tmp && wget --quiet https://github.com/ccache/ccache/releases/download/v
    cd ccache-${CCACHE_VERSION} && \
    mkdir build && \
    cd build && \
-   scl enable devtoolset-${DEVTOOLSET_VERSION} \
-      "cmake .. \
+   cmake .. \
          -DCMAKE_BUILD_TYPE=Release \
          -DZSTD_FROM_INTERNET=ON \
          -DREDIS_STORAGE_BACKEND=OFF && \
-      cmake --build . --parallel ${PARALLEL_LEVEL} --target install" && \
+      cmake --build . --parallel ${PARALLEL_LEVEL} --target install && \
    cd ../.. && \
    rm -rf ccache-${CCACHE_VERSION}
+
+## install a version of boost that is needed for arrow/parquet to work
+RUN cd /usr/local && wget --quiet https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.gz && \
+  tar -xzf boost_1_81_0.tar.gz && \
+  rm boost_1_81_0.tar.gz && \
+  cd boost_1_81_0 && \
+  ./bootstrap.sh --prefix=/usr/local && \
+  ./b2 install --prefix=/usr/local --with-filesystem --with-system && \
+   cd /usr/local && \
+   rm -rf boost_1_81_0

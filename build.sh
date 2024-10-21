@@ -144,24 +144,32 @@ function buildAll {
 }
 
 function buildLibCudfJniInDocker {
-    local cudaVersion="11.5.0"
-    local imageName="cudf-build:${cudaVersion}-devel-centos7"
+    local LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"$CUDF_JAR_JAVA_BUILD_DIR/cmake-build:$CUDF_JAR_JAVA_BUILD_DIR/cmake-build/lib:$CUDF_JAR_JAVA_BUILD_DIR/libcudf-install/lib"}
+    local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
+    local RAPIDS_CMAKE_BRANCH=${RAPIDS_CMAKE_BRANCH:-branch-24.06}
+    local ROCM_VERSION="6.2"
+    local imageName="cudf-build:${ROCM_VERSION}-devel-centos7"
     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
-    local workspaceDir="/rapids"
+    local workspaceDir="$HOME/rapids"
     local localMavenRepo=${LOCAL_MAVEN_REPO:-"$HOME/.m2/repository"}
     local workspaceRepoDir="$workspaceDir/cudf"
     local workspaceMavenRepoDir="$workspaceDir/.m2/repository"
     local workspaceCcacheDir="$workspaceDir/.ccache"
     mkdir -p "$CUDF_JAR_JAVA_BUILD_DIR/libcudf-cmake-build"
     mkdir -p "$HOME/.ccache" "$HOME/.m2"
-    nvidia-docker build \
-        -f java/ci/Dockerfile.centos7 \
-        --build-arg CUDA_VERSION=${cudaVersion} \
+    docker build \
+        -f $REPODIR/java/ci/Dockerfile.centos7 \
+        --build-arg ROCM_VERSION=${ROCM_VERSION} \
         -t $imageName .
-    nvidia-docker run -it -u $(id -u):$(id -g) --rm \
+    docker run -v /var/run/docker.sock:/var/run/docker.sock $DOCKER_GPU_OPTS -it -u $(id -u):$(id -g) --rm \
         -e PARALLEL_LEVEL \
         -e CCACHE_DISABLE \
         -e CCACHE_DIR="$workspaceCcacheDir" \
+        -e CMAKE_PREFIX_PATH="/opt/rocm/lib/cmake" \
+        -e GITHUB_USER=${GITHUB_USER} \
+        -e GITHUB_PASS=${GITHUB_PASS} \
+        -e LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
+        -e RAPIDS_CMAKE_BRANCH=${RAPIDS_CMAKE_BRANCH} \
         -v "/etc/group:/etc/group:ro" \
         -v "/etc/passwd:/etc/passwd:ro" \
         -v "/etc/shadow:/etc/shadow:ro" \
@@ -169,21 +177,24 @@ function buildLibCudfJniInDocker {
         -v "$HOME/.ccache:$workspaceCcacheDir:rw" \
         -v "$REPODIR:$workspaceRepoDir:rw" \
         -v "$localMavenRepo:$workspaceMavenRepoDir:rw" \
+        -v "$HOME:$HOME" \
         --workdir "$workspaceRepoDir/java/target/libcudf-cmake-build" \
         ${imageName} \
-        scl enable devtoolset-9 \
+        /bin/bash -c \
             "cmake $workspaceRepoDir/cpp \
                 -G${CMAKE_GENERATOR} \
                 -DCMAKE_C_COMPILER_LAUNCHER=ccache \
                 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
                 -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
                 -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
+                -DCMAKE_C_COMPILER=hipcc \
+                -DCMAKE_CXX_COMPILER=hipcc \
                 -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
                 -DCUDA_STATIC_RUNTIME=ON \
                 -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES} \
                 -DCMAKE_INSTALL_PREFIX=/usr/local/rapids \
                 -DUSE_NVTX=OFF \
-                -DCUDF_USE_PROPRIETARY_NVCOMP=ON \
+                -DCUDF_USE_PROPRIETARY_NVCOMP=OFF \
                 -DCUDF_USE_ARROW_STATIC=ON \
                 -DCUDF_ENABLE_ARROW_S3=OFF \
                 -DBUILD_TESTS=OFF \
@@ -193,19 +204,29 @@ function buildLibCudfJniInDocker {
              cmake --build . --parallel ${PARALLEL_LEVEL} && \
              cd $workspaceRepoDir/java && \
              mvn ${MVN_PHASES:-"package"} \
+                -DLD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
+                -DCUDF_C_COMPILER=hipcc \
+                -DCUDF_CXX_COMPILER=hipcc \
+                -DCMAKE_C_COMPILER=hipcc \
+                -DCMAKE_CXX_COMPILER=hipcc \
                 -Dmaven.repo.local=$workspaceMavenRepoDir \
                 -DskipTests=${SKIP_TESTS:-false} \
                 -Dparallel.level=${PARALLEL_LEVEL} \
                 -Dcmake.ccache.opts='-DCMAKE_C_COMPILER_LAUNCHER=ccache \
                                      -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
                                      -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
-                                     -DCMAKE_CXX_LINKER_LAUNCHER=ccache' \
+                                     -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
+                                     -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
+                                     -DCUDF_C_COMPILER=hipcc \
+                                     -DCUDF_CXX_COMPILER=hipcc \
+                                     -DCMAKE_C_COMPILER=hipcc \
+                                     -DCMAKE_CXX_COMPILER=hipcc' \
                 -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
                 -DCUDA_STATIC_RUNTIME=ON \
-                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
-                -DUSE_GDS=ON \
+                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
+                -DUSE_GDS=OFF \
                 -DGPU_ARCHS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
-                -DCUDF_JNI_LIBCUDF_STATIC=ON \
+                -DCUDF_JNI_LIBCUDF_STATIC=OFF \
                 -Dtest=*,!CuFileTest,!CudaFatalTest,!ColumnViewNonEmptyNullsTest"
 }
 
