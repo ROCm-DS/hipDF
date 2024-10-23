@@ -154,7 +154,6 @@ function buildAll {
 function buildLibCudfJniInDocker {
     local LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"$CUDF_JAR_JAVA_BUILD_DIR/cmake-build:$CUDF_JAR_JAVA_BUILD_DIR/cmake-build/lib:$CUDF_JAR_JAVA_BUILD_DIR/libcudf-install/lib"}
     local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
-    local RAPIDS_CMAKE_BRANCH=${RAPIDS_CMAKE_BRANCH:-branch-24.06}
     local ROCM_VERSION="6.2"
     local imageName="cudf-build:${ROCM_VERSION}-devel-ubuntu"
     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
@@ -211,10 +210,6 @@ function buildLibCudfJniInDocker {
              cd $workspaceRepoDir/java && \
              mvn ${MVN_PHASES:-"package"} \
                 -DLD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
-                -DCUDF_C_COMPILER=hipcc \
-                -DCUDF_CXX_COMPILER=hipcc \
-                -DCMAKE_C_COMPILER=hipcc \
-                -DCMAKE_CXX_COMPILER=hipcc \
                 -Dmaven.repo.local=$workspaceMavenRepoDir \
                 -DskipTests=${SKIP_TESTS:-false} \
                 -Dparallel.level=${PARALLEL_LEVEL} \
@@ -223,13 +218,10 @@ function buildLibCudfJniInDocker {
                                      -DCMAKE_CUDA_COMPILER_LAUNCHER=ccache \
                                      -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
                                      -DCMAKE_CXX_LINKER_LAUNCHER=ccache \
-                                     -DCUDF_C_COMPILER=hipcc \
-                                     -DCUDF_CXX_COMPILER=hipcc \
                                      -DCMAKE_C_COMPILER=hipcc \
                                      -DCMAKE_CXX_COMPILER=hipcc' \
                 -DCUDF_CPP_BUILD_DIR=$workspaceRepoDir/java/target/libcudf-cmake-build \
                 -DCUDF_JNI_ENABLE_PROFILING=NO \
-                -DfailIfNoTests=false \
                 -Dio.netty.tryReflectionSetAccessible=true \
                 -DCUDA_STATIC_RUNTIME=ON \
                 -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
