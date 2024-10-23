@@ -100,13 +100,3 @@ RUN cd /tmp && wget --quiet https://github.com/ccache/ccache/releases/download/v
       cmake --build . --parallel ${PARALLEL_LEVEL} --target install && \
    cd ../.. && \
    rm -rf ccache-${CCACHE_VERSION}
-
-## install a version of boost that is needed for arrow/parquet to work
-RUN cd /usr/local && wget --quiet https://archives.boost.io/release/1.81.0/source/boost_1_81_0.tar.gz && \
-  tar -xzf boost_1_81_0.tar.gz && \
-  rm boost_1_81_0.tar.gz && \
-  cd boost_1_81_0 && \
-  ./bootstrap.sh --prefix=/usr/local && \
-  ./b2 install --prefix=/usr/local --with-filesystem --with-system && \
-   cd /usr/local && \
-   rm -rf boost_1_81_0
