@@ -842,7 +842,7 @@ __device__ void process_symbols(inflate_state_s* s, int t)
       symbol = shuffle(symt, pos);
       len    = max((symbol & 0xffff) - 256, 0);  // max should be unnecessary, but just in case
       dist   = symbol >> 16;
-      for (int i = t; i < len; i += 32) {
+      for (int i = t; i < len; i += cudf::detail::warp_size) {
         uint8_t const* src = out + ((i >= dist) ? (i % dist) : i) - dist;
         if (out + i < outend and src >= outbase) { out[i] = *src; }
       }
