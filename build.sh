@@ -150,7 +150,7 @@ function buildLibCudfJniInDocker {
     local ROCM_VERSION="6.2"
     local imageName="cudf-build:${ROCM_VERSION}-devel-ubuntu"
     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
-    local workspaceDir="$HOME/rapids"
+    local workspaceDir="/rapids"
     local localMavenRepo=${LOCAL_MAVEN_REPO:-"$HOME/.m2/repository"}
     local workspaceRepoDir="$workspaceDir/cudf"
     local workspaceMavenRepoDir="$workspaceDir/.m2/repository"
