@@ -148,7 +148,7 @@ function buildLibCudfJniInDocker {
     local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
     local RAPIDS_CMAKE_BRANCH=${RAPIDS_CMAKE_BRANCH:-branch-24.06}
     local ROCM_VERSION="6.2"
-    local imageName="cudf-build:${ROCM_VERSION}-devel-centos7"
+    local imageName="cudf-build:${ROCM_VERSION}-devel-ubuntu"
     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
     local workspaceDir="$HOME/rapids"
     local localMavenRepo=${LOCAL_MAVEN_REPO:-"$HOME/.m2/repository"}
@@ -158,18 +158,15 @@ function buildLibCudfJniInDocker {
     mkdir -p "$CUDF_JAR_JAVA_BUILD_DIR/libcudf-cmake-build"
     mkdir -p "$HOME/.ccache" "$HOME/.m2"
     docker build \
-        -f $REPODIR/java/ci/Dockerfile.centos7 \
+        -f $REPODIR/java/ci/Dockerfile.ubuntu \
         --build-arg ROCM_VERSION=${ROCM_VERSION} \
         -t $imageName .
-    docker run -v /var/run/docker.sock:/var/run/docker.sock $DOCKER_GPU_OPTS -it -u $(id -u):$(id -g) --rm \
+    docker run $DOCKER_GPU_OPTS -it -u $(id -u):$(id -g) --rm \
         -e PARALLEL_LEVEL \
         -e CCACHE_DISABLE \
         -e CCACHE_DIR="$workspaceCcacheDir" \
         -e CMAKE_PREFIX_PATH="/opt/rocm/lib/cmake" \
-        -e GITHUB_USER=${GITHUB_USER} \
-        -e GITHUB_PASS=${GITHUB_PASS} \
         -e LD_LIBRARY_PATH=${LD_LIBRARY_PATH} \
-        -e RAPIDS_CMAKE_BRANCH=${RAPIDS_CMAKE_BRANCH} \
         -v "/etc/group:/etc/group:ro" \
         -v "/etc/passwd:/etc/passwd:ro" \
         -v "/etc/shadow:/etc/shadow:ro" \
@@ -226,7 +223,7 @@ function buildLibCudfJniInDocker {
                 -DfailIfNoTests=false \
                 -Dio.netty.tryReflectionSetAccessible=true \
                 -DCUDA_STATIC_RUNTIME=ON \
-                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${BUILD_PER_THREAD_DEFAULT_STREAM} \
+                -DCUDF_USE_PER_THREAD_DEFAULT_STREAM=ON \
                 -DUSE_GDS=OFF \
                 -DGPU_ARCHS=${CUDF_CMAKE_HIP_ARCHITECTURES} \
                 -DCUDF_JNI_LIBCUDF_STATIC=ON \

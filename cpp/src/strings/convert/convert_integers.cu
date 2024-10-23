@@ -363,6 +363,9 @@ struct from_integers_fn {
     char* d_buffer    = d_chars + d_offsets[idx];
     integer_to_string(value, d_buffer);
   }
+  // TODO(HIP/AMD): It seems that the compiler optimizes the operator overloading.
+  // Added __attribute__((optnone)) as a workaround for now.
+  // internal issue 50
   __attribute__((optnone))
   __device__ void operator()(size_type idx)
   {
