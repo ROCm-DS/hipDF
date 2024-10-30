@@ -217,7 +217,8 @@ constexpr CUDF_HOST_DEVICE inline uint32_t set_most_significant_bits_32(size_typ
   constexpr_assert(0 <= n && n < word_size);
   // TODO(HIP/AMD): warning: shift count >= width of type
   // To fix the issue, we should check if the returned value does not exceed UINT32_MAX.
-  return ~((uint32_t{1} << (word_size - n)) - 1);
+  // NOTE(HIP/AMD): treat UB arising for n=0 separately here (issue 175).
+  return (n==0) ? 0 : ~((uint32_t{1} << (word_size - n)) - 1);
 }
 
 #if defined(__HIPCC__) || defined(__CUDACC__) 

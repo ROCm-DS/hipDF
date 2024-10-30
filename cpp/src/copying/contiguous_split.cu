@@ -144,7 +144,6 @@ struct dst_buf_info {
   int dst_buf_index;  // destination buffer index
 };
 
-// TODO(HIP/AMD): __attribute__((optnone)) is required to work around internal issue 175.
 /**
  * @brief Copy a single buffer of column data, shifting values (for offset columns),
  * and validity (for validity buffers) as necessary.
@@ -175,7 +174,7 @@ struct dst_buf_info {
  * @param valid_count Optional pointer to a value to store count of set bits
  */
 template <int block_size>
-__attribute__((optnone)) __device__ void copy_buffer(uint8_t* __restrict__ dst,
+__device__ void copy_buffer(uint8_t* __restrict__ dst,
                             uint8_t const* __restrict__ src,
                             int t,
                             std::size_t num_elements,
@@ -249,7 +248,8 @@ __attribute__((optnone)) __device__ void copy_buffer(uint8_t* __restrict__ dst,
                                           ? (reinterpret_cast<uint32_t const*>(src)[idx + 1] - value_shift)
                                           : 0;
 
-        uint32_t const val = (v >> bit_shift) | (next << (32 - bit_shift));
+        uint32_t const val = (bit_shift>0) ?  (v >> bit_shift) | (next << (32 - bit_shift)) :
+                              v;
         if (valid_count) { thread_valid_count += __POPC(val); }
         reinterpret_cast<uint32_t*>(dst)[idx] = val;
         v                                     = next;
@@ -280,9 +280,7 @@ __attribute__((optnone)) __device__ void copy_buffer(uint8_t* __restrict__ dst,
         std::size_t const max_row    = (num_bytes * 8);
         std::size_t const slack_bits = max_row > num_rows ? max_row - num_rows : 0;
         auto const slack_mask        = set_most_significant_bits_32(slack_bits);
-        // TODO(HIP/AMD): It is possible that set_most_significant_bits_32 returns an overflown value.
-        // In this case, we should behave as if slack_mask == 0.
-        if (slack_mask > 0 && slack_mask != UINT32_MAX) {
+        if (slack_mask > 0) {
           uint32_t const last_word = reinterpret_cast<uint32_t*>(dst + (num_bytes - 4))[0];
           block_valid_count -= __POPC(last_word & slack_mask);
         }
