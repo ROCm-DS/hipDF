@@ -139,6 +139,7 @@ struct dst_buf_info {
   int dst_buf_index;  // destination buffer index
 };
 
+// TODO(HIP/AMD): __attribute__((optnone)) is required to work around internal issue 175.
 /**
  * @brief Copy a single buffer of column data, shifting values (for offset columns),
  * and validity (for validity buffers) as necessary.
