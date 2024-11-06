@@ -143,11 +143,27 @@ function buildAll {
     ((${NUMARGS} == 0 )) || !(echo " ${ARGS} " | grep -q " [^-]\+ ")
 }
 
+# Usage: ROCM_VERSION=$(get_rocm_version_short) 
+function get_rocm_version_short() { 
+    local rocm_version_h=$(find $(hipconfig --path) -name "rocm_version.h") 
+    local major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+") 
+    local minor=$(grep "ROCM_VERSION_MINOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+") 
+    local patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+") 
+
+    if [[ "${patch}" == "0" ]]; 
+    then 
+        printf "${major}.${minor}" 
+    else 
+    printf "${major}.${minor}.${patch}" 
+    fi 
+}
+
 # NOTE(HIP/AMD): We need to set DCUDF_JNI_ENABLE_PROFILING=NO because of NVTX missing.
+# TODO(HIP/AMD): We need to set USE_GDS to OFF because we do not support GPU Direct Storage currently.
 function buildLibCudfJniInDocker {
     local LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"$CUDF_JAR_JAVA_BUILD_DIR/cmake-build:$CUDF_JAR_JAVA_BUILD_DIR/cmake-build/lib:$CUDF_JAR_JAVA_BUILD_DIR/libcudf-install/lib"}
     local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
-    local ROCM_VERSION="6.2"
+    local ROCM_VERSION=${ROCM_VERSION:-"6.2"}
     local imageName="cudf-build:${ROCM_VERSION}-devel-ubuntu"
     local CMAKE_GENERATOR="${CMAKE_GENERATOR:-Ninja}"
     local workspaceDir="/rapids"
@@ -158,7 +174,7 @@ function buildLibCudfJniInDocker {
     mkdir -p "$CUDF_JAR_JAVA_BUILD_DIR/libcudf-cmake-build"
     mkdir -p "$HOME/.ccache" "$HOME/.m2"
     docker build \
-        -f $REPODIR/java/ci/Dockerfile.ubuntu \
+        -f java/ci/Dockerfile.ubuntu \
         --build-arg ROCM_VERSION=${ROCM_VERSION} \
         -t $imageName .
     docker run $DOCKER_GPU_OPTS -it -u $(id -u):$(id -g) --rm \
