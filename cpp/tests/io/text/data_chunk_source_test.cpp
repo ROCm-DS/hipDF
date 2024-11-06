@@ -302,8 +302,9 @@ TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsets)
 TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsetsSingleGZipBlock)
 {
 #ifdef CUDF_USE_PER_THREAD_DEFAULT_STREAM
-  GTEST_SKIP() << "Skipping this test temporarily because it fails in PTDS mode: "\
+  GTEST_SKIP() << "TODO(AMD/HIP): Skipping this test temporarily because it fails in PTDS mode: "\
                   "internal issue 170";
+#endif
   auto const filename = temp_env->get_temp_filepath("bgzip_source_offsets_single_block");
   std::string const input{"collection unit brings"};
   std::string const head_garbage{"garbage"};
@@ -326,8 +327,9 @@ TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsetsSingleGZipBlock)
 TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsetsSingleChunk)
 {
 #ifdef CUDF_USE_PER_THREAD_DEFAULT_STREAM
-  GTEST_SKIP() << "Skipping this test temporarily because it fails in PTDS mode: "\
+  GTEST_SKIP() << "TODO(AMD/HIP): Skipping this test temporarily because it fails in PTDS mode: "\
                   "internal issue 170";
+#endif
   auto const filename = temp_env->get_temp_filepath("bgzip_source_offsets_single_chunk");
   std::string const input{"collection unit brings"};
   std::string const head_garbage{"garbage"};
@@ -394,7 +396,7 @@ TEST_F(DataChunkSourceTest, BgzipCompressedSourceVirtualOffsets)
 TEST_F(DataChunkSourceTest, BgzipSourceVirtualOffsetsSingleCompressedGZipBlock)
 {
 #ifdef CUDF_USE_PER_THREAD_DEFAULT_STREAM
-  GTEST_SKIP() << "Skipping this test temporarily because it fails in PTDS mode: "\
+  GTEST_SKIP() << "TODO(AMD/HIP): Skipping this test temporarily because it fails in PTDS mode: "\
                   "internal issue 170";
 #endif
   auto const filename = temp_env->get_temp_filepath("bgzip_source_offsets_single_compressed_block");
