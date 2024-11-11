@@ -168,6 +168,7 @@ function get_rocm_version_short() {
 
 # NOTE(HIP/AMD): We need to set DCUDF_JNI_ENABLE_PROFILING=NO because of NVTX missing.
 # TODO(HIP/AMD): We need to set USE_GDS to OFF because we do not support GPU Direct Storage currently.
+# TODO(HIP/AMD): Unlike CUDA, we need to set LD_LIBRARY_PATH explicitly otherwise we run into "NoClassDefFound" error for java tests. Internal issue #177. 
 function buildLibCudfJniInDocker {
     local LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-"$CUDF_JAR_JAVA_BUILD_DIR/cmake-build:$CUDF_JAR_JAVA_BUILD_DIR/cmake-build/lib:$CUDF_JAR_JAVA_BUILD_DIR/libcudf-install/lib"}
     local DOCKER_GPU_OPTS=${DOCKER_GPU_OPTS:-"--device=/dev/kfd --device=/dev/dri  --group-add=render --ipc=host --cap-add=SYS_PTRACE --security-opt seccomp=unconfined"}
