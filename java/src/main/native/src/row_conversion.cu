@@ -406,7 +406,7 @@ copy_from_rows_fixed_width_optimized(const size_type num_rows, const size_type n
     // But we might not use all of the threads if the number of rows does not go
     // evenly into the thread count. We don't want those threads to exit yet
     // because we may need them to copy data in for the next row group.
-    bitmask_type active_mask = __ballot_sync(LANE_MASK_ALL, row_index < num_rows);
+    bitmask_type active_mask = __ballot_sync((uint64_t) LANE_MASK_ALL, row_index < num_rows);
     if (row_index < num_rows) {
       auto const col_index_start = threadIdx.y;
       auto const col_index_stride = blockDim.y;
@@ -449,7 +449,7 @@ copy_from_rows_fixed_width_optimized(const size_type num_rows, const size_type n
         int8_t *valid_byte = &row_vld_tmp[col_index / 8];
         size_type byte_bit_offset = col_index % 8;
         int predicate = *valid_byte & (1 << byte_bit_offset);
-        bitmask_type bitmask = __ballot_sync(active_mask, predicate);
+        bitmask_type bitmask = __ballot_sync((uint64_t) active_mask, predicate);
         if (row_index % cudf::detail::warp_size == 0) {
           nm[word_index(row_index)] = bitmask;
         }
@@ -814,7 +814,7 @@ copy_validity_to_rows(const size_type num_rows, const size_type num_columns,
     auto const absolute_col = relative_col + tile.start_col;
     auto const absolute_row = relative_row + tile.start_row;
     auto const participating = absolute_col < num_columns && absolute_row < num_rows;
-    auto const participation_mask = __ballot_sync(LANE_MASK_ALL, participating);
+    auto const participation_mask = __ballot_sync((uint64_t) LANE_MASK_ALL, participating);
 
     if (participating) {
       auto my_data = input_nm[absolute_col] != nullptr ?
@@ -826,7 +826,7 @@ copy_validity_to_rows(const size_type num_rows, const size_type num_columns,
       // we actually write.
       bitmask_type dw_mask = 0x1;
       for (int i = 0; i < threads_per_warp && relative_row + i < num_rows; ++i, dw_mask <<= 1) {
-        auto validity_data = __ballot_sync(participation_mask, (my_data & dw_mask)>0);
+        auto validity_data = __ballot_sync((uint64_t) participation_mask, (my_data & dw_mask)>0);
         // lead thread in each warp writes data
         auto const validity_write_offset =
             validity_data_row_length * (relative_row + i) + (relative_col / CHAR_BIT);
@@ -1144,7 +1144,7 @@ copy_validity_from_rows(const size_type num_rows, const size_type num_columns,
     auto const row_batch_start =
         tile.batch_number == 0 ? 0 : batch_row_boundaries[tile.batch_number];
 
-    auto const participation_mask = __ballot_sync(LANE_MASK_ALL, absolute_row < num_rows);
+    auto const participation_mask = __ballot_sync((uint64_t) LANE_MASK_ALL, absolute_row < num_rows);
 
     if (absolute_row < num_rows) {
       auto const my_byte = input_data[row_offsets(absolute_row, row_batch_start) + validity_offset +
@@ -1156,7 +1156,7 @@ copy_validity_from_rows(const size_type num_rows, const size_type num_columns,
       bitmask_type byte_mask = 0x1;
       for (int i = 0; (i < cols_per_read) && ((relative_col + i) < num_columns);
            ++i, byte_mask <<= 1) {
-        auto const validity_data = __ballot_sync(participation_mask, (my_byte & byte_mask)>0);
+        auto const validity_data = __ballot_sync((uint64_t) participation_mask, (my_byte & byte_mask)>0);
         // lead thread in each warp writes data
         if (warp.thread_rank() == 0) {
           auto const validity_write_offset =
