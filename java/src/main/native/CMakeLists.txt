@@ -68,6 +68,8 @@ option(CUDA_STATIC_RUNTIME "Statically link the CUDA runtime" OFF)
 option(USE_GDS "Build with GPUDirect Storage (GDS)/cuFile support" OFF)
 option(CUDF_JNI_LIBCUDF_STATIC "Link with libcudf.a" OFF)
 option(CUDF_JNI_ENABLE_PROFILING "Build with profiling support" OFF)  # TODO(HIP/AMD): this option is currently not supported
+option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
+
 
 message(VERBOSE "CUDF_JNI: Build with NVTX support: ${USE_NVTX}")
 message(VERBOSE "CUDF_JNI: Build cuDF JNI shared libraries: ${BUILD_SHARED_LIBS}")
@@ -129,6 +131,10 @@ if(NOT DEFINED hipcomp_DIR)
   set(hipcomp_DIR "${CUDF_CPP_BUILD_DIR}/_deps/hipcomp-build")
 endif()
 rapids_find_package(hipcomp REQUIRED)
+if(TARGET hipcomp AND CUDF_USE_WARPSIZE_32)
+  target_compile_definitions(hipcomp PRIVATE USE_WARPSIZE_32)
+endif()
+
 
 # ##################################################################################################
 # * find JNI -------------------------------------------------------------------------------------
