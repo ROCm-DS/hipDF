@@ -1,4 +1,4 @@
-# <div align="left"><img src="img/rapids_logo.png" width="90px"/>&nbsp;cuDF - GPU DataFrames</div>
+# <div align="left">&nbsp;hipDF - GPU DataFrames on AMD GPUs</div>
 
 > [!CAUTION] 
 > This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
@@ -99,7 +99,7 @@ Please see our [guide for contributing to cuDF](CONTRIBUTING.md).
 
 Find out more details on the [RAPIDS site](https://rapids.ai/community.html)
 
-## <div align="left"><img src="img/rapids_logo.png" width="265px"/></div> Open GPU Data Science
+## Open GPU Data Science
 
 The RAPIDS suite of open source software libraries aim to enable execution of end-to-end data science and analytics pipelines entirely on GPUs. It relies on NVIDIA® CUDA® primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
 
