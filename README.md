@@ -22,7 +22,7 @@
     SOFTWARE.
 -->
 
-# <div align="left"><img src="img/rapids_logo.png" width="90px"/>&nbsp;cuDF - GPU DataFrames</div>
+# <div align="left">&nbsp;hipDF - GPU DataFrames on AMD GPUs</div>
 
 > [!CAUTION] 
 > This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
