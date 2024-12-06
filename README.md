@@ -28,6 +28,7 @@
 > This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
 ***
 **NOTE:** This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
+**NOTE:** In source code, hipMM uses the `cudf` namespace/naming conventions like the original cuDF project (which it is derived from).
 
 ## Resources
 
@@ -37,9 +38,44 @@
 - [libcudf (C++/CUDA) documentation](https://docs.rapids.ai/api/libcudf/stable/)
 - [RAPIDS Community](https://rapids.ai/learn-more/#get-involved): Get help, contribute, and collaborate.
 
-See the [RAPIDS install page](https://docs.rapids.ai/install) for
-the most up-to-date information and commands for installing cuDF
-and other RAPIDS packages.
+## Overview
+
+Built based on the [Apache Arrow](http://arrow.apache.org/) columnar memory format, hipDF is a GPU DataFrame library for loading, joining, aggregating, filtering, and otherwise manipulating data.
+
+hipDF provides a pandas-like API that will be familiar to data engineers & data scientists, so they can use it to easily accelerate their workflows without going into the details of HIP programming.
+
+For example, the following snippet downloads a CSV, then uses the GPU to parse it into rows and columns and run calculations:
+```python
+import cudf, requests
+from io import StringIO
+
+url = "https://github.com/plotly/datasets/raw/master/tips.csv"
+content = requests.get(url).content.decode('utf-8')
+
+tips_df = cudf.read_csv(StringIO(content))
+tips_df['tip_percentage'] = tips_df['tip'] / tips_df['total_bill'] * 100
+
+# display average tip by dining party size
+print(tips_df.groupby('size').tip_percentage.mean())
+```
+
+Output:
+```
+size
+1    21.729201548727808
+2    16.571919173482897
+3    15.215685473711837
+4    14.594900639351332
+5    14.149548965142023
+6    15.622920072028379
+Name: tip_percentage, dtype: float64
+```
+
+For additional examples, browse our complete [API documentation](https://docs.rapids.ai/api/cudf/stable/), or check out our more detailed [notebooks](https://github.com/rapidsai/notebooks-contrib).
+
+## Quick Start
+
+**NOTE:** Currently, a docker image is not available for AMD GPUs.
 
 ## Installation
 
@@ -78,7 +114,7 @@ pip install --extra-index-url=https://pypi.nvidia.com cudf-cu12
 
 **NOTE:** Currently, this option is not supported for AMD GPUs.
 
-cuDF can be installed with conda (via [miniforge](https://github.com/conda-forge/miniforge)) from the `rapidsai` channel:
+hipDF can be installed with conda (via [miniconda](https://conda.io/miniconda.html) or the full [Anaconda distribution](https://www.anaconda.com/download)) from the `rapidsai` channel:
 
 ```bash
 # NOTE: Conda installation not supported for hipDF for AMD GPUs.
@@ -89,7 +125,7 @@ conda install -c rapidsai -c conda-forge -c nvidia \
 We also provide [nightly Conda packages](https://anaconda.org/rapidsai-nightly) built from the HEAD
 of our latest development branch.
 
-Note: cuDF is supported only on Linux, and with Python versions 3.10 and later.
+Note: hipDF is supported only on Linux, and with Python versions 3.9 and later.
 
 See the [RAPIDS installation guide](https://docs.rapids.ai/install) for more OS and version info.
 
