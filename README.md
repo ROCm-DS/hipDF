@@ -27,9 +27,13 @@
 > [!CAUTION] 
 > This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
 ***
-**NOTE:** This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
+> [!NOTE]
+> This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
 
-**NOTE:** In source code, hipMM uses the `cudf` namespace/naming conventions like the original cuDF project (which it is derived from).
+
+> [!NOTE]
+> This ROCm&trade; port is derived work based on the NVIDIA RAPIDS&reg; cuDF project. It aims to
+follow the latter's directory structure and API naming as closely as possible to minimize porting friction for users that are interested in using both projects.
 
 ## Resources
 
@@ -76,7 +80,8 @@ For additional examples, browse our complete [API documentation](https://docs.ra
 
 ## Quick Start
 
-**NOTE:** Currently, a docker image is not available for AMD GPUs.
+> [!NOTE]
+> Currently, a docker image is not available for AMD GPUs.
 
 ## Installation
 
@@ -113,7 +118,8 @@ pip install --extra-index-url=https://pypi.nvidia.com cudf-cu12
 
 ### Conda
 
-**NOTE:** Currently, this option is not supported for AMD GPUs.
+> [!NOTE]
+> Currently, this option is not supported for AMD GPUs.
 
 hipDF can be installed with conda (via [miniconda](https://conda.io/miniconda.html) or the full [Anaconda distribution](https://www.anaconda.com/download)) from the `rapidsai` channel:
 
