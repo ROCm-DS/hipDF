@@ -49,7 +49,6 @@ and other RAPIDS packages.
 
 * ROCm HIP SDK compilers version 6.3+
 * Officially supported architecture (gfx90a, gfx942, gfx1100).
-* For UDFs through Jitify (required for some BINARYOP, ROLLING and TRANSFORM APIs): A patched ROCm version is required (currently available internally only).
 
 ### CUDA/GPU requirements
 
