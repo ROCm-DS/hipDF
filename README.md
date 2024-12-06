@@ -91,13 +91,6 @@ See the [Get RAPIDS version picker](https://rapids.ai/start.html) for more OS an
 ## Build/Install from Source
 See build [instructions](CONTRIBUTING.md#setting-up-your-build-environment).
 
-## Contributing
-
-Please see our [guide for contributing to cuDF](CONTRIBUTING.md).
-
-## Contact
-
-Find out more details on the [RAPIDS site](https://rapids.ai/community.html)
 
 ## Open GPU Data Science
 
