@@ -1,5 +1,8 @@
 # <div align="left"><img src="img/rapids_logo.png" width="90px"/>&nbsp;cuDF - GPU DataFrames</div>
 
+> [!CAUTION] 
+> This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
+***
 **NOTE:** This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
 
 ## Resources
