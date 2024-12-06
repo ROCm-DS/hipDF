@@ -28,6 +28,7 @@
 > This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
 ***
 **NOTE:** This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
+
 **NOTE:** In source code, hipMM uses the `cudf` namespace/naming conventions like the original cuDF project (which it is derived from).
 
 ## Resources
