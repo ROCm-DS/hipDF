@@ -16,7 +16,7 @@ follow the latter's directory structure and API naming as closely as possible to
 ## Resources
 
 - [cuDF Reference Documentation](https://docs.rapids.ai/api/cudf/stable/): Python API reference, tutorials, and topic guides.
-- [libcudf Reference Documentation](https://docs.rapids.ai/api/libcudf/stable/): C/C++ CUDA library API reference.
+- [libcudf Reference Documentation](https://docs.rapids.ai/api/libcudf/stable/): C/C++ GPU library API reference.
 - [Getting Started](https://rapids.ai/start.html): Instructions for installing cuDF.
 - [RAPIDS Community](https://rapids.ai/community.html): Get help, contribute, and collaborate.
 - [GitHub repository](https://github.com/rapidsai/cudf): Download the cuDF source code.
