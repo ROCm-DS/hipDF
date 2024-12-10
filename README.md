@@ -78,7 +78,7 @@ size
 Name: tip_percentage, dtype: float64
 ```
 
-For additional examples, browse our complete [API documentation](https://docs.rapids.ai/api/cudf/stable/), or check out our more detailed [notebooks](https://github.com/rapidsai/notebooks-contrib).
+For additional examples, browse the complete [cuDF API documentation](https://docs.rapids.ai/api/cudf/stable/), or check out the more detailed [cuDF notebooks](https://github.com/rapidsai/notebooks-contrib).
 
 ## Quick Start
 
@@ -134,7 +134,7 @@ conda install -c rapidsai -c conda-forge -c nvidia \
 ```
 
 We also provide [nightly Conda packages](https://anaconda.org/rapidsai-nightly) built from the HEAD
-of our latest development branch.
+of the latest cuDF development branch.
 
 > [!NOTE]
 > hipDF is supported only on Linux, and with Python versions 3.9 and later.
