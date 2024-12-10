@@ -71,7 +71,7 @@ For additional examples, browse our complete [API documentation](https://docs.ra
 * ROCm HIP SDK compilers version 6.3+
 * Officially supported architecture (gfx90a, gfx942, gfx1100).
 
-### CUDA/GPU requirements
+<!-- ### CUDA/GPU requirements
 
 * CUDA 11.2+
 * NVIDIA driver 450.80.02+
@@ -95,7 +95,7 @@ of our latest development branch.
 
 Note: hipDF is supported only on Linux, and with Python versions 3.9 and later.
 
-See the [Get RAPIDS version picker](https://rapids.ai/start.html) for more OS and version info.
+See the [Get RAPIDS version picker](https://rapids.ai/start.html) for more OS and version info. -->
 
 ## Build/Install from Source
 See build [instructions](CONTRIBUTING.md#setting-up-your-build-environment).
