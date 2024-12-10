@@ -64,7 +64,9 @@ For additional examples, browse our complete [API documentation](https://docs.ra
 
 ## Installation
 
-**NOTE(NVIDIA GPUs):** We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
+
+> [!NOTE]
+> We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
 
 ### ROCM/GPU requirements
 
