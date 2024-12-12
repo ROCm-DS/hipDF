@@ -30,9 +30,9 @@
       "git_url" : "https://github.com/ROCm/hipCollections",
       "git_tag" : "branch-23.10"
     },
-    "rmm-rocm" : {
+    "hipmm" : {
       "version" : "23.12",
-      "git_url" : "https://github.com/ROCm/rmm-rocm",
+      "git_url" : "https://github.com/ROCm/hipmm",
       "git_tag" : "branch-23.12"
     },
     "hipcomp" : {
