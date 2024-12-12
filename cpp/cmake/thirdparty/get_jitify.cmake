@@ -38,8 +38,8 @@
 
 # This function finds Jitify and sets any additional necessary environment variables.
 function(find_and_configure_jitify)
-  include(${rapids-cmake-dir}/cpm/jitify-rocm.cmake)
-  rapids_cpm_jitify_rocm(DOWNLOAD_ONLY TRUE)
+  include(${rapids-cmake-dir}/cpm/jitify-hip.cmake)
+  rapids_cpm_jitify_hip(DOWNLOAD_ONLY TRUE)
   set(JITIFY_INCLUDE_DIR
       "${jitify_SOURCE_DIR}"
       PARENT_SCOPE
