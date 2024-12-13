@@ -91,7 +91,7 @@ For additional examples, browse the complete [cuDF API documentation](https://do
 > [!NOTE]
 > We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
 
-### ROCM/GPU requirements
+### ROCM/GPU Requirements
 
 * ROCm HIP SDK compilers version 6.3+
 * Officially supported architecture (gfx90a, gfx942, gfx1100).
