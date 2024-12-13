@@ -101,7 +101,7 @@ of the latest cuDF development branch.
 See the [Get RAPIDS version picker](https://rapids.ai/start.html) for more OS and version info. -->
 
 ## Build/Install from Source
-See build [instructions](CONTRIBUTING.md#setting-up-your-build-environment).
+See build [instructions](INSTALL.md).
 
 
 ## Open GPU Data Science
