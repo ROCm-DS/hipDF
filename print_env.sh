@@ -23,7 +23,7 @@ uname -a
 echo
 
 echo "***GPU Information***"
-nvidia-smi
+rocm-smi
 echo
 
 echo "***CPU***"
@@ -38,8 +38,8 @@ echo "***g++***"
 which g++ && g++ --version
 echo
 
-echo "***nvcc***"
-which nvcc && nvcc --version
+echo "***hipcc***"
+which hipcc && hipcc --version
 echo
 
 echo "***Python***"
