@@ -1,2 +1,0 @@
---extra-index-url https://test.pypi.org/simple/
-hip-python-as-cuda>=6.2
