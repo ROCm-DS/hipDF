@@ -66,9 +66,9 @@ For additional examples, browse the complete [cuDF API documentation](https://do
 
 
 > [!NOTE]
-> We currently support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
+> We support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
 
-### ROCM/GPU Requirements
+### ROCm/GPU Requirements
 
 * ROCm HIP SDK compilers version 6.3+
 * Officially supported architecture (gfx90a, gfx942, gfx1100).
@@ -106,7 +106,7 @@ See build [instructions](INSTALL.md).
 
 ## Open GPU Data Science
 
-The ROCM-DS suite of open source software libraries aim to enable execution of end-to-end data science and analytics pipelines entirely on AMD GPUs. It relies on ROCm HIP primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
+The ROCm-DS suite of open source software libraries aim to enable execution of end-to-end data science and analytics pipelines entirely on AMD GPUs. It relies on ROCm HIP primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
 
 <p align="center"><img src="img/rapids_arrow.png" width="80%"/></p>
 
