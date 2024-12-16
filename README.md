@@ -147,7 +147,7 @@ See build [instructions](INSTALL.md).
 
 ## Open GPU Data Science
 
-The ROCm-DS suite of open source software libraries aim to enable execution of end-to-end data science and analytics pipelines entirely on AMD GPUs. It relies on ROCm HIP primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
+The ROCm-DS suite of open source software libraries aims to enable execution of end-to-end data science and analytics pipelines entirely on AMD GPUs. It relies on ROCm HIP primitives for low-level compute optimization, but exposing that GPU parallelism and high-bandwidth memory speed through user-friendly Python interfaces.
 
 <p align="center"><img src="img/rapids_arrow.png" width="80%"/></p>
 
