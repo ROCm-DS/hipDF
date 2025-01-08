@@ -110,12 +110,17 @@ using byte_array_view  = statistics::byte_array_view;
 using byte_array_stats = t_array_stats<byte_array_view, byte_array_view::element_type>;
 
 union statistics_val {
+  // NOTE(HIP/AMD): The largest type needs to come first
+  // to ensure that all bytes of a union instance are zero-initialized.
+  // Otherwise, we end up in UB situations where some bytes contain 
+  // arbitrary invalid statistics values which may be written into the
+  // output file (seen for ORC + sum member in statistics_chunk struct).
+  __int128_t d128_val;        //!< decimal128 columns
   string_stats str_val;       //!< string columns
   byte_array_stats byte_val;  //!< byte array columns
   double fp_val;              //!< float columns
   int64_t i_val;              //!< integer columns
   uint64_t u_val;             //!< unsigned integer columns
-  __int128_t d128_val;        //!< decimal128 columns
 };
 
 struct statistics_chunk {
