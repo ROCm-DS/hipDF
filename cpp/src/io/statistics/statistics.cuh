@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 /**
  * @file statistics.cuh
  * @brief Common structures and utility functions for statistics
@@ -83,12 +105,17 @@ using byte_array_view  = statistics::byte_array_view;
 using byte_array_stats = t_array_stats<byte_array_view>;
 
 union statistics_val {
+  // NOTE(HIP/AMD): The largest type needs to come first
+  // to ensure that all bytes of a union instance are zero-initialized.
+  // Otherwise, we end up in UB situations where some bytes contain 
+  // arbitrary invalid statistics values which may be written into the
+  // output file (seen for ORC + sum member in statistics_chunk struct).
+  __int128_t d128_val;        //!< decimal128 columns
   string_stats str_val;       //!< string columns
   byte_array_stats byte_val;  //!< byte array columns
   double fp_val;              //!< float columns
   int64_t i_val;              //!< integer columns
   uint64_t u_val;             //!< unsigned integer columns
-  __int128_t d128_val;        //!< decimal128 columns
 };
 
 struct statistics_chunk {
