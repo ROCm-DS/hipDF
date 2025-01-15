@@ -59,7 +59,7 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 namespace cudf {
 namespace strings {
@@ -181,9 +181,9 @@ __global__ void finder_warp_parallel_fn(column_device_view const d_strings,
 
   // find stores the minimum position while rfind stores the maximum position
   // note that this was slightly faster than using hipcub::WarpReduce
-  hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_results + str_idx)};
-  forward ? ref.fetch_min(position, hip::std::memory_order_relaxed)
-          : ref.fetch_max(position, hip::std::memory_order_relaxed);
+  cuda::atomic_ref<size_type, cuda::thread_scope_block> ref{*(d_results + str_idx)};
+  forward ? ref.fetch_min(position, cuda::std::memory_order_relaxed)
+          : ref.fetch_max(position, cuda::std::memory_order_relaxed);
   __syncwarp();
 
   if (lane_idx == 0) {

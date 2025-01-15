@@ -57,7 +57,7 @@
 #include <thrust/scan.h>
 #include <thrust/transform.h>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 namespace cudf::strings::detail {
 
@@ -378,9 +378,9 @@ std::pair<std::unique_ptr<column>, rmm::device_uvector<string_index_pair>> split
                        delimiter_count,
                        [d_string_indices, d_delimiter_offsets] __device__(size_type idx) {
                          auto const str_idx = d_string_indices[idx] - 1;
-                         hip::atomic_ref<size_type, hip::thread_scope_device> ref{
+                         cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{
                            *(d_delimiter_offsets + str_idx)};
-                         ref.fetch_add(1, hip::std::memory_order_relaxed);
+                         ref.fetch_add(1, cuda::std::memory_order_relaxed);
                        });
     // finally, convert the delimiter counts into offsets
     thrust::exclusive_scan(rmm::exec_policy(stream),

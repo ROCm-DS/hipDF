@@ -713,7 +713,7 @@ __global__ void __launch_bounds__(decode_block_size)
 
           auto [ptr, len] = src_pos + i < target_pos && dst_pos >= 0
                               ? gpuGetStringData(s, sb, src_pos + skipped_leaf_values + i)
-                              : hip::std::pair<char const*, size_t>{nullptr, 0};
+                              : cuda::std::pair<char const*, size_t>{nullptr, 0};
 
           __shared__ hipcub::WarpScan<size_type>::TempStorage temp_storage;
           size_type offset;
@@ -776,8 +776,8 @@ __global__ void __launch_bounds__(decode_block_size)
   block_excl_sum<decode_block_size>(offptr, value_count, s->page.str_offset);
 
   if (t == 0 and s->error != 0) {
-    hip::atomic_ref<int32_t, hip::thread_scope_device> ref{*error_code};
-    ref.fetch_or(s->error, hip::std::memory_order_relaxed);
+    cuda::atomic_ref<int32_t, cuda::thread_scope_device> ref{*error_code};
+    ref.fetch_or(s->error, cuda::std::memory_order_relaxed);
   }
 }
 

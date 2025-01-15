@@ -373,24 +373,24 @@ struct parse_datetime {
     auto const days = [timeparts, this] {
       // week and weekday prioritize over month/day
       if ((timeparts.week > 0) && (timeparts.weekday > 0)) {
-        auto const y = hip::std::chrono::year{timeparts.year};
+        auto const y = cuda::std::chrono::year{timeparts.year};
         // clang-format off
         auto const start = format_contains('U')
-          ? hip::std::chrono::sys_days{hip::std::chrono::Sunday[1]/hip::std::chrono::January/y}
-          : hip::std::chrono::sys_days{hip::std::chrono::Monday[1]/hip::std::chrono::January/y};
+          ? cuda::std::chrono::sys_days{cuda::std::chrono::Sunday[1]/cuda::std::chrono::January/y}
+          : cuda::std::chrono::sys_days{cuda::std::chrono::Monday[1]/cuda::std::chrono::January/y};
         // clang-format on
         auto const days =  // compute days from year, weeks and weekday
-          start + hip::std::chrono::weeks(timeparts.week - 1) - hip::std::chrono::weeks{1} +
-          (hip::std::chrono::weekday(timeparts.weekday) -
-           hip::std::chrono::weekday{1});  // hip::std::chrono::Monday causes compile error here
+          start + cuda::std::chrono::weeks(timeparts.week - 1) - cuda::std::chrono::weeks{1} +
+          (cuda::std::chrono::weekday(timeparts.weekday) -
+           cuda::std::chrono::weekday{1});  // cuda::std::chrono::Monday causes compile error here
         return days.time_since_epoch().count();
       }
       auto const ymd =  // chrono class handles the leap year calculations for us
-        hip::std::chrono::year_month_day(
-          hip::std::chrono::year{timeparts.year},
-          hip::std::chrono::month{static_cast<uint32_t>(timeparts.month)},
-          hip::std::chrono::day{static_cast<uint32_t>(timeparts.day)});
-      return hip::std::chrono::sys_days(ymd).time_since_epoch().count();
+        cuda::std::chrono::year_month_day(
+          cuda::std::chrono::year{timeparts.year},
+          cuda::std::chrono::month{static_cast<uint32_t>(timeparts.month)},
+          cuda::std::chrono::day{static_cast<uint32_t>(timeparts.day)});
+      return cuda::std::chrono::sys_days(ymd).time_since_epoch().count();
     }();
 
     if constexpr (std::is_same_v<T, cudf::timestamp_D>) { return days; }
@@ -688,9 +688,9 @@ struct check_datetime_format {
     auto const year  = THRUST_OPTIONAL_VALUE(dateparts).year;
     auto const month = static_cast<uint32_t>(THRUST_OPTIONAL_VALUE(dateparts).month);
     auto const day   = static_cast<uint32_t>(THRUST_OPTIONAL_VALUE(dateparts).day);
-    return hip::std::chrono::year_month_day(hip::std::chrono::year{year},
-                                            hip::std::chrono::month{month},
-                                            hip::std::chrono::day{day})
+    return cuda::std::chrono::year_month_day(cuda::std::chrono::year{year},
+                                            cuda::std::chrono::month{month},
+                                            cuda::std::chrono::day{day})
       .ok();
   }
 };
@@ -848,12 +848,12 @@ struct datetime_formatter_fn {
     // We only dissect the timestamp into components if needed
     // by a specifier. And then we only do it once and reuse it.
     // This can improve performance when not using uncommon specifiers.
-    thrust::optional<hip::std::chrono::sys_days> days;
+    thrust::optional<cuda::std::chrono::sys_days> days;
 
     auto days_from_timestamp = [tstamp]() {
       auto const count = tstamp.time_since_epoch().count();
-      return hip::std::chrono::sys_days(static_cast<cudf::timestamp_D::duration>(
-        floor<hip::std::chrono::days>(typename T::duration(count))));
+      return cuda::std::chrono::sys_days(static_cast<cudf::timestamp_D::duration>(
+        floor<cuda::std::chrono::days>(typename T::duration(count))));
     };
 
     size_type bytes = 0;  // output size
@@ -870,7 +870,7 @@ struct datetime_formatter_fn {
           if (!days.has_value()) { days = days_from_timestamp(); }
           // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust
           auto const day_of_week =
-            hip::std::chrono::year_month_weekday(THRUST_OPTIONAL_VALUE(days)).weekday().c_encoding();
+            cuda::std::chrono::year_month_weekday(THRUST_OPTIONAL_VALUE(days)).weekday().c_encoding();
           auto const day_idx =
             day_of_week + offset_weekdays + (item.value == 'a' ? days_in_week : 0);
           if (day_idx < d_format_names.size())
@@ -882,7 +882,7 @@ struct datetime_formatter_fn {
           if (!days.has_value()) { days = days_from_timestamp(); }
           // TODO(HIP/AMD): thrust::optional::value requires a patched version of rocthrust
           auto const month =
-            static_cast<uint32_t>(hip::std::chrono::year_month_day(THRUST_OPTIONAL_VALUE(days)).month());
+            static_cast<uint32_t>(cuda::std::chrono::year_month_day(THRUST_OPTIONAL_VALUE(days)).month());
           auto const month_idx =
             month - 1 + offset_months + (item.value == 'b' ? months_in_year : 0);
           if (month_idx < d_format_names.size())
@@ -925,15 +925,15 @@ struct datetime_formatter_fn {
 
   // from https://howardhinnant.github.io/date/date.html
   __device__ thrust::pair<int32_t, int32_t> get_iso_week_year(
-    hip::std::chrono::year_month_day const& ymd) const
+    cuda::std::chrono::year_month_day const& ymd) const
   {
-    auto const days = hip::std::chrono::sys_days(ymd);
+    auto const days = cuda::std::chrono::sys_days(ymd);
     auto year       = ymd.year();
 
-    auto iso_week_start = [](hip::std::chrono::year const y) {
+    auto iso_week_start = [](cuda::std::chrono::year const y) {
       // clang-format off
-      return hip::std::chrono::sys_days{hip::std::chrono::Thursday[1]/hip::std::chrono::January/y} -
-             (hip::std::chrono::Thursday - hip::std::chrono::Monday);
+      return cuda::std::chrono::sys_days{cuda::std::chrono::Thursday[1]/cuda::std::chrono::January/y} -
+             (cuda::std::chrono::Thursday - cuda::std::chrono::Monday);
       // clang-format on
     };
 
@@ -941,30 +941,30 @@ struct datetime_formatter_fn {
     if (days < start)
       start = iso_week_start(--year);
     else {
-      auto const next_start = iso_week_start(year + hip::std::chrono::years{1});
+      auto const next_start = iso_week_start(year + cuda::std::chrono::years{1});
       if (days >= next_start) {
         ++year;
         start = next_start;
       }
     }
     return thrust::make_pair(
-      (hip::std::chrono::duration_cast<hip::std::chrono::weeks>(days - start) +
-       hip::std::chrono::weeks{1})  // always [1-53]
+      (cuda::std::chrono::duration_cast<cuda::std::chrono::weeks>(days - start) +
+       cuda::std::chrono::weeks{1})  // always [1-53]
         .count(),
       static_cast<int32_t>(year));
   }
 
-  __device__ int8_t get_week_of_year(hip::std::chrono::sys_days const days,
-                                     hip::std::chrono::sys_days const start) const
+  __device__ int8_t get_week_of_year(cuda::std::chrono::sys_days const days,
+                                     cuda::std::chrono::sys_days const start) const
   {
     return days < start
              ? 0
-             : (hip::std::chrono::duration_cast<hip::std::chrono::weeks>(days - start) +
-                hip::std::chrono::weeks{1})
+             : (cuda::std::chrono::duration_cast<cuda::std::chrono::weeks>(days - start) +
+                cuda::std::chrono::weeks{1})
                  .count();
   }
 
-  __device__ int32_t get_day_of_year(hip::std::chrono::year_month_day const& ymd) const
+  __device__ int32_t get_day_of_year(cuda::std::chrono::year_month_day const& ymd) const
   {
     auto const month               = static_cast<uint32_t>(ymd.month());
     auto const day                 = static_cast<uint32_t>(ymd.day());
@@ -975,10 +975,10 @@ struct datetime_formatter_fn {
 
   __device__ void timestamp_to_string(T const tstamp, char* ptr) const
   {
-    auto const days = hip::std::chrono::sys_days(
-      static_cast<cudf::timestamp_D::duration>(hip::std::chrono::floor<hip::std::chrono::days>(
+    auto const days = cuda::std::chrono::sys_days(
+      static_cast<cudf::timestamp_D::duration>(cuda::std::chrono::floor<cuda::std::chrono::days>(
         typename T::duration(tstamp.time_since_epoch().count()))));
-    auto const ymd = hip::std::chrono::year_month_day(days);
+    auto const ymd = cuda::std::chrono::year_month_day(days);
 
     auto timeparts = get_time_components(tstamp.time_since_epoch().count());
 
@@ -1066,19 +1066,19 @@ struct datetime_formatter_fn {
         case 'u':    // day of week ISO
         case 'w': {  // day of week non-ISO
           auto const day_of_week = static_cast<int32_t>(
-            hip::std::chrono::year_month_weekday(days).weekday().c_encoding());
+            cuda::std::chrono::year_month_weekday(days).weekday().c_encoding());
           copy_value = day_of_week == 0 && item.value == 'u' ? 7 : day_of_week;
           break;
         }
         // clang-format off
         case 'U': {  // week of year: first week includes the first Sunday of the year
-          copy_value = get_week_of_year(days, hip::std::chrono::sys_days{
-            hip::std::chrono::Sunday[1]/hip::std::chrono::January/ymd.year()});
+          copy_value = get_week_of_year(days, cuda::std::chrono::sys_days{
+            cuda::std::chrono::Sunday[1]/cuda::std::chrono::January/ymd.year()});
           break;
         }
         case 'W': {  // week of year: first week includes the first Monday of the year
-          copy_value = get_week_of_year(days, hip::std::chrono::sys_days{
-            hip::std::chrono::Monday[1]/hip::std::chrono::January/ymd.year()});
+          copy_value = get_week_of_year(days, cuda::std::chrono::sys_days{
+            cuda::std::chrono::Monday[1]/cuda::std::chrono::January/ymd.year()});
           break;
         }
         // clang-format on
@@ -1091,7 +1091,7 @@ struct datetime_formatter_fn {
         case 'a':    // abbreviated day of the week
         case 'A': {  // day of the week
           auto const day_of_week =
-            hip::std::chrono::year_month_weekday(days).weekday().c_encoding();
+            cuda::std::chrono::year_month_weekday(days).weekday().c_encoding();
           auto const day_idx =
             day_of_week + offset_weekdays + (item.value == 'a' ? days_in_week : 0);
           if (d_format_names.size())

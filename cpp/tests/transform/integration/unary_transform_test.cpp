@@ -377,7 +377,7 @@ TEST_F(UnaryOperationIntegrationTest, Transform_Datetime)
     R"***(
 __device__ inline void f(cudf::timestamp_us* output, cudf::timestamp_us input)
 {
-  using dur = hip::std::chrono::duration<int32_t, hip::std::ratio<86400>>;
+  using dur = cuda::std::chrono::duration<int32_t, cuda::std::ratio<86400>>;
   *output = static_cast<cudf::timestamp_us>(input + dur{1});
 }
 
@@ -385,7 +385,7 @@ __device__ inline void f(cudf::timestamp_us* output, cudf::timestamp_us input)
 
   using dtype = cudf::timestamp_us;
   auto op     = [](dtype a) {
-    using dur = hip::std::chrono::duration<int32_t, hip::std::ratio<86400>>;
+    using dur = cuda::std::chrono::duration<int32_t, cuda::std::ratio<86400>>;
     return static_cast<cudf::timestamp_us>(a + dur{1});
   };
   auto random_eng = cudf::test::UniformRandomGenerator<cudf::timestamp_us::rep>(0, 100000000);

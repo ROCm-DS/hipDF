@@ -36,12 +36,12 @@
 // SOFTWARE.
 #pragma once
 
-#include <hip/std/chrono>
+#include <cuda/std/chrono>
 
 namespace cudf {
 namespace datetime {
 namespace detail {
-using namespace hip::std::chrono;
+using namespace cuda::std::chrono;
 
 template <typename Timestamp>
 __device__ Timestamp add_calendrical_months_with_scale_back(Timestamp time_val, months months_val)

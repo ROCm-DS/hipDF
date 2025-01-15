@@ -45,7 +45,7 @@
 #include <thrust/iterator/transform_iterator.h>
 #include <thrust/reduce.h>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 namespace cudf {
 namespace reduction {
@@ -66,8 +66,8 @@ struct all_fn {
     __device__ void operator()(size_type idx)
     {
       if (*d_result && (iter[idx] != *d_result)) {
-        hip::atomic_ref<int32_t, hip::thread_scope_device> ref{*d_result};
-        ref.fetch_and(0, hip::std::memory_order_relaxed);
+        cuda::atomic_ref<int32_t, cuda::thread_scope_device> ref{*d_result};
+        ref.fetch_and(0, cuda::std::memory_order_relaxed);
       }
     }
     Iterator iter;

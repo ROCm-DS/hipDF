@@ -25,7 +25,7 @@
 #include <thrust/iterator/zip_iterator.h>
 #include <thrust/tuple.h>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 #include <optional>
 
@@ -61,8 +61,8 @@ struct reduce_fn : cudf::detail::reduce_by_row_fn_base<MapView, KeyHasher, KeyEq
   {
     auto const increment = d_partial_output ? d_partial_output[idx] : CountType{1};
     auto const count =
-      hip::atomic_ref<CountType, hip::thread_scope_device>(*this->get_output_ptr(idx));
-    count.fetch_add(increment, hip::std::memory_order_relaxed);
+      cuda::atomic_ref<CountType, cuda::thread_scope_device>(*this->get_output_ptr(idx));
+    count.fetch_add(increment, cuda::std::memory_order_relaxed);
   }
 };
 

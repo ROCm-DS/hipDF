@@ -126,11 +126,11 @@ TYPED_TEST(RangeComparatorTypedTest, TestAddSafe)
   using T = TypeParam;
   EXPECT_EQ(cudf::detail::add_safe(T{3}, T{4}), T{7});
 
-  if constexpr (hip::std::numeric_limits<T>::is_signed) {
+  if constexpr (cuda::std::numeric_limits<T>::is_signed) {
     EXPECT_EQ(cudf::detail::add_safe(T{-3}, T{4}), T{1});
   }
 
-  auto constexpr max = hip::std::numeric_limits<T>::max();
+  auto constexpr max = cuda::std::numeric_limits<T>::max();
   EXPECT_EQ(cudf::detail::add_safe(T{max - 5}, T{4}), max - 1);
   EXPECT_EQ(cudf::detail::add_safe(T{max - 4}, T{4}), max);
   EXPECT_EQ(cudf::detail::add_safe(T{max - 3}, T{4}), max);
@@ -149,11 +149,11 @@ TYPED_TEST(RangeComparatorTypedTest, TestSubtractSafe)
   using T = TypeParam;
   EXPECT_EQ(cudf::detail::subtract_safe(T{4}, T{3}), T{1});
 
-  if constexpr (hip::std::numeric_limits<T>::is_signed) {
+  if constexpr (cuda::std::numeric_limits<T>::is_signed) {
     EXPECT_EQ(cudf::detail::subtract_safe(T{3}, T{4}), T{-1});
   }
 
-  auto constexpr min = hip::std::numeric_limits<T>::lowest();
+  auto constexpr min = cuda::std::numeric_limits<T>::lowest();
   EXPECT_EQ(cudf::detail::subtract_safe(T{min + 5}, T{4}), min + 1);
   EXPECT_EQ(cudf::detail::subtract_safe(T{min + 4}, T{4}), min);
   EXPECT_EQ(cudf::detail::subtract_safe(T{min + 3}, T{4}), min);

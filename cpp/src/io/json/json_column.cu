@@ -67,7 +67,7 @@
 #include <thrust/transform.h>
 #include <thrust/unique.h>
 #include <thrust/sequence.h>
-#include <hip/atomic>
+#include <cuda/atomic>
 
 #include <algorithm>
 #include <cstdint>
@@ -252,9 +252,9 @@ reduce_to_column_tree(tree_meta_t& tree,
                        auto parent_col_id = parent_col_ids[col_id];
                        if (parent_col_id != parent_node_sentinel and
                            column_categories[parent_col_id] == node_t::NC_LIST) {
-                         hip::atomic_ref<NodeIndexT, hip::thread_scope_device> ref{
+                         cuda::atomic_ref<NodeIndexT, cuda::thread_scope_device> ref{
                            *(list_parents_children_max_row_offsets + parent_col_id)};
-                         ref.fetch_max(max_row_offsets[col_id], hip::std::memory_order_relaxed);
+                         ref.fetch_max(max_row_offsets[col_id], cuda::std::memory_order_relaxed);
                        }
                      });
     thrust::gather_if(

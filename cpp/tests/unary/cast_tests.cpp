@@ -51,7 +51,7 @@
 #include <thrust/host_vector.h>
 #include <thrust/iterator/counting_iterator.h>
 
-#include <hip/std/limits>
+#include <cuda/std/limits>
 
 #include <type_traits>
 #include <vector>
@@ -1009,7 +1009,7 @@ TYPED_TEST(FixedPointTests, ValidateCastRescalePrecision)
   // that are powers of ten show this error more readily than non-powers of 10
   // because the rescaling factor is a power of 10, meaning that errors in
   // division are more visible.
-  constexpr auto min_scale = -hip::std::numeric_limits<RepType>::digits10;
+  constexpr auto min_scale = -cuda::std::numeric_limits<RepType>::digits10;
   for (int input_scale = 0; input_scale >= min_scale; --input_scale) {
     for (int result_scale = 0; result_scale >= min_scale; --result_scale) {
       RepType input_value = 1;
@@ -1087,7 +1087,7 @@ TYPED_TEST(FixedPointTests, DecimalRescaleOverflowAndNullMask)
   using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
 
   auto const vec      = std::vector{1729, 17290, 172900, 1729000};
-  auto const scale    = hip::std::numeric_limits<RepType>::digits10 + 1;
+  auto const scale    = cuda::std::numeric_limits<RepType>::digits10 + 1;
   auto const input    = fp_wrapper{vec.cbegin(), vec.cend(), {1, 0, 0, 1}, scale_type{0}};
   auto const expected = fp_wrapper{{0, 0, 0, 0}, {1, 0, 0, 1}, scale_type{scale}};
   auto const result   = cudf::cast(input, make_fixed_point_data_type<decimalXX>(scale));

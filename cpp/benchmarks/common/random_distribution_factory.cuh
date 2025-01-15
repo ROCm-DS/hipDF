@@ -61,7 +61,7 @@
  */
 template <typename T>
 using integral_to_realType =
-  std::conditional_t<hip::std::is_floating_point_v<T>,
+  std::conditional_t<cuda::std::is_floating_point_v<T>,
                      T,
                      std::conditional_t<sizeof(T) * 8 <= 23, float, double>>;
 
@@ -77,7 +77,7 @@ auto make_normal_dist(T lower_bound, T upper_bound)
   return thrust::random::normal_distribution<realT>(mean, stddev);
 }
 
-template <typename T, std::enable_if_t<hip::std::is_integral_v<T>, T>* = nullptr>
+template <typename T, std::enable_if_t<cuda::std::is_integral_v<T>, T>* = nullptr>
 auto make_uniform_dist(T range_start, T range_end)
 {
   return thrust::uniform_int_distribution<T>(range_start, range_end);
@@ -142,8 +142,8 @@ struct value_generator {
   __host__ __device__ T operator()(size_t n)
   {
     engine.discard(n);
-    if constexpr (hip::std::is_integral_v<T> &&
-                  hip::std::is_floating_point_v<decltype(dist(engine))>) {
+    if constexpr (cuda::std::is_integral_v<T> &&
+                  cuda::std::is_floating_point_v<decltype(dist(engine))>) {
       return std::clamp(static_cast<T>(std::round(dist(engine))), lower_bound, upper_bound);
     } else {
       return std::clamp(dist(engine), lower_bound, upper_bound);
@@ -162,7 +162,7 @@ using distribution_fn = std::function<rmm::device_uvector<T>(thrust::minstd_rand
 
 template <
   typename T,
-  std::enable_if_t<hip::std::is_integral_v<T> or hip::std::is_floating_point_v<T>, T>* = nullptr>
+  std::enable_if_t<cuda::std::is_integral_v<T> or cuda::std::is_floating_point_v<T>, T>* = nullptr>
 distribution_fn<T> make_distribution(distribution_id dist_id, T lower_bound, T upper_bound)
 {
   switch (dist_id) {

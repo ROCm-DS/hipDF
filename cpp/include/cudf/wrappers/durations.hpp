@@ -37,7 +37,7 @@
 
 #pragma once
 
-#include <hip/std/chrono>
+#include <cuda/std/chrono>
 
 namespace cudf {
 
@@ -51,31 +51,31 @@ namespace cudf {
 /**
  * @brief Type alias representing an int32_t duration of days.
  */
-using duration_D = hip::std::chrono::duration<int32_t, hip::std::chrono::days::period>;
+using duration_D = cuda::std::chrono::duration<int32_t, cuda::std::chrono::days::period>;
 /**
  * @brief Type alias representing an int32_t duration of hours.
  */
-using duration_h = hip::std::chrono::duration<int32_t, hip::std::chrono::hours::period>;
+using duration_h = cuda::std::chrono::duration<int32_t, cuda::std::chrono::hours::period>;
 /**
  * @brief Type alias representing an int32_t duration of minutes.
  */
-using duration_m = hip::std::chrono::duration<int32_t, hip::std::chrono::minutes::period>;
+using duration_m = cuda::std::chrono::duration<int32_t, cuda::std::chrono::minutes::period>;
 /**
  * @brief Type alias representing an int64_t duration of seconds.
  */
-using duration_s = hip::std::chrono::duration<int64_t, hip::std::chrono::seconds::period>;
+using duration_s = cuda::std::chrono::duration<int64_t, cuda::std::chrono::seconds::period>;
 /**
  * @brief Type alias representing an int64_t duration of milliseconds.
  */
-using duration_ms = hip::std::chrono::duration<int64_t, hip::std::chrono::milliseconds::period>;
+using duration_ms = cuda::std::chrono::duration<int64_t, cuda::std::chrono::milliseconds::period>;
 /**
  * @brief Type alias representing an int64_t duration of microseconds.
  */
-using duration_us = hip::std::chrono::duration<int64_t, hip::std::chrono::microseconds::period>;
+using duration_us = cuda::std::chrono::duration<int64_t, cuda::std::chrono::microseconds::period>;
 /**
  * @brief Type alias representing an int64_t duration of nanoseconds.
  */
-using duration_ns = hip::std::chrono::duration<int64_t, hip::std::chrono::nanoseconds::period>;
+using duration_ns = cuda::std::chrono::duration<int64_t, cuda::std::chrono::nanoseconds::period>;
 
 static_assert(sizeof(duration_D) == sizeof(typename duration_D::rep), "");
 static_assert(sizeof(duration_h) == sizeof(typename duration_h::rep), "");

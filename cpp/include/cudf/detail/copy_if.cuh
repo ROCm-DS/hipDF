@@ -65,7 +65,7 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 #include <algorithm>
 #include <hip/hip_cooperative_groups.h>
@@ -205,9 +205,9 @@ __launch_bounds__(block_size) __global__
           if (wid > 0 && wid < last_warp)
             output_valid[valid_index] = valid_warp;
           else {
-            hip::atomic_ref<cudf::bitmask_type, hip::thread_scope_device> ref{
+            cuda::atomic_ref<cudf::bitmask_type, cuda::thread_scope_device> ref{
               output_valid[valid_index]};
-            ref.fetch_or(valid_warp, hip::std::memory_order_relaxed);
+            ref.fetch_or(valid_warp, cuda::std::memory_order_relaxed);
           }
         }
 
@@ -216,9 +216,9 @@ __launch_bounds__(block_size) __global__
           cudf::bitmask_type valid_warp = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, temp_valids[block_size + threadIdx.x]); // FIXME(HIP/AMD): WAR for SWDEV-490930
           if (lane == 0 && valid_warp != 0) {
             tmp_warp_valid_counts += __POPC(valid_warp);
-            hip::atomic_ref<cudf::bitmask_type, hip::thread_scope_device> ref{
+            cuda::atomic_ref<cudf::bitmask_type, cuda::thread_scope_device> ref{
               output_valid[valid_index + num_warps]};
-            ref.fetch_or(valid_warp, hip::std::memory_order_relaxed);
+            ref.fetch_or(valid_warp, cuda::std::memory_order_relaxed);
           }
         }
       }
@@ -234,8 +234,8 @@ __launch_bounds__(block_size) __global__
     cudf::detail::single_lane_block_sum_reduce<block_size, leader_lane>(warp_valid_counts);
 
   if (threadIdx.x == 0) {  // one thread computes and adds to null count
-    hip::atomic_ref<size_type, hip::thread_scope_device> ref{*output_null_count};
-    ref.fetch_add(block_sum - block_valid_count, hip::std::memory_order_relaxed);
+    cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{*output_null_count};
+    ref.fetch_add(block_sum - block_valid_count, cuda::std::memory_order_relaxed);
   }
 }
 

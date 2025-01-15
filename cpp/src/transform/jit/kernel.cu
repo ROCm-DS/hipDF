@@ -38,10 +38,10 @@
 // Include Jitify's cstddef header first
 #include <cstddef>
 
-#include <hip/std/climits>
-#include <hip/std/cstddef>
-#include <hip/std/limits>
-#include <hip/std/type_traits>
+#include <cuda/std/climits>
+#include <cuda/std/cstddef>
+#include <cuda/std/limits>
+#include <cuda/std/type_traits>
 
 #include <cudf/wrappers/durations.hpp>
 #include <cudf/wrappers/timestamps.hpp>

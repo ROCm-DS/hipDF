@@ -41,8 +41,8 @@
 #include <cudf/fixed_point/temporary.hpp>
 #include <cudf/types.hpp>
 
-#include <hip/std/limits>
-#include <hip/std/type_traits>
+#include <cuda/std/limits>
+#include <cuda/std/type_traits>
 
 #include <algorithm>
 #include <cassert>
@@ -75,9 +75,9 @@ enum class Radix : int32_t { BASE_2 = 2, BASE_10 = 10 };
 template <typename T>
 constexpr inline auto is_supported_representation_type()
 {
-  return hip::std::is_same_v<T, int32_t> ||  //
-         hip::std::is_same_v<T, int64_t> ||  //
-         hip::std::is_same_v<T, __int128_t>;
+  return cuda::std::is_same_v<T, int32_t> ||  //
+         cuda::std::is_same_v<T, int64_t> ||  //
+         cuda::std::is_same_v<T, __int128_t>;
 }
 
 /**
@@ -89,7 +89,7 @@ constexpr inline auto is_supported_representation_type()
 template <typename T>
 constexpr inline auto is_supported_construction_value_type()
 {
-  return hip::std::is_integral<T>() || hip::std::is_floating_point_v<T>;
+  return cuda::std::is_integral<T>() || cuda::std::is_floating_point_v<T>;
 }
 
 // Helper functions for `fixed_point` type
@@ -109,7 +109,7 @@ namespace detail {
 template <typename Rep,
           Radix Base,
           typename T,
-          typename hip::std::enable_if_t<(hip::std::is_same_v<int32_t, T> &&
+          typename cuda::std::enable_if_t<(cuda::std::is_same_v<int32_t, T> &&
                                            is_supported_representation_type<Rep>())>* = nullptr>
 CUDF_HOST_DEVICE inline Rep ipow(T exponent)
 {
@@ -162,11 +162,11 @@ CUDF_HOST_DEVICE inline constexpr T left_shift(T const& val, scale_type const& s
 {
   // TODO(HIP/AMD): We added this additional check to fix the unit test StringsConvertTest.FixedPointStringConversionOperator
   // (cpp/tests/strings/fixed_point_tests.cpp).
-  // This test produces an overflow by left shifting hip::std::numeric_limits<__int128_t>::max().
+  // This test produces an overflow by left shifting cuda::std::numeric_limits<__int128_t>::max().
   // On CUDA backend, this leaves the value unchanged, but it results in a different value on AMD backend.
   // This is likely UB (left shift a signed value out of range) which is why we require this workaround.
-  if constexpr(hip::std::is_same_v<T,__int128_t>) {
-    if(val == hip::std::numeric_limits<__int128_t>::max()) {
+  if constexpr(cuda::std::is_same_v<T,__int128_t>) {
+    if(val == cuda::std::numeric_limits<__int128_t>::max()) {
       return val;
     } else {
       return val * ipow<Rep, Rad>(static_cast<int32_t>(-scale));
@@ -209,8 +209,8 @@ CUDF_HOST_DEVICE inline constexpr T shift(T const& val, scale_type const& scale)
  */
 template <typename Rep, typename T>
 CUDF_HOST_DEVICE inline Rep safe_cast_fp_to_rep(T val) {
-  if(val >= static_cast<T>(hip::std::numeric_limits<Rep>::max())) {
-    return hip::std::numeric_limits<Rep>::max();
+  if(val >= static_cast<T>(cuda::std::numeric_limits<Rep>::max())) {
+    return cuda::std::numeric_limits<Rep>::max();
   }
   else {
     return static_cast<Rep>(val);
@@ -238,7 +238,7 @@ CUDF_HOST_DEVICE inline Rep safe_cast_fp_to_rep(T val) {
  * @tparam Rep The representation type (either `int32_t` or `int64_t`)
  */
 template <typename Rep,
-          typename hip::std::enable_if_t<is_supported_representation_type<Rep>()>* = nullptr>
+          typename cuda::std::enable_if_t<is_supported_representation_type<Rep>()>* = nullptr>
 struct scaled_integer {
   Rep value;         ///< The value of the fixed point number
   scale_type scale;  ///< The scale of the value
@@ -277,7 +277,7 @@ class fixed_point {
    * @param scale The exponent that is applied to Rad to perform shifting
    */
   template <typename T,
-            typename hip::std::enable_if_t<hip::std::is_floating_point<T>() &&
+            typename cuda::std::enable_if_t<cuda::std::is_floating_point<T>() &&
                                             is_supported_representation_type<Rep>()>* = nullptr>
   CUDF_HOST_DEVICE inline explicit fixed_point(T const& value, scale_type const& scale)
     : _value{detail::safe_cast_fp_to_rep<rep, T>(detail::shift<Rep, Rad>(value, scale))}, _scale{scale}
@@ -293,7 +293,7 @@ class fixed_point {
    * @param scale The exponent that is applied to Rad to perform shifting
    */
   template <typename T,
-            typename hip::std::enable_if_t<hip::std::is_integral<T>() &&
+            typename cuda::std::enable_if_t<cuda::std::is_integral<T>() &&
                                             is_supported_representation_type<Rep>()>* = nullptr>
   CUDF_HOST_DEVICE inline explicit fixed_point(T const& value, scale_type const& scale)
     // `value` is cast to `Rep` to avoid overflow in cases where
@@ -320,7 +320,7 @@ class fixed_point {
    * @param value The value that will be constructed from
    */
   template <typename T,
-            typename hip::std::enable_if_t<is_supported_construction_value_type<T>()>* = nullptr>
+            typename cuda::std::enable_if_t<is_supported_construction_value_type<T>()>* = nullptr>
   CUDF_HOST_DEVICE inline fixed_point(T const& value)
     : _value{static_cast<Rep>(value)}, _scale{scale_type{0}}
   {
@@ -339,7 +339,7 @@ class fixed_point {
    * @return The `fixed_point` number in base 10 (aka human readable format)
    */
   template <typename U,
-            typename hip::std::enable_if_t<hip::std::is_floating_point_v<U>>* = nullptr>
+            typename cuda::std::enable_if_t<cuda::std::is_floating_point_v<U>>* = nullptr>
   explicit constexpr operator U() const
   {
     return detail::shift<Rep, Rad>(static_cast<U>(_value), scale_type{-_scale});
@@ -351,16 +351,16 @@ class fixed_point {
    * @tparam U The integral type that is being explicitly converted to
    * @return The `fixed_point` number in base 10 (aka human readable format)
    */
-  template <typename U, typename hip::std::enable_if_t<hip::std::is_integral_v<U>>* = nullptr>
+  template <typename U, typename cuda::std::enable_if_t<cuda::std::is_integral_v<U>>* = nullptr>
   explicit constexpr operator U() const
   {
     // Cast to the larger of the two types (of U and Rep) before converting to Rep because in
     // certain cases casting to U before shifting will result in integer overflow (i.e. if U =
     // int32_t, Rep = int64_t and _value > 2 billion)
-    // FIXME(HIP/AMD): Using hip::std here to work around error message
+    // FIXME(HIP/AMD): Using cuda::std here to work around error message
     // "/tmp/comgr-62b797/include/cudf/fixed_point/fixed_point.hpp:12:3326: error: no template named 'common_type_t'
-    //  in namespace 'std'; did you mean 'hip::std::common_type_t'?"
-    auto const value = hip::std::common_type_t<U, Rep>(_value);
+    //  in namespace 'std'; did you mean 'cuda::std::common_type_t'?"
+    auto const value = cuda::std::common_type_t<U, Rep>(_value);
     return static_cast<U>(detail::shift<Rep, Rad>(value, scale_type{-_scale}));
   }
 
@@ -701,8 +701,8 @@ class fixed_point {
 template <typename Rep, typename T>
 CUDF_HOST_DEVICE inline auto addition_overflow(T lhs, T rhs)
 {
-  return rhs > 0 ? lhs > hip::std::numeric_limits<Rep>::max() - rhs
-                 : lhs < hip::std::numeric_limits<Rep>::min() - rhs;
+  return rhs > 0 ? lhs > cuda::std::numeric_limits<Rep>::max() - rhs
+                 : lhs < cuda::std::numeric_limits<Rep>::min() - rhs;
 }
 
 /** @brief Function for identifying integer overflow when subtracting
@@ -716,8 +716,8 @@ CUDF_HOST_DEVICE inline auto addition_overflow(T lhs, T rhs)
 template <typename Rep, typename T>
 CUDF_HOST_DEVICE inline auto subtraction_overflow(T lhs, T rhs)
 {
-  return rhs > 0 ? lhs < hip::std::numeric_limits<Rep>::min() + rhs
-                 : lhs > hip::std::numeric_limits<Rep>::max() + rhs;
+  return rhs > 0 ? lhs < cuda::std::numeric_limits<Rep>::min() + rhs
+                 : lhs > cuda::std::numeric_limits<Rep>::max() + rhs;
 }
 
 /** @brief Function for identifying integer overflow when dividing
@@ -731,7 +731,7 @@ CUDF_HOST_DEVICE inline auto subtraction_overflow(T lhs, T rhs)
 template <typename Rep, typename T>
 CUDF_HOST_DEVICE inline auto division_overflow(T lhs, T rhs)
 {
-  return lhs == hip::std::numeric_limits<Rep>::min() && rhs == -1;
+  return lhs == cuda::std::numeric_limits<Rep>::min() && rhs == -1;
 }
 
 /** @brief Function for identifying integer overflow when multiplying
@@ -745,8 +745,8 @@ CUDF_HOST_DEVICE inline auto division_overflow(T lhs, T rhs)
 template <typename Rep, typename T>
 CUDF_HOST_DEVICE inline auto multiplication_overflow(T lhs, T rhs)
 {
-  auto const min = hip::std::numeric_limits<Rep>::min();
-  auto const max = hip::std::numeric_limits<Rep>::max();
+  auto const min = cuda::std::numeric_limits<Rep>::min();
+  auto const max = cuda::std::numeric_limits<Rep>::max();
   if (rhs > 0) { return lhs > max / rhs || lhs < min / rhs; }
   if (rhs < -1) { return lhs > min / rhs || lhs < max / rhs; }
   return rhs == -1 && lhs == min;

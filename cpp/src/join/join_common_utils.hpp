@@ -49,7 +49,7 @@
 #include <hipco/static_map.cuh>
 #include <hipco/static_multimap.cuh>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 #include <limits>
 
@@ -73,12 +73,12 @@ using multimap_type = cudf::hash_join::impl_type::map_type;
 // using a cooperative group of size 1.
 using mixed_multimap_type = hipco::static_multimap<hash_value_type,
                                                   size_type,
-                                                  hip::thread_scope_device,
+                                                  cuda::thread_scope_device,
                                                   hash_table_allocator_type,
                                                   hipco::double_hashing<1, hash_type, hash_type>>;
 
 using semi_map_type = hipco::
-  static_map<hash_value_type, size_type, hip::thread_scope_device, hash_table_allocator_type>;
+  static_map<hash_value_type, size_type, cuda::thread_scope_device, hash_table_allocator_type>;
 
 using row_hash_legacy =
   cudf::row_hasher<cudf::hashing::detail::default_hash, cudf::nullate::DYNAMIC>;

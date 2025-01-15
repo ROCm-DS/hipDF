@@ -53,7 +53,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 namespace cudf {
 namespace strings {
@@ -191,8 +191,8 @@ struct count_bytes_fn {
     }
     // this is every so slightly faster than using the cub::warp_reduce
     if (size > 0) {
-      hip::atomic_ref<size_type, hip::thread_scope_block> ref{*(d_offsets + str_idx)};
-      ref.fetch_add(size, hip::std::memory_order_relaxed);
+      cuda::atomic_ref<size_type, cuda::thread_scope_block> ref{*(d_offsets + str_idx)};
+      ref.fetch_add(size, cuda::std::memory_order_relaxed);
     }
   }
 };

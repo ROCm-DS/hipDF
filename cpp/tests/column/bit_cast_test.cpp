@@ -98,8 +98,8 @@ void do_bit_cast(cudf::column_view const& column_view, Iterator begin, Iterator 
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(output, expected);
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(output1, expected);
   } else {
-    if (hip::std::is_trivially_copyable_v<FromType> &&
-        hip::std::is_trivially_copyable_v<ToType>) {
+    if (cuda::std::is_trivially_copyable_v<FromType> &&
+        cuda::std::is_trivially_copyable_v<ToType>) {
       constexpr auto from_size = sizeof(cudf::device_storage_type_t<FromType>);
       constexpr auto to_size   = sizeof(cudf::device_storage_type_t<ToType>);
       if (from_size == to_size) {

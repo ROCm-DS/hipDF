@@ -87,7 +87,7 @@ using probe_scheme              = hipco::experimental::linear_probing<1, vocab_h
 using vocabulary_map_type       = hipco::experimental::static_map<cudf::size_type,
                                                            cudf::size_type,
                                                            hipco::experimental::extent<std::size_t>,
-                                                           hip::thread_scope_device,
+                                                           cuda::thread_scope_device,
                                                            vocab_equal,
                                                            probe_scheme,
                                                            hash_table_allocator_type>;

@@ -341,7 +341,7 @@ TYPED_TEST(RoundTestsFixedPointTypes, TestScaleMovementExceedingMaxPrecision)
   // scale movement = -(-20) -1 = 19 > 18
   // max precision of int128 = 38
   // scale movement = -(-40) -1 = 39 > 38
-  auto const target_scale = hip::std::numeric_limits<RepType>::digits10 + 1 + 1;
+  auto const target_scale = cuda::std::numeric_limits<RepType>::digits10 + 1 + 1;
 
   auto const input =
     fp_wrapper{{14, 15, 16, 24, 25, 26, -14, -15, -16, -24, -25, -26}, scale_type{1}};

@@ -175,8 +175,8 @@ __global__ void __launch_bounds__(cudf::detail::warp_size * 3)
   }
 
   if (t == 0 and s->error != 0) {
-    hip::atomic_ref<int32_t, hip::thread_scope_device> ref{*error_code};
-    ref.fetch_or(s->error, hip::std::memory_order_relaxed);
+    cuda::atomic_ref<int32_t, cuda::thread_scope_device> ref{*error_code};
+    ref.fetch_or(s->error, cuda::std::memory_order_relaxed);
   }
 }
 

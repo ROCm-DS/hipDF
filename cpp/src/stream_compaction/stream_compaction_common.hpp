@@ -53,7 +53,7 @@ namespace detail {
 using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
 
 using hash_map_type =
-  hipco::static_map<size_type, size_type, hip::thread_scope_device, hash_table_allocator_type>;
+  hipco::static_map<size_type, size_type, cuda::thread_scope_device, hash_table_allocator_type>;
 
 }  // namespace detail
 }  // namespace cudf

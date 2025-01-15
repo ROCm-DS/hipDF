@@ -51,7 +51,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <hip/std/cmath>
+#include <cuda/std/cmath>
 
 #include <thrust/transform.h>
 
@@ -65,7 +65,7 @@ struct unary_cast {
     typename SourceT,
     typename TargetT                                                                = _TargetT,
     std::enable_if_t<(cudf::is_floating_point<SourceT>() && cudf::is_integral<TargetT>() && 
-                     !((hip::std::is_same<SourceT, float>() || hip::std::is_same<SourceT, double>()) && hip::std::is_same<TargetT, long>())
+                     !((cuda::std::is_same<SourceT, float>() || cuda::std::is_same<SourceT, double>()) && cuda::std::is_same<TargetT, long>())
                      )>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
@@ -76,17 +76,17 @@ struct unary_cast {
   template <
     typename SourceT,
     typename TargetT                                                                = _TargetT,
-    std::enable_if_t<((hip::std::is_same<SourceT, float>() || hip::std::is_same<SourceT, double>())  && hip::std::is_same<TargetT, long>())>* = nullptr>
+    std::enable_if_t<((cuda::std::is_same<SourceT, float>() || cuda::std::is_same<SourceT, double>())  && cuda::std::is_same<TargetT, long>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    if(hip::std::isinf(element) && element < 0){
-      return hip::std::numeric_limits<TargetT>::min();
-    } else if((hip::std::isinf(element) && element > 0) || hip::std::isnan(element)){
-      return hip::std::numeric_limits<TargetT>::max();
-    } else if(static_cast<SourceT>(element) >= static_cast<SourceT>(hip::std::numeric_limits<TargetT>::max())){
-      return hip::std::numeric_limits<TargetT>::max();
-    } else if(static_cast<SourceT>(element) <= static_cast<SourceT>(hip::std::numeric_limits<TargetT>::min())){
-      return hip::std::numeric_limits<TargetT>::min();
+    if(cuda::std::isinf(element) && element < 0){
+      return cuda::std::numeric_limits<TargetT>::min();
+    } else if((cuda::std::isinf(element) && element > 0) || cuda::std::isnan(element)){
+      return cuda::std::numeric_limits<TargetT>::max();
+    } else if(static_cast<SourceT>(element) >= static_cast<SourceT>(cuda::std::numeric_limits<TargetT>::max())){
+      return cuda::std::numeric_limits<TargetT>::max();
+    } else if(static_cast<SourceT>(element) <= static_cast<SourceT>(cuda::std::numeric_limits<TargetT>::min())){
+      return cuda::std::numeric_limits<TargetT>::min();
     } else{
       return static_cast<TargetT>(element);
     }
@@ -110,7 +110,7 @@ struct unary_cast {
     // Convert source tick counts into target tick counts without blindly truncating them
     // by dividing the respective duration time periods (which may not work for time before
     // UNIX epoch)
-    return TargetT{hip::std::chrono::floor<typename TargetT::duration>(element.time_since_epoch())};
+    return TargetT{cuda::std::chrono::floor<typename TargetT::duration>(element.time_since_epoch())};
   }
 
   template <
@@ -119,7 +119,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_duration<SourceT>() && cudf::is_duration<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{hip::std::chrono::floor<TargetT>(element)};
+    return TargetT{cuda::std::chrono::floor<TargetT>(element)};
   }
 
   template <
@@ -137,7 +137,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_timestamp<SourceT>() && cudf::is_duration<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{hip::std::chrono::floor<TargetT>(element.time_since_epoch())};
+    return TargetT{cuda::std::chrono::floor<TargetT>(element.time_since_epoch())};
   }
 
   template <
@@ -155,7 +155,7 @@ struct unary_cast {
     std::enable_if_t<(cudf::is_duration<SourceT>() && cudf::is_timestamp<TargetT>())>* = nullptr>
   __device__ inline TargetT operator()(SourceT const element)
   {
-    return TargetT{hip::std::chrono::floor<typename TargetT::duration>(element)};
+    return TargetT{cuda::std::chrono::floor<typename TargetT::duration>(element)};
   }
 };
 
@@ -245,7 +245,7 @@ std::unique_ptr<column> rescale(column_view input,
     // The value of fixed point scalar will overflow if the scale difference is larger than the
     // max digits of underlying integral type. Under this condition, the output values can be
     // nothing other than zero value. Therefore, we simply return a zero column.
-    if (-diff > hip::std::numeric_limits<RepType>::digits10) {
+    if (-diff > cuda::std::numeric_limits<RepType>::digits10) {
       auto const scalar  = make_fixed_point_scalar<T>(0, scale_type{scale}, stream);
       auto output_column = make_column_from_scalar(*scalar, input.size(), stream, mr);
       if (input.nullable()) {

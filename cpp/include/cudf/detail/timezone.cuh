@@ -85,7 +85,7 @@ inline __device__ duration_s get_ut_offset(table_device_view tz_table, timestamp
         // Exceptions are years divisible by 100, but not divisible by 400
         static constexpr int32_t num_leap_years_in_cycle =
           solar_cycle_years / 4 - (solar_cycle_years / 100 - solar_cycle_years / 400);
-        static constexpr duration_s cycle_s = hip::std::chrono::duration_cast<duration_s>(
+        static constexpr duration_s cycle_s = cuda::std::chrono::duration_cast<duration_s>(
           duration_D{365 * solar_cycle_years + num_leap_years_in_cycle});
         return timestamp_s{(ts.time_since_epoch() + cycle_s) % cycle_s};
       };

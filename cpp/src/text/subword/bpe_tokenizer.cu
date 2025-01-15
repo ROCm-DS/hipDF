@@ -236,9 +236,9 @@ struct byte_pair_encoding_fn {
 
     // keep processing the string until there are no more adjacent pairs found in d_map
     cudf::size_type min_rank = 0;
-    while (min_rank < hip::std::numeric_limits<cudf::size_type>::max()) {
+    while (min_rank < cuda::std::numeric_limits<cudf::size_type>::max()) {
       // initialize working variables
-      min_rank = hip::std::numeric_limits<cudf::size_type>::max();
+      min_rank = cuda::std::numeric_limits<cudf::size_type>::max();
 
       auto lhs = next_substr(begin, end, d_str);
       auto itr = begin + lhs.size_bytes();
@@ -267,7 +267,7 @@ struct byte_pair_encoding_fn {
       }
 
       // if any pair matched, remove every occurrence from the string
-      if (min_rank < hip::std::numeric_limits<cudf::size_type>::max()) {
+      if (min_rank < cuda::std::numeric_limits<cudf::size_type>::max()) {
         // remove the first pair we found
         itr  = min_itr;
         *itr = 0;

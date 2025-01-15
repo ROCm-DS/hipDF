@@ -43,7 +43,7 @@
 #include <cudf/wrappers/durations.hpp>
 #include <cudf/wrappers/timestamps.hpp>
 
-#include <hip/std/type_traits>
+#include <cuda/std/type_traits>
 
 namespace cudf {
 
@@ -116,7 +116,7 @@ constexpr inline bool has_common_type_v = detail::has_common_type_impl<void, Ts.
 
 /// Checks if a type is a timestamp type.
 template <typename T>
-using is_timestamp_t = hip::std::disjunction<std::is_same<cudf::timestamp_D, T>,
+using is_timestamp_t = cuda::std::disjunction<std::is_same<cudf::timestamp_D, T>,
                                               std::is_same<cudf::timestamp_s, T>,
                                               std::is_same<cudf::timestamp_ms, T>,
                                               std::is_same<cudf::timestamp_us, T>,
@@ -124,7 +124,7 @@ using is_timestamp_t = hip::std::disjunction<std::is_same<cudf::timestamp_D, T>,
 
 /// Checks if a type is a duration type.
 template <typename T>
-using is_duration_t = hip::std::disjunction<std::is_same<cudf::duration_D, T>,
+using is_duration_t = cuda::std::disjunction<std::is_same<cudf::duration_D, T>,
                                              std::is_same<cudf::duration_s, T>,
                                              std::is_same<cudf::duration_ms, T>,
                                              std::is_same<cudf::duration_us, T>,
@@ -194,7 +194,7 @@ bool is_equality_comparable(data_type type);
 template <typename T>
 constexpr inline bool is_numeric()
 {
-  return hip::std::is_arithmetic<T>();
+  return cuda::std::is_arithmetic<T>();
 }
 
 /**
@@ -286,7 +286,7 @@ constexpr inline bool is_signed_iterator()
 template <typename T>
 constexpr inline bool is_integral()
 {
-  return hip::std::is_integral_v<T>;
+  return cuda::std::is_integral_v<T>;
 }
 
 /**

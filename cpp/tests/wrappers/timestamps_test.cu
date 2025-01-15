@@ -99,7 +99,7 @@ TYPED_TEST(ChronoColumnTest, ChronoDurationsMatchPrimitiveRepresentation)
 {
   using T   = TypeParam;
   using Rep = typename T::rep;
-  using namespace hip::std::chrono;
+  using namespace cuda::std::chrono;
 
   auto start      = milliseconds(-2500000000000);  // Sat, 11 Oct 1890 19:33:20 GMT
   auto stop       = milliseconds(2500000000000);   // Mon, 22 Mar 2049 04:26:40 GMT
@@ -153,7 +153,7 @@ struct compare_chrono_elements {
 TYPED_TEST(ChronoColumnTest, ChronosCanBeComparedInDeviceCode)
 {
   using T = TypeParam;
-  using namespace hip::std::chrono;
+  using namespace cuda::std::chrono;
 
   auto start_lhs = milliseconds(-2500000000000);  // Sat, 11 Oct 1890 19:33:20 GMT
   auto start_rhs = milliseconds(-2400000000000);  // Tue, 12 Dec 1893 05:20:00 GMT

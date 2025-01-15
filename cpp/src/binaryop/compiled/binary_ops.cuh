@@ -55,7 +55,7 @@ namespace compiled {
 template <typename BinaryOperator, typename TypeLhs, typename TypeRhs>
 constexpr bool is_bool_result()
 {
-  using ReturnType = hip::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
+  using ReturnType = cuda::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>;
   return std::is_same_v<bool, ReturnType>;
 }
 
@@ -119,7 +119,7 @@ struct ops_wrapper {
   template <typename TypeCommon>
   __device__ void operator()(size_type i)
   {
-    if constexpr (hip::std::is_invocable_v<BinaryOperator, TypeCommon, TypeCommon>) {
+    if constexpr (cuda::std::is_invocable_v<BinaryOperator, TypeCommon, TypeCommon>) {
       TypeCommon x =
         type_dispatcher(lhs.type(), type_casted_accessor<TypeCommon>{}, i, lhs, is_lhs_scalar);
       TypeCommon y =
@@ -143,7 +143,7 @@ struct ops_wrapper {
           return BinaryOperator{}.template operator()<TypeCommon, TypeCommon>(x, y);
         }
         // To suppress nvcc warning
-        return hip::std::invoke_result_t<BinaryOperator, TypeCommon, TypeCommon>{};
+        return cuda::std::invoke_result_t<BinaryOperator, TypeCommon, TypeCommon>{};
       }();
       if constexpr (is_bool_result<BinaryOperator, TypeCommon, TypeCommon>())
         out.element<decltype(result)>(i) = result;
@@ -170,7 +170,7 @@ struct ops2_wrapper {
   __device__ void operator()(size_type i)
   {
     if constexpr (!has_common_type_v<TypeLhs, TypeRhs> and
-                  hip::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) { //TODO(HIP/AMD): this is an instance of the internal issue 8,
+                  cuda::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>) { //TODO(HIP/AMD): this is an instance of the internal issue 8,
                                                                                 //if the underlying root cause has been fixed, this change may be reverted
       TypeLhs x   = lhs.element<TypeLhs>(is_lhs_scalar ? 0 : i);
       TypeRhs y   = rhs.element<TypeRhs>(is_rhs_scalar ? 0 : i);
@@ -193,7 +193,7 @@ struct ops2_wrapper {
           return BinaryOperator{}.template operator()<TypeLhs, TypeRhs>(x, y);
         }
         // To suppress nvcc warning
-        return hip::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>{};
+        return cuda::std::invoke_result_t<BinaryOperator, TypeLhs, TypeRhs>{};
       }();
       if constexpr (is_bool_result<BinaryOperator, TypeLhs, TypeRhs>())
         out.element<decltype(result)>(i) = result;

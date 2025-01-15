@@ -43,7 +43,7 @@
 
 #include <thrust/optional.h>
 
-#include <hip/std/type_traits>
+#include <cuda/std/type_traits>
 
 #include <cmath>
 #include <type_traits>
@@ -76,10 +76,10 @@ using possibly_null_value_t = typename possibly_null_value<T, has_nulls>::type;
 
 // Traits for valid operator / type combinations
 template <typename Op, typename LHS, typename RHS>
-constexpr bool is_valid_binary_op = hip::std::is_invocable_v<Op, LHS, RHS>;
+constexpr bool is_valid_binary_op = cuda::std::is_invocable_v<Op, LHS, RHS>;
 
 template <typename Op, typename T>
-constexpr bool is_valid_unary_op = hip::std::is_invocable_v<Op, T>;
+constexpr bool is_valid_unary_op = cuda::std::is_invocable_v<Op, T>;
 
 /**
  * @brief Operator dispatcher
@@ -1145,7 +1145,7 @@ struct return_type_functor {
             std::enable_if_t<is_valid_binary_op<OperatorFunctor, LHS, RHS>>* = nullptr>
   CUDF_HOST_DEVICE inline void operator()(cudf::data_type& result)
   {
-    using Out = hip::std::invoke_result_t<OperatorFunctor, LHS, RHS>;
+    using Out = cuda::std::invoke_result_t<OperatorFunctor, LHS, RHS>;
     result    = cudf::data_type(cudf::type_to_id<Out>());
   }
 
@@ -1174,7 +1174,7 @@ struct return_type_functor {
             std::enable_if_t<is_valid_unary_op<OperatorFunctor, T>>* = nullptr>
   CUDF_HOST_DEVICE inline void operator()(cudf::data_type& result)
   {
-    using Out = hip::std::invoke_result_t<OperatorFunctor, T>;
+    using Out = cuda::std::invoke_result_t<OperatorFunctor, T>;
     result    = cudf::data_type(cudf::type_to_id<Out>());
   }
 

@@ -807,9 +807,9 @@ type_id to_cudf_decimal_type(host_span<std::string const> decimal128_columns,
   }
 
   auto const precision = metadata.get_col_type(column_index)
-                           .precision.value_or(hip::std::numeric_limits<int64_t>::digits10);
-  if (precision <= hip::std::numeric_limits<int32_t>::digits10) { return type_id::DECIMAL32; }
-  if (precision <= hip::std::numeric_limits<int64_t>::digits10) { return type_id::DECIMAL64; }
+                           .precision.value_or(cuda::std::numeric_limits<int64_t>::digits10);
+  if (precision <= cuda::std::numeric_limits<int32_t>::digits10) { return type_id::DECIMAL32; }
+  if (precision <= cuda::std::numeric_limits<int64_t>::digits10) { return type_id::DECIMAL64; }
   return type_id::DECIMAL128;
 }
 

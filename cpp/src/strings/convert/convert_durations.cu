@@ -190,18 +190,18 @@ template <typename T>
 __device__ void dissect_duration(T duration, duration_component* timeparts)
 {
   timeparts->is_negative = (duration < T{0});
-  timeparts->day         = hip::std::chrono::duration_cast<duration_D>(duration).count();
+  timeparts->day         = cuda::std::chrono::duration_cast<duration_D>(duration).count();
 
-  if (hip::std::is_same_v<T, duration_D>) return;
+  if (cuda::std::is_same_v<T, duration_D>) return;
 
-  duration_s seconds = hip::std::chrono::duration_cast<duration_s>(duration);
+  duration_s seconds = cuda::std::chrono::duration_cast<duration_s>(duration);
   timeparts->hour =
-    (hip::std::chrono::duration_cast<hip::std::chrono::hours>(seconds) % duration_D(1)).count();
-  timeparts->minute = (hip::std::chrono::duration_cast<hip::std::chrono::minutes>(seconds) %
-                       hip::std::chrono::hours(1))
+    (cuda::std::chrono::duration_cast<cuda::std::chrono::hours>(seconds) % duration_D(1)).count();
+  timeparts->minute = (cuda::std::chrono::duration_cast<cuda::std::chrono::minutes>(seconds) %
+                       cuda::std::chrono::hours(1))
                         .count();
-  timeparts->second = (seconds % hip::std::chrono::minutes(1)).count();
-  if (not hip::std::is_same_v<T, duration_s>) {
+  timeparts->second = (seconds % cuda::std::chrono::minutes(1)).count();
+  if (not cuda::std::is_same_v<T, duration_s>) {
     timeparts->subsecond = (duration % duration_s(1)).count();
   }
 }
@@ -222,9 +222,9 @@ struct from_durations_fn {
       case 'D': return count_digits(timeparts->day) - (timeparts->day < 0); break;
       case 'S':
         return 2 + (timeparts->subsecond == 0 ? 0 : [] {
-                 if (hip::std::is_same_v<T, duration_ms>) return 3 + 1;  // +1 is for dot
-                 if (hip::std::is_same_v<T, duration_us>) return 6 + 1;  // +1 is for dot
-                 if (hip::std::is_same_v<T, duration_ns>) return 9 + 1;  // +1 is for dot
+                 if (cuda::std::is_same_v<T, duration_ms>) return 3 + 1;  // +1 is for dot
+                 if (cuda::std::is_same_v<T, duration_us>) return 6 + 1;  // +1 is for dot
+                 if (cuda::std::is_same_v<T, duration_ns>) return 9 + 1;  // +1 is for dot
                  return 0;
                }());
         break;
@@ -635,21 +635,21 @@ struct parse_duration {
     auto hour     = timeparts->hour;
     auto minute   = timeparts->minute;
     auto second   = timeparts->second;
-    auto duration = duration_D(days) + hip::std::chrono::hours(hour) +
-                    hip::std::chrono::minutes(minute) + duration_s(second);
-    if (hip::std::is_same_v<T, duration_D>)
-      return hip::std::chrono::duration_cast<duration_D>(duration).count();
-    else if (hip::std::is_same_v<T, duration_s>)
-      return hip::std::chrono::duration_cast<duration_s>(duration).count();
+    auto duration = duration_D(days) + cuda::std::chrono::hours(hour) +
+                    cuda::std::chrono::minutes(minute) + duration_s(second);
+    if (cuda::std::is_same_v<T, duration_D>)
+      return cuda::std::chrono::duration_cast<duration_D>(duration).count();
+    else if (cuda::std::is_same_v<T, duration_s>)
+      return cuda::std::chrono::duration_cast<duration_s>(duration).count();
 
     duration_ns subsecond(timeparts->subsecond);  // ns
-    if (hip::std::is_same_v<T, duration_ms>) {
-      return hip::std::chrono::duration_cast<duration_ms>(duration + subsecond).count();
-    } else if (hip::std::is_same_v<T, duration_us>) {
-      return hip::std::chrono::duration_cast<duration_us>(duration + subsecond).count();
-    } else if (hip::std::is_same_v<T, duration_ns>)
-      return hip::std::chrono::duration_cast<duration_ns>(duration + subsecond).count();
-    return hip::std::chrono::duration_cast<duration_ns>(duration + subsecond).count();
+    if (cuda::std::is_same_v<T, duration_ms>) {
+      return cuda::std::chrono::duration_cast<duration_ms>(duration + subsecond).count();
+    } else if (cuda::std::is_same_v<T, duration_us>) {
+      return cuda::std::chrono::duration_cast<duration_us>(duration + subsecond).count();
+    } else if (cuda::std::is_same_v<T, duration_ns>)
+      return cuda::std::chrono::duration_cast<duration_ns>(duration + subsecond).count();
+    return cuda::std::chrono::duration_cast<duration_ns>(duration + subsecond).count();
   }
 
   __device__ T operator()(size_type idx)

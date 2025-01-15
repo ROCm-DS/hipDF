@@ -124,7 +124,7 @@ TEST_F(StringsConvertTest, ToFixedPointDecimal128)
   auto const scale    = scale_type{20};
   auto const type     = cudf::data_type{cudf::type_to_id<decimal128>(), scale};
   auto const results  = cudf::strings::to_fixed_point(cudf::strings_column_view(strings), type);
-  auto const max      = hip::std::numeric_limits<__int128_t>::max();
+  auto const max      = cuda::std::numeric_limits<__int128_t>::max();
   auto const expected = fp_wrapper{{12, -8, 5, 0, 0, 0, 0, 0, 1701411834604692317, max}, scale};
 
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*results, expected);
@@ -152,7 +152,7 @@ TEST_F(StringsConvertTest, FromFixedPointDecimal128)
   using RepType    = cudf::device_storage_type_t<decimal128>;
   using fp_wrapper = cudf::test::fixed_point_column_wrapper<RepType>;
 
-  auto constexpr max = hip::std::numeric_limits<__int128_t>::max();
+  auto constexpr max = cuda::std::numeric_limits<__int128_t>::max();
 
   {
     auto const input = fp_wrapper{{110, max}, numeric::scale_type{-2}};
@@ -349,7 +349,7 @@ TEST_F(StringsConvertTest, FixedPointStringConversionOperator)
 TEST_F(StringsConvertTest, DISABLED_FixedPointStringConversionOperator)
 #endif
 {
-  auto const max = hip::std::numeric_limits<__int128_t>::max();
+  auto const max = cuda::std::numeric_limits<__int128_t>::max();
 
   auto const x = numeric::decimal128{max, numeric::scale_type{-10}};
   EXPECT_EQ(static_cast<std::string>(x), "17014118346046923173168730371.5884105727");

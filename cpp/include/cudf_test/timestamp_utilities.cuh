@@ -48,7 +48,7 @@
 namespace cudf {
 namespace test {
 using time_point_ms =
-  hip::std::chrono::time_point<hip::std::chrono::system_clock, hip::std::chrono::milliseconds>;
+  cuda::std::chrono::time_point<cuda::std::chrono::system_clock, cuda::std::chrono::milliseconds>;
 
 /**
  * @brief Creates a `fixed_width_column_wrapper` with ascending timestamps in the
@@ -71,7 +71,7 @@ inline cudf::test::fixed_width_column_wrapper<T, int64_t> generate_timestamps(in
 {
   using Rep        = typename T::rep;
   using Period     = typename T::period;
-  using ToDuration = hip::std::chrono::duration<Rep, Period>;
+  using ToDuration = cuda::std::chrono::duration<Rep, Period>;
 
   auto lhs = start.time_since_epoch().count();
   auto rhs = stop.time_since_epoch().count();
@@ -80,8 +80,8 @@ inline cudf::test::fixed_width_column_wrapper<T, int64_t> generate_timestamps(in
   auto const max   = std::max(lhs, rhs);
   auto const range = max - min;
   auto iter        = cudf::detail::make_counting_transform_iterator(0, [=](auto i) {
-    return hip::std::chrono::floor<ToDuration>(
-             hip::std::chrono::milliseconds(min + (range / count) * i))
+    return cuda::std::chrono::floor<ToDuration>(
+             cuda::std::chrono::milliseconds(min + (range / count) * i))
       .count();
   });
 

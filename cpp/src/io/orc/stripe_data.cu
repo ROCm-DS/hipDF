@@ -1760,7 +1760,7 @@ __global__ void __launch_bounds__(block_size)
                 cudf::duration_D days{s->vals.i32[t + vals_skipped]};
                 // Convert from days to milliseconds
                 static_cast<int64_t*>(data_out)[row] =
-                  hip::std::chrono::duration_cast<cudf::duration_ms>(days).count();
+                  cuda::std::chrono::duration_cast<cudf::duration_ms>(days).count();
               } else {
                 static_cast<uint32_t*>(data_out)[row] = s->vals.u32[t + vals_skipped];
               }
@@ -1808,7 +1808,7 @@ __global__ void __launch_bounds__(block_size)
               if (seconds.count() < 0 and nanos.count() > 999999) { seconds -= duration_s{1}; }
 
               static_cast<int64_t*>(data_out)[row] = [&]() {
-                using hip::std::chrono::duration_cast;
+                using cuda::std::chrono::duration_cast;
                 switch (s->chunk.timestamp_type_id) {
                   case type_id::TIMESTAMP_SECONDS:
                     return (seconds + duration_cast<duration_s>(nanos)).count();

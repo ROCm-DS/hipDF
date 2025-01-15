@@ -47,7 +47,7 @@
 #include <cudf/wrappers/timestamps.hpp>
 
 #include <binaryop/jit/operation-udf.hpp>
-#include <hip/std/type_traits>
+#include <cuda/std/type_traits>
 
 namespace cudf {
 namespace binops {
@@ -58,7 +58,7 @@ struct UserDefinedOp {
   __device__ static TypeOut operate(TypeLhs x, TypeRhs y)
   {
     TypeOut output;
-    using TypeCommon = typename hip::std::common_type<TypeOut, TypeLhs, TypeRhs>::type;
+    using TypeCommon = typename cuda::std::common_type<TypeOut, TypeLhs, TypeRhs>::type;
     GENERIC_BINARY_OP(&output, static_cast<TypeCommon>(x), static_cast<TypeCommon>(y));
     return output;
   }

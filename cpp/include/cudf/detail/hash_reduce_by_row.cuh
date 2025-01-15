@@ -34,7 +34,7 @@ namespace cudf::detail {
 
 using hash_table_allocator_type = rmm::mr::stream_allocator_adaptor<default_allocator<char>>;
 using hash_map_type =
-  hipco::static_map<size_type, size_type, hip::thread_scope_device, hash_table_allocator_type>;
+  hipco::static_map<size_type, size_type, cuda::thread_scope_device, hash_table_allocator_type>;
 
 /**
  * @brief The base struct for customized reduction functor to perform reduce-by-key with keys are
@@ -72,7 +72,7 @@ struct reduce_by_row_fn_base {
     if (iter != d_map.end()) {
       // Only one (undetermined) index value of the duplicate rows could be inserted into the map.
       // As such, looking up for all indices of duplicate rows always returns the same value.
-      auto const inserted_idx = iter->second.load(hip::std::memory_order_relaxed);
+      auto const inserted_idx = iter->second.load(cuda::std::memory_order_relaxed);
 
       // All duplicate rows will have concurrent access to this same output slot.
       return &d_output[inserted_idx];

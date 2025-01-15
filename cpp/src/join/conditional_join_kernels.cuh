@@ -130,8 +130,8 @@ __global__ void compute_conditional_join_output_size(
 
   // Add block counter to global counter
   if (threadIdx.x == 0) {
-    hip::atomic_ref<std::size_t, hip::thread_scope_device> ref{*output_size};
-    ref.fetch_add(block_counter, hip::std::memory_order_relaxed);
+    cuda::atomic_ref<std::size_t, cuda::thread_scope_device> ref{*output_size};
+    ref.fetch_add(block_counter, cuda::std::memory_order_relaxed);
   }
 }
 

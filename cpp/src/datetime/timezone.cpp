@@ -364,7 +364,7 @@ static int64_t get_transition_time(dst_transition_s const& trans, int year)
 {
   auto day = trans.day;
 
-  auto const is_leap = hip::std::chrono::year{year}.is_leap();
+  auto const is_leap = cuda::std::chrono::year{year}.is_leap();
 
   if (trans.type == 'M') {
     auto const month = std::min(std::max(trans.month, 1), 12);
@@ -394,7 +394,7 @@ static int64_t get_transition_time(dst_transition_s const& trans, int year)
     day += (day > 31 + 29 && is_leap);
   }
 
-  return trans.time + hip::std::chrono::duration_cast<duration_s>(duration_D{day}).count();
+  return trans.time + cuda::std::chrono::duration_cast<duration_s>(duration_D{day}).count();
 }
 
 }  // namespace
@@ -497,8 +497,8 @@ std::unique_ptr<table> make_timezone_transition_table(std::optional<std::string_
       std::swap(offsets.rbegin()[0], offsets.rbegin()[1]);
     }
 
-    year_timestamp += hip::std::chrono::duration_cast<duration_s>(
-                        duration_D{365 + hip::std::chrono::year{year}.is_leap()})
+    year_timestamp += cuda::std::chrono::duration_cast<duration_s>(
+                        duration_D{365 + cuda::std::chrono::year{year}.is_leap()})
                         .count();
   }
 

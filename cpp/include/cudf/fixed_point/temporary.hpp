@@ -42,8 +42,8 @@
 
 #include <cudf/types.hpp>
 
-#include <hip/std/limits>
-#include <hip/std/type_traits>
+#include <cuda/std/limits>
+#include <cuda/std/type_traits>
 
 #include <algorithm>
 #include <string>
@@ -54,13 +54,13 @@ namespace detail {
 template <typename T>
 auto to_string(T value) -> std::string
 {
-  if constexpr (hip::std::is_same_v<T, __int128_t>) {
+  if constexpr (cuda::std::is_same_v<T, __int128_t>) {
     auto s          = std::string{};
     auto const sign = value < 0;
     if (sign) {
       value += 1;  // avoid overflowing if value == _int128_t lowest
       value *= -1;
-      if (value == hip::std::numeric_limits<__int128_t>::max())
+      if (value == cuda::std::numeric_limits<__int128_t>::max())
         return "-170141183460469231731687303715884105728";
       value += 1;  // can add back the one, no need to avoid overflow anymore
     }

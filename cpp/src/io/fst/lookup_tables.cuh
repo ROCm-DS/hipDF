@@ -44,7 +44,7 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <hip/std/iterator>
+#include <cuda/std/iterator>
 
 #include <algorithm>
 #include <cstdint>

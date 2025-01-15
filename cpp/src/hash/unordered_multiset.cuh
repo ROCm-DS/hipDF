@@ -52,7 +52,7 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/scan.h>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 namespace cudf {
 namespace detail {
@@ -125,8 +125,8 @@ class unordered_multiset {
         if (!d_col.is_null(idx)) {
           Element e     = d_col.element<Element>(idx);
           size_type tmp = hasher(e) % (2 * d_col.size());
-          hip::atomic_ref<size_type, hip::thread_scope_device> ref{*(d_hash_bins_start + tmp)};
-          ref.fetch_add(1, hip::std::memory_order_relaxed);
+          cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{*(d_hash_bins_start + tmp)};
+          ref.fetch_add(1, cuda::std::memory_order_relaxed);
         }
       });
 
@@ -148,8 +148,8 @@ class unordered_multiset {
         if (!d_col.is_null(idx)) {
           Element e     = d_col.element<Element>(idx);
           size_type tmp = hasher(e) % (2 * d_col.size());
-          hip::atomic_ref<size_type, hip::thread_scope_device> ref{*(d_hash_bins_end + tmp)};
-          size_type offset    = ref.fetch_add(1, hip::std::memory_order_relaxed);
+          cuda::atomic_ref<size_type, cuda::thread_scope_device> ref{*(d_hash_bins_end + tmp)};
+          size_type offset    = ref.fetch_add(1, cuda::std::memory_order_relaxed);
           d_hash_data[offset] = e;
         }
       });

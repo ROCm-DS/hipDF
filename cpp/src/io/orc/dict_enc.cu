@@ -198,10 +198,10 @@ __global__ void __launch_bounds__(block_size)
                                    hipco::empty_key{KEY_SENTINEL},
                                    hipco::empty_value{VALUE_SENTINEL});
 
-  __shared__ hip::atomic<size_type, hip::thread_scope_block> counter;
+  __shared__ cuda::atomic<size_type, cuda::thread_scope_block> counter;
 
-  using hip::std::memory_order_relaxed;
-  if (t == 0) { new (&counter) hip::atomic<size_type, hip::thread_scope_block>{0}; }
+  using cuda::std::memory_order_relaxed;
+  if (t == 0) { new (&counter) cuda::atomic<size_type, cuda::thread_scope_block>{0}; }
   __syncthreads();
   for (size_type i = 0; i < dict.map_slots.size(); i += block_size) {
     if (t + i < dict.map_slots.size()) {

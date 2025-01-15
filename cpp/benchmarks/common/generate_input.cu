@@ -230,11 +230,11 @@ struct random_value_fn<T, std::enable_if_t<cudf::is_chrono<T>()>> {
 
   random_value_fn(distribution_params<T> params)
   {
-    using hip::std::chrono::duration_cast;
+    using cuda::std::chrono::duration_cast;
 
     std::pair<cudf::duration_s, cudf::duration_s> const range_s = {
-      duration_cast<hip::std::chrono::seconds>(typename T::duration{params.lower_bound}),
-      duration_cast<hip::std::chrono::seconds>(typename T::duration{params.upper_bound})};
+      duration_cast<cuda::std::chrono::seconds>(typename T::duration{params.lower_bound}),
+      duration_cast<cuda::std::chrono::seconds>(typename T::duration{params.upper_bound})};
     if (range_s.first != range_s.second) {
       seconds_gen =
         make_distribution<int64_t>(params.id, range_s.first.count(), range_s.second.count());
@@ -272,7 +272,7 @@ struct random_value_fn<T, std::enable_if_t<cudf::is_chrono<T>()>> {
         auto const timestamp_ns =
           cudf::duration_s{sec_value} + cudf::duration_ns{nanoseconds_value};
         // Return value in the type's precision
-        return T(hip::std::chrono::duration_cast<typename T::duration>(timestamp_ns));
+        return T(cuda::std::chrono::duration_cast<typename T::duration>(timestamp_ns));
       });
     return result;
   }

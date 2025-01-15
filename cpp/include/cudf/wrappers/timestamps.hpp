@@ -48,7 +48,7 @@ namespace cudf {
 namespace detail {
 // TODO: Use chrono::utc_clock when available in libcu++?
 template <class Duration>
-using time_point = hip::std::chrono::sys_time<Duration>;  ///< Time point type
+using time_point = cuda::std::chrono::sys_time<Duration>;  ///< Time point type
 
 /**
  * @brief A wrapper around a column of time_point in varying resolutions

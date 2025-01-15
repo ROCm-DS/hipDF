@@ -232,8 +232,8 @@ __device__ inline uint8_t* pb_put_fixed64(uint8_t* p, uint32_t id, void const* r
 // Splits a nanosecond timestamp into milliseconds and nanoseconds
 __device__ std::pair<int64_t, int32_t> split_nanosecond_timestamp(int64_t nano_count)
 {
-  auto const ns           = hip::std::chrono::nanoseconds(nano_count);
-  auto const ms_floor     = hip::std::chrono::floor<hip::std::chrono::milliseconds>(ns);
+  auto const ns           = cuda::std::chrono::nanoseconds(nano_count);
+  auto const ms_floor     = cuda::std::chrono::floor<cuda::std::chrono::milliseconds>(ns);
   auto const ns_remainder = ns - ms_floor;
   return {ms_floor.count(), ns_remainder.count()};
 }

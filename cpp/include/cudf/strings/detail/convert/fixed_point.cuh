@@ -41,7 +41,7 @@
 #include <thrust/optional.h>
 #include <thrust/pair.h>
 
-#include <hip/std/type_traits>
+#include <cuda/std/type_traits>
 
 namespace cudf {
 namespace strings {
@@ -161,7 +161,7 @@ __device__ DecimalType parse_decimal(char const* iter, char const* iter_end, int
   // if string begins with a sign, continue with next character
   if (sign != 0) ++iter;
 
-  using UnsignedDecimalType = hip::std::make_unsigned_t<DecimalType>;
+  using UnsignedDecimalType = cuda::std::make_unsigned_t<DecimalType>;
   auto [value, exp_offset]  = parse_integer<UnsignedDecimalType>(iter, iter_end);
   if (value == 0) { return DecimalType{0}; }
 
@@ -175,8 +175,8 @@ __device__ DecimalType parse_decimal(char const* iter, char const* iter_end, int
 
   // shift the output value based on the exp_ten and the scale values
   auto const shift_adjust =
-    abs(scale - exp_ten) > hip::std::numeric_limits<UnsignedDecimalType>::digits10
-      ? hip::std::numeric_limits<UnsignedDecimalType>::max()
+    abs(scale - exp_ten) > cuda::std::numeric_limits<UnsignedDecimalType>::digits10
+      ? cuda::std::numeric_limits<UnsignedDecimalType>::max()
       : numeric::detail::exp10<UnsignedDecimalType>(abs(scale - exp_ten));
   value = exp_ten < scale ? value / shift_adjust : value * shift_adjust;
 

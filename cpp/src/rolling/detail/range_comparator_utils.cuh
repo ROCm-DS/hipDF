@@ -53,28 +53,28 @@ namespace cudf::detail {
 /**
  * @brief Add `delta` to value, and cap at numeric_limits::max(), for signed types.
  */
-template <typename T, CUDF_ENABLE_IF(hip::std::numeric_limits<T>::is_signed)>
+template <typename T, CUDF_ENABLE_IF(cuda::std::numeric_limits<T>::is_signed)>
 __host__ __device__ T add_safe(T const& value, T const& delta)
 {
   if constexpr (std::is_floating_point_v<T>) {
     if (std::isinf(value) or std::isnan(value)) { return value; }
   }
   // delta >= 0.
-  return (value < 0 || (hip::std::numeric_limits<T>::max() - value) >= delta)
+  return (value < 0 || (cuda::std::numeric_limits<T>::max() - value) >= delta)
            ? (value + delta)
-           : hip::std::numeric_limits<T>::max();
+           : cuda::std::numeric_limits<T>::max();
 }
 
 /**
  * @brief Add `delta` to value, and cap at numeric_limits::max(), for unsigned types.
  */
-template <typename T, CUDF_ENABLE_IF(not hip::std::numeric_limits<T>::is_signed)>
+template <typename T, CUDF_ENABLE_IF(not cuda::std::numeric_limits<T>::is_signed)>
 __host__ __device__ T add_safe(T const& value, T const& delta)
 {
   // delta >= 0.
-  return ((hip::std::numeric_limits<T>::max() - value) >= delta)
+  return ((cuda::std::numeric_limits<T>::max() - value) >= delta)
            ? (value + delta)
-           : hip::std::numeric_limits<T>::max();
+           : cuda::std::numeric_limits<T>::max();
 }
 
 /**
@@ -83,16 +83,16 @@ __host__ __device__ T add_safe(T const& value, T const& delta)
  * Note: We use numeric_limits::lowest() instead of min() because for floats, lowest() returns
  * the smallest finite value, as opposed to min() which returns the smallest _positive_ value.
  */
-template <typename T, CUDF_ENABLE_IF(hip::std::numeric_limits<T>::is_signed)>
+template <typename T, CUDF_ENABLE_IF(cuda::std::numeric_limits<T>::is_signed)>
 __host__ __device__ T subtract_safe(T const& value, T const& delta)
 {
   if constexpr (std::is_floating_point_v<T>) {
     if (std::isinf(value) or std::isnan(value)) { return value; }
   }
   // delta >= 0;
-  return (value >= 0 || (value - hip::std::numeric_limits<T>::lowest()) >= delta)
+  return (value >= 0 || (value - cuda::std::numeric_limits<T>::lowest()) >= delta)
            ? (value - delta)
-           : hip::std::numeric_limits<T>::lowest();
+           : cuda::std::numeric_limits<T>::lowest();
 }
 
 /**
@@ -104,13 +104,13 @@ __host__ __device__ T subtract_safe(T const& value, T const& delta)
  * This distinction isn't truly relevant for this overload (because float is signed).
  * lowest() is kept for uniformity.
  */
-template <typename T, CUDF_ENABLE_IF(not hip::std::numeric_limits<T>::is_signed)>
+template <typename T, CUDF_ENABLE_IF(not cuda::std::numeric_limits<T>::is_signed)>
 __host__ __device__ T subtract_safe(T const& value, T const& delta)
 {
   // delta >= 0;
-  return ((value - hip::std::numeric_limits<T>::lowest()) >= delta)
+  return ((value - cuda::std::numeric_limits<T>::lowest()) >= delta)
            ? (value - delta)
-           : hip::std::numeric_limits<T>::lowest();
+           : cuda::std::numeric_limits<T>::lowest();
 }
 
 /**

@@ -172,7 +172,7 @@ inline __device__ void gpuOutputInt96Timestamp(volatile page_state_s* s,
                                                int src_pos,
                                                int64_t* dst)
 {
-  using hip::std::chrono::duration_cast;
+  using cuda::std::chrono::duration_cast;
 
   uint8_t const* src8;
   uint32_t dict_pos, dict_size = s->dict_size, ofs;
@@ -630,8 +630,8 @@ __global__ void __launch_bounds__(decode_block_size)
     __syncthreads();
   }
   if (t == 0 and s->error != 0) {
-    hip::atomic_ref<int32_t, hip::thread_scope_device> ref{*error_code};
-    ref.fetch_or(s->error, hip::std::memory_order_relaxed);
+    cuda::atomic_ref<int32_t, cuda::thread_scope_device> ref{*error_code};
+    ref.fetch_or(s->error, cuda::std::memory_order_relaxed);
   }
 }
 

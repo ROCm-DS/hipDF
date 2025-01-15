@@ -384,8 +384,8 @@ struct is_bit_castable_to_impl {
   template <typename ToType, std::enable_if_t<not is_compound<ToType>()>* = nullptr>
   constexpr bool operator()()
   {
-    if (not hip::std::is_trivially_copyable_v<FromType> ||
-        not hip::std::is_trivially_copyable_v<ToType>) {
+    if (not cuda::std::is_trivially_copyable_v<FromType> ||
+        not cuda::std::is_trivially_copyable_v<ToType>) {
       return false;
     }
     constexpr auto from_size = sizeof(cudf::device_storage_type_t<FromType>);

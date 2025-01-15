@@ -38,7 +38,7 @@
 #pragma once
 
 #include <cassert>
-#include <hip/std/climits>
+#include <cuda/std/climits>
 #include <cudf/types.hpp>
 
 /**

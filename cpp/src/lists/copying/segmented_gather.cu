@@ -93,7 +93,7 @@ std::unique_ptr<column> segmented_gather(lists_column_view const& value_column,
     auto list_is_null = values_lists_view.is_null(offset_idx);
     auto list_size = list_is_null ? 0 : (value_offsets[offset_idx + 1] - value_offsets[offset_idx]);
     auto wrapped_sub_index  = sub_index < 0 ? sub_index + list_size : sub_index;
-    auto constexpr null_idx = hip::std::numeric_limits<cudf::size_type>::max();
+    auto constexpr null_idx = cuda::std::numeric_limits<cudf::size_type>::max();
     // Add sub_index to value_column offsets, to get gather indices of child of value_column
     return (bounds_policy == out_of_bounds_policy::NULLIFY && out_of_bounds(sub_index, list_size))
              ? null_idx

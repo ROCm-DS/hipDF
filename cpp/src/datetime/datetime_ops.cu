@@ -89,7 +89,7 @@ struct extract_component_operator {
   template <typename Timestamp>
   __device__ inline int16_t operator()(Timestamp const ts) const
   {
-    using namespace hip::std::chrono;
+    using namespace cuda::std::chrono;
 
     auto days_since_epoch = floor<days>(ts);
 
@@ -142,9 +142,9 @@ struct RoundFunctor {
   __device__ inline auto operator()(rounding_function round_kind, Timestamp dt)
   {
     switch (round_kind) {
-      case rounding_function::CEIL: return hip::std::chrono::ceil<DurationType>(dt);
-      case rounding_function::FLOOR: return hip::std::chrono::floor<DurationType>(dt);
-      case rounding_function::ROUND: return hip::std::chrono::round<DurationType>(dt);
+      case rounding_function::CEIL: return cuda::std::chrono::ceil<DurationType>(dt);
+      case rounding_function::FLOOR: return cuda::std::chrono::floor<DurationType>(dt);
+      case rounding_function::ROUND: return cuda::std::chrono::round<DurationType>(dt);
       default: CUDF_UNREACHABLE("Unsupported rounding kind.");
     }
   }
@@ -201,7 +201,7 @@ struct extract_last_day_of_month {
   template <typename Timestamp>
   __device__ inline timestamp_D operator()(Timestamp const ts) const
   {
-    using namespace hip::std::chrono;
+    using namespace cuda::std::chrono;
     year_month_day const ymd(floor<days>(ts));
     auto const ymdl = year_month_day_last{ymd.year() / ymd.month() / last};
     return timestamp_D{sys_days{ymdl}};
@@ -215,7 +215,7 @@ struct days_in_month_op {
   template <typename Timestamp>
   __device__ inline int16_t operator()(Timestamp const ts) const
   {
-    using namespace hip::std::chrono;
+    using namespace cuda::std::chrono;
     auto const date = year_month_day(floor<days>(ts));
     auto const ymdl = year_month_day_last(date.year() / date.month() / last);
     return static_cast<int16_t>(unsigned{ymdl.day()});
@@ -227,7 +227,7 @@ struct extract_day_num_of_year {
   template <typename Timestamp>
   __device__ inline int16_t operator()(Timestamp const ts) const
   {
-    using namespace hip::std::chrono;
+    using namespace cuda::std::chrono;
 
     // Only has the days - time component is chopped off, which is what we want
     auto const days_since_epoch = floor<days>(ts);
@@ -243,7 +243,7 @@ struct extract_quarter_op {
   template <typename Timestamp>
   __device__ inline int16_t operator()(Timestamp const ts) const
   {
-    using namespace hip::std::chrono;
+    using namespace cuda::std::chrono;
 
     // Only has the days - time component is chopped off, which is what we want
     auto const days_since_epoch = floor<days>(ts);
@@ -260,7 +260,7 @@ struct is_leap_year_op {
   template <typename Timestamp>
   __device__ inline bool operator()(Timestamp const ts) const
   {
-    using namespace hip::std::chrono;
+    using namespace cuda::std::chrono;
     auto const days_since_epoch = floor<days>(ts);
     auto const date             = year_month_day(days_since_epoch);
     return date.year().is_leap();
@@ -398,7 +398,7 @@ struct add_calendrical_months_functor {
                       output->mutable_view().begin<Timestamp>(),
                       [] __device__(auto& timestamp, auto& months) {
                         return add_calendrical_months_with_scale_back(
-                          timestamp, hip::std::chrono::months{months});
+                          timestamp, cuda::std::chrono::months{months});
                       });
     return output;
   }

@@ -105,7 +105,7 @@ using probe_scheme = hipco::experimental::linear_probing<1, bpe_hasher>;
 using merge_pairs_map_type = hipco::experimental::static_map<cudf::size_type,
                                                             cudf::size_type,
                                                             hipco::experimental::extent<std::size_t>,
-                                                            hip::thread_scope_device,
+                                                            cuda::thread_scope_device,
                                                             bpe_equal,
                                                             probe_scheme,
                                                             hash_table_allocator_type>;

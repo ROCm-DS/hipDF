@@ -50,7 +50,7 @@
 
 #include <hipcub/hipcub.hpp>
 
-#include <hip/std/chrono>
+#include <cuda/std/chrono>
 
 #include <thrust/binary_search.h>
 #include <thrust/gather.h>
@@ -1000,8 +1000,8 @@ static __device__ void PlainBoolEncode(page_enc_state_s* s,
  */
 constexpr auto julian_calendar_epoch_diff()
 {
-  using namespace hip::std::chrono;
-  using namespace hip::std::chrono_literals;
+  using namespace cuda::std::chrono;
+  using namespace cuda::std::chrono_literals;
   return sys_days{January / 1 / 1970} - (sys_days{November / 24 / -4713} + 12h);
 }
 
@@ -1017,7 +1017,7 @@ constexpr auto julian_calendar_epoch_diff()
 template <typename PeriodT>
 __device__ auto julian_days_with_time(int64_t v)
 {
-  using namespace hip::std::chrono;
+  using namespace cuda::std::chrono;
   auto const dur_total             = duration<int64_t, PeriodT>{v};
   auto const dur_days              = floor<days>(dur_total);
   auto const dur_time_of_day       = dur_total - dur_days;
@@ -1344,21 +1344,21 @@ __global__ void __launch_bounds__(4 * cudf::detail::warp_size, 8)
             }
 
             auto const [last_day_nanos, julian_days] = [&] {
-              using namespace hip::std::chrono;
+              using namespace cuda::std::chrono;
               switch (s->col.leaf_column->type().id()) {
                 case type_id::TIMESTAMP_SECONDS:
                 case type_id::TIMESTAMP_MILLISECONDS: {
-                  return julian_days_with_time<hip::std::milli>(v);
+                  return julian_days_with_time<cuda::std::milli>(v);
                 } break;
                 case type_id::TIMESTAMP_MICROSECONDS:
                 case type_id::TIMESTAMP_NANOSECONDS: {
-                  return julian_days_with_time<hip::std::micro>(v);
+                  return julian_days_with_time<cuda::std::micro>(v);
                 } break;
                 // TODO(HIP/AMD): 25 enumeration values not handled in switch: 'EMPTY', 'INT8', 'INT16'... [-Werror,-Wswitch]
                 default:
                   break;
               }
-              return julian_days_with_time<hip::std::nano>(0);
+              return julian_days_with_time<cuda::std::nano>(0);
             }();
 
             // the 12 bytes of fixed length data.

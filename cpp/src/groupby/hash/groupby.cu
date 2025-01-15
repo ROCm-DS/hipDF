@@ -79,7 +79,7 @@
 #include <unordered_set>
 #include <utility>
 
-#include <hip/std/atomic>
+#include <cuda/std/atomic>
 
 namespace cudf {
 namespace groupby {

@@ -40,7 +40,7 @@
 #include <hipcub/block/block_scan.hpp>
 #include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
 
-#include <hip/atomic>
+#include <cuda/atomic>
 
 namespace cudf {
 namespace io {
@@ -57,14 +57,14 @@ enum class scan_tile_status : uint8_t {
 template <typename T>
 struct scan_tile_state_view {
   uint64_t num_tiles;
-  hip::atomic<scan_tile_status, hip::thread_scope_device>* tile_status;
+  cuda::atomic<scan_tile_status, cuda::thread_scope_device>* tile_status;
   T* tile_partial;
   T* tile_inclusive;
 
   __device__ inline void set_status(cudf::size_type tile_idx, scan_tile_status status)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
-    tile_status[offset].store(status, hip::memory_order_relaxed);
+    tile_status[offset].store(status, cuda::memory_order_relaxed);
   }
 
   __device__ inline void set_partial_prefix(cudf::size_type tile_idx, T value)
@@ -86,7 +86,7 @@ struct scan_tile_state_view {
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
 
-    while ((status = tile_status[offset].load(hip::memory_order_relaxed)) ==
+    while ((status = tile_status[offset].load(cuda::memory_order_relaxed)) ==
            scan_tile_status::invalid) {}
 
     //: NOTE(HIP/AMD): This threadfence is necessary, as the subsequent ThreadLoad
@@ -105,14 +105,14 @@ struct scan_tile_state_view {
 
 template <typename T>
 struct scan_tile_state {
-  rmm::device_uvector<hip::atomic<scan_tile_status, hip::thread_scope_device>> tile_status;
+  rmm::device_uvector<cuda::atomic<scan_tile_status, cuda::thread_scope_device>> tile_status;
   rmm::device_uvector<T> tile_state_partial;
   rmm::device_uvector<T> tile_state_inclusive;
 
   scan_tile_state(cudf::size_type num_tiles,
                   rmm::cuda_stream_view stream,
                   rmm::mr::device_memory_resource* mr)
-    : tile_status(rmm::device_uvector<hip::atomic<scan_tile_status, hip::thread_scope_device>>(
+    : tile_status(rmm::device_uvector<cuda::atomic<scan_tile_status, cuda::thread_scope_device>>(
         num_tiles, stream, mr)),
       tile_state_partial(rmm::device_uvector<T>(num_tiles, stream, mr)),
       tile_state_inclusive(rmm::device_uvector<T>(num_tiles, stream, mr))

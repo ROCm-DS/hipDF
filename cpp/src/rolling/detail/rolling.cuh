@@ -83,8 +83,8 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/reduce.h>
 
-#include <hip/std/climits>
-#include <hip/std/limits>
+#include <cuda/std/climits>
+#include <cuda/std/limits>
 
 #include <memory>
 
@@ -436,7 +436,7 @@ struct DeviceRollingVariance {
         }
       } else {
         output.element<OutputType>(current_index) =
-          hip::std::numeric_limits<OutputType>::signaling_NaN();
+          cuda::std::numeric_limits<OutputType>::signaling_NaN();
       }
     }
 

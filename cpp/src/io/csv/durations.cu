@@ -70,25 +70,25 @@ template <typename T>
 __device__ void dissect_duration(T duration, duration_component* timeparts)
 {
   timeparts->is_negative = (duration < T{0});
-  timeparts->day         = hip::std::chrono::floor<duration_D>(duration).count();
+  timeparts->day         = cuda::std::chrono::floor<duration_D>(duration).count();
 
-  if (hip::std::is_same_v<T, duration_D>) return;
+  if (cuda::std::is_same_v<T, duration_D>) return;
 
   // adjust for pandas format
   if (timeparts->is_negative) {
     duration =
-      hip::std::chrono::duration_cast<T>(duration % duration_D(1) + hip::std::chrono::hours(24));
+      cuda::std::chrono::duration_cast<T>(duration % duration_D(1) + cuda::std::chrono::hours(24));
   }
-  duration_s seconds = hip::std::chrono::duration_cast<duration_s>(duration);
+  duration_s seconds = cuda::std::chrono::duration_cast<duration_s>(duration);
   timeparts->hour =
-    (hip::std::chrono::duration_cast<hip::std::chrono::hours>(seconds) % duration_D(1)).count();
-  timeparts->minute = (hip::std::chrono::duration_cast<hip::std::chrono::minutes>(seconds) %
-                       hip::std::chrono::hours(1))
+    (cuda::std::chrono::duration_cast<cuda::std::chrono::hours>(seconds) % duration_D(1)).count();
+  timeparts->minute = (cuda::std::chrono::duration_cast<cuda::std::chrono::minutes>(seconds) %
+                       cuda::std::chrono::hours(1))
                         .count();
-  timeparts->second = (seconds % hip::std::chrono::minutes(1)).count();
-  if (not hip::std::is_same_v<T, duration_s>) {
+  timeparts->second = (seconds % cuda::std::chrono::minutes(1)).count();
+  if (not cuda::std::is_same_v<T, duration_s>) {
     timeparts->nanosecond =
-      (hip::std::chrono::duration_cast<duration_ns>(duration) % duration_s(1)).count();
+      (cuda::std::chrono::duration_cast<duration_ns>(duration) % duration_s(1)).count();
   }
 }
 

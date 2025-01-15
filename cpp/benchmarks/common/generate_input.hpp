@@ -115,7 +115,7 @@ distribution_id default_distribution_id()
 template <typename T, std::enable_if_t<cudf::is_timestamp<T>()>* = nullptr>
 std::pair<int64_t, int64_t> default_range()
 {
-  using hip::std::chrono::duration_cast;
+  using cuda::std::chrono::duration_cast;
   auto const year = duration_cast<typename T::duration>(cudf::duration_D{365l});
   return {50 * year.count(), 0};
 }
@@ -128,7 +128,7 @@ std::pair<int64_t, int64_t> default_range()
 template <typename T, std::enable_if_t<cudf::is_duration<T>()>* = nullptr>
 std::pair<int64_t, int64_t> default_range()
 {
-  using hip::std::chrono::duration_cast;
+  using cuda::std::chrono::duration_cast;
   auto const year = duration_cast<typename T::duration>(cudf::duration_D{365l});
   return {0, 2 * year.count()};
 }
@@ -256,7 +256,7 @@ class data_profile {
 
  public:
   template <typename T,
-            std::enable_if_t<!std::is_same_v<T, bool> && hip::std::is_integral_v<T>, T>* = nullptr>
+            std::enable_if_t<!std::is_same_v<T, bool> && cuda::std::is_integral_v<T>, T>* = nullptr>
   distribution_params<T> get_distribution_params() const
   {
     auto it = int_params.find(cudf::type_to_id<T>());
@@ -343,7 +343,7 @@ class data_profile {
   // discrete distributions (integers, strings, lists). Otherwise the call with have no effect.
   template <typename T,
             typename Type_enum,
-            std::enable_if_t<hip::std::is_integral_v<T>, T>* = nullptr>
+            std::enable_if_t<cuda::std::is_integral_v<T>, T>* = nullptr>
   void set_distribution_params(Type_enum type_or_group,
                                distribution_id dist,
                                T lower_bound,

@@ -82,7 +82,7 @@ struct hash_join {
   using map_type =
     hipco::static_multimap<hash_value_type,
                           cudf::size_type,
-                          hip::thread_scope_device,
+                          cuda::thread_scope_device,
                           rmm::mr::stream_allocator_adaptor<default_allocator<char>>,
                           hipco::double_hashing<DEFAULT_JOIN_CG_SIZE, Hasher, Hasher>>;
 

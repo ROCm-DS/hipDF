@@ -43,8 +43,8 @@
 
 #include <io/utilities/block_utils.cuh>
 
-#include <hip/atomic>
-#include <hip/std/tuple>
+#include <cuda/atomic>
+#include <cuda/std/tuple>
 
 namespace cudf::io::parquet::gpu {
 
@@ -95,14 +95,14 @@ struct page_state_s {
 
   inline __device__ void set_error_code(decode_error err) volatile
   {
-    hip::atomic_ref<int32_t, hip::thread_scope_block> ref{const_cast<int&>(error)};
-    ref.fetch_or(static_cast<int32_t>(err), hip::std::memory_order_relaxed);
+    cuda::atomic_ref<int32_t, cuda::thread_scope_block> ref{const_cast<int&>(error)};
+    ref.fetch_or(static_cast<int32_t>(err), cuda::std::memory_order_relaxed);
   }
 
   inline __device__ void reset_error_code() volatile
   {
-    hip::atomic_ref<int32_t, hip::thread_scope_block> ref{const_cast<int&>(error)};
-    ref.store(0, hip::std::memory_order_release);
+    cuda::atomic_ref<int32_t, cuda::thread_scope_block> ref{const_cast<int&>(error)};
+    ref.store(0, cuda::std::memory_order_release);
   }
 };
 
@@ -207,7 +207,7 @@ inline __device__ bool is_page_contained(page_state_s* const s, size_t start_row
  * @return A pair containing a pointer to the string and its length
  */
 template <typename state_buf>
-inline __device__ hip::std::pair<char const*, size_t> gpuGetStringData(page_state_s volatile* s,
+inline __device__ cuda::std::pair<char const*, size_t> gpuGetStringData(page_state_s volatile* s,
                                                                         state_buf volatile* sb,
                                                                         int src_pos)
 {
@@ -254,7 +254,7 @@ inline __device__ hip::std::pair<char const*, size_t> gpuGetStringData(page_stat
  * additional values.
  */
 template <bool sizes_only, typename state_buf>
-__device__ hip::std::pair<int, int> gpuDecodeDictionaryIndices(
+__device__ cuda::std::pair<int, int> gpuDecodeDictionaryIndices(
   page_state_s volatile* s, [[maybe_unused]] state_buf volatile* sb, int target_pos, int t)
 {
   uint8_t const* end = s->data_end;

@@ -76,7 +76,7 @@ struct calendrical_month_sequence_functor {
                       output->mutable_view().begin<T>(),
                       [initial = device_input, months] __device__(size_type i) {
                         return datetime::detail::add_calendrical_months_with_scale_back(
-                          initial.value(), hip::std::chrono::months{i * months});
+                          initial.value(), cuda::std::chrono::months{i * months});
                       });
 
     return output;
