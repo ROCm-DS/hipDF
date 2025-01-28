@@ -44,7 +44,7 @@ test = [
     "dask-hip @ git+https://github.com/rocm/dask-hip@branch-24.06",
     #: "distributed @ git+https://github.com/AMD-AI/distributed@rocm-dev",
     #: "dask-cuda==23.10.*", #: NOTE(HIP/AMD): assumed to be installed
-    #: "numba>=0.57,<0.58", #: NOTE(HIP/AMD): assumed to be installed
+    #: "numba>=0.57,<=0.58", #: NOTE(HIP/AMD): assumed to be installed
     "pytest",
     "pytest-cov",
     "pytest-xdist",

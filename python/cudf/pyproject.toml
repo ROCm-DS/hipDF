@@ -6,7 +6,7 @@ requires = [
     "cmake>=3.26.4",
     "cython>=3.0.0",
     "ninja",
-    "numpy>=1.21",
+    "numpy>=1.21,<1.25",
     "protoc-wheel",
     "pyarrow==12.0.1.*",
     "hipmm>=23.10",
@@ -35,9 +35,9 @@ dependencies = [
     #: "cupy-cuda11x>=12.0.0",
     #: HIP/AMD: we build 'cupy' from source
     "fsspec>=0.6.0",
-    "numba>=0.57",
+    "numba>=0.57,<=0.58", # FIXME: HIP/AMD: upstream uses numba<0.58!
     #: TODO: HIP/AMD: use AMD ver
-    "numpy>=1.21",
+    "numpy>=1.21,<1.25",
     #: "nvtx>=0.2.1",
     "packaging",
     "pandas>=1.3,<1.6.0dev0",
