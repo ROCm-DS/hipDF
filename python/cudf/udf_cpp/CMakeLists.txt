@@ -42,11 +42,18 @@ include(rapids-find)
 
 rapids_cpm_init()
 
+# FIXME(HIP/AMD): During the wheel
+# build process, the hip target and other targets
+# set by find_package(HIP ...) are added multiple
+# times, causing the CMake build to fail.
+if(NOT TARGET hip)
 rapids_find_package(
   HIP REQUIRED
   BUILD_EXPORT_SET udf-exports
   INSTALL_EXPORT_SET udf-exports
 )
+endif()
+
 include(${rapids-cmake-dir}/cpm/libhipcxx.cmake)
 rapids_cpm_libhipcxx(BUILD_EXPORT_SET udf-exports INSTALL_EXPORT_SET udf-exports)
 add_library(cudf_strings_udf SHARED strings/src/strings/udf/udf_apis.cu)
