@@ -35,8 +35,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <rolling/detail/rolling_jit.hpp>
-#include <rolling/jit/operation.hpp>
+#include "rolling/detail/rolling_jit.hpp"
+#include "rolling/jit/operation.hpp"
 
 #include <cudf/types.hpp>
 #include <cudf/utilities/bit.hpp>
