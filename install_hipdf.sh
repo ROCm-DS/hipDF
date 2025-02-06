@@ -179,8 +179,8 @@ conda activate cupy_dev
   export CUPY_INSTALL_USE_HIP=1
   export ROCM_HOME=/opt/rocm
   export HCC_AMDGPU_TARGET=${AMDGPU_TARGETS//;/,}
-  python3 setup.py bdist_wheel
-  CUPY_WHEEL=$(find ~+ -type f -name "cupy*.whl")
+  python3 setup.py --cupy-package-name amd-cupy-for-rocmds bdist_wheel
+  CUPY_WHEEL=$(find ~+ -type f -name "*cupy*.whl")
 
 # build hipdf
 cd ${BUILD_DIR}/hipdf

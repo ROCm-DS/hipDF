@@ -56,7 +56,7 @@ We will perform the following steps:
 1. Install ROCm
 2. Install Conda
 3. Create build folder
-    * Download ROCm CuPy
+    * Download ROCm CuPy for ROCm-DS
     * Download hipMM
     * Download hipDF
 4. Build CuPy wheel
@@ -116,7 +116,7 @@ git submodule update --init
 export CUPY_INSTALL_USE_HIP=1
 export ROCM_HOME=/opt/rocm        # NOTE: adapt to your environment
 export HCC_AMDGPU_TARGET="gfx90a" # NOTE: adapt to your AMD GPU architecture
-python3 setup.py bdist_wheel      # build the wheel
+python3 setup.py --cupy-package-name amd-cupy-for-rocmds bdist_wheel      # build the wheel
 ```
 
 #### Step 5: Create and activate hipDF Conda environment `hipdf_dev`.
@@ -140,7 +140,7 @@ conda activate hipdf_dev
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
 
-pip install /tmp/hipdf/cupy/dist/cupy*.whl
+pip install /tmp/hipdf/cupy/dist/amd-cupy-for-rocmds*.whl
 ```
 
 #### Step 7: Install Numba HIP into `hipdf_dev`.
