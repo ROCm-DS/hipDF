@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 
 setup(
     include_package_data=True,
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=find_packages(include=["dask_hipdf", "dask_cudf*"], exclude=["tests", "tests.*"]),
     entry_points={
         "dask.dataframe.backends": [
             "cudf = dask_cudf.backends:CudfBackendEntrypoint",

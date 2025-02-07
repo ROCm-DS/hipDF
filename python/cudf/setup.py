@@ -3,7 +3,7 @@
 from setuptools import find_packages
 from skbuild import setup
 
-packages = find_packages(include=["cudf*", "udf_cpp*"])
+packages = find_packages(include=["hipdf", "cudf*", "udf_cpp*"])
 setup(
     packages=packages,
     package_data={key: ["*.pxd", "*.hpp", "*.cuh"] for key in packages},

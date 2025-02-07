@@ -131,7 +131,7 @@ extensions = [
     )
 ]
 
-packages = find_packages(include=["cudf_kafka*"])
+packages = find_packages(include=["hipdf_kafka", "cudf_kafka*"])
 setup(
     # Include the separately-compiled shared library
     ext_modules=cythonize(
