@@ -788,16 +788,15 @@ TYPED_TEST(Sort, WithListColumn)
   */
 
   using lcw = cudf::test::lists_column_wrapper<T, int32_t>;
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
   lcw col{{{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
           {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
           {{1, 2, 3}, {}, {4, 5}, {0, 6, 0}},
           {{1, 2}, {3}, {4, 5}, {0, 6, 0}},
           {{7, 8}, {}},
           lcw{lcw{}, lcw{}, lcw{}},
-          lcw{{lcw{}}},
-          {{lcw{10}}},
-          {lcw{}}};
+          lcw{lcw{}},
+          {lcw{10}},
+          lcw{}};
 
   auto expect = cudf::test::fixed_width_column_wrapper<cudf::size_type>{8, 6, 5, 3, 0, 1, 2, 4, 7};
   auto result = cudf::sorted_order(cudf::table_view({col}));
@@ -828,7 +827,6 @@ TYPED_TEST(Sort, WithNullableListColumn)
     [[1, 2], [3], [4, 5], [NULL, 7]]          11
   ]
   */
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
   lcw col{
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},                   // 0
     {{{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}}, nulls_at({3})},  // 1
@@ -837,9 +835,9 @@ TYPED_TEST(Sort, WithNullableListColumn)
     {{1, 2}, {3}, {4, 5}, {{0, 6, 0}, nulls_at({0})}},        // 4
     {{7, 8}, {}},                                             // 5
     lcw{lcw{}, lcw{}, lcw{}},                                 // 6
-    lcw{{lcw{}}},                                             // 7
-    {{lcw{10}}},                                              // 8
-    {lcw{}},                                                  // 9
+    lcw{lcw{}},                                               // 7
+    {lcw{10}},                                                // 8
+    lcw{},                                                    // 9
     {{1, 2}, {3}, {4, 5}, {{0, 6, 0}, nulls_at({0, 2})}},     // 10
     {{1, 2}, {3}, {4, 5}, {{0, 7}, nulls_at({0})}},           // 11
   };
@@ -866,10 +864,9 @@ TYPED_TEST(Sort, MoreLists)
       [[NULL, NULL]]      1
     ]
     */
-    // TODO(HIP/AMD): HIP Workaround for nested Empty List
     lcw col{
-      lcw{lcw{{0}, nulls_at({0})}, lcw{-21827}},    // 0
-      lcw{{lcw{{0, 0}, nulls_at({0, 1})}}}          // 1
+      lcw{lcw{{0}, nulls_at({0})}, lcw{-21827}},  // 0
+      lcw{lcw{{0, 0}, nulls_at({0, 1})}}          // 1
     };
     cudf::test::fixed_width_column_wrapper<int32_t> expected{{0, 1}};
     auto result = cudf::sorted_order(cudf::table_view({col}));
@@ -900,12 +897,11 @@ TYPED_TEST(Sort, MoreLists)
       [[[0, 0]], [[0, 0, 0, 0, 0, 0, 0, 0]], [[0]]] 4
     ]
     */
-    // TODO(HIP/AMD): HIP Workaround for nested Empty List
-    lcw col{lcw{{lcw{{lcw{0, 0, 0}}}}},
-            lcw{{lcw{lcw{0}, lcw{0}, lcw{0}}}},
-            lcw{lcw{{lcw{0}}}, lcw{{lcw{0}}}, lcw{{lcw{0}}}},
-            lcw{lcw{{lcw{0, 0, 0}}}, lcw{{lcw{0}}}, lcw{{lcw{0}}}},
-            lcw{lcw{{lcw{0, 0}}}, lcw{{lcw{0, 0, 0, 0, 0, 0, 0, 0}}}, lcw{{lcw{0}}}}};
+    lcw col{lcw{lcw{lcw{0, 0, 0}}},
+            lcw{lcw{lcw{0}, lcw{0}, lcw{0}}},
+            lcw{lcw{lcw{0}}, lcw{lcw{0}}, lcw{lcw{0}}},
+            lcw{lcw{lcw{0, 0, 0}}, lcw{lcw{0}}, lcw{lcw{0}}},
+            lcw{lcw{lcw{0, 0}}, lcw{lcw{0, 0, 0, 0, 0, 0, 0, 0}}, lcw{lcw{0}}}};
     cudf::test::fixed_width_column_wrapper<int32_t> expected{{2, 1, 4, 0, 3}};
     auto result = cudf::sorted_order(cudf::table_view({col}));
     CUDF_TEST_EXPECT_COLUMNS_EQUAL(expected, *result);
@@ -972,7 +968,6 @@ TYPED_TEST(Sort, WithSlicedListColumn)
 
   using lcw = cudf::test::lists_column_wrapper<T, int32_t>;
   using cudf::test::iterators::nulls_at;
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
   lcw col{
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},                   //
     {{{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}}, nulls_at({3})},  // 0
@@ -981,8 +976,8 @@ TYPED_TEST(Sort, WithSlicedListColumn)
     {{1, 2}, {3}, {4, 5}, {{0, 6, 0}, nulls_at({0})}},        // 3
     {{7, 8}, {}},                                             // 4
     lcw{lcw{}, lcw{}, lcw{}},                                 // 5
-    lcw{{lcw{}}},                                             // 6
-    {{lcw{10}}},                                              // 7
+    lcw{lcw{}},                                               // 6
+    {lcw{10}},                                                // 7
     lcw{},                                                    // 8
     {{1, 2}, {3}, {4, 5}, {{0, 6, 0}, nulls_at({0, 2})}},     // 9
     {{1, 2}, {3}, {4, 5}, {{0, 7}, nulls_at({0})}},           //
