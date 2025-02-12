@@ -487,8 +487,7 @@ TEST_F(ListConcatenateRowsTest, StringsColumnsWithEmptyListTest)
 {
   auto const col1 = StrListsCol{{"1", "2", "3", "4"}}.release();
   auto const col2 = StrListsCol{{"a", "b", "c"}}.release();
-  // TODO(HIP/AMD): Workaround for HIP
-  auto const col3 = StrListsCol{{StrListsCol{}}}.release();
+  auto const col3 = StrListsCol{StrListsCol{}}.release();
   auto const col4 = StrListsCol{{"x", "y", "" /*NULL*/, "z"}, null_at(2)}.release();
   auto const col5 = StrListsCol{{StrListsCol{}}, null_at(0)}.release();
   auto const expected =
