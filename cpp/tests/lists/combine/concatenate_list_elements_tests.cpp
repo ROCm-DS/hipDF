@@ -105,21 +105,17 @@ TYPED_TEST(ConcatenateListElementsTypedTest, SimpleInputNestedManyLevelsNoNull)
   using ListsCol = cudf::test::lists_column_wrapper<TypeParam>;
 
   auto row00 = ListsCol{{1, 2}, {3}, {4, 5, 6}};
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
-  auto row01 = ListsCol{{ListsCol{}}};
+  auto row01 = ListsCol{ListsCol{}};
   auto row02 = ListsCol{{7, 8}, {9, 10}};
   auto row0  = build_lists_col(row00, row01, row02);
 
-
   auto row10 = ListsCol{{1, 2}, {3}, {4, 5, 6}};
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
-  auto row11 = ListsCol{{ListsCol{}}};
+  auto row11 = ListsCol{ListsCol{}};
   auto row12 = ListsCol{{7, 8}, {9, 10}};
   auto row1  = build_lists_col(row10, row11, row12);
 
   auto row20 = ListsCol{{1, 2}, {3}, {4, 5, 6}};
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
-  auto row21 = ListsCol{{ListsCol{}}};
+  auto row21 = ListsCol{ListsCol{}};
   auto row22 = ListsCol{{7, 8}, {9, 10}};
   auto row2  = build_lists_col(row20, row21, row22);
 
@@ -208,20 +204,17 @@ TYPED_TEST(ConcatenateListElementsTypedTest, SimpleInputNestedManyLevelsWithNull
   using ListsCol = cudf::test::lists_column_wrapper<TypeParam>;
 
   auto row00 = ListsCol{{1, 2}, {3}, {4, 5, 6}};
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
-  auto row01 = ListsCol{{ListsCol{}}}; /*NULL*/
+  auto row01 = ListsCol{ListsCol{}}; /*NULL*/
   auto row02 = ListsCol{{7, 8}, {9, 10}};
   auto row0  = ListsCol{{std::move(row00), std::move(row01), std::move(row02)}, null_at(1)};
 
   auto row10 = ListsCol{{{1, 2}, {3}, {4, 5, 6} /*NULL*/}, null_at(2)};
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
-  auto row11 = ListsCol{{ListsCol{}}};
+  auto row11 = ListsCol{ListsCol{}};
   auto row12 = ListsCol{{7, 8}, {9, 10}};
   auto row1  = build_lists_col(row10, row11, row12);
 
   auto row20 = ListsCol{{1, 2}, {3}, {4, 5, 6}};
-  // TODO(HIP/AMD): HIP Workaround for nested Empty List
-  auto row21 = ListsCol{{ListsCol{}}};
+  auto row21 = ListsCol{ListsCol{}};
   auto row22 = ListsCol{ListsCol{{null, 8}, null_at(0)}, {9, 10}};
   auto row2  = build_lists_col(row20, row21, row22);
 
@@ -370,13 +363,11 @@ TYPED_TEST(ConcatenateListElementsTypedTest, SlicedColumnsInputWithNulls)
   auto row0 = ListsCol{ListsCol{{null, 2, 3}, null_at(0)}, ListsCol{2, 3}};
   auto row1 = ListsCol{ListsCol{{3, null, null, 6}, nulls_at({1, 2})},
                        ListsCol{{5, 6, null}, null_at(2)},
-                       {ListsCol{}}, // TODO(HIP/AMD): Workaround for HIP
+                       ListsCol{},
                        ListsCol{{7, null}, null_at(1)}};
   auto row2 = ListsCol{ListsCol{7, 7, 7}, ListsCol{{7, 8, null, 0}, null_at(2)}, ListsCol{1}};
-  // TODO(HIP/AMD): Workaround for HIP
-  auto row3 = ListsCol{{ListsCol{9, 10, 11}}};
-  // TODO(HIP/AMD): Workaround for HIP
-  auto row4 = ListsCol{{ListsCol{}}};
+  auto row3 = ListsCol{ListsCol{9, 10, 11}};
+  auto row4 = ListsCol{ListsCol{}};
   auto row5 = ListsCol{ListsCol{{12, null, 14, 15}, null_at(1)}, ListsCol{16}, ListsCol{17}};
   auto const col_original = build_lists_col(row0, row1, row2, row3, row4, row5);
 
