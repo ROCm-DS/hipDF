@@ -565,9 +565,7 @@ TYPED_TEST(ListsColumnTest, ListsSlicedNonNestedEmpty)
   // Column of List<int>
   LCW list{{1, 2}, {}, {3, 4}, {8, 9}};
   // Column of 1 row, an empty List<int>
-  // TODO(HIP/AMD): the original code used LCW expect{LCW{}}; -> this resulted in the wrong constructor being called,
-  // so the object would not get initialized properly
-  LCW expect = LCW{std::initializer_list<LCW>{LCW{}}};
+  LCW expect{LCW{}};
   
   auto sliced = cudf::slice(list, {1, 2}).front();
   auto result = std::make_unique<cudf::column>(sliced);
