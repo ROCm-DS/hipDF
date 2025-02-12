@@ -108,7 +108,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
 
 !0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
 !2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
 !3 = !{i32 1, !"wchar_size", i32 4}
 !4 = !{i32 8, !"PIC Level", i32 2}
@@ -228,7 +228,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
 
 !0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
 !2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
 !3 = !{i32 1, !"wchar_size", i32 4}
 !4 = !{i32 8, !"PIC Level", i32 2}
@@ -358,7 +358,7 @@ attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "st
 !opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
 
 !0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 500}
+!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
 !2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
 !3 = !{i32 1, !"wchar_size", i32 4}
 !4 = !{i32 8, !"PIC Level", i32 2}
