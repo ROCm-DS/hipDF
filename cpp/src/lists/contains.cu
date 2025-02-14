@@ -201,9 +201,10 @@ std::unique_ptr<column> dispatch_index_of(lists_column_view const& lists,
   auto const num_rows = lists.size();
 
   auto const lists_cdv_ptr = column_device_view::create(lists.parent(), stream);
+  //TODO(HIP/AMD): __attribute__((noinline)) is a WAR for internal issue 198
   auto const input_it      = cudf::detail::make_counting_transform_iterator(
     size_type{0},
-    [lists = cudf::detail::lists_column_device_view{*lists_cdv_ptr}] __device__(auto const idx) {
+    [lists = cudf::detail::lists_column_device_view{*lists_cdv_ptr}] __attribute__((noinline)) __device__(auto const idx) {
       return list_device_view{lists, idx};
     });
 
