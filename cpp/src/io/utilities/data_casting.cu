@@ -463,8 +463,7 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
   // get 1-string index per warp/block
   auto get_next_string = [&]() {
     if constexpr (is_warp) {
-      // FIXME(HIP/AMD): work-around for SWDEV-470886 through explicit initialization
-      size_type istring = 0;
+      size_type istring;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
       return __shfl_sync((uint64_t) LANE_MASK_ALL, istring, 0);
     } else {
