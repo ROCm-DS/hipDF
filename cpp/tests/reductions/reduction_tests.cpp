@@ -2726,8 +2726,7 @@ TEST_F(ListReductionTest, NestedListReductionNthElement)
   // test without nulls
   auto validity    = std::vector<bool>{1, 0, 0, 1, 1};
   auto nested_list = LCW(
-    // TODO(HIP/AMD): Applied workaround for lists {LCW{9, 10}} -> LCW({LCW{9, 10}})
-    {{LCW{}, LCW{2, 3, 4}}, {}, {LCW{5}, LCW{6}, LCW{7, 8}}, LCW({LCW{9, 10}}), {LCW{11}, LCW{12, 13}}},
+    {{LCW{}, LCW{2, 3, 4}}, {}, {LCW{5}, LCW{6}, LCW{7, 8}}, {LCW{9, 10}}, {LCW{11}, LCW{12, 13}}},
     validity.begin());
   this->reduction_test(
     nested_list,
