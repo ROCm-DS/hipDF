@@ -39,7 +39,9 @@
 
 //: TODO(HIP/AMD) is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
 #ifdef __HIP_PLATFORM_AMD__
+#ifndef CUDF_HOST_DEVICE
 #define CUDF_HOST_DEVICE __host__ __device__
+#endif
 #include "cudf/cuda_runtime.h" //: including "hip/device_functions.h" causes errors
 
 
@@ -64,7 +66,9 @@ __device__ inline void __syncwarp(uint64_t activemask)
   __builtin_amdgcn_fence(__ATOMIC_ACQUIRE, "wavefront");
 }
 #else
+#ifndef CUDF_HOST_DEVICE
 #define CUDF_HOST_DEVICE
+#endif
 #endif
 
 #include <cassert>
