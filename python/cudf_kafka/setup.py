@@ -123,8 +123,6 @@ extensions = [
                 CUDF_KAFKA_ROOT,
             ]
         ),
-        #: TODO(HIP/AMD): We should use the same library names as cuDF to not break build systems
-        #: libraries=["cudf", "cudf_kafka"],
         libraries=["cudf", "cudf_kafka"],
         language="c++",
         extra_compile_args=["-std=c++17", "-DFMT_HEADER_ONLY=1"],
