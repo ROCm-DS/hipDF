@@ -930,10 +930,10 @@ TEST_P(ParquetV2Test, SlicedTable)
   lcw flats{lcw{},
             {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
             {{7, 8}, {}},
-            lcw({lcw{}}), //: TODO(HIP/AMD): WAR for internal issue 23
-            lcw({lcw{}}), //: TODO(HIP/AMD): WAR for internal issue 23
+            lcw{lcw{}},
+            lcw{lcw{}},
             lcw{lcw{}, lcw{}, lcw{}},
-            lcw({lcw{10}}), //: TODO(HIP/AMD): WAR for internal issue 23
+            {lcw{10}},
             {{13, 14}, {15}}};
 
   auto struct_1 = cudf::test::structs_column_wrapper{land, flats};
