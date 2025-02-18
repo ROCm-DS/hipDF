@@ -39,7 +39,9 @@
 
 //: TODO(HIP/AMD) is __HIP_PLATFORM_AMD__ good replacement of  __CUDACC__ ?
 #ifdef __HIP_PLATFORM_AMD__
+#ifndef CUDF_HOST_DEVICE
 #define CUDF_HOST_DEVICE __host__ __device__
+#endif
 /**
  * @brief Indicates that the function is a CUDA kernel
  */
