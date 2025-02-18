@@ -200,8 +200,6 @@ def pytest_runtest_makereport(item, call):
     setattr(item, "report", {rep.when: rep})
 
 
-#TODO(HIP): we are disabling these tests as they hang currently. Once support for these APIs are added,
-# these tests should be enabled again
 disabled_test_files = []
 
 def pytest_collection_modifyitems(items):
