@@ -146,7 +146,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
 {
   auto tidx         = cudf::detail::grid_1d::global_thread_id<block_size>();
   auto const stride = cudf::detail::grid_1d::grid_stride<block_size>();
-  auto active_mask  = __ballot_sync((uint64_t)cudf::LANE_MASK_ALL, tidx < number_of_mask_bits); // FIXME(HIP/AMD): WAR for SWDEV-490930
+  auto active_mask  = __ballot_sync((uint64_t)cudf::LANE_MASK_ALL, tidx < number_of_mask_bits); // NOTE(HIP/AMD): See SWDEV-490930
 
   size_type warp_valid_count = 0;
 
@@ -161,7 +161,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
       size_type const column_element_index = mask_index - output_offsets[source_view_index];
       bit_is_set = views[source_view_index].is_valid(column_element_index);
     }
-    bitmask_type const new_word = __ballot_sync((uint64_t) active_mask, bit_is_set); // FIXME(HIP/AMD): WAR for SWDEV-490930
+    bitmask_type const new_word = __ballot_sync((uint64_t) active_mask, bit_is_set); // NOTE(HIP/AMD): See SWDEV-490930
 
     if (threadIdx.x % detail::warp_size == 0) {
       dest_mask[word_index(mask_index)] = new_word;
@@ -169,7 +169,7 @@ CUDF_KERNEL void concatenate_masks_kernel(column_device_view const* views,
     }
 
     tidx += stride;
-    active_mask = __ballot_sync((uint64_t) active_mask, tidx < number_of_mask_bits); // FIXME(HIP/AMD): WAR for SWDEV-490930
+    active_mask = __ballot_sync((uint64_t) active_mask, tidx < number_of_mask_bits); // NOTE(HIP/AMD): See SWDEV-490930
   }
 
   using detail::single_lane_block_sum_reduce;
@@ -227,7 +227,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
   size_type warp_valid_count = 0;
 
   bitmask_type active_mask;
-  if (Nullable) { active_mask = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, output_index < output_size); } // FIXME(HIP/AMD): WAR for SWDEV-490930
+  if (Nullable) { active_mask = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, output_index < output_size); } // NOTE(HIP/AMD): See SWDEV-490930
   while (output_index < output_size) {
     // Lookup input index by searching for output index in offsets
     auto const offset_it            = thrust::prev(thrust::upper_bound(
@@ -242,7 +242,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
 
     if (Nullable) {
       bool const bit_is_set       = input_view.is_valid(offset_index);
-      bitmask_type const new_word = __ballot_sync((uint64_t) active_mask, bit_is_set); // FIXME(HIP/AMD): WAR for SWDEV-490930
+      bitmask_type const new_word = __ballot_sync((uint64_t) active_mask, bit_is_set); // NOTE(HIP/AMD): See SWDEV-490930
 
       // First thread writes bitmask word
       if (threadIdx.x % detail::warp_size == 0) {
@@ -253,7 +253,7 @@ CUDF_KERNEL void fused_concatenate_kernel(column_device_view const* input_views,
     }
 
     output_index += stride;
-    if (Nullable) { active_mask = __ballot_sync((uint64_t) active_mask, output_index < output_size); } // FIXME(HIP/AMD): WAR for SWDEV-490930
+    if (Nullable) { active_mask = __ballot_sync((uint64_t) active_mask, output_index < output_size); } // NOTE(HIP/AMD): See SWDEV-490930
   }
 
   if (Nullable) {

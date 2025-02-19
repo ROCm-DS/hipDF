@@ -46,13 +46,13 @@ namespace io {
 template <typename T>
 inline __device__ T shuffle(T var, int lane = 0)
 {
-  return __shfl_sync((uint64_t) LANE_MASK_ALL, var, lane); // FIXME(HIP/AMD): WAR for SWDEV-490930
+  return __shfl_sync((uint64_t) LANE_MASK_ALL, var, lane); // NOTE(HIP/AMD): See SWDEV-490930
 }
 
 template <typename T>
 inline __device__ T shuffle_xor(T var, uint32_t delta)
 {
-  return __shfl_xor_sync((uint64_t) LANE_MASK_ALL, var, delta); // FIXME(HIP/AMD): WAR for SWDEV-490930
+  return __shfl_xor_sync((uint64_t) LANE_MASK_ALL, var, delta); // NOTE(HIP/AMD): See SWDEV-490930
 }
 
 inline __device__ void syncwarp() { 
@@ -62,7 +62,7 @@ inline __device__ void syncwarp() {
 
 }
 
-inline __device__ lane_mask ballot(int pred) { return __ballot_sync((uint64_t) LANE_MASK_ALL, pred); } // FIXME(HIP/AMD): WAR for SWDEV-490930
+inline __device__ lane_mask ballot(int pred) { return __ballot_sync((uint64_t) LANE_MASK_ALL, pred); } // NOTE(HIP/AMD): See SWDEV-490930
 
 // Warp reduction helpers
 template <typename T>
