@@ -110,6 +110,7 @@ option(BUILD_BENCHMARKS "Configure CMake to build (google & hipbench) benchmarks
 option(BUILD_SHARED_LIBS "Build cuDF shared libraries" ON)
 option(JITIFY_USE_CACHE "Use a file cache for JIT compiled kernels" ON)
 option(CUDF_USE_WARPSIZE_32 "Uses warp size 32 in cuDF. Only to be used for gfx1100." OFF)
+mark_as_advanced(CUDF_USE_WARPSIZE_32)
 option(CUDF_BUILD_TESTUTIL "Whether to build the test utilities contained in libcudf" ON)
 mark_as_advanced(CUDF_BUILD_TESTUTIL)
 #TODO(HIP/AMD) : FIX wrt CUDF_USE_PROPRIETARY_NVCOMP is not used.
@@ -158,6 +159,23 @@ mark_as_advanced(CUDF_BUILD_STREAMS_TEST_UTIL)
 
 option(USE_LIBARROW_FROM_PYARROW "Use the libarrow contained within pyarrow." OFF)
 mark_as_advanced(USE_LIBARROW_FROM_PYARROW)
+
+if(CUDF_USE_WARPSIZE_32)
+message(WARNING "Support for warp size 32 is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
+
+list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx940" "gfx941" "gfx942"
+                        "gfx90a:sramecc+:xnack-" "gfx908:sramecc+:xnack-"
+                        "gfx940:sramecc+:xnack-" "gfx941:sramecc+:xnack-"
+                        "gfx942:sramecc+:xnack-"
+                        "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
+                        "gfx942:xnack+")
+
+foreach(arch ${CMAKE_HIP_ARCHITECTURES})
+  if(${arch} IN_LIST WS_64_ARCHS)
+    message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with warp size 32.")
+  endif()
+endforeach()
+endif()
 
 message(VERBOSE "CUDF: Build with NVTX support: ${USE_NVTX}")
 message(VERBOSE "CUDF: Configure CMake to build tests: ${BUILD_TESTS}")
