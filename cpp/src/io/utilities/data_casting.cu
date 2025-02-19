@@ -463,7 +463,8 @@ CUDF_KERNEL void parse_fn_string_parallel(str_tuple_it str_tuples,
   // get 1-string index per warp/block
   auto get_next_string = [&]() {
     if constexpr (is_warp) {
-      size_type istring;
+      // TODO(HIP/AMD): work-around related to SWDEV-470886, see internal issue #201
+      size_type istring = 0;
       if (lane == 0) { istring = atomicAdd(str_counter, 1); }
       return __shfl_sync((uint64_t) LANE_MASK_ALL, istring, 0);
     } else {
