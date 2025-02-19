@@ -1106,8 +1106,7 @@ TEST_F(ListsColumnTest, ConcatenateEmptyLists)
   }
 
   {
-    // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
-    cudf::test::lists_column_wrapper<int> a({LCW{}});
+    cudf::test::lists_column_wrapper<int> a{LCW{}};
     cudf::test::lists_column_wrapper<int> b{4, 5, 6, 7};
     cudf::test::lists_column_wrapper<int> expected{LCW{}, {4, 5, 6, 7}};
 
@@ -1117,7 +1116,7 @@ TEST_F(ListsColumnTest, ConcatenateEmptyLists)
   }
 
   {
-    cudf::test::lists_column_wrapper<int> a({LCW{}}), b({LCW{}}), c({LCW{}});
+    cudf::test::lists_column_wrapper<int> a{LCW{}}, b{LCW{}}, c{LCW{}};
     cudf::test::lists_column_wrapper<int> d{4, 5, 6, 7};
     cudf::test::lists_column_wrapper<int> expected{LCW{}, LCW{}, LCW{}, {4, 5, 6, 7}};
 
@@ -1128,7 +1127,7 @@ TEST_F(ListsColumnTest, ConcatenateEmptyLists)
 
   {
     cudf::test::lists_column_wrapper<int> a{1, 2};
-    cudf::test::lists_column_wrapper<int> b({LCW{}}), c({LCW{}});
+    cudf::test::lists_column_wrapper<int> b{LCW{}}, c{LCW{}};
     cudf::test::lists_column_wrapper<int> d{4, 5, 6, 7};
     cudf::test::lists_column_wrapper<int> expected{{1, 2}, LCW{}, LCW{}, {4, 5, 6, 7}};
 

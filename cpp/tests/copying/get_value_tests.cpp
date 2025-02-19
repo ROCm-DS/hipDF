@@ -265,14 +265,12 @@ TYPED_TEST(ListGetFixedWidthValueTest, NestedGetNonNullNonEmpty)
   using LCW = cudf::test::lists_column_wrapper<TypeParam, int32_t>;
 
   // clang-format off
-  // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
-    //: LCW col{
-    //:   LCW{LCW{1, 2}, LCW{34}},
-    //:   LCW{},
-    //:   LCW{LCW{1}},
-    //:   LCW{LCW{42}, LCW{10}}
-    //: };
-  LCW col{LCW{LCW{1, 2}, LCW{34}}, LCW{}, LCW({LCW{1}}), LCW{LCW{42}, LCW{10}}};
+  LCW col{
+    LCW{LCW{1, 2}, LCW{34}},
+    LCW{},
+    LCW{LCW{1}},
+    LCW{LCW{42}, LCW{10}}
+  };
   // clang-format on
   LCW expected_data{LCW{42}, LCW{10}};
 
@@ -294,8 +292,7 @@ TYPED_TEST(ListGetFixedWidthValueTest, NestedGetNonNullNonEmptyPreserveNull)
   LCW col{
     LCW{LCW{1, 2}, LCW{34}},
     LCW{},
-    // LCW{LCW{1}},
-    LCW({LCW{1}}),
+    LCW{LCW{1}},
     LCW({LCW{42}, LCW{10}, LCW({1, 3, 2}, this->nth_valid(1))}, valid.begin())
   };
   // clang-format on
@@ -314,13 +311,12 @@ TYPED_TEST(ListGetFixedWidthValueTest, NestedGetNonNullEmpty)
   using LCW = cudf::test::lists_column_wrapper<TypeParam, int32_t>;
 
   // clang-format off
-    //: LCW col{
-    //:   LCW{LCW{1, 2}, LCW{34}},
-    //:   LCW{},
-    //:   LCW{LCW{1}},
-    //:   LCW{LCW{42}, LCW{10}}
-    //: };
-  LCW col{LCW{LCW{1, 2}, LCW{34}}, LCW{}, LCW({LCW{1}}), LCW{LCW{42}, LCW{10}}};
+  LCW col{
+    LCW{LCW{1, 2}, LCW{34}},
+    LCW{},
+    LCW{LCW{1}},
+    LCW{LCW{42}, LCW{10}}
+  };
   // clang-format on
   LCW expected_data{};
   cudf::size_type index = 1;
@@ -341,14 +337,11 @@ TYPED_TEST(ListGetFixedWidthValueTest, NestedGetNull)
   std::vector<cudf::valid_type> valid{1, 0, 1, 0};
   // clang-format off
   LCW col(
-      //: {
-      //:   LCW{LCW{1, 2}, LCW{34}},
-      //:   LCW{},
-      //:   LCW{LCW{1}},
-      //:   LCW{LCW{42}, LCW{10}}
-      //: }
     {
-      LCW{LCW{1, 2}, LCW{34}}, LCW{}, LCW({LCW{1}}), LCW{LCW{42}, LCW{10}}
+      LCW{LCW{1, 2}, LCW{34}},
+      LCW{},
+      LCW{LCW{1}},
+      LCW{LCW{42}, LCW{10}}
     }, valid.begin());
   // clang-format on
   cudf::size_type index = 1;
@@ -427,7 +420,7 @@ TEST_F(ListGetStringValueTest, NestedGetNonNullNonEmpty)
 
   // clang-format off
   LCW col{
-    LCW({LCW{"aaa", "Héllo"}}), /*: LCW{LCW{"aaa", "Héllo"}},*/
+    LCW{LCW{"aaa", "Héllo"}},
     LCW{},
     LCW{LCW{""}, LCW({"string", "str2", "xyz"}, this->nth_valid(0))},
     LCW{LCW{"42"}, LCW{"21"}}
@@ -450,7 +443,7 @@ TEST_F(ListGetStringValueTest, NestedGetNonNullNonEmptyPreserveNull)
   std::vector<cudf::valid_type> valid{0, 1, 1};
   // clang-format off
   LCW col{
-    LCW({LCW{"aaa", "Héllo"}}), /*: LCW{LCW{"aaa", "Héllo"}}, */
+    LCW{LCW{"aaa", "Héllo"}},
     LCW{},
     LCW({LCW{""}, LCW{"cc"}, LCW({"string", "str2", "xyz"}, this->nth_valid(0))}, valid.begin()),
     LCW{LCW{"42"}, LCW{"21"}}
@@ -472,13 +465,12 @@ TEST_F(ListGetStringValueTest, NestedGetNonNullEmpty)
   using LCW = cudf::test::lists_column_wrapper<cudf::string_view>;
 
   // clang-format off
-    //: LCW col{
-    //:   LCW{LCW{"aaa", "Héllo"}},
-    //:   LCW{LCW{""}},
-    //:   LCW{LCW{"42"}, LCW{"21"}},
-    //:   LCW{}
-    //: };
-  LCW col{LCW({LCW{"aaa", "Héllo"}}), LCW({LCW{""}}), LCW{LCW{"42"}, LCW{"21"}}, LCW{}};
+  LCW col{
+    LCW{LCW{"aaa", "Héllo"}},
+    LCW{LCW{""}},
+    LCW{LCW{"42"}, LCW{"21"}},
+    LCW{}
+  };
   // clang-format on
   LCW expected_data{};
   cudf::size_type index = 3;
@@ -501,14 +493,11 @@ TEST_F(ListGetStringValueTest, NestedGetNull)
   std::vector<cudf::valid_type> valid{0, 0, 1, 1};
   // clang-format off
   LCW col(
-    //: {
-    //:   LCW{LCW{"aaa", "Héllo"}},
-    //:   LCW{LCW{""}},
-    //:   LCW{LCW{"42"}, LCW{"21"}},
-    //:   LCW{}
-    //: }
     {
-      LCW({LCW{"aaa", "Héllo"}}), LCW({LCW{""}}), LCW{LCW{"42"}, LCW{"21"}}, LCW{}
+      LCW{LCW{"aaa", "Héllo"}},
+      LCW{LCW{""}},
+      LCW{LCW{"42"}, LCW{"21"}},
+      LCW{}
     }, valid.begin());
   // clang-format on
   cudf::size_type index = 0;
