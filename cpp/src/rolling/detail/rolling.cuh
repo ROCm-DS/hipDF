@@ -1058,7 +1058,7 @@ __launch_bounds__(block_size) __global__
 
   size_type warp_valid_count{0};
 
-  auto active_threads = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, i < input.size()); // FIXME(HIP/AMD): WAR for SWDEV-490930
+  auto active_threads = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, i < input.size()); // NOTE(HIP/AMD): See SWDEV-490930
   while (i < input.size()) {
     // to prevent overflow issues when computing bounds use int64_t
     int64_t const preceding_window = preceding_window_begin[i];
@@ -1082,7 +1082,7 @@ __launch_bounds__(block_size) __global__
       input, default_outputs, output, start_index, end_index, i);
 
     // set the mask
-    cudf::bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync((uint64_t) active_threads, output_is_valid))}; // FIXME(HIP/AMD): WAR for SWDEV-490930
+    cudf::bitmask_type const result_mask{static_cast<bitmask_type>(__ballot_sync((uint64_t) active_threads, output_is_valid))}; // NOTE(HIP/AMD): See SWDEV-490930
 
     // only one thread writes the mask
     if (0 == threadIdx.x % cudf::detail::warp_size) {
@@ -1092,7 +1092,7 @@ __launch_bounds__(block_size) __global__
 
     // process next element
     i += stride;
-    active_threads = __ballot_sync((uint64_t) active_threads, i < input.size()); // FIXME(HIP/AMD): WAR for SWDEV-490930
+    active_threads = __ballot_sync((uint64_t) active_threads, i < input.size()); // NOTE(HIP/AMD): See SWDEV-490930
   }
 
   // sum the valid counts across the whole block
