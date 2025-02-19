@@ -756,7 +756,7 @@ void struct_from_scalar(bool is_valid)
   cudf::test::fixed_width_column_wrapper<int> col0{1};
   cudf::test::strings_column_wrapper col1{"abc"};
   cudf::test::lists_column_wrapper<int> col2{{1, 2, 3}};
-  cudf::test::lists_column_wrapper<int> col3{LCW({LCW{}})}; // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
+  cudf::test::lists_column_wrapper<int> col3{LCW{}};
 
   std::vector<cudf::column_view> src_children({col0, col1, col2, col3});
   auto value = cudf::struct_scalar(src_children, is_valid);
