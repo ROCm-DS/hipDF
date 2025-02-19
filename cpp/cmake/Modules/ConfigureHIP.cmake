@@ -34,7 +34,7 @@
 # SOFTWARE.
 
 if(GPU_WARNINGS_AS_ERRORS)
-  list(APPEND CUDF_GPU_FLAGS -Werror -Wno-c++11-narrowing-const-reference -Wno-deprecated  -Wno-pass-failed -Wno-implicit-conversion-floating-point-to-bool ) #FIXME(HIP): WAR for some transformation passes failing in hipcub, might degrade performance; accept implicit conversion of math operations to integer types like bool
+  list(APPEND CUDF_GPU_FLAGS -Werror -Wno-c++11-narrowing-const-reference -Wno-deprecated  -Wno-pass-failed -Wno-implicit-conversion-floating-point-to-bool ) #TODO(HIP): WAR for some transformation passes failing in hipcub, might degrade performance (see internal issue #202); accept implicit conversion of math operations to integer types like bool
 endif()
 
 if(DISABLE_DEPRECATION_WARNINGS)
