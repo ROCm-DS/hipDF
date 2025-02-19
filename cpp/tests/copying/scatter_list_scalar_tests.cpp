@@ -236,8 +236,7 @@ TYPED_TEST(ScatterListOfListScalarTest, Basic)
   LCW col({LCW({LCW{88, 88}, LCW{}, LCW{9, 9, 9}}, mask_vector{1, 0, 1}.begin()),
            LCW{LCW{66}, LCW{}, LCW({77, 77, 77, 77}, mask_vector{1, 0, 0, 1}.begin())},
            LCW{LCW{55, 55}, LCW{}, LCW{10, 10, 10}},
-             //: LCW{LCW{44, 44}}}); // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
-           LCW({LCW{44, 44}})});
+           LCW{LCW{44, 44}}});
 
   size_column scatter_map{1, 2, 3};
 
@@ -258,8 +257,7 @@ TYPED_TEST(ScatterListOfListScalarTest, EmptyValidScalar)
   LCW col({LCW({LCW{88, 88}, LCW{}, LCW{9, 9, 9}}, mask_vector{1, 0, 1}.begin()),
            LCW{LCW{66}, LCW{}, LCW({77, 77, 77, 77}, mask_vector{1, 0, 0, 1}.begin())},
            LCW{LCW{55, 55}, LCW{}, LCW{10, 10, 10}},
-             //: LCW{LCW{44, 44}}});
-           LCW({LCW{44, 44}})});
+           LCW{LCW{44, 44}}});
 
   size_column scatter_map{3, 0};
 
@@ -279,12 +277,11 @@ TYPED_TEST(ScatterListOfListScalarTest, NullScalar)
   auto slr = std::make_unique<cudf::list_scalar>(LCW{}, false);
   LCW col({LCW({LCW{88, 88}, LCW{}, LCW{9, 9, 9}}, mask_vector{1, 0, 1}.begin()),
            LCW{LCW{66}, LCW{}, LCW({77, 77, 77, 77}, mask_vector{1, 0, 0, 1}.begin())},
-             //: LCW{LCW{44, 44}}});
-           LCW({LCW{44, 44}})});
+           LCW{LCW{44, 44}}});
 
   size_column scatter_map{1, 0};
 
-  LCW expected({LCW{}, LCW{}, LCW({LCW{44, 44}})}, mask_vector{0, 0, 1}.begin());
+  LCW expected({LCW{}, LCW{}, LCW{LCW{44, 44}}}, mask_vector{0, 0, 1}.begin());
 
   auto result = single_scalar_scatter(col, *slr, scatter_map);
   CUDF_TEST_EXPECT_COLUMNS_EQUIVALENT(*result, expected);
@@ -299,16 +296,14 @@ TYPED_TEST(ScatterListOfListScalarTest, NullableTargetRows)
 
   LCW col({LCW({LCW{88, 88}, LCW{}, LCW{9, 9, 9}}, mask_vector{1, 0, 1}.begin()),
            LCW{LCW{66}, LCW{}, LCW({77, 77, 77, 77}, mask_vector{1, 0, 0, 1}.begin())},
-             //: LCW{LCW{44, 44}}},
-           LCW({LCW{44, 44}})},
+           LCW{LCW{44, 44}}},
           mask_vector{1, 0, 1}.begin());
 
   size_column scatter_map{1};
 
   LCW expected({LCW({LCW{88, 88}, LCW{}, LCW{9, 9, 9}}, mask_vector{1, 0, 1}.begin()),
                 LCW({LCW{1, 1, 1}, LCW{3, 3}, LCW{}, LCW{4}}, mask_vector{1, 1, 0, 1}.begin()),
-                  //: LCW{LCW{44, 44}}},
-                LCW({LCW{44, 44}})},
+                LCW{LCW{44, 44}}},
                mask_vector{1, 1, 1}.begin());
 
   auto result = single_scalar_scatter(col, *slr, scatter_map);

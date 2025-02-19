@@ -798,13 +798,10 @@ void split_lists(SplitFunc Split, CompareFunc Compare, bool split = true)
 
       std::vector<cudf::test::lists_column_wrapper<T>> expected;
       expected.push_back(LCW{});
-        //: expected.push_back(LCW{{1, 2, 3}}); // TODO(HIP/AMD): revert to original col3{LCW{}} when compiler issue has been addressed
-      expected.push_back(LCW({{1, 2, 3}}));
+      expected.push_back(LCW{{1, 2, 3}});
       expected.push_back(LCW{{4, 5}, {6}, {7, 8}});
-        //: expected.push_back(LCW{{9, 10, 11}});
-        //: expected.push_back(LCW{LCW{}});
-      expected.push_back(LCW({{9, 10, 11}}));
-      expected.push_back(LCW({LCW{}}));
+      expected.push_back(LCW{{9, 10, 11}});
+      expected.push_back(LCW{LCW{}});
       expected.push_back(LCW{LCW{}, {-1, -2, -3, -4, -5}, {-10}});
       expected.push_back(LCW{{-100, -200}});
 
@@ -824,26 +821,20 @@ void split_lists(SplitFunc Split, CompareFunc Compare, bool split = true)
   {
     cudf::test::lists_column_wrapper<T> list{{{1, 2, 3}, {4, 5}},
                                              {LCW{}, LCW{}, {7, 8}, LCW{}},
-                                               //: {LCW{6}},
-                                             LCW({LCW{6}}),
+                                             {LCW{6}},
                                              {{7, 8}, {9, 10, 11}, LCW{}},
                                              {LCW{}, {-1, -2, -3, -4, -5}},
-                                               //: {LCW{}},
-                                             LCW({LCW{}}),
+                                             {LCW{}},
                                              {{-10}, {-100, -200}}};
 
     if (split) {
       std::vector<cudf::size_type> splits{1, 3, 4};
 
       std::vector<cudf::test::lists_column_wrapper<T>> expected;
-        //: expected.push_back(LCW{{{1, 2, 3}, {4, 5}}});
-        //: expected.push_back(LCW{{LCW{}, LCW{}, {7, 8}, LCW{}}, {LCW{6}}});
-        //: expected.push_back(LCW{{{7, 8}, {9, 10, 11}, LCW{}}});
-        //: expected.push_back(LCW{{LCW{}, {-1, -2, -3, -4, -5}}, {LCW{}}, {{-10}, {-100, -200}}});
-      expected.push_back(LCW({{{1, 2, 3}, {4, 5}}}));
-      expected.push_back(LCW{{LCW{}, LCW{}, {7, 8}, LCW{}}, LCW({LCW{6}})});
-      expected.push_back(LCW({{{7, 8}, {9, 10, 11}, LCW{}}}));
-      expected.push_back(LCW{{LCW{}, {-1, -2, -3, -4, -5}}, LCW({LCW{}}), {{-10}, {-100, -200}}});
+      expected.push_back(LCW{{{1, 2, 3}, {4, 5}}});
+      expected.push_back(LCW{{LCW{}, LCW{}, {7, 8}, LCW{}}, {LCW{6}}});
+      expected.push_back(LCW{{{7, 8}, {9, 10, 11}, LCW{}}});
+      expected.push_back(LCW{{LCW{}, {-1, -2, -3, -4, -5}}, {LCW{}}, {{-10}, {-100, -200}}});
 
       auto result = Split(list, splits);
       EXPECT_EQ(expected.size(), result.size());
@@ -871,8 +862,7 @@ void split_lists_with_nulls(SplitFunc Split, CompareFunc Compare, bool split = t
     cudf::test::lists_column_wrapper<T> list{{1, 2, 3},
                                              {4, 5},
                                              {6},
-                                               //: {{7, 8}, valids},
-                                             LCW({7, 8}, valids),
+                                             {{7, 8}, valids},
                                              {9, 10, 11},
                                              LCW{},
                                              LCW{},
@@ -885,14 +875,10 @@ void split_lists_with_nulls(SplitFunc Split, CompareFunc Compare, bool split = t
 
       std::vector<cudf::test::lists_column_wrapper<T>> expected;
       expected.push_back(LCW{});
-        //: expected.push_back(LCW{{1, 2, 3}});
-        //: expected.push_back(LCW{{4, 5}, {6}, {{7, 8}, valids}});
-        //: expected.push_back(LCW{{9, 10, 11}});
-        //: expected.push_back(LCW{LCW{}});
-      expected.push_back(LCW({{1, 2, 3}}));
-      expected.push_back(LCW{{4, 5}, {6}, LCW({7, 8}, valids)});
-      expected.push_back(LCW({{9, 10, 11}}));
-      expected.push_back(LCW({LCW{}}));
+      expected.push_back(LCW{{1, 2, 3}});
+      expected.push_back(LCW{{4, 5}, {6}, {{7, 8}, valids}});
+      expected.push_back(LCW{{9, 10, 11}});
+      expected.push_back(LCW{LCW{}});
       expected.push_back(LCW{LCW{}, {{-1, -2, -3, -4, -5}, valids}, {-10}});
       expected.push_back(LCW{{{-100, -200}, valids}});
 
@@ -910,32 +896,23 @@ void split_lists_with_nulls(SplitFunc Split, CompareFunc Compare, bool split = t
   }
 
   {
-      //: cudf::test::lists_column_wrapper<T> list{{{{1, 2, 3}, valids}, {4, 5}},
-      //:                                       {{LCW{}, LCW{}, {7, 8}, LCW{}}, valids},
-      //:                                       {{{6}}},
-      //:                                       {{{7, 8}, {{9, 10, 11}, valids}, LCW{}}, valids},
-    cudf::test::lists_column_wrapper<T> list{{LCW({1, 2, 3}, valids), {4, 5}},
-                                             LCW({LCW{}, LCW{}, {7, 8}, LCW{}}, valids),
-                                             LCW({LCW({6})}),
-                                             LCW({{7, 8}, LCW({9, 10, 11}, valids), LCW{}}, valids),
+    cudf::test::lists_column_wrapper<T> list{{{{1, 2, 3}, valids}, {4, 5}},
+                                             {{LCW{}, LCW{}, {7, 8}, LCW{}}, valids},
+                                             {{{6}}},
+                                             {{{7, 8}, {{9, 10, 11}, valids}, LCW{}}, valids},
                                              {{LCW{}, {-1, -2, -3, -4, -5}}, valids},
-                                               //: {LCW{}},
-                                             LCW({LCW{}}),
+                                             {LCW{}},
                                              {{-10}, {-100, -200}}};
 
     if (split) {
       std::vector<cudf::size_type> splits{1, 3, 4};
 
       std::vector<cudf::test::lists_column_wrapper<T>> expected;
-        //: expected.push_back(LCW{{{{1, 2, 3}, valids}, {4, 5}}});
-        //: expected.push_back(LCW{{{LCW{}, LCW{}, {7, 8}, LCW{}}, valids}, {{{6}}}});
-        //: expected.push_back(LCW{{{{7, 8}, {{9, 10, 11}, valids}, LCW{}}, valids}});
-      expected.push_back(LCW({{LCW({1, 2, 3}, valids), {4, 5}}}));
-      expected.push_back(LCW{LCW({LCW{}, LCW{}, {7, 8}, LCW{}}, valids), LCW({LCW({6})})});
-      expected.push_back(LCW({LCW({{7, 8}, LCW({9, 10, 11}, valids), LCW{}}, valids)}));
+      expected.push_back(LCW{{{{1, 2, 3}, valids}, {4, 5}}});
+      expected.push_back(LCW{{{LCW{}, LCW{}, {7, 8}, LCW{}}, valids}, {{{6}}}});
+      expected.push_back(LCW{{{{7, 8}, {{9, 10, 11}, valids}, LCW{}}, valids}});
       expected.push_back(
-        //: LCW{{{LCW{}, {-1, -2, -3, -4, -5}}, valids}, {LCW{}}, {{-10}, {-100, -200}}});
-        LCW{{{LCW{}, {-1, -2, -3, -4, -5}}, valids}, LCW({LCW{}}), {{-10}, {-100, -200}}});
+        LCW{{{LCW{}, {-1, -2, -3, -4, -5}}, valids}, {LCW{}}, {{-10}, {-100, -200}}});
 
       auto result = Split(list, splits);
       EXPECT_EQ(expected.size(), result.size());
@@ -1146,7 +1123,7 @@ void split_nested_struct_of_list(SplitFunc Split, CompareFunc Compare, bool spli
                                                 LCW{},
                                                 {{8}, {10, 9, 8, 7, 6, 5}},
                                                 {{5, 6}, LCW{}, {8}},
-                                                LCW({LCW{-3, 4, -5}})},
+                                                {LCW{-3, 4, -5}}},
                                                list_validity.begin());
 
   // Assemble struct column.
@@ -1994,17 +1971,12 @@ TEST_F(ContiguousSplitTableCornerCases, PreSplitTable)
 
   using LCW = cudf::test::lists_column_wrapper<int>;
 
-    //: cudf::test::lists_column_wrapper<int> col0{{{{1, 2, 3}, valids}, {4, 5}},
-    //:                                            {{LCW{}, LCW{}, {7, 8}, LCW{}}, valids},
-    //:                                            {{{6}}},
-    //:                                            {{{7, 8}, {{9, 10, 11}, valids}, LCW{}}, valids},
-  cudf::test::lists_column_wrapper<int> col0{{LCW({1, 2, 3}, valids), {4, 5}},
-                                             LCW({LCW{}, LCW{}, {7, 8}, LCW{}}, valids),
-                                             LCW({LCW({6})}),
-                                             LCW({{7, 8}, LCW({9, 10, 11}, valids), LCW{}}, valids),
+  cudf::test::lists_column_wrapper<int> col0{{{{1, 2, 3}, valids}, {4, 5}},
+                                             {{LCW{}, LCW{}, {7, 8}, LCW{}}, valids},
+                                             {{{6}}},
+                                             {{{7, 8}, {{9, 10, 11}, valids}, LCW{}}, valids},
                                              {{LCW{}, {-1, -2, -3, -4, -5}}, valids},
-                                               //: {LCW{}},
-                                             LCW({LCW{}}),
+                                             {LCW{}},
                                              {{-10}, {-100, -200}}};
 
   cudf::test::strings_column_wrapper col1{
