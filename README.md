@@ -94,7 +94,7 @@ For additional examples, browse the complete [cuDF API documentation](https://do
 ### ROCm/GPU Requirements
 
 * ROCm HIP SDK compilers version 6.3+
-* Officially supported architecture (gfx90a, gfx942, gfx1100).
+* Officially supported architecture (gfx90a, gfx942).
 
 <!-- ### CUDA/GPU requirements
 
