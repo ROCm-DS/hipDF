@@ -261,23 +261,22 @@ List<List<List<int>
 template <typename T>
 std::enable_if_t<std::is_same_v<T, cudf::list_view>, lcw> ascending()
 {
-  // TODO(HIP/AMD): list construction issue, see internal issue 23
-  return lcw{lcw{lcw({lcw{0}}), lcw({lcw{0}}), lcw({lcw{0}})},
-             lcw({lcw{lcw{0}, lcw{0}, lcw{0}}}),
-             lcw{lcw({lcw{0, 0}}), lcw({lcw{0, 0, 0, 0, 0, 0, 0, 0}}), lcw({lcw{0}})},
-             lcw({lcw({lcw{0, 0, 0}})}),
-             lcw{lcw({lcw{0, 0, 0}}), lcw({lcw{0}}), lcw({lcw{0}})}};
+  return lcw{lcw{lcw{lcw{0}}, lcw{lcw{0}}, lcw{lcw{0}}},
+             lcw{lcw{lcw{0}, lcw{0}, lcw{0}}},
+             lcw{lcw{lcw{0, 0}}, lcw{lcw{0, 0, 0, 0, 0, 0, 0, 0}}, lcw{lcw{0}}},
+             lcw{lcw{lcw{0, 0, 0}}},
+             lcw{lcw{lcw{0, 0, 0}}, lcw{lcw{0}}, lcw{lcw{0}}}};
 }
 
 template <typename T>
 std::enable_if_t<std::is_same_v<T, cudf::list_view>, lcw> descending()
 {
-  // TODO(HIP/AMD): list construction issue, see internal issue 23
-  return lcw{lcw{lcw({lcw{0, 0, 0}}), lcw({lcw{0}}), lcw({lcw{0}})},
-             lcw({lcw({lcw{0, 0, 0}})}),
-             lcw{lcw({lcw{0, 0}}), lcw({lcw{0, 0, 0, 0, 0, 0, 0, 0}}), lcw({lcw{0}})},
-             lcw({lcw{lcw{0}, lcw{0}, lcw{0}}}),
-             lcw{lcw({lcw{0}}), lcw({lcw{0}}), lcw({lcw{0}})}};
+  return lcw{lcw{lcw{lcw{0, 0, 0}}, lcw{lcw{0}}, lcw{lcw{0}}},
+             lcw{lcw{lcw{0, 0, 0}}},
+             lcw{lcw{lcw{0, 0}}, lcw{lcw{0, 0, 0, 0, 0, 0, 0, 0}}, lcw{lcw{0}}},
+
+             lcw{lcw{lcw{0}, lcw{0}, lcw{0}}},
+             lcw{lcw{lcw{0}}, lcw{lcw{0}}, lcw{lcw{0}}}};
 }
 
 template <>
@@ -289,15 +288,13 @@ auto empty<cudf::list_view>()
 template <>
 auto nulls_after<cudf::list_view>()
 {
-  // TODO(HIP/AMD): list construction issue, see internal issue 23
-  return lcw({{{1}, {2, 2}, {0}}, null_at(2)});
+  return lcw{{{1}, {2, 2}, {0}}, null_at(2)};
 }
 
 template <>
 auto nulls_before<cudf::list_view>()
 {
-  // TODO(HIP/AMD): list construction issue, see internal issue 23
-  return lcw({{{0}, {1}, {2, 2}}, null_at(0)});
+  return lcw{{{0}, {1}, {2, 2}}, null_at(0)};
 }
 
 }  // namespace testdata
@@ -349,8 +346,7 @@ TYPED_TEST(IsSortedTest, Ascending)
   using T = TypeParam;
 
   auto col1 = testdata::ascending<T>();
-  // TODO(HIP/AMD): list construction issue, see internal issue 23
-  cudf::table_view in({{col1}});
+  cudf::table_view in{{col1}};
   std::vector<cudf::order> order{cudf::order::ASCENDING};
   std::vector<cudf::null_order> null_precedence{};
 
