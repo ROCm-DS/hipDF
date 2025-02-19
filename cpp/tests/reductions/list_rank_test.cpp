@@ -73,25 +73,24 @@ TEST_F(ListRankScanTest, BasicList)
 
 TEST_F(ListRankScanTest, DeepList)
 {
-  // TODO(HIP/AMD): Applied workaround for lists
-  using LCW = cudf::test::lists_column_wrapper<uint64_t>;
-  LCW col{
+  using lcw = cudf::test::lists_column_wrapper<uint64_t>;
+  lcw col{
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
     {{1, 2, 3}, {}, {4, 5}, {}, {0, 6, 0}},
     {{1, 2, 3}, {}, {4, 5}, {0, 6, 0}},
     {{7, 8}, {}},
-    LCW{LCW{}, LCW{}, LCW{}},
-    LCW({LCW{}}),
-    LCW({LCW{}}),
-    LCW({LCW{}}),
-    LCW{LCW{}, LCW{}, LCW{}},
-    LCW{LCW{}, LCW{}, LCW{}},
-    LCW({LCW{10}}),
-    LCW({LCW{10}}),
+    lcw{lcw{}, lcw{}, lcw{}},
+    lcw{lcw{}},
+    lcw{lcw{}},
+    lcw{lcw{}},
+    lcw{lcw{}, lcw{}, lcw{}},
+    lcw{lcw{}, lcw{}, lcw{}},
+    {lcw{10}},
+    {lcw{10}},
     {{13, 14}, {15}},
     {{13, 14}, {16}},
-    LCW{},
-    LCW({LCW{}}),
+    lcw{},
+    lcw{lcw{}},
   };
 
   {  // Non-sliced
