@@ -196,7 +196,7 @@ __launch_bounds__(block_size) __global__
         int valid_index = (block_offset / warpSize) + wid;
 
         // compute the valid mask for this warp
-        cudf::bitmask_type valid_warp = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, temp_valids[threadIdx.x]); // FIXME(HIP/AMD): WAR for SWDEV-490930
+        cudf::bitmask_type valid_warp = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, temp_valids[threadIdx.x]); // NOTE(HIP/AMD): See SWDEV-490930
 
         // Note the atomicOr's below assume that output_valid has been set to
         // all zero before the kernel
@@ -213,7 +213,7 @@ __launch_bounds__(block_size) __global__
 
         // if the block is full and not aligned then we have one more warp to cover
         if ((wid == 0) && (last_warp == num_warps)) {
-          cudf::bitmask_type valid_warp = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, temp_valids[block_size + threadIdx.x]); // FIXME(HIP/AMD): WAR for SWDEV-490930
+          cudf::bitmask_type valid_warp = __ballot_sync((uint64_t) cudf::LANE_MASK_ALL, temp_valids[block_size + threadIdx.x]); // NOTE(HIP/AMD): See SWDEV-490930
           if (lane == 0 && valid_warp != 0) {
             tmp_warp_valid_counts += __POPC(valid_warp);
             cuda::atomic_ref<cudf::bitmask_type, cuda::thread_scope_device> ref{
