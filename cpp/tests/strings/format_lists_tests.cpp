@@ -61,8 +61,7 @@ TEST_F(StringsFormatListsTest, EmptyNestedList)
 {
   using STR_LISTS = cudf::test::lists_column_wrapper<cudf::string_view>;
 
-  // TODO(HIP/AMD): Applied workaround for empty lists
-  auto const input = STR_LISTS{STR_LISTS{STR_LISTS{}, STR_LISTS{}}, STR_LISTS({STR_LISTS{}})};
+  auto const input = STR_LISTS{STR_LISTS{STR_LISTS{}, STR_LISTS{}}, STR_LISTS{STR_LISTS{}}};
   auto const view  = cudf::lists_column_view(input);
 
   auto results  = cudf::strings::format_list_column(view);
