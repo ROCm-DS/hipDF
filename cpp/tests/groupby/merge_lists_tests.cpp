@@ -89,9 +89,7 @@ TYPED_TEST(GroupbyMergeListsTypedTest, InvalidInput)
   auto const keys = keys_col{1, 2, 3};
 
   // The input lists column must NOT be nullable.
-  //TODO(HIP/AMD): the original code uses lists_col{2}, but fails due to internal issue 23
-  //auto const lists = lists_col{{lists_col{1}, lists_col{} /*NULL*/, lists_col{2}}, null_at(1)};
-  auto const lists = lists_col{{lists_col({1}), lists_col{} /*NULL*/, lists_col({2})}, null_at(1)};
+  auto const lists = lists_col{{lists_col{1}, lists_col{} /*NULL*/, lists_col{2}}, null_at(1)};
   EXPECT_THROW(merge_lists({keys}, {lists}), cudf::logic_error);
 
   // The input column must be a lists column.
@@ -290,7 +288,7 @@ TYPED_TEST(GroupbyMergeListsTypedTest, InputHasListsOfLists)
   };
   auto const lists3 = lists_col{
     lists_col{lists_col{14}, lists_col{15, 16, 17, 18}},             // key = 2
-    lists_col({lists_col{}}),                                          // key = 3, //TODO(HIP/AMD): the original code lists_col{lists_col{}} fails because of internal issue 23
+    lists_col{lists_col{}},                                          // key = 3
     lists_col{lists_col{17, 18, 19, 20, 21}, lists_col{18, 19, 20}}  // key = 4
   };
 
