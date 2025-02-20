@@ -683,8 +683,7 @@ struct check_datetime_format {
     auto const dateparts = check_string(d_str);
     if (!dateparts.has_value()) return false;
 
-    // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust, need to file a
-    // ticket
+    // NOTE(HIP/AMD): using workaround for thrust::optional::value() not being callable on the device
     auto const year  = THRUST_OPTIONAL_VALUE(dateparts).year;
     auto const month = static_cast<uint32_t>(THRUST_OPTIONAL_VALUE(dateparts).month);
     auto const day   = static_cast<uint32_t>(THRUST_OPTIONAL_VALUE(dateparts).day);
@@ -868,7 +867,7 @@ struct datetime_formatter_fn {
         case 'a':    // weekday abbreviated
         case 'A': {  // weekday full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          // TODO(HIP/AMD): thrust::optional::value() requires a patched version of rocthrust
+          // NOTE(HIP/AMD): using workaround for thrust::optional::value() not being callable on the device
           auto const day_of_week =
             cuda::std::chrono::year_month_weekday(THRUST_OPTIONAL_VALUE(days)).weekday().c_encoding();
           auto const day_idx =
@@ -880,7 +879,7 @@ struct datetime_formatter_fn {
         case 'b':    // month abbreviated
         case 'B': {  // month full name
           if (!days.has_value()) { days = days_from_timestamp(); }
-          // TODO(HIP/AMD): thrust::optional::value requires a patched version of rocthrust
+          // NOTE(HIP/AMD): using workaround for thrust::optional::value() not being callable on the device
           auto const month =
             static_cast<uint32_t>(cuda::std::chrono::year_month_day(THRUST_OPTIONAL_VALUE(days)).month());
           auto const month_idx =
