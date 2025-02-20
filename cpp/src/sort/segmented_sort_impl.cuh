@@ -107,33 +107,32 @@ struct column_fast_sort_fn {
       rmm::device_buffer d_temp_storage;
       size_t temp_storage_bytes = 0;
       if (ascending) {
-        //TODO(HIP/AMD): check cudaError_t error return value (StableSortPairs/StableSortPairsDescending is [[nodiscard]])
         if constexpr (method == sort_method::STABLE) {
-          (void) hipcub::DeviceSegmentedSort::StableSortPairs(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::StableSortPairs(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
           d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-          (void) hipcub::DeviceSegmentedSort::StableSortPairs(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::StableSortPairs(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
         } else {
-          (void) hipcub::DeviceSegmentedSort::SortPairs(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortPairs(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
           d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-          (void) hipcub::DeviceSegmentedSort::SortPairs(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortPairs(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
         }
       } else {
         if constexpr (method == sort_method::STABLE) {
-          (void) hipcub::DeviceSegmentedSort::StableSortPairsDescending(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::StableSortPairsDescending(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
           d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-          (void) hipcub::DeviceSegmentedSort::StableSortPairsDescending(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::StableSortPairsDescending(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
         } else {
-          (void) hipcub::DeviceSegmentedSort::SortPairsDescending(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortPairsDescending(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
           d_temp_storage = rmm::device_buffer{temp_storage_bytes, stream};
-          (void) hipcub::DeviceSegmentedSort::SortPairsDescending(
-            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...);
+          CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortPairsDescending(
+            d_temp_storage.data(), temp_storage_bytes, std::forward<decltype(args)>(args)...));
         }
       }
     };
