@@ -70,8 +70,8 @@ For additional examples, browse the complete [cuDF API documentation](https://do
 
 ### ROCm/GPU Requirements
 
-* ROCm HIP SDK compilers version 6.3+
 <!-- TODO(HIP/AMD): document other reqs, such as hipcub, rocm-llvm-dev, rocthrust, rocfft...>
+* ROCm HIP SDK compilers version 6.4+
 * Officially supported architecture (gfx90a, gfx942).
 
 <!-- ### CUDA/GPU requirements
