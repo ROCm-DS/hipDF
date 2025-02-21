@@ -78,7 +78,7 @@ Let's go through the installation steps in detail.
 ```bash
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
 cd /tmp/hipdf
-git clone https://github.com/ROCm/hipDF hipdf -b branch-23.10
+git clone https://github.com/ROCm/hipDF hipdf -b branch-1.0.0-rocm-ds-25.03
 git clone https://github.com/ROCm/hipMM hipmm -b branch-23.12
 git clone https://github.com/ROCm/cupy cupy -b aiss/cai-branch
 ```
