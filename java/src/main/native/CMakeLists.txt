@@ -53,7 +53,7 @@ rapids_hip_init_architectures(CUDF_JNI)
 
 project(
   CUDF_JNI
-  VERSION 23.10.00
+  VERSION 1.0.00
   LANGUAGES C CXX HIP
 )
 

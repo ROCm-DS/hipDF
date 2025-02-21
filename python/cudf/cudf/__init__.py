@@ -130,7 +130,7 @@ from cuda import cuda as _cuda_python_cuda
 __is_hip_amd_port__ = hasattr(_cuda_python_cuda, "HIP_PYTHON")
 del _cuda_python_cuda
 
-__version__ = "23.10.00"
+__version__ = "1.0.00"
 
 __all__ = [
     "BaseIndex",
