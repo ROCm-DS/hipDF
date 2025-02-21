@@ -35,7 +35,7 @@
 # ENV CUPY_URL="https://github.com/rocm/cupy"
 # ENV CUPY_BRANCH="aiss/cai-branch"
 # ENV HIPMM_URL="https://github.com/ROCm/hipMM"
-# ENV HIPMM_BRANCH="branch-23.12"
+# ENV HIPMM_BRANCH="branch-1.0.0-rocm-ds-25.03"
 
 # Helpers
 function __get_rocm_version_header() {
@@ -87,7 +87,7 @@ NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
 CUPY_URL=${CUPY_URL:-"https://github.com/rocm/cupy"}
 CUPY_BRANCH=${CUPY_BRANCH:-"aiss/cai-branch"}
 HIPMM_URL=${HIPMM_URL:-"https://github.com/ROCm/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"branch-23.12"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"branch-1.0.0-rocm-ds-25.03"}
 
 
 # Identify ROCm version regardless of scenario (ROCm preinstalled on base image/BM)

@@ -33,7 +33,7 @@
     "hipmm" : {
       "version" : "23.12",
       "git_url" : "https://github.com/ROCm/hipmm",
-      "git_tag" : "branch-23.12"
+      "git_tag" : "branch-1.0.0-rocm-ds-25.03"
     },
     "hipcomp" : {
       "version" : "2.2.0",
