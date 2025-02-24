@@ -106,6 +106,6 @@ dependencies:
 - zlib>=1.2.13
 - pip:
   - git+https://github.com/python-streamz/streamz.git@master
-  - git+https://github.com/rocm/dask-hip@branch-24.06
+  - git+https://github.com/rocm/dask-hip@branch-1.0.0-rocm-ds-25.03
   - ipykernel>=7.0.0a0
 name: all_rocm_arch-x86_64
