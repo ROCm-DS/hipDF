@@ -10,7 +10,7 @@
 > This repository will be eventually moved to the [ROCm-DS](https://github.com/rocm-ds) Github organization.
 
 > [!NOTE]
-> This ROCm&trade; port is derived work based on the NVIDIA RAPIDS&reg; cuDF project. It aims to
+> This ROCm&trade; port is derived work based on the NVIDIA RAPIDS&reg; cuDF project (**version 23.10**). It aims to
 follow the latter's directory structure and API naming as closely as possible to minimize porting friction for users that are interested in using both projects.
 
 ## Resources
