@@ -26,12 +26,12 @@
       "git_tag" : "v${version}"
     },
     "hipco" : {
-      "version" : "1.0",
+      "version" : "0.0.1",
       "git_url" : "https://github.com/ROCm/hipCollections",
-      "git_tag" : "branch-23.10"
+      "git_tag" : "branch-1.0.0-rocm-ds-25.03"
     },
     "hipmm" : {
-      "version" : "23.12",
+      "version" : "1.0",
       "git_url" : "https://github.com/ROCm/hipmm",
       "git_tag" : "branch-1.0.0-rocm-ds-25.03"
     },
@@ -41,20 +41,20 @@
       "git_tag" : "v2.2.0"
     },
     "libhipcxx" : {
-      "version" : "1.9.0",
+      "version" : "2.2.0",
       "git_url" : "https://github.com/ROCm/libhipcxx",
-      "git_tag" : "v1.9.0"
+      "git_tag" : "v2.2.0"
     },
     "hipbench": {
-      "version": "0.0",
+      "version": "0.1",
       "git_shallow": false,
       "git_url": "https://github.com/ROCm/hipBench",
-      "git_tag": "branch-23.10"
+      "git_tag": "branch-1.0.0-rocm-ds-25.03"
     },
     "jitify-hip" : {
-      "version" : "2.0.0",
+      "version" : "0.0",
       "git_url" : "https://github.com/ROCm/jitify",
-      "git_tag" : "branch-23.10",
+      "git_tag" : "branch-1.0.0-rocm-ds-25.03",
       "git_shallow": true
     }
   }
