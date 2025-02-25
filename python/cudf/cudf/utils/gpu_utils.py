@@ -25,6 +25,29 @@
 
 def validate_setup():
     import os
+    import warnings
+    import sys
+    import importlib.metadata
+
+    # NOTE(HIP/AMD): Check for conflicting installations. 
+    # Currently, this will only work in some circumstances, e.g., 
+    # if hipdf is installed after cudf into the same environment.
+    conflicts = [
+            'cudf',
+            'cudf-cu11',
+            'cudf-cu12']
+    conflicts_installed = [ conflict for conflict in conflicts
+                            if list(importlib.metadata.distributions(name=conflict))]
+
+    conflicts_installed = ', '.join(conflicts_installed)
+
+    if len(conflicts_installed)>0:
+      warnings.warn(
+        "The following conflicting packages were detected:\n"
+        f"{conflicts_installed}\n"
+        "HipDF may not work correctly, please fix your environment\n"
+        "by removing the conflicting packages and re-installing hipDF.\n"
+        )
 
     # TODO: Remove the following check once we arrive at a solution for #4827
     # This is a temporary workaround to unblock internal testing
@@ -34,8 +57,6 @@ def validate_setup():
         or "CUDF_NO_INITIALIZE" in os.environ
     ):
         return
-
-    import warnings
 
     from cuda.cudart import cudaDeviceAttr, cudaError_t
 
