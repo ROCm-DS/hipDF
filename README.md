@@ -87,6 +87,8 @@ For additional examples, browse the complete [cuDF API documentation](https://do
 
 ## Installation
 
+> [!CAUTION]
+> Incompatibility notice: Mixing RAPIDS and ROCmDS packages/installations is not supported. To avoid conflicts, strictly separate and isolated environments must be maintained if it is required to install both RAPIDS and ROCm-DS packages on the same system.
 
 > [!NOTE]
 > We support only AMD GPUs. Use the RAPIDS package for NVIDIA GPUs.
