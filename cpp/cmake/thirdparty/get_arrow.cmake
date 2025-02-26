@@ -175,6 +175,8 @@ function(find_and_configure_arrow VERSION BUILD_STATIC ENABLE_S3 ENABLE_ORC ENAB
     list(APPEND ARROW_PARQUET_OPTIONS "Thrift_SOURCE BUNDLED")
     list(APPEND ARROW_PARQUET_OPTIONS "ARROW_DEPENDENCY_SOURCE AUTO")
   endif()
+  include(${rapids-cmake-dir}/cpm/package_override.cmake)
+  rapids_cpm_package_override("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/patches/arrow_override.json")
 
   rapids_cpm_find(
     Arrow ${VERSION}
@@ -214,6 +216,8 @@ function(find_and_configure_arrow VERSION BUILD_STATIC ENABLE_S3 ENABLE_ORC ENAB
             "ARROW_ZSTD_USE_SHARED ${ARROW_BUILD_SHARED}"
             "xsimd_SOURCE AUTO"
   )
+  include("${rapids-cmake-dir}/cpm/detail/display_patch_status.cmake")
+  rapids_cpm_display_patch_status(Arrow)
 
   set(ARROW_FOUND
       TRUE

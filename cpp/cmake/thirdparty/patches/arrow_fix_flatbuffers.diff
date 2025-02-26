@@ -1,0 +1,16 @@
+diff --git a/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h b/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h
+index 2f7eb5fcf..9f045a9e3 100644
+--- a/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h
++++ b/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h
+@@ -1005,10 +1005,10 @@ class vector_downward {
+     swap(own_allocator_, other.own_allocator_);
+   }
+ 
++  vector_downward &operator=(const vector_downward &);
+  private:
+   // You shouldn't really be copying instances of this class.
+   FLATBUFFERS_DELETE_FUNC(vector_downward(const vector_downward &))
+-  FLATBUFFERS_DELETE_FUNC(vector_downward &operator=(const vector_downward &))
+ 
+   Allocator *allocator_;
+   bool own_allocator_;
