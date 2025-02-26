@@ -38,7 +38,7 @@ authors = [
     { name = "Advanced Micro Devices, Inc." },
     { name = "NVIDIA Corporation" },
 ]
-license = { text = "Apache 2.0" }
+license = { text = "Apache 2.0 AND MIT" }
 requires-python = ">=3.10"
 dependencies = [
     "cachetools",
@@ -69,6 +69,7 @@ classifiers = [
     "Topic :: Database",
     "Topic :: Scientific/Engineering",
     "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
