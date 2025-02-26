@@ -34,7 +34,7 @@ requires = [
 
 [project]
 name = "amd-hipdf_kafka"
-version = "1.0.00"
+version = "1.0.00b1"
 description = "hipDF Kafka Datasource"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [

@@ -32,7 +32,7 @@ requires = [
 
 [project]
 name = "amd-dask_hipdf"
-version = "1.0.00"
+version = "1.0.00b1"
 description = "Utilities for Dask and cuDF interactions"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
