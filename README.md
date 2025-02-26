@@ -92,7 +92,7 @@ hipDF can be installed with conda (via [miniconda](https://conda.io/miniconda.ht
 ```bash
 # NOTE: Conda installation not supported for hipDF for AMD GPUs.
 conda install -c rapidsai -c conda-forge -c nvidia \
-    amd-hipdf=1.0.0 python=3.10 cuda-version=11.8
+    amd-hipdf=1.0.0b1 python=3.10 cuda-version=11.8
 ```
 
 We also provide [nightly Conda packages](https://anaconda.org/rapidsai-nightly) built from the HEAD
