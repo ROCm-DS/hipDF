@@ -1196,3 +1196,4 @@ TEST_F(ExplodeOuterTest, SlicedList)
   auto pos_ret = cudf::explode_outer_position(sliced_t[0], 0);
   CUDF_TEST_EXPECT_TABLES_EQUAL(pos_ret->view(), pos_expected);
 }
+
