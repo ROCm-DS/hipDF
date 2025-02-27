@@ -44,8 +44,8 @@ dependencies = [
     "cachetools",
     #: "cubinlinker",
     #: "cuda-python>=11.8.5,<12.0a0",
-    "hip-python>=5.6",
-    "hip-python-as-cuda>=5.6",
+    "hip-python>=6.4",
+    "hip-python-as-cuda>=6.4",
     "amd-cupy-for-rocmds==13.0.0b1",
     #: HIP/AMD: we build 'cupy' from source
     "fsspec>=0.6.0",
