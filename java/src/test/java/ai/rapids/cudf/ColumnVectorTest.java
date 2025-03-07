@@ -111,7 +111,7 @@ public class ColumnVectorTest extends CudfTestBase {
   " !llvm.ident = !{!4, !4, !4, !4, !4, !4, !4, !4, !4, !4, !4} \n"+
   " !opencl.ocl.version = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5} \n"+
   "  \n"+
-  " !0 = !{i32 1, !\"amdgpu_code_object_version\", i32 500} \n"+
+  " !0 = !{i32 1, !\"amdgpu_code_object_version\", i32 600} \n"+
   " !1 = !{i32 1, !\"amdgpu_printf_kind\", !\"hostcall\"} \n"+
   " !2 = !{i32 1, !\"wchar_size\", i32 4} \n"+
   " !3 = !{i32 8, !\"PIC Level\", i32 2} \n"+
