@@ -159,7 +159,7 @@ pip install /tmp/hipdf/cupy/dist/amd_cupy*.whl
 
 pip install --upgrade pip
 pip config set global.extra-index-url https://test.pypi.org/simple
-pip install numba-hip[rocm-6-3-0]@git+https://github.com/rocm/numba-hip.git # NOTE: adapt ROCm key to your Python version
+pip install numba-hip[rocm-6-4-0]@git+https://github.com/rocm/numba-hip.git # NOTE: adapt ROCm key to your Python version
 ```
 
 #### Step 8: Install hipMM into `hipdf_dev`.
