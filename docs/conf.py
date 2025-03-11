@@ -3,43 +3,83 @@
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-import re
 
-from rocm_docs import ROCmDocs
+from datetime import datetime as _datetime
 
-version_number = "1.0.0b"
-left_nav_title = f"hipDF {version_number} Documentation"
+_today = _datetime.today()
 
-# for PDF output on Read the Docs
-project = "hipDF Documentation"
-author = "Advanced Micro Devices, Inc."
-copyright = "Copyright (c) 2025 Advanced Micro Devices, Inc. All rights reserved."
-version = version_number
-release = version_number
-cpp_maximum_signature_line_length = 10
+# Rocm-docs-core
+external_projects_remote_repository = ""
+# TODO extend with ROCm-DS projects
+external_projects = [
+    "hipDF",
+    "hipMM",
+    "python", "rocm"
+]
+external_projects_current_project = "hipDF"
+
+setting_all_article_info = True
+all_article_info_os = ["linux"]
+all_article_info_author = (
+    "Advanced Micro Devices, Inc."
+)
+all_article_info_date = _today.strftime(r"%Y-%m-%d")
+
+# specific settings override any general settings (eg: all_article_info_<field>)
+# TODO extend
+article_pages = [
+    {
+        "file": "index",
+        "read-time": "1 min read",
+    },
+]
+
+html_theme = "rocm_docs_theme"
+html_theme_options = {"flavor": "rocm"}
+
+external_toc_path = "./sphinx/_toc.yml"
 
 extensions = [
+    "rocm_docs",
     "breathe",
     "sphinx.ext.intersphinx",
-    "sphinx.ext.autodoc",
+    "sphinx.ext.autodoc",  # Automatically create API documentation from Python docstrings
     "sphinx.ext.autosummary",
-    "numpydoc",
+    # "numpydoc",
     "sphinx_markdown_tables",
     "sphinx.ext.doctest",
-    "sphinx.ext.linkcode",
-    "IPython.sphinxext.ipython_console_highlighting",
-    "IPython.sphinxext.ipython_directive",
-    "nbsphinx",
-    "recommonmark",
+    # "sphinx.ext.linkcode", # TODO requires to specify `def linkcode_resolve` function, more details: linkcode_resolve
+    # "IPython.sphinxext.ipython_console_highlighting",
+    # "IPython.sphinxext.ipython_directive",
+    # "nbsphinx",
+    # "recommonmark",
     "sphinx_copybutton",
 ]
 
-external_toc_path = "./sphinx/_toc.yml"
-docs_core = ROCmDocs(left_nav_title)
-docs_core.run_doxygen(doxygen_root="doxygen", doxygen_path="doxygen/xml")
-docs_core.setup()
 
-external_projects_current_project = "hipDF"
-# external_toc_path = "./sphinx/_toc.yml"
-for sphinx_var in ROCmDocs.SPHINX_VARS:
-    globals()[sphinx_var] = getattr(docs_core, sphinx_var)
+# for PDF output on Read the Docs
+version_number = "1.0.0b1"
+project = "hipDF Documentation"
+author = "Advanced Micro Devices, Inc."
+copyright = f"Copyright (c) 2023-{_today.strftime(r'%Y')} Advanced Micro Devices, Inc. All rights reserved."
+version = version_number
+release = version_number
+cpp_maximum_signature_line_length = 10
+left_nav_title = f"hipDF {version_number} Documentation"
+
+doxygen_root = "../cpp/doxygen"
+doxysphinx_enabled = False
+doxygen_project = {
+    "name": "doxygen",
+    "path": "../cpp/doxygen/xml",
+}
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": True,
+    "special-members": "__init__, __getitem__",
+    "inherited-members": True,
+    "show-inheritance": True,
+    "imported-members": False,
+    "member-order": "bysource",  # bysource: seems unfortunately not to work for Cython modules
+}
