@@ -98,8 +98,8 @@ rocm_version_patch=$(grep "ROCM_VERSION_PATCH\s\+[0-9]\+" ${rocm_version_h} | gr
 ROCM_KEY="rocm-${rocm_version_major}-${rocm_version_minor}-${rocm_version_patch}"
 declare -x ROCM_VER=${rocm_version_major}.${rocm_version_minor}.${rocm_version_patch}
 
-if ((  $(get_rocm_version_linearized) < 60300 )); then
-  echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 6.3.0"
+if ((  $(get_rocm_version_linearized) < 60400 )); then
+  echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 6.4.0"
   exit -1
 fi
 
