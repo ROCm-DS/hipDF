@@ -1,12 +1,12 @@
 ================
 Extension Dtypes
 ================
-.. currentmodule:: cudf.core.dtypes
+.. currentmodule:: hipdf.core.dtypes
 
-cuDF supports a number of extension dtypes that build on top of the types that pandas supports. These dtypes are not directly available in pandas, which instead relies on object dtype arrays that run at Python rather than native speeds. The following dtypes are supported:
+hipDF supports a number of extension dtypes that build on top of the types that pandas supports. These dtypes are not directly available in pandas, which instead relies on object dtype arrays that run at Python rather than native speeds. The following dtypes are supported:
 
 
-cudf.CategoricalDtype
+hipdf.CategoricalDtype
 =====================
 .. autosummary::
    :toctree: api/
@@ -36,7 +36,7 @@ Properties and Methods
     CategoricalDtype.type
 
 
-cudf.Decimal32Dtype
+hipdf.Decimal32Dtype
 ===================
 .. autosummary::
    :toctree: api/
@@ -64,7 +64,7 @@ Properties and Methods
    Decimal32Dtype.str
    Decimal32Dtype.to_arrow
 
-cudf.Decimal64Dtype
+hipdf.Decimal64Dtype
 ===================
 .. autosummary::
    :toctree: api/
@@ -92,7 +92,7 @@ Properties and Methods
    Decimal64Dtype.str
    Decimal64Dtype.to_arrow
 
-cudf.Decimal128Dtype
+hipdf.Decimal128Dtype
 ====================
 .. autosummary::
    :toctree: api/
@@ -120,7 +120,7 @@ Properties and Methods
    Decimal128Dtype.str
    Decimal128Dtype.to_arrow
 
-cudf.ListDtype
+hipdf.ListDtype
 ==============
 .. autosummary::
    :toctree: api/
@@ -145,7 +145,7 @@ Properties and Methods
    ListDtype.to_arrow
    ListDtype.type
 
-cudf.StructDtype
+hipdf.StructDtype
 ================
 .. autosummary::
    :toctree: api/

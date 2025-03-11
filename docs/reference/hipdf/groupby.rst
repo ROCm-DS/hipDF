@@ -3,9 +3,9 @@
 =======
 GroupBy
 =======
-.. currentmodule:: cudf.core.groupby
+.. currentmodule:: hipdf.core.groupby
 
-GroupBy objects are returned by groupby calls: :func:`cudf.DataFrame.groupby`, :func:`cudf.Series.groupby`, etc.
+GroupBy objects are returned by groupby calls: :func:`hipdf.DataFrame.groupby`, :func:`hipdf.Series.groupby`, etc.
 
 Indexing, iteration
 -------------------
@@ -15,14 +15,14 @@ Indexing, iteration
    GroupBy.__iter__
    GroupBy.groups
 
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 
 .. autosummary::
    :toctree: api/
 
    Grouper
 
-.. currentmodule:: cudf.core.groupby.groupby
+.. currentmodule:: hipdf.core.groupby.groupby
 
 Function application
 --------------------

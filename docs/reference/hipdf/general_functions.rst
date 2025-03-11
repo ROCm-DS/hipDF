@@ -1,7 +1,7 @@
 =================
 General Functions
 =================
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 
 Data manipulations
 ------------------
@@ -9,26 +9,26 @@ Data manipulations
 .. autosummary::
    :toctree: api/
 
-   cudf.concat
-   cudf.crosstab
-   cudf.cut
-   cudf.factorize
-   cudf.get_dummies
-   cudf.melt
-   cudf.merge
-   cudf.pivot
-   cudf.pivot_table
-   cudf.unstack
+   hipdf.concat
+   hipdf.crosstab
+   hipdf.cut
+   hipdf.factorize
+   hipdf.get_dummies
+   hipdf.melt
+   hipdf.merge
+   hipdf.pivot
+   hipdf.pivot_table
+   hipdf.unstack
 
 Top-level conversions
 ---------------------
 .. autosummary::
    :toctree: api/
 
-    cudf.to_numeric
-    cudf.from_dataframe
-    cudf.from_dlpack
-    cudf.from_pandas
+    hipdf.to_numeric
+    hipdf.from_dataframe
+    hipdf.from_dlpack
+    hipdf.from_pandas
 
 Top-level dealing with datetimelike data
 ----------------------------------------
@@ -36,8 +36,8 @@ Top-level dealing with datetimelike data
 .. autosummary::
    :toctree: api/
 
-    cudf.to_datetime
-    cudf.date_range
+    hipdf.to_datetime
+    hipdf.date_range
 
 Top-level dealing with Interval data
 ------------------------------------
@@ -45,4 +45,4 @@ Top-level dealing with Interval data
 .. autosummary::
    :toctree: api/
 
-    cudf.interval_range
+    hipdf.interval_range

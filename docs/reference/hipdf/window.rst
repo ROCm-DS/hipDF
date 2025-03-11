@@ -4,13 +4,13 @@
 Window
 ======
 
-Rolling objects are returned by ``.rolling`` calls: :func:`cudf.DataFrame.rolling`, :func:`cudf.Series.rolling`, etc.
+Rolling objects are returned by ``.rolling`` calls: :func:`hipdf.DataFrame.rolling`, :func:`hipdf.Series.rolling`, etc.
 
 .. _api.functions_rolling:
 
 Rolling window functions
 ------------------------
-.. currentmodule:: cudf.core.window.rolling
+.. currentmodule:: hipdf.core.window.rolling
 
 .. autosummary::
    :toctree: api/

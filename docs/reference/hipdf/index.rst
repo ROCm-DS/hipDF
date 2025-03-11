@@ -3,7 +3,7 @@ API reference
 =============
 
 This page provides a list of all publicly accessible modules, methods and classes through
-``cudf.*`` namespace.
+``hipdf.*`` namespace.
 
 .. toctree::
     :maxdepth: 2

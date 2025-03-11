@@ -4,7 +4,7 @@ Index objects
 
 Index
 -----
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 
 **Many of these methods or variants thereof are available on the objects
 that contain an index (Series/DataFrame) and those should most likely be

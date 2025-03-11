@@ -1,7 +1,7 @@
 =========
 DataFrame
 =========
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 
 Constructor
 ~~~~~~~~~~~

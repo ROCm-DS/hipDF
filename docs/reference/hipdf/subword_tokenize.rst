@@ -1,7 +1,7 @@
 ================
 SubwordTokenizer
 ================
-.. currentmodule:: cudf.core.subword_tokenizer
+.. currentmodule:: hipdf.core.subword_tokenizer
 
 Constructor
 ~~~~~~~~~~~

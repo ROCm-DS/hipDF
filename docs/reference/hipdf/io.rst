@@ -3,7 +3,7 @@
 ============
 Input/output
 ============
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 
 CSV
 ~~~
@@ -35,10 +35,10 @@ Parquet
 
    read_parquet
    DataFrame.to_parquet
-   cudf.io.parquet.read_parquet_metadata
-   cudf.io.parquet.ParquetDatasetWriter
-   cudf.io.parquet.ParquetDatasetWriter.close
-   cudf.io.parquet.ParquetDatasetWriter.write_table
+   hipdf.io.parquet.read_parquet_metadata
+   hipdf.io.parquet.ParquetDatasetWriter
+   hipdf.io.parquet.ParquetDatasetWriter.close
+   hipdf.io.parquet.ParquetDatasetWriter.write_table
 
 
 ORC

@@ -1,7 +1,7 @@
 ======
 Series
 ======
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 
 Constructor
 -----------
@@ -263,7 +263,7 @@ Datetimelike properties
 datetimelike and return several properties.
 These can be accessed like ``Series.dt.<property>``.
 
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 .. autosummary::
    :toctree: api/
 
@@ -271,7 +271,7 @@ These can be accessed like ``Series.dt.<property>``.
 
 Datetime properties
 ^^^^^^^^^^^^^^^^^^^
-.. currentmodule:: cudf.core.series.DatetimeProperties
+.. currentmodule:: hipdf.core.series.DatetimeProperties
 
 .. autosummary::
    :toctree: api/
@@ -315,7 +315,7 @@ Datetime methods
 Timedelta properties
 ^^^^^^^^^^^^^^^^^^^^
 
-.. currentmodule:: cudf.core.series.TimedeltaProperties
+.. currentmodule:: hipdf.core.series.TimedeltaProperties
 .. autosummary::
    :toctree: api/
 
@@ -337,13 +337,13 @@ Categorical accessor
 Categorical-dtype specific methods and attributes are available under
 the ``Series.cat`` accessor.
 
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 .. autosummary::
    :toctree: api/
 
    Series.cat
 
-.. currentmodule:: cudf.core.column.categorical.CategoricalAccessor
+.. currentmodule:: hipdf.core.column.categorical.CategoricalAccessor
 .. autosummary::
    :toctree: api/
 
@@ -371,7 +371,7 @@ the ``Series.cat`` accessor.
     correct template (otherwise they would be created in the Series/Index class page)
 
 ..
-    .. currentmodule:: cudf
+    .. currentmodule:: hipdf
     .. autosummary::
        :toctree: api/
        :template: autosummary/accessor.rst
@@ -384,7 +384,7 @@ the ``Series.cat`` accessor.
 
 Serialization / IO / conversion
 -------------------------------
-.. currentmodule:: cudf
+.. currentmodule:: hipdf
 .. autosummary::
    :toctree: api/
 
