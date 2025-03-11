@@ -1,1 +1,4 @@
 rocm-docs-core==1.17.0
+autodoc
+pandas-compat
+# amd-hipdf # must be locally installed

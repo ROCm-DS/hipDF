@@ -130,11 +130,21 @@ nbformat==5.10.4
     #   nbclient
 nest-asyncio==1.6.0
     # via ipykernel
+<<<<<<< HEAD
 packaging==24.0
+=======
+numpy==2.2.3
+    # via pandas
+packaging==24.2
+>>>>>>> 17f1610adae (wipdocs(sphinx/requirements.*): + pandas-compat)
     # via
     #   ipykernel
     #   pydata-sphinx-theme
     #   sphinx
+pandas==2.2.3
+    # via pandas-compat
+pandas-compat==0.1.1
+    # via -r requirements.in
 parso==0.8.4
     # via jedi
 pexpect==4.9.0
@@ -168,8 +178,17 @@ pyjwt[crypto]==2.8.0
 pynacl==1.5.0
     # via pygithub
 python-dateutil==2.9.0.post0
+<<<<<<< HEAD
     # via jupyter-client
 pyyaml==6.0.1
+=======
+    # via
+    #   jupyter-client
+    #   pandas
+pytz==2025.1
+    # via pandas
+pyyaml==6.0.2
+>>>>>>> 17f1610adae (wipdocs(sphinx/requirements.*): + pandas-compat)
     # via
     #   jupyter-cache
     #   myst-nb
@@ -266,7 +285,9 @@ typing-extensions==4.12.2
     #   pygithub
     #   referencing
     #   sqlalchemy
-urllib3==2.2.2
+tzdata==2025.1
+    # via pandas
+urllib3==2.3.0
     # via
     #   pygithub
     #   requests
