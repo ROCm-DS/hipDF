@@ -50,7 +50,7 @@ The hipDF documentation is structured as follows:
 
   .. grid-item-card:: Reference
 
-    * :ref:`hipDF-reference`
+    * :ref:`hipDF-reference <./reference/hipdf/index.html>`
 
 To contribute to the documentation refer to `Contributing to ROCm  <https://rocm.docs.amd.com/en/latest/contribute/contributing.html>`_.
 

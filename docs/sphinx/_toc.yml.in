@@ -29,15 +29,10 @@ subtrees:
   entries: 
   - file: install/INSTALL.md
 
-- caption: How to
-  entries: 
-  - file: how-to/example-how-to.rst
-    title: How to topic
-
 - caption: Reference
   entries: 
-  - file: reference/example-reference.rst
-    title: Reference topic
+  - file: reference/hipdf/index.rst
+    title: hipDF API reference
 
 - caption: About
   entries:
