@@ -13,6 +13,12 @@
 ### Install ROCm
 
 We assume that you have a full ROCm installation on your system. [^rocm]
+In particular, please make sure that the following ROCm packages are installed:
+
+- `rocthrust-dev`
+- `hipcub`
+- `rocm-llvm-dev`
+
 In this guide we assume that you have installed ROCm to `/opt/rocm`.
 
 ### Install Conda
