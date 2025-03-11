@@ -12,7 +12,7 @@
 
 ### Install ROCm
 
-We assume that you have a full ROCm installation on your system. [^rocm]
+We assume that you have a full ROCm installation on your system (Ubuntu 22.04+, ROCm 6.4+). [^rocm]
 In particular, please make sure that the following ROCm packages are installed:
 
 - `rocthrust-dev`
