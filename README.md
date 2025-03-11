@@ -96,9 +96,10 @@ For additional examples, browse the complete [cuDF API documentation](https://do
 ### ROCm/GPU Requirements
 
 * ROCm HIP SDK compilers version 6.4+
-* Build requirements: `rocthrust-dev`, `rocm-llvm-dev`, `hipcub`
-* Runtime requirements: `rocm-llvm-dev`
+* Build requirements: `rocthrust-dev`, `rocm-llvm-dev`, `hipcub` (Ubuntu)
+* Runtime requirements: `rocm-llvm-dev` (Ubuntu)
 * Officially supported architecture (gfx90a, gfx942).
+* Ubuntu 22.04+
 
 <!-- ### CUDA/GPU requirements
 
