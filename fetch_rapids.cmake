@@ -33,6 +33,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # =============================================================================
+option(
+  RAPIDS_CMAKE_FROM_MODULE_PATH
+  "Do not fetch ROCmDS-CMake, assume it to be preinstalled and available via the CMAKE_MODULE_PATH."
+  $ENV{RAPIDS_CMAKE_FROM_MODULE_PATH}
+)
+if (RAPIDS_CMAKE_FROM_MODULE_PATH)
+  return()
+endif()
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS.cmake)
   if (DEFINED ENV{RAPIDS_CMAKE_SCRIPT_BRANCH})
     set(RAPIDS_CMAKE_SCRIPT_BRANCH "$ENV{RAPIDS_CMAKE_SCRIPT_BRANCH}")
