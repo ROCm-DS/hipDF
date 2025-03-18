@@ -1138,7 +1138,7 @@ class alignas(16) mutable_column_device_view : public detail::column_device_view
     return d_children[child_index];
   }
 
-#ifdef __CUDACC__  // because set_bit in bit.hpp is wrapped with __CUDACC__
+#if defined(__CUDACC__) || defined(__HIPCC__)  // because set_bit in bit.hpp is wrapped with __CUDACC__
   /**
    * @brief Updates the null mask to indicate that the specified element is
    * valid
