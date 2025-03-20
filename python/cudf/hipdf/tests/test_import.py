@@ -20,5 +20,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 def test_import_hipdf():
+    from hipdf._lib import groupby
+    from hipdf._lib import pylibcudf
+    from hipdf._lib import pylibhipdf
+    from hipdf.core import udf
+    from hipdf import core
+    from hipdf import _lib
+
     import hipdf
+    import hipdf.core.udf
+    import hipdf._lib.pylibcudf
+    import hipdf._lib.pylibhipdf
+    import hipdf._lib.pylibcudf
+    import hipdf._lib.nvtext
+    import hipdf._lib.hiptext
+
+def test_hipdf_attributes():
+    import hipdf
+    import cudf
+    assert hipdf.__version__ == cudf.__version__
