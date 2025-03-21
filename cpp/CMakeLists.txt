@@ -160,21 +160,32 @@ mark_as_advanced(CUDF_BUILD_STREAMS_TEST_UTIL)
 option(USE_LIBARROW_FROM_PYARROW "Use the libarrow contained within pyarrow." OFF)
 mark_as_advanced(USE_LIBARROW_FROM_PYARROW)
 
-if(CUDF_USE_WARPSIZE_32)
-message(WARNING "Support for warp size 32 is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
-
 list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx940" "gfx941" "gfx942"
                         "gfx90a:sramecc+:xnack-" "gfx908:sramecc+:xnack-"
                         "gfx940:sramecc+:xnack-" "gfx941:sramecc+:xnack-"
                         "gfx942:sramecc+:xnack-"
                         "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
                         "gfx942:xnack+")
+                    
+list(APPEND WS_32_ARCHS "gfx1100")
+
+if(CUDF_USE_WARPSIZE_32)
+message(WARNING "Support for warp size 32 is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
 
 foreach(arch ${CMAKE_HIP_ARCHITECTURES})
   if(${arch} IN_LIST WS_64_ARCHS)
     message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with warp size 32.")
   endif()
 endforeach()
+
+else()
+
+foreach(arch ${CMAKE_HIP_ARCHITECTURES})
+  if(${arch} IN_LIST WS_32_ARCHS)
+    message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported when building hipDF for warp size 64. Consider enabling the experimental flag CUDF_USE_WARPSIZE_32 (in CMake) or set --warpsize32 (build.sh) to proceed with the build.")
+  endif()
+endforeach()
+
 endif()
 
 message(VERBOSE "CUDF: Build with NVTX support: ${USE_NVTX}")
