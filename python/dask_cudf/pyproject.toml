@@ -43,7 +43,7 @@ license = { text = "Apache 2.0 AND MIT" }
 requires-python = ">=3.9"
 dependencies = [
     "amd-hipdf>=1.0,<2.0",
-    "amd-cupy-for-rocmds>=13.0.0.b1",
+    "amd-cupy>=13.0.0",
     "dask>=2023.0.0",
     "distributed", # TODO(HIP/AMD): AMD-AI/distributed@rocm-dev seems to be too old, causes problems
     #: "distributed @ git+https://github.com/AMD-AI/distributed@rocm-dev", TODO(HIP/AMD): causes trouble in some tests
