@@ -122,7 +122,7 @@ conda activate hipdf_dev
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
 
-pip install /tmp/hipdf/cupy/dist/amd-cupy-for-rocmds*.whl
+pip install /tmp/hipdf/cupy/dist/amd_cupy_for_rocmds*.whl
 ```
 
 #### Step 7: Install Numba HIP into `hipdf_dev`.
