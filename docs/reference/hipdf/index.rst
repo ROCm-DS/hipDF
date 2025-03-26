@@ -21,7 +21,11 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 
-.. _cudf-api:
+.. meta::
+  :description: hipDF documentation and API reference library
+  :keywords: hipDF, cuDF, Pandas, ROCm-DS, API, documentation
+
+.. _hipDF-reference:
 
 =============
 API reference
