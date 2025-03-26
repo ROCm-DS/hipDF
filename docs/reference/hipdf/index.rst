@@ -4,16 +4,15 @@
 
 .. _hipDF-reference:
 
-=============
-API reference
-=============
+===================
+hipDF API reference
+===================
 
 This page provides a list of all publicly accessible modules, methods and classes through
 ``hipdf.*`` namespace.
 
 .. toctree::
     :maxdepth: 2
-    :caption: API Documentation
 
     series
     dataframe

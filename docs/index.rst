@@ -1,6 +1,6 @@
 .. meta::
-  :description: rocGRAPH documentation and API reference library
-  :keywords: rocGRAPH, ROCm, API, documentation
+  :description: hipDF documentation and API reference library
+  :keywords: hipDF, cuDF, Pandas, ROCm-DS, API, documentation
 
 .. _hipDF-index:
 
@@ -8,9 +8,23 @@
 hipDF documentation
 ********************************************************************
 
-Built based on the `Apache Arrow <http://arrow.apache.org/>`_ columnar memory format, `hipDF` is a GPU DataFrame library for loading, joining, aggregating, filtering, and otherwise manipulating data.
+.. note::
+   hipDF is in an *early access* state. Running production workloads is **not** recommended.
 
-The code is open and hosted at: https://github.com/ROCm/hipDF
+Based on the `Apache Arrow <http://arrow.apache.org/>`_ columnar memory format,
+the `hipDF <https://github.com/ROCm-DS/hipDF>`_ library enables DataFrames that
+let you load and manipulate your data in the memory of AMD GPUs. Following a
+familiar Pandas-like API, hipDF lets you accelerate both your existing and new
+data science workloads on AMD GPUs with high-level functions that eliminate the
+need to go into low-level HIP programming.
+
+In addition to containing all of the necessary tools to build powerful new data
+processing applications, hipDF enables you to easily port your existing Pandas
+and cuDF workloads to AMD GPUs. hipDF is derived from the NVIDIA RAPIDS open
+source project cuDF.
+
+The hipDF code is open source and hosted at
+`github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
 
 The hipDF documentation is structured as follows:
 
@@ -21,13 +35,9 @@ The hipDF documentation is structured as follows:
 
     * `Install hipDF <./install/INSTALL.html>`_
 
-  .. grid-item-card:: How to
-
-    * :ref:`how-to-hipDF`
-
   .. grid-item-card:: Reference
 
-    * :ref:`hipDF-reference <./reference/hipdf/index.html>`
+    * :ref:`hipDF-reference`
 
 To contribute to the documentation refer to `Contributing to ROCm  <https://rocm.docs.amd.com/en/latest/contribute/contributing.html>`_.
 
