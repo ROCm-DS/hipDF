@@ -1,3 +1,9 @@
+.. meta::
+  :description: hipDF documentation and API reference library
+  :keywords: hipDF, cuDF, Pandas, ROCm-DS, API, documentation
+
+.. _hipDF-reference:
+
 =============
 API reference
 =============
