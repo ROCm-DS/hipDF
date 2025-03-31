@@ -231,6 +231,28 @@ export CUDF_CMAKE_HIP_ARCHITECTURES="gfx90a" # NOTE: adapt to your AMD GPU archi
 bash build.sh cudf # NOTE: the build target is called 'cudf'
 ```
 
+## Verify Successful Installation
+
+From the command line, run:
+```bash
+python3
+```
+
+and then run the following code snippet:
+```python3
+import hipdf
+print(hipdf.__version__)
+```
+
+You should see output that is similar to the following output:
+```
+Python 3.10.12 (main, Feb  4 2025, 14:57:36) [GCC 11.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import hipdf
+>>> print(hipdf.__version__)
+1.0.00b1
+```
+
 <!--References-->
 
 [^rocm]: <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>
