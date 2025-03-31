@@ -236,4 +236,5 @@ bash build.sh cudf # NOTE: the build target is called 'cudf'
 [^rocm]: <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>
 [^miniconda]: <https://docs.anaconda.com/miniconda/#>
 [^hip_python]: <https://rocm.docs.amd.com/projects/hip-python/en/latest/>
+[^cupy]: <https://github.com/ROCm/cupy>
 [^amd_package_index]: <https://pypi.amd.com/>
