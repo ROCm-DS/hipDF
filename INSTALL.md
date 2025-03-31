@@ -25,13 +25,44 @@
 # Installing hipDF
 
 > [!IMPORTANT]
-> We do not yet distribute prebuilt packages via Conda or PyPI for this project and its dependencies. So you need to build from source for now.
-> This documents walks you through all necessary steps.
-> For your convenience, we have also condensed these steps into the [install_hipdf.sh](install_hipdf.sh) script. Make sure to read it carefully and adapt the environment variables to your needs.
+> We do not yet distribute prebuilt packages via Conda for this project and its dependencies.
+> You either need to install hipDF via AMD-PyPI (recommended for regular users) or build and install it from source (for developers).
+
+## Install from AMD-PyPI
+
+Packaged versions of hipDF and its dependencies are available on AMD PyPI [^amd_package_index].
+
+### Requirements
+We assume that you have a full ROCm installation on your system (Ubuntu 22.04+, ROCm 6.4+). [^rocm]
+In particular, please make sure that the following ROCm package is installed:
+- `rocm-llvm-dev`
+
+Furthermore, we assume that Python 3.10 and pip are installed in your environment.
+
+### Installation into Conda Environment (optional)
+
+Although not mandatory, we highly recommend installing hipDF into a virtual Python conda environment.
+To this end, you may use Miniconda [^miniconda] to create and activate a minimal conda environment with preinstalled Python 3.10 as follows:
+
+```bash
+conda create --name hipdf python=3.10
+conda install -c conda-forge libstdcxx-ng # make sure that libstdcxx-ng>=13.2 is installed
+conda activate hipdf
+```
+
+Then, follow the subsequent steps to install hipDF.
+
+### Install hipDF via pip
+
+```bash
+pip3 install amd-hipdf --extra-index-url=https://pypi.amd.com
+```
 
 ## Install from Source
 
 > [!IMPORTANT]
+> The following section walks you through all necessary steps required for building hipDF from source.
+> For your convenience, we have also condensed these steps into the [install_hipdf.sh](install_hipdf.sh) script. Make sure to read it carefully and adapt the environment variables to your needs.
 > In this guide we are assuming a MI200 series GPU and thus use the architecture code `gfx90a` in our build steps. Adapt this to your needs.
 
 ### Install ROCm
@@ -205,4 +236,4 @@ bash build.sh cudf # NOTE: the build target is called 'cudf'
 [^rocm]: <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>
 [^miniconda]: <https://docs.anaconda.com/miniconda/#>
 [^hip_python]: <https://rocm.docs.amd.com/projects/hip-python/en/latest/>
-[^cupy]: <https://rocm.docs.amd.com/projects/hip-python/en/latest/>
+[^amd_package_index]: <https://pypi.amd.com/>
