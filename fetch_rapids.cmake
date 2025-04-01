@@ -33,15 +33,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # =============================================================================
-set(DEFAULT_RAPIDS_CMAKE_FROM_MODULE_PATH OFF)
-if(DEFINED ENV{RAPIDS_CMAKE_FROM_MODULE_PATH})
-  set(DEFAULT_RAPIDS_CMAKE_FROM_MODULE_PATH "$ENV{RAPIDS_CMAKE_FROM_MODULE_PATH}")
-endif()
-option(
-  RAPIDS_CMAKE_FROM_MODULE_PATH
-  "Do not fetch ROCmDS-CMake, assume it to be preinstalled and available via the CMAKE_MODULE_PATH."
-  ${DEFAULT_RAPIDS_CMAKE_FROM_MODULE_PATH}
-)
+option( RAPIDS_CMAKE_FROM_MODULE_PATH "Do not fetch ROCmDS-CMake, assume it to be preinstalled and available via the CMAKE_MODULE_PATH." $ENV{RAPIDS_CMAKE_FROM_MODULE_PATH} )
 if (RAPIDS_CMAKE_FROM_MODULE_PATH)
   return()
 endif()
