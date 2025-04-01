@@ -25,7 +25,7 @@
 # Installing hipDF
 
 > [!IMPORTANT]
-> We do not yet distribute prebuilt packages via Conda for this project and its dependencies.
+> hipDF and its dependencies are not distributed as prebuilt packages via Conda.
 > You either need to install hipDF via AMD-PyPI (recommended for regular users) or build and install it from source (for developers).
 
 ## Install from AMD-PyPI
@@ -33,16 +33,16 @@
 Packaged versions of hipDF and its dependencies are available on AMD PyPI [^amd_package_index].
 
 ### Requirements
-We assume that you have a full ROCm installation on your system (Ubuntu 22.04+, ROCm 6.4+). [^rocm]
-In particular, please make sure that the following ROCm package is installed:
+hipDF requires a full ROCm installation on your system (Ubuntu 22.04+, ROCm 6.4+). [^rocm]
+In particular, make sure that the following ROCm package is installed:
 - `rocm-llvm-dev`
 
-Furthermore, we assume that Python 3.10 and pip are installed in your environment.
+Python 3.10 and pip must be installed in your environment.
 
 ### Installation into Conda Environment (optional)
 
-Although not mandatory, we highly recommend installing hipDF into a virtual Python conda environment.
-To this end, you may use Miniconda [^miniconda] to create and activate a minimal conda environment with preinstalled Python 3.10 as follows:
+Although not required, the following instructions recommend installing hipDF into a virtual Python conda environment.
+You can use Miniconda [^miniconda] to create and activate a minimal conda environment with preinstalled Python 3.10 as follows:
 
 ```bash
 conda create --name hipdf python=3.10
@@ -62,8 +62,8 @@ pip3 install amd-hipdf --extra-index-url=https://pypi.amd.com
 
 > [!IMPORTANT]
 > The following section walks you through all necessary steps required for building hipDF from source.
-> For your convenience, we have also condensed these steps into the [install_hipdf.sh](install_hipdf.sh) script. Make sure to read it carefully and adapt the environment variables to your needs.
-> In this guide we are assuming a MI200 series GPU and thus use the architecture code `gfx90a` in our build steps. Adapt this to your needs.
+> For your convenience, these steps are available in the [install_hipdf.sh](install_hipdf.sh) script. Make sure to read it carefully and adapt the environment variables to your needs.
+> This guide assumes a MI200 series GPU and thus uses the architecture code `gfx90a` in the build steps. Adapt this to your needs.
 
 ### Install ROCm
 
