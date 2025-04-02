@@ -26,9 +26,10 @@
       "git_tag" : "v${version}"
     },
     "hipco" : {
-      "version" : "0.0.1",
+      "version" : "0.1.0",
       "git_url" : "https://github.com/ROCm/hipCollections",
-      "git_tag" : "branch-1.0.0-rocm-ds-25.03"
+      "git_tag" : "branch-1.0.0-rocm-ds-25.03",
+      "always_download": false
     },
     "hipmm" : {
       "version" : "1.0",
