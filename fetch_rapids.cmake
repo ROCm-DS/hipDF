@@ -33,8 +33,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # =============================================================================
-option( RAPIDS_CMAKE_FROM_MODULE_PATH "Do not fetch ROCmDS-CMake, assume it to be preinstalled and available via the CMAKE_MODULE_PATH." $ENV{RAPIDS_CMAKE_FROM_MODULE_PATH} )
-if (RAPIDS_CMAKE_FROM_MODULE_PATH)
+set( 
+  RAPIDS_CMAKE_MODULE_PATH
+  $ENV{RAPIDS_CMAKE_MODULE_PATH}
+  CACHE FILEPATH
+  "Announce that ROCmDS-CMake is available via the provided module path."  
+)
+if (NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
+  list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
+  include(rapids-cmake)  # ensure rapids-cmake-dir is set
   return()
 endif()
 if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS.cmake)
