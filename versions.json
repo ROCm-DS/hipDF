@@ -46,7 +46,8 @@
     "libhipcxx" : {
       "version" : "2.2.0",
       "git_url" : "https://github.com/ROCm/libhipcxx",
-      "git_tag" : "v2.2.0"
+      "git_tag" : "v2.2.0",
+      "always_download": false
     },
     "hipbench": {
       "version": "0.1",
