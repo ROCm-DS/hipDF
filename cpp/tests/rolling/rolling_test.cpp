@@ -1234,146 +1234,146 @@ TEST_F(RollingTestStrings, StringsUnsupportedOperators)
 }*/
 
 struct RollingTestUdf : public cudf::test::BaseFixture {
-  const std::string cuda_func{
-    R"***(
-      template <typename OutType, typename InType>
-      __device__ void CUDA_GENERIC_AGGREGATOR(OutType *ret, InType *in_col, cudf::size_type start,
-                                              cudf::size_type count) {
-        OutType val = 0;
-        for (cudf::size_type i = 0; i < count; i++) {
-          val += in_col[start + i];
+    const std::string cuda_func{
+      R"***(
+        template <typename OutType, typename InType>
+        __device__ void CUDA_GENERIC_AGGREGATOR(OutType *ret, InType *in_col, cudf::size_type start,
+                                                cudf::size_type count) {
+          OutType val = 0;
+          for (cudf::size_type i = 0; i < count; i++) {
+            val += in_col[start + i];
+          }
+          *ret = val;
         }
-        *ret = val;
-      }
-    )***"};
+      )***"};
 
-  std::string amd_llvm_ir_str = 
-    R"'''(
-; Function Attrs: convergent mustprogress noreturn nounwind
-define weak void @__cxa_pure_virtual() #0 {
-  call void @llvm.trap()
-  unreachable
-}
+    std::string amd_llvm_ir_str = 
+      R"'''(
+  ; Function Attrs: convergent mustprogress noreturn nounwind
+  define weak void @__cxa_pure_virtual() #0 {
+    call void @llvm.trap()
+    unreachable
+  }
 
-; Function Attrs: cold noreturn nounwind
-declare void @llvm.trap() #1
+  ; Function Attrs: cold noreturn nounwind
+  declare void @llvm.trap() #1
 
-; Function Attrs: convergent mustprogress noreturn nounwind
-define weak void @__cxa_deleted_virtual() #0 {
-  call void @llvm.trap()
-  unreachable
-}
+  ; Function Attrs: convergent mustprogress noreturn nounwind
+  define weak void @__cxa_deleted_virtual() #0 {
+    call void @llvm.trap()
+    unreachable
+  }
 
-; Function Attrs: convergent mustprogress nounwind
-define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, ptr %1, ptr %2, i64 %3, i64 %4, ptr %5, i64 %6, i64 %7) #2 {
-  %9 = alloca ptr, align 8, addrspace(5)
-  %10 = alloca ptr, align 8, addrspace(5)
-  %11 = alloca ptr, align 8, addrspace(5)
-  %12 = alloca i64, align 8, addrspace(5)
-  %13 = alloca i64, align 8, addrspace(5)
-  %14 = alloca ptr, align 8, addrspace(5)
-  %15 = alloca i64, align 8, addrspace(5)
-  %16 = alloca i64, align 8, addrspace(5)
-  %17 = alloca i64, align 8, addrspace(5)
-  %18 = alloca i32, align 4, addrspace(5)
-  %19 = alloca i32, align 4, addrspace(5)
-  %20 = addrspacecast ptr addrspace(5) %9 to ptr
-  %21 = addrspacecast ptr addrspace(5) %10 to ptr
-  %22 = addrspacecast ptr addrspace(5) %11 to ptr
-  %23 = addrspacecast ptr addrspace(5) %12 to ptr
-  %24 = addrspacecast ptr addrspace(5) %13 to ptr
-  %25 = addrspacecast ptr addrspace(5) %14 to ptr
-  %26 = addrspacecast ptr addrspace(5) %15 to ptr
-  %27 = addrspacecast ptr addrspace(5) %16 to ptr
-  %28 = addrspacecast ptr addrspace(5) %17 to ptr
-  %29 = addrspacecast ptr addrspace(5) %18 to ptr
-  store ptr %0, ptr %20, align 8, !tbaa !7
-  store ptr %1, ptr %21, align 8, !tbaa !7
-  store ptr %2, ptr %22, align 8, !tbaa !7
-  store i64 %3, ptr %23, align 8, !tbaa !11
-  store i64 %4, ptr %24, align 8, !tbaa !11
-  store ptr %5, ptr %25, align 8, !tbaa !7
-  store i64 %6, ptr %26, align 8, !tbaa !11
-  store i64 %7, ptr %27, align 8, !tbaa !11
-  call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) %17) #4
-  store i64 0, ptr %28, align 8, !tbaa !11
-  call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) %18) #4
-  store i32 0, ptr %29, align 4, !tbaa !13
-  br label %30
+  ; Function Attrs: convergent mustprogress nounwind
+  define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, ptr %1, ptr %2, i64 %3, i64 %4, ptr %5, i64 %6, i64 %7) #2 {
+    %9 = alloca ptr, align 8, addrspace(5)
+    %10 = alloca ptr, align 8, addrspace(5)
+    %11 = alloca ptr, align 8, addrspace(5)
+    %12 = alloca i64, align 8, addrspace(5)
+    %13 = alloca i64, align 8, addrspace(5)
+    %14 = alloca ptr, align 8, addrspace(5)
+    %15 = alloca i64, align 8, addrspace(5)
+    %16 = alloca i64, align 8, addrspace(5)
+    %17 = alloca i64, align 8, addrspace(5)
+    %18 = alloca i32, align 4, addrspace(5)
+    %19 = alloca i32, align 4, addrspace(5)
+    %20 = addrspacecast ptr addrspace(5) %9 to ptr
+    %21 = addrspacecast ptr addrspace(5) %10 to ptr
+    %22 = addrspacecast ptr addrspace(5) %11 to ptr
+    %23 = addrspacecast ptr addrspace(5) %12 to ptr
+    %24 = addrspacecast ptr addrspace(5) %13 to ptr
+    %25 = addrspacecast ptr addrspace(5) %14 to ptr
+    %26 = addrspacecast ptr addrspace(5) %15 to ptr
+    %27 = addrspacecast ptr addrspace(5) %16 to ptr
+    %28 = addrspacecast ptr addrspace(5) %17 to ptr
+    %29 = addrspacecast ptr addrspace(5) %18 to ptr
+    store ptr %0, ptr %20, align 8, !tbaa !7
+    store ptr %1, ptr %21, align 8, !tbaa !7
+    store ptr %2, ptr %22, align 8, !tbaa !7
+    store i64 %3, ptr %23, align 8, !tbaa !11
+    store i64 %4, ptr %24, align 8, !tbaa !11
+    store ptr %5, ptr %25, align 8, !tbaa !7
+    store i64 %6, ptr %26, align 8, !tbaa !11
+    store i64 %7, ptr %27, align 8, !tbaa !11
+    call void @llvm.lifetime.start.p5(i64 8, ptr addrspace(5) %17) #4
+    store i64 0, ptr %28, align 8, !tbaa !11
+    call void @llvm.lifetime.start.p5(i64 4, ptr addrspace(5) %18) #4
+    store i32 0, ptr %29, align 4, !tbaa !13
+    br label %30
 
-30:                                               ; preds = %45, %8
-  %31 = load i32, ptr %29, align 4, !tbaa !13
-  %32 = sext i32 %31 to i64
-  %33 = load i64, ptr %26, align 8, !tbaa !11
-  %34 = icmp slt i64 %32, %33
-  br i1 %34, label %36, label %35
+  30:                                               ; preds = %45, %8
+    %31 = load i32, ptr %29, align 4, !tbaa !13
+    %32 = sext i32 %31 to i64
+    %33 = load i64, ptr %26, align 8, !tbaa !11
+    %34 = icmp slt i64 %32, %33
+    br i1 %34, label %36, label %35
 
-35:                                               ; preds = %30
-  call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) %18) #4
-  br label %48
+  35:                                               ; preds = %30
+    call void @llvm.lifetime.end.p5(i64 4, ptr addrspace(5) %18) #4
+    br label %48
 
-36:                                               ; preds = %30
-  %37 = load ptr, ptr %25, align 8, !tbaa !7
-  %38 = load i32, ptr %29, align 4, !tbaa !13
-  %39 = sext i32 %38 to i64
-  %40 = getelementptr inbounds i32, ptr %37, i64 %39
-  %41 = load i32, ptr %40, align 4, !tbaa !13
-  %42 = sext i32 %41 to i64
-  %43 = load i64, ptr %28, align 8, !tbaa !11
-  %44 = add nsw i64 %43, %42
-  store i64 %44, ptr %28, align 8, !tbaa !11
-  br label %45
+  36:                                               ; preds = %30
+    %37 = load ptr, ptr %25, align 8, !tbaa !7
+    %38 = load i32, ptr %29, align 4, !tbaa !13
+    %39 = sext i32 %38 to i64
+    %40 = getelementptr inbounds i32, ptr %37, i64 %39
+    %41 = load i32, ptr %40, align 4, !tbaa !13
+    %42 = sext i32 %41 to i64
+    %43 = load i64, ptr %28, align 8, !tbaa !11
+    %44 = add nsw i64 %43, %42
+    store i64 %44, ptr %28, align 8, !tbaa !11
+    br label %45
 
-45:                                               ; preds = %36
-  %46 = load i32, ptr %29, align 4, !tbaa !13
-  %47 = add nsw i32 %46, 1
-  store i32 %47, ptr %29, align 4, !tbaa !13
-  br label %30, !llvm.loop !15
+  45:                                               ; preds = %36
+    %46 = load i32, ptr %29, align 4, !tbaa !13
+    %47 = add nsw i32 %46, 1
+    store i32 %47, ptr %29, align 4, !tbaa !13
+    br label %30, !llvm.loop !15
 
-48:                                               ; preds = %35
-  %49 = load i64, ptr %28, align 8, !tbaa !11
-  %50 = load ptr, ptr %20, align 8, !tbaa !7
-  store i64 %49, ptr %50, align 8, !tbaa !11
-  call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) %17) #4
-  ret void
-}
+  48:                                               ; preds = %35
+    %49 = load i64, ptr %28, align 8, !tbaa !11
+    %50 = load ptr, ptr %20, align 8, !tbaa !7
+    store i64 %49, ptr %50, align 8, !tbaa !11
+    call void @llvm.lifetime.end.p5(i64 8, ptr addrspace(5) %17) #4
+    ret void
+  }
 
-; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
-declare void @llvm.lifetime.start.p5(i64 immarg, ptr addrspace(5) nocapture) #3
+  ; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+  declare void @llvm.lifetime.start.p5(i64 immarg, ptr addrspace(5) nocapture) #3
 
-; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
-declare void @llvm.lifetime.end.p5(i64 immarg, ptr addrspace(5) nocapture) #3
+  ; Function Attrs: nocallback nofree nosync nounwind willreturn memory(argmem: readwrite)
+  declare void @llvm.lifetime.end.p5(i64 immarg, ptr addrspace(5) nocapture) #3
 
-attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #1 = { cold noreturn nounwind }
-attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
-attributes #3 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
-attributes #4 = { nounwind }
+  attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+  attributes #1 = { cold noreturn nounwind }
+  attributes #2 = { convergent mustprogress nounwind "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-cpu"="gfx90a" "target-features"="+16-bit-insts,+atomic-buffer-global-pk-add-f16-insts,+atomic-fadd-rtn-insts,+ci-insts,+dl-insts,+dot1-insts,+dot10-insts,+dot2-insts,+dot3-insts,+dot4-insts,+dot5-insts,+dot6-insts,+dot7-insts,+dpp,+gfx8-insts,+gfx9-insts,+gfx90a-insts,+mai-insts,+s-memrealtime,+s-memtime-inst,+wavefrontsize64" }
+  attributes #3 = { nocallback nofree nosync nounwind willreturn memory(argmem: readwrite) }
+  attributes #4 = { nounwind }
 
-!llvm.module.flags = !{!0, !1, !2, !3, !4}
-!llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
-!opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
+  !llvm.module.flags = !{!0, !1, !2, !3, !4}
+  !llvm.ident = !{!5, !5, !5, !5, !5, !5, !5, !5, !5, !5, !5}
+  !opencl.ocl.version = !{!6, !6, !6, !6, !6, !6, !6, !6, !6, !6}
 
-!0 = !{i32 4, !"amdgpu_hostcall", i32 1}
-!1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
-!2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
-!3 = !{i32 1, !"wchar_size", i32 4}
-!4 = !{i32 8, !"PIC Level", i32 2}
-!5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.2 24012 af27734ed982b52a9f1be0f035ac91726fc697e4)"}
-!6 = !{i32 2, i32 0}
-!7 = !{!8, !8, i64 0}
-!8 = !{!"any pointer", !9, i64 0}
-!9 = !{!"omnipotent char", !10, i64 0}
-!10 = !{!"Simple C++ TBAA"}
-!11 = !{!12, !12, i64 0}
-!12 = !{!"long long", !9, i64 0}
-!13 = !{!14, !14, i64 0}
-!14 = !{!"int", !9, i64 0}
-!15 = distinct !{!15, !16}
-!16 = !{!"llvm.loop.mustprogress"}
-  )'''";
+  !0 = !{i32 4, !"amdgpu_hostcall", i32 1}
+  !1 = !{i32 1, !"amdgpu_code_object_version", i32 600}
+  !2 = !{i32 1, !"amdgpu_printf_kind", !"hostcall"}
+  !3 = !{i32 1, !"wchar_size", i32 4}
+  !4 = !{i32 8, !"PIC Level", i32 2}
+  !5 = !{!"AMD clang version 17.0.0 (https://github.com/RadeonOpenCompute/llvm-project roc-6.0.2 24012 af27734ed982b52a9f1be0f035ac91726fc697e4)"}
+  !6 = !{i32 2, i32 0}
+  !7 = !{!8, !8, i64 0}
+  !8 = !{!"any pointer", !9, i64 0}
+  !9 = !{!"omnipotent char", !10, i64 0}
+  !10 = !{!"Simple C++ TBAA"}
+  !11 = !{!12, !12, i64 0}
+  !12 = !{!"long long", !9, i64 0}
+  !13 = !{!14, !14, i64 0}
+  !14 = !{!"int", !9, i64 0}
+  !15 = distinct !{!15, !16}
+  !16 = !{!"llvm.loop.mustprogress"}
+    )'''";
 
-  const std::string ptx_func{
+    const std::string ptx_func{
     R"***(
     //
     // Generated by NVIDIA NVVM Compiler
@@ -1518,7 +1518,6 @@ TEST_F(RollingTestUdf, DynamicWindow)
 
   CUDF_TEST_EXPECT_COLUMNS_EQUAL(*output, expected);
 
-  // Test PTX UDF
   auto ptx_udf_agg = cudf::make_udf_aggregation<cudf::rolling_aggregation>(
     cudf::udf_type::PTX, cudf::HIP_PLATFORM_AMD ? this->amd_llvm_ir_str : this->ptx_func, cudf::data_type{cudf::type_id::INT64});
   output = cudf::rolling_window(input, preceding, following, 2, *ptx_udf_agg);
