@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 # Copyright (c) 2022, NVIDIA CORPORATION.
-# Reports relevant environment information useful for diagnosing and
-# debugging cuDF issues.
-# Usage:
-# "./print_env.sh" - prints to stdout
-# "./print_env.sh > env.txt" - prints to file "env.txt"
 
 # MIT License
 #
-# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +22,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+# Reports relevant environment information useful for diagnosing and
+# debugging cuDF issues.
+# Usage:
+# "./print_env.sh" - prints to stdout
+# "./print_env.sh > env.txt" - prints to file "env.txt"
 
 print_env() {
 echo "**git***"
