@@ -24,6 +24,8 @@
 
 [ ! -d _venv ] && python3 -m venv _venv --system-site-packages # assumes amd-hipdf is installed here
 source _venv/bin/activate
+# pip list
 python3 -m pip install -r sphinx/requirements.txt
+python3 -m hipdf  # test if hipdf import works
 source build.sh
 deactivate
