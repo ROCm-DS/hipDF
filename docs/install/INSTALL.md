@@ -15,7 +15,7 @@ myst:
 ## Install from Source
 
 > **IMPORTANT:**
-> This guide assumes an MI200 series GPU and thus use the architecture code `gfx90a` as the build target (``HCC_AMDGPU_TARGET``). Customize this to your needs.
+> This guide assumes an AMD MI200 series GPU and thus uses the architecture code `gfx90a` as the build target (``HCC_AMDGPU_TARGET``). Customize this to your needs.
 
 ### Installation Procedure
 
@@ -35,16 +35,16 @@ You will perform the following steps:
 9. Install hipDF into `hipdf_dev`
 
 > **NOTE:**
-> Be aware that `install_hipdf.sh` script deviates slightly in the order of operations. One key difference is that it assumes that hipDF is already downloaded.
+> The `install_hipdf.sh` script deviates slightly in the order of operations. One key difference is that it assumes that hipDF is already downloaded.
 
 #### Step 1: Install ROCm
 
-You must have a full ROCm 6.4.0 (or later) installation on your system. [^rocm]
+You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](<https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>) for more information. 
 This guide assumes that the ROCm path is `/opt/rocm`.
 
 #### Step 2: Install Conda
 
-`hipDF` must be built inside of a predefined Conda environment to ensure that it is working properly. A minimum free version of Conda is Miniconda [^miniconda].
+`hipDF` must be built inside of a predefined Conda environment to ensure that it is working properly. A minimum free version of Conda is [Miniconda](https://docs.anaconda.com/miniconda/#).
 
 #### Cython and Python dependencies: CuPy, Numba HIP, hipMM, HIP Python, ROCm LLVM Python
 
@@ -134,8 +134,8 @@ pip install /tmp/hipdf/cupy/dist/amd-cupy*.whl
 
 #### Step 7: Install Numba HIP into `hipdf_dev`.
 
-> [!IMPORTANT]
-> You need to provide the version of your ROCm installation here via the optional dependency key `rocm-X-Y-Z`.
+> **IMPORTANT:**
+> You must provide the version of your ROCm installation here via the optional dependency key `rocm-X-Y-Z`.
 
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
@@ -163,10 +163,10 @@ Note that no architecture must be set here as the hipMM installation does not co
 #### Step 9: Install hipDF into `hipdf_dev`
 
 > **IMPORTANT:**
-> You need to provide one or more AMD GPU architectures here via
+> You must provide one or more AMD GPU architectures here via
 > the `CUDF_CMAKE_HIP_ARCHITECTURES` environment variable (separator: `;`).
 
-We install the `hipdf` Python package as shown below:
+Install the `hipdf` Python package as shown below:
 
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
@@ -190,9 +190,6 @@ You have just completed installing hipDF for use in the conda `hipdf_dev`
 environment. You must activate the `hipdf_env` before code like `import hipdf`
 will work.
 
-<!--References-->
-
-[^rocm]: <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>
-[^miniconda]: <https://docs.anaconda.com/miniconda/#>
-[^hip_python]: <https://rocm.docs.amd.com/projects/hip-python/en/latest/>
-[^cupy]: <https://rocm.docs.amd.com/projects/hip-python/en/latest/>
+```bash
+conda activate hipdf_dev
+```

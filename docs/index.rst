@@ -9,7 +9,7 @@ hipDF documentation
 ********************************************************************
 
 .. note::
-   hipDF is in an *early access* state. Running production workloads is **not** recommended.
+   hipDF is in an early access state. Running production workloads is not recommended.
 
 Based on the `Apache Arrow <http://arrow.apache.org/>`_ columnar memory format,
 the `hipDF <https://github.com/ROCm-DS/hipDF>`_ library enables DataFrames that
@@ -20,11 +20,10 @@ need to go into low-level HIP programming.
 
 In addition to containing all of the necessary tools to build powerful new data
 processing applications, hipDF enables you to easily port your existing Pandas
-and cuDF workloads to AMD GPUs. hipDF is derived from the NVIDIA RAPIDS open
-source project cuDF.
+and cuDF workloads to AMD GPUs. hipDF is derived from the NVIDIA RAPIDS™ open-source project cuDF.
 
-The hipDF code is open source and hosted at
-`github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
+The hipDF code is open and hosted at
+`https://github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
 
 The hipDF documentation is structured as follows:
 
