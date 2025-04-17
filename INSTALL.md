@@ -34,8 +34,12 @@ Packaged versions of hipDF and its dependencies are available on AMD PyPI [^amd_
 
 ### Requirements
 hipDF requires a full ROCm installation on your system (Ubuntu 22.04+, ROCm 6.4+). [^rocm]
-In particular, make sure that the following ROCm package is installed:
-- `rocm-llvm-dev`
+In particular, make sure that the following ROCm packages are installed (Ubuntu packages):
+- `hipblas`
+- `hipfft`
+- `hiprand`
+- `rocrand`
+- `hipsparse`
 
 Python 3.10 and pip must be installed in your environment.
 
@@ -55,7 +59,7 @@ Then, follow the subsequent steps to install hipDF.
 ### Install hipDF via pip
 
 ```bash
-pip3 install amd-hipdf --extra-index-url=https://pypi.amd.com
+pip3 install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com
 ```
 
 ## Install from Source
