@@ -94,10 +94,10 @@ git clone https://github.com/ROCm/cupy cupy -b rocmds/develop/13.4.x
 > [Release Compatibility](https://rocm.docs.amd.com/en/latest/compatibility/compatibility.html)
 > for supported GPU targets.
 
-To compile CuPy you need a legacy version of Cython. You must create the Conda
+You must create the Conda
 environment file (`cupy_dev.yaml`) as shown below. Place this file in the
 `/tmp/hipdf/cupy` folder. You can adapt the Python version to your installed
-version. However, you should not modify the Cython version.
+version.
 
 ```yaml
 # file: cupy.yaml
@@ -105,7 +105,6 @@ channels:
 - conda-forge
 dependencies:
 - python~=3.10.0 # NOTE: adapt to your needs, must match hipDF Python version
-- cython==0.29.35
 ```
 
 Then build the conda `cupy_dev` environment as follows:
