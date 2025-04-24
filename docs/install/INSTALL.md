@@ -195,8 +195,8 @@ Install the `hipdf` Python package as shown below:
 # IMPORTANT: conda env `hipdf_dev` must be active
 
 cd /tmp/hipdf/hipdf
-# export CXX="hipcc"  # Cython CXX compiler, adapt to your environment (This was set two steps up? Is it needed here?)
-# export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake (This was set two steps up...)
+export CXX="hipcc"  # Cython CXX compiler, adapt to your environment
+export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake
 
 export PARALLEL_LEVEL=16 # NOTE: number of build threads, adapt as needed
 
