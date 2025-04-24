@@ -199,7 +199,7 @@ pip install numba-hip[rocm-6-4-0]@git+https://github.com/rocm/numba-hip.git # NO
 
 #### Step 8: Install hipMM into `hipdf_dev`.
 
-Install the `hipMM` Python wheel using the hipMM `build.sh` script as shown below:
+Install the `amd-hipmm` Python wheel using the hipMM `build.sh` script as shown below:
 
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
@@ -218,7 +218,7 @@ Note that no architecture must be set here as the hipMM installation does not co
 > You must provide one or more AMD GPU architectures here via
 > the `CUDF_CMAKE_HIP_ARCHITECTURES` environment variable (separator: `;`).
 
-Install the `hipdf` Python package as shown below:
+Install the `amd-hipdf` Python package as shown below:
 
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
