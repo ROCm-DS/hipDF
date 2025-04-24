@@ -53,7 +53,7 @@ Python 3.10 and pip must be installed in your environment.
 ### Installation into Conda Environment (optional)
 
 Although not required, the following instructions recommend installing hipDF into a virtual Python conda environment.
-You can use Miniconda [^miniconda] to create and activate a minimal conda environment with preinstalled Python 3.10 as follows:
+You can use Miniconda [^miniconda], e.g., to create and activate a minimal conda environment with preinstalled Python 3.10 as follows:
 
 ```bash
 conda create --name hipdf python=3.10
