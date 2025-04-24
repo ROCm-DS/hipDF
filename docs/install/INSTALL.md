@@ -127,7 +127,7 @@ python3 setup.py --cupy-package-name amd-cupy bdist_wheel      # build the wheel
 ```
 
 > **NOTE:**
-> At this time you can deactivate the conda cup_dev environment using
+> At this time you can deactivate the conda cupy_dev environment using
 > `conda deactivate`, though it will be deactivated automatically when you
 > activate the next environment (`hipdf_dev`) in the following steps.
 
