@@ -123,7 +123,7 @@ git submodule update --init
 export CUPY_INSTALL_USE_HIP=1
 export ROCM_HOME=/opt/rocm        # NOTE: adapt to your environment
 export HCC_AMDGPU_TARGET="gfx90a" # NOTE: adapt to your AMD GPU architecture
-python3 setup.py --cupy-package-name amd-cupy-for-rocmds bdist_wheel      # build the wheel
+python3 setup.py --cupy-package-name amd-cupy bdist_wheel      # build the wheel
 ```
 
 > **NOTE:**
@@ -152,7 +152,7 @@ conda activate hipdf_dev
 ```bash
 # IMPORTANT: conda env `hipdf_dev` must be active
 
-pip install /tmp/hipdf/cupy/dist/amd-cupy*.whl
+pip install /tmp/hipdf/cupy/dist/amd_cupy*.whl
 ```
 
 #### Step 7: Install Numba HIP into `hipdf_dev`.
