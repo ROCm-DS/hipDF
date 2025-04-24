@@ -81,9 +81,9 @@ While the hipDF build process fetches C++ dependencies itself, it has Cython and
 ```bash
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
 cd /tmp/hipdf
-git clone https://github.com/ROCm-DS/hipDF hipdf -b branch-23.10
-git clone https://github.com/ROCm-DS/hipMM hipmm -b branch-23.12
-git clone https://github.com/ROCm-DS/cupy cupy -b aiss/cai-branch
+git clone https://github.com/ROCm-DS/hipDF hipdf -b release/1.0.x
+git clone https://github.com/ROCm-DS/hipMM hipmm -b release/1.0.x
+git clone https://github.com/ROCm/cupy cupy -b rocmds/develop/13.4.x
 ```
 
 #### Step 4: Create CuPy wheel
