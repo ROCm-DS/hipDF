@@ -21,6 +21,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# Requirements: conda, rocthrust-dev, hipcub, hipblas, hipblas-dev, hipfft, hipsparse, hiprand, rocsolver, rocrand-dev
+
+set -e
+set -x
+
 # ENV AMDGPU_TARGETS="gfx90a"
 # ENV BUILD_DIR="/build"
 # ENV FIND_CUDF_CPP="false"
@@ -36,6 +41,32 @@
 # ENV CUPY_BRANCH="rocmds/develop/13.4.x"
 # ENV HIPMM_URL="https://github.com/ROCm-DS/hipMM"
 # ENV HIPMM_BRANCH="release/1.0.x"
+
+export CMAKE_PREFIX_PATH=/opt/rocm/lib/cmake
+
+AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx90a"}
+BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
+
+BUILD_CUDF_PYTHON=${BUILD_CUDF_PYTHON:-"true"}
+BUILD_DASK_CUDF=${BUILD_DASK_CUDF:-"false"}
+BUILD_CUDF_KAFKA=${BUILD_CUDF_KAFKA:-"false"}
+
+CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
+
+CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
+CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
+
+NUMBA_URL=${NUMBA_URL:-"https://github.com/ROCm/numba-hip"}
+NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
+CUPY_URL=${CUPY_URL:-"https://github.com/ROCm/cupy"}
+CUPY_BRANCH=${CUPY_BRANCH:-"rocmds/develop/13.4.x"}
+HIPMM_URL=${HIPMM_URL:-"https://github.com/ROCm-DS/hipMM"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"release/1.0.x"}
+HIPDF_URL=${HIPDF_URL:-"https://github.com/ROCm-DS/hipDF"}
+HIPDF_BRANCH=${HIPDF_BRANCH:-"release/1.0.x"}
+
+# Step 1: Install ROCm
+# We assume that you have already installed ROCm into /opt/rocm
 
 # Helpers
 function __get_rocm_version_header() {
@@ -63,33 +94,6 @@ function get_rocm_version_linearized() {
   __get_rocm_version_linearized ${major} ${minor} ${patch}
 }
 
-# Requirements: conda, rocthrust-dev, hipcub, hipblas, hipfft 
-
-set -e
-set -x
-
-export CMAKE_PREFIX_PATH=/opt/rocm/lib/cmake
-
-AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx90a"}
-BUILD_DIR=${BUILD_DIR:-"/tmp/build"}
-
-BUILD_CUDF_PYTHON=${BUILD_CUDF_PYTHON:-"true"}
-BUILD_DASK_CUDF=${BUILD_DASK_CUDF:-"true"}
-BUILD_CUDF_KAFKA=${BUILD_CUDF_KAFKA:-"false"}
-
-CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
-
-CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
-CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
-
-NUMBA_URL=${NUMBA_URL:-"https://github.com/ROCm/numba-hip"}
-NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
-CUPY_URL=${CUPY_URL:-"https://github.com/ROCm/cupy"}
-CUPY_BRANCH=${CUPY_BRANCH:-"rocmds/develop/13.4.x"}
-HIPMM_URL=${HIPMM_URL:-"https://github.com/ROCm-DS/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"release/1.0.x"}
-
-
 # Identify ROCm version regardless of scenario (ROCm preinstalled on base image/BM)
 rocm_version_h=$(find $(hipconfig --path) -name "rocm_version.h")
 rocm_version_major=$(grep "ROCM_VERSION_MAJOR\s\+[0-9]\+" ${rocm_version_h} | grep -o "[0-9]\+")
@@ -103,21 +107,80 @@ if ((  $(get_rocm_version_linearized) < 60400 )); then
   exit -1
 fi
 
+# Step 2: Install Conda
+# We assume that you have already installed conda
+
 if [[ -z ${CONDA_PREFIX} ]]; then
   echo "Error: No conda installation found, please install and activate conda."
+  echo "If you have already installed conda, please set CONDA_PREFIX."
   exit -1
 fi
 
+. ${CONDA_PREFIX}/etc/profile.d/conda.sh
+
+# Step 3: Create build folder
+mkdir -p ${BUILD_DIR}
+cd ${BUILD_DIR}
+git clone ${HIPDF_URL} -b ${HIPDF_BRANCH}
+git clone ${HIPMM_URL} -b ${HIPMM_BRANCH}
+git clone ${CUPY_URL} -b ${CUPY_BRANCH}
+
+# Step 4: Create CuPy wheel
+cd ${BUILD_DIR}/cupy
+git submodule update --init
+cat << EOF > cupy_dev.yaml
+name: cupy_dev
+channels:
+- conda-forge
+dependencies:
+- python==3.10.0
+EOF
+
+conda env create -n cupy_dev -f cupy_dev.yaml
+conda activate cupy_dev
+  pip install --upgrade pip
+  export CUPY_INSTALL_USE_HIP=1
+  export ROCM_HOME=/opt/rocm
+  export HCC_AMDGPU_TARGET=${AMDGPU_TARGETS//;/,}
+  python3 setup.py --cupy-package-name amd-cupy bdist_wheel
+  CUPY_WHEEL=$(find ~+ -type f -name "*cupy*.whl")
+
+# Step 5: Create and activate hipDF Conda environment `hipdf_dev`.
+cd ${BUILD_DIR}/hipDF
+
+#prepare conda environment for hipdf build 
+conda env create --name hipdf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
+conda activate hipdf_dev
+  pip config set global.extra-index-url "https://test.pypi.org/simple"
+
+# Step 6: Install CuPy into `hipdf_dev`
+  pip install ${CUPY_WHEEL}
+
+# Step 7: Install Numba HIP into `hipdf_dev`.
+  pip install numba-hip[${ROCM_KEY}]@git+${NUMBA_URL}#${NUMBA_BRANCH}
+
+# Step 8: Install hipMM into `hipdf_dev`.
+cd ${BUILD_DIR}/hipMM
+export CXX=hipcc
+export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake
+bash build.sh rmm
+
+# Step 9: Install hipDF into `hipdf_dev`
+cd ${BUILD_DIR}/hipDF
+export LDFLAGS="-Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,--allow-shlib-undefined -Wl,-rpath,/lib/x86_64-linux-gnu/ -Wl,-rpath,${CONDA_PREFIX}/lib -Wl,-rpath-link,${CONDA_PREFIX}/lib -L${CONDA_PREFIX}/lib"
+export PARALLEL_LEVEL=16
+export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
+
 # determine installation components
-components=" libcudf " # these components are always build, optionally add "tests benchmarks" 
+components=" libcudf " # these components are always built, optionally add "tests benchmarks" 
 if [[ ${BUILD_CUDF_PYTHON} == "true" ]]; then
   components+=" cudf"
 fi
 if [[ ${BUILD_DASK_CUDF} == "true" ]]; then
-  components+=" libcudf cudf dask_cudf"
+  components+=" cudf dask_cudf"
 fi
 if [[ ${BUILD_CUDF_KAFKA} == "true" ]]; then
-  components+=" libcudf cudf libcudf_kafka cudf_kafka custreamz"
+  components+=" cudf libcudf_kafka cudf_kafka custreamz"
 fi
 
 if [[ ${CUDF_DEBUG_BUILD} == "true" ]]; then
@@ -141,66 +204,9 @@ if [ ! -z "${cmake_extra_args}" ]; then
   cmake_extra_args="--cmake-args=\"${cmake_extra_args}\""
 fi
 
-. ${CONDA_PREFIX}/etc/profile.d/conda.sh
+CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake bash build.sh ${components} ${cmake_extra_args}
 
-# assumes that the cwd is the hip root dir
-mkdir -p ${BUILD_DIR}/hipdf
-cp -r ./*  ${BUILD_DIR}/hipdf/
-conda env create --name hipdf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
-
-#build RMM from source
-cd ${BUILD_DIR}
-git clone ${HIPMM_URL} -b ${HIPMM_BRANCH}
-cd ${BUILD_DIR}/hipMM
-conda activate hipdf_dev
-pip install --upgrade pip
-pip config set global.extra-index-url "https://test.pypi.org/simple"
-
-pip install numba-hip[${ROCM_KEY}]@git+${NUMBA_URL}#${NUMBA_BRANCH} # install hip-python etc. dependencies
-CXX=hipcc CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake ./build.sh rmm
-
-#build cupy from source
-cd ${BUILD_DIR}
-git clone ${CUPY_URL} -b ${CUPY_BRANCH}
-cd ${BUILD_DIR}/cupy
-git submodule update --init
-cat << EOF > cupy_dev.yaml
-name: cupy_dev
-channels:
-- conda-forge
-dependencies:
-- python==3.10
-- cython==0.29.35
-EOF
-
-conda env create -n cupy_dev -f cupy_dev.yaml
-conda activate cupy_dev
-  pip install --upgrade pip
-  export CUPY_INSTALL_USE_HIP=1
-  export ROCM_HOME=/opt/rocm
-  export HCC_AMDGPU_TARGET=${AMDGPU_TARGETS//;/,}
-  python3 setup.py --cupy-package-name amd-cupy bdist_wheel
-  CUPY_WHEEL=$(find ~+ -type f -name "*cupy*.whl")
-
-# build hipdf
-cd ${BUILD_DIR}/hipdf
-  #prepare conda environment for hipdf build 
-  conda activate hipdf_dev
-    pip install --upgrade pip
-    pip config set global.extra-index-url "https://test.pypi.org/simple"
-
-    #add cupy custom build to conda environment
-    pip install ${CUPY_WHEEL}
-
-    #patch environment for internal issue 99
-    export LDFLAGS="-Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,--allow-shlib-undefined -Wl,-rpath,/lib/x86_64-linux-gnu/ -Wl,-rpath,/opt/conda/envs/hipdf_dev/lib -Wl,-rpath-link,/opt/conda/envs/hipdf_dev/lib -L/opt/conda/envs/hipdf_dev/lib"
-
-    #build hipdf python package
-    export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
-    cd ${BUILD_DIR}/hipdf
-    CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake bash build.sh ${components} ${cmake_extra_args}
-
-# remove build artifacts & cupy_dev helper env
-rm -rf ${BUILD_DIR}
+# Step 10: remove build artifacts & cupy_dev helper env
+# rm -rf ${BUILD_DIR}
 conda remove -n cupy_dev -y --all
 
