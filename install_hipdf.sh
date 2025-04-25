@@ -32,10 +32,10 @@
 # ENV CUDF_USE_PER_THREAD_DEFAULT_STREAM="false"
 # ENV NUMBA_URL="https://github.com/ROCm/numba-hip"
 # ENV NUMBA_BRANCH="dev"
-# ENV CUPY_URL="https://github.com/rocm/cupy"
-# ENV CUPY_BRANCH="aiss/cai-branch"
-# ENV HIPMM_URL="https://github.com/ROCm/hipMM"
-# ENV HIPMM_BRANCH="branch-1.0.0-rocm-ds-25.03"
+# ENV CUPY_URL="https://github.com/ROCm/cupy"
+# ENV CUPY_BRANCH="rocmds/develop/13.4.x"
+# ENV HIPMM_URL="https://github.com/ROCm-DS/hipMM"
+# ENV HIPMM_BRANCH="release/1.0.x"
 
 # Helpers
 function __get_rocm_version_header() {
@@ -84,10 +84,10 @@ CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"
 
 NUMBA_URL=${NUMBA_URL:-"https://github.com/ROCm/numba-hip"}
 NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
-CUPY_URL=${CUPY_URL:-"https://github.com/rocm/cupy"}
-CUPY_BRANCH=${CUPY_BRANCH:-"aiss/cai-branch"}
-HIPMM_URL=${HIPMM_URL:-"https://github.com/ROCm/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"branch-1.0.0-rocm-ds-25.03"}
+CUPY_URL=${CUPY_URL:-"https://github.com/ROCm/cupy"}
+CUPY_BRANCH=${CUPY_BRANCH:-"rocmds/develop/13.4.x"}
+HIPMM_URL=${HIPMM_URL:-"https://github.com/ROCm-DS/hipMM"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"release/1.0.x"}
 
 
 # Identify ROCm version regardless of scenario (ROCm preinstalled on base image/BM)
