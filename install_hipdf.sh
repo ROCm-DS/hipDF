@@ -45,6 +45,7 @@ set -x
 export CMAKE_PREFIX_PATH=/opt/rocm/lib/cmake
 
 AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx90a"}
+export RAPIDS_CMAKE_HIP_ARCHITECTURES="${AMDGPU_TARGETS}"
 BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
 
 BUILD_CUDF_PYTHON=${BUILD_CUDF_PYTHON:-"true"}
@@ -110,13 +111,10 @@ fi
 # Step 2: Install Conda
 # We assume that you have already installed conda
 
-if [[ -z ${CONDA_PREFIX} ]]; then
+if [[ -z ${CONDA_EXE} ]]; then
   echo "Error: No conda installation found, please install and activate conda."
-  echo "If you have already installed conda, please set CONDA_PREFIX."
   exit -1
 fi
-
-. ${CONDA_PREFIX}/etc/profile.d/conda.sh
 
 # Step 3: Create build folder
 mkdir -p ${BUILD_DIR}
@@ -148,7 +146,7 @@ conda activate cupy_dev
 # Step 5: Create and activate hipDF Conda environment `hipdf_dev`.
 cd ${BUILD_DIR}/hipDF
 
-#prepare conda environment for hipdf build 
+#prepare conda environment for hipdf build
 conda env create --name hipdf_dev --file conda/environments/all_rocm_arch-x86_64.yaml
 conda activate hipdf_dev
   pip config set global.extra-index-url "https://test.pypi.org/simple"
@@ -169,10 +167,10 @@ bash build.sh rmm
 cd ${BUILD_DIR}/hipDF
 export LDFLAGS="-Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,--allow-shlib-undefined -Wl,-rpath,/lib/x86_64-linux-gnu/ -Wl,-rpath,${CONDA_PREFIX}/lib -Wl,-rpath-link,${CONDA_PREFIX}/lib -L${CONDA_PREFIX}/lib"
 export PARALLEL_LEVEL=16
-export CUDF_CMAKE_HIP_ARCHITECTURES=${AMDGPU_TARGETS}
+export CUDF_CMAKE_HIP_ARCHITECTURES="${AMDGPU_TARGETS}"
 
 # determine installation components
-components=" libcudf " # these components are always built, optionally add "tests benchmarks" 
+components=" libcudf " # these components are always built, optionally add "tests benchmarks"
 if [[ ${BUILD_CUDF_PYTHON} == "true" ]]; then
   components+=" cudf"
 fi
@@ -209,4 +207,3 @@ CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake bash build.sh ${compo
 # Step 10: remove build artifacts & cupy_dev helper env
 # rm -rf ${BUILD_DIR}
 conda remove -n cupy_dev -y --all
-
