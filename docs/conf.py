@@ -42,10 +42,7 @@ external_projects_current_project = "hipDF"
 
 setting_all_article_info = True
 all_article_info_os = ["linux"]
-all_article_info_author = (
-    "Advanced Micro Devices, Inc."
-)
-all_article_info_date = _today.strftime(r"%Y-%m-%d")
+all_article_info_author = ""
 
 # specific settings override any general settings (eg: all_article_info_<field>)
 # TODO extend
