@@ -98,7 +98,7 @@ You will perform the following steps:
 
 #### Step 1: Install ROCm
 
-You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](<https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>) for more information. 
+You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](<https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>) for more information.
 This guide assumes that the ROCm path is `/opt/rocm`.
 
 #### Step 2: Install Conda

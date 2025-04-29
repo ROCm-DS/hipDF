@@ -21,7 +21,6 @@
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
 
-
 *******************************************************
 hipDF supported environments, features, and interfaces
 *******************************************************
@@ -38,13 +37,13 @@ There is no support for:
 * GPU direct storage (KvikIO, cuFile)
 * rocTX tracing
 
-Support is limited to C++ and Python interfaces. There is no official Java interface support. 
+Support is limited to C++ and Python interfaces. There is no official Java interface support.
 
-hipDF only supports features from cuDF 23.10. 
+hipDF only supports features from cuDF 23.10.
 
 There is no official support for:
 
 * Per-thread default stream (PTDS)
 * Integration with Dask hipDF or Dask HIP
 * Interoperability with Polars
-* The ``hipstreamz`` and ``hipdf_kafka`` Python packages 
+* The ``hipstreamz`` and ``hipdf_kafka`` Python packages

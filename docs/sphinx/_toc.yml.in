@@ -26,12 +26,12 @@ root: index
 subtrees:
 
 - caption: Install
-  entries: 
+  entries:
   - file: install/hipDF-support.rst
   - file: install/INSTALL.md
 
 - caption: Reference
-  entries: 
+  entries:
   - file: reference/hipdf/index.rst
     title: hipDF API reference
 
