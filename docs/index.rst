@@ -55,6 +55,7 @@ The hipDF documentation is structured as follows:
 
   .. grid-item-card:: Installation
 
+    * :doc:`hipDF supported environments, features, and interfaces <./install/hipDF-support>`
     * `Install hipDF <./install/INSTALL.html>`_
 
   .. grid-item-card:: Reference

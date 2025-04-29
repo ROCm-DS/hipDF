@@ -27,6 +27,7 @@ subtrees:
 
 - caption: Install
   entries: 
+  - file: install/hipDF-support.rst
   - file: install/INSTALL.md
 
 - caption: Reference
