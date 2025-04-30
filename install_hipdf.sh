@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env -S bash -i
 # MIT License
 #
 # Copyright (c) 2023-2025 Advanced Micro Devices, Inc.
@@ -25,6 +25,7 @@
 
 set -e
 set -x
+set +H # NOTE: Disables '!' style history substitution of 'bash' -i shell.
 
 # ENV AMDGPU_TARGETS="gfx942"
 # ENV BUILD_DIR="/build"
