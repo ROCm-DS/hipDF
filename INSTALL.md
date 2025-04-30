@@ -67,7 +67,8 @@ pip3 install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com/rocm-ds/s
 > [!IMPORTANT]
 > The following section walks you through all necessary steps for the build process.
 > For your convenience, these steps are contained in the [install_hipdf.sh](install_hipdf.sh) script. Read and edit the script carefully to adapt the environment variables for your installation.
-> This guide assumes an AMD MI200 series GPU and thus uses the architecture code `gfx90a` as the build target (``HCC_AMDGPU_TARGET``). Customize this to your needs.
+> These instructions use the AMD MI300 GPU and the gfx942 architecture. However, this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to any supported architecture.
+> See [hipDF supported environments, features, and interfaces](docs/install/hipDF-support.rst) for supported architectures.
 
 ### Installation Procedure
 
@@ -92,7 +93,7 @@ You will perform the following steps:
 
 #### Step 1: Install ROCm
 
-You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](<https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>) for more information. 
+You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](<https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>) for more information.
 This guide assumes that the ROCm path is `/opt/rocm`. In Ubuntu, you must have the following packages installed:
 
 - `hipblas`
@@ -112,7 +113,7 @@ This guide assumes that the ROCm path is `/opt/rocm`. In Ubuntu, you must have t
 
 While the hipDF build process fetches C++ dependencies itself, it has Cython and Python dependencies (CuPy, Numba HIP, hipMM, HIP Python, ROCm LLVM Python) that need to be installed into the hipDF Conda environment before you can build the project. The following diagram gives an overview:
 
-![hipDF Cython (build) and Python (runtime) dependencies.](../data/install/hipdf_cypy_deps.svg)
+![hipDF Cython (build) and Python (runtime) dependencies.](docs/data/install/hipdf_cypy_deps.svg)
 
 #### Step 3: Create build folder
 
@@ -160,7 +161,7 @@ pip install --upgrade pip # always recommended
 git submodule update --init
 export CUPY_INSTALL_USE_HIP=1
 export ROCM_HOME=/opt/rocm        # NOTE: adapt to your environment
-export HCC_AMDGPU_TARGET="gfx90a" # NOTE: adapt to your AMD GPU architecture
+export HCC_AMDGPU_TARGET="gfx942" # NOTE: adapt to your AMD GPU architecture
 python3 setup.py --cupy-package-name amd-cupy bdist_wheel      # build the wheel
 ```
 
@@ -240,7 +241,7 @@ export PARALLEL_LEVEL=16 # NOTE: number of build threads, adapt as needed
 
 export LDFLAGS="-Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,--allow-shlib-undefined -Wl,-rpath,/lib/x86_64-linux-gnu/ -Wl,-rpath,${CONDA_PREFIX}/lib -Wl,-rpath-link,${CONDA_PREFIX}/lib -L${CONDA_PREFIX}/lib"
 
-export CUDF_CMAKE_HIP_ARCHITECTURES="gfx90a" # NOTE: adapt to your AMD GPU architecture
+export CUDF_CMAKE_HIP_ARCHITECTURES="gfx942" # NOTE: adapt to your AMD GPU architecture
 
 bash build.sh libcudf cudf # NOTE: the build target is called 'cudf'
 ```
