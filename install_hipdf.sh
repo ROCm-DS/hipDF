@@ -26,7 +26,7 @@
 set -e
 set -x
 
-# ENV AMDGPU_TARGETS="gfx90a"
+# ENV AMDGPU_TARGETS="gfx942"
 # ENV BUILD_DIR="/build"
 # ENV FIND_CUDF_CPP="false"
 # ENV BUILD_CUDF_PYTHON="false"
@@ -44,7 +44,7 @@ set -x
 
 export CMAKE_PREFIX_PATH=/opt/rocm/lib/cmake
 
-AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx90a"}
+AMDGPU_TARGETS=${AMDGPU_TARGETS:-"gfx942"}
 export RAPIDS_CMAKE_HIP_ARCHITECTURES="${AMDGPU_TARGETS}"
 BUILD_DIR=${BUILD_DIR:-"/tmp/hipdf"}
 
