@@ -130,7 +130,7 @@ git clone https://github.com/ROCm/cupy cupy -b rocmds/develop/13.4.x
 > [!IMPORTANT]
 > You must provide one or more AMD GPU architectures here via the
 > `HCC_AMDGPU_TARGET` environment variable (separator: `,`). Refer to
-> [Release Compatibility](https://rocm.docs.amd.com/en/latest/compatibility/compatibility.html)
+> [Release Compatibility](https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html)
 > for supported GPU targets.
 
 You must create the Conda
