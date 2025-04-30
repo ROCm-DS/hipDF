@@ -66,7 +66,7 @@ Then, follow the subsequent steps to install hipDF.
 ### Install hipDF via pip
 
 ```bash
-pip3 install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com/rocm-ds/simple
+pip3 install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
 ```
 
 ## Install from Source
