@@ -37,23 +37,25 @@ myst:
 
 ## Install from AMD-PyPI
 
-Packaged versions of hipDF and its dependencies are available on AMD PyPI [^amd_package_index].
+Packaged versions of hipDF and its dependencies are available at [AMD PyPI](https://pypi.amd.com/simple).
 
 ### Requirements
-hipDF requires a full ROCm installation on your system (Ubuntu 22.04+, ROCm 6.4+). [^rocm]
-In particular, make sure that the following ROCm packages are installed (Ubuntu packages):
-- `hipblas`
-- `hipfft`
-- `hiprand`
-- `rocrand`
-- `hipsparse`
 
-Python 3.10 and pip must be installed in your environment.
+hipDF requires [ROCm 6.4 or later](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/) running on Ubuntu 22.04 or later with Python 3.10 and pip installed.
 
-### Installation into Conda Environment (optional)
+The following ROCm components must also be installed:
 
-Although not required, the following instructions recommend installing hipDF into a virtual Python conda environment.
-You can use Miniconda [^miniconda], e.g., to create and activate a minimal conda environment with preinstalled Python 3.10 as follows:
+- [hipBLAS](https://rocm.docs.amd.com/projects/hipBLAS/en/latest/index.html)
+- [hipFFT](https://rocm.docs.amd.com/projects/hipFFT/en/latest/index.html)
+- [hipRAND](https://rocm.docs.amd.com/projects/hipRAND/en/latest/index.html)
+- [rocRAND](https://rocm.docs.amd.com/projects/rocRAND/en/latest/index.html)
+- [hipSPARSE](https://rocm.docs.amd.com/projects/hipSPARSE/en/latest/)
+
+### Install into Conda Environment (optional)
+
+Although not required, it's recommended to install hipDF into a virtual Python conda environment.
+
+[Miniconda](https://docs.anaconda.com/miniconda/#) can be used to create and activate a minimal conda environment with preinstalled Python 3.10:
 
 ```bash
 conda create --name hipdf python=3.10
@@ -61,9 +63,7 @@ conda install -c conda-forge libstdcxx-ng # make sure that libstdcxx-ng>=13.2 is
 conda activate hipdf
 ```
 
-Then, follow the subsequent steps to install hipDF.
-
-### Install hipDF via pip
+hipDF can then be installed in this environment using pip:
 
 ```bash
 pip3 install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
@@ -98,7 +98,8 @@ You will perform the following steps:
 
 #### Step 1: Install ROCm
 
-You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](<https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>) for more information.
+You must have a full ROCm 6.4.0 or later installation on your system. See [ROCm installation for Linux](https://rocm.docs.amd.com/projects/install-on-linux/en/latest/) for more information.
+
 This guide assumes that the ROCm path is `/opt/rocm`.
 
 #### Step 2: Install Conda
