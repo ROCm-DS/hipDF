@@ -29,8 +29,8 @@ def validate_setup():
     import sys
     import importlib.metadata
 
-    # NOTE(HIP/AMD): Check for conflicting installations. 
-    # Currently, this will only work in some circumstances, e.g., 
+    # NOTE(HIP/AMD): Check for conflicting installations.
+    # Currently, this will only work in some circumstances, e.g.,
     # if hipdf is installed after cudf into the same environment.
     conflicts = [
             'cudf',
@@ -192,3 +192,87 @@ def validate_setup():
             )
     else:
         warnings.warn("No NVIDIA GPU detected")
+
+del validate_setup
+def validate_setup():
+    import os
+    import warnings
+    import importlib.metadata
+
+    # NOTE(HIP/AMD): Check for conflicting installations.
+    # Currently, this will only work in some circumstances, e.g.,
+    # if hipdf is installed after cudf into the same environment.
+    conflicts = [
+            'cudf',
+            'cudf-cu11',
+            'cudf-cu12']
+    conflicts_installed = [ conflict for conflict in conflicts
+                            if list(importlib.metadata.distributions(name=conflict))]
+
+    conflicts_installed = ', '.join(conflicts_installed)
+
+    if len(conflicts_installed)>0:
+      warnings.warn(
+        "The following conflicting packages were detected:\n"
+        f"{conflicts_installed}\n"
+        "HipDF may not work correctly, please fix your environment\n"
+        "by removing the conflicting packages and re-installing hipDF.\n"
+        )
+
+    # TODO: Remove the following check once we arrive at a solution for #4827
+    # This is a temporary workaround to unblock internal testing
+    # related issue: https://github.com/rapidsai/cudf/issues/4827
+    if (
+        "RAPIDS_NO_INITIALIZE" in os.environ
+        or "CUDF_NO_INITIALIZE" in os.environ
+        or "HIPDF_NO_INITIALIZE" in os.environ
+    ):
+        return
+
+    from cuda.cudart import cudaError_t
+
+    from rmm._cuda.gpu import (
+        CUDARuntimeError,
+        getDeviceCount,
+    )
+
+    from cudf.errors import UnsupportedCUDAError
+
+    notify_caller_errors = {
+        cudaError_t.cudaErrorInitializationError,
+        cudaError_t.cudaErrorInsufficientDriver,
+        cudaError_t.cudaErrorInvalidDeviceFunction,
+        cudaError_t.cudaErrorInvalidDevice,
+        #: cudaError_t.cudaErrorStartupFailure, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        cudaError_t.cudaErrorInvalidKernelImage,
+        cudaError_t.cudaErrorAlreadyAcquired,
+        cudaError_t.cudaErrorOperatingSystem,
+        #: cudaError_t.cudaErrorNotPermitted, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        cudaError_t.cudaErrorNotSupported,
+        #: cudaError_t.cudaErrorSystemNotReady, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        #: cudaError_t.cudaErrorSystemDriverMismatch, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        #: cudaError_t.cudaErrorCompatNotSupportedOnDevice, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        cudaError_t.cudaErrorDeviceUninitialized,
+        #: cudaError_t.cudaErrorTimeout, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+        cudaError_t.cudaErrorUnknown,
+        #: cudaError_t.cudaErrorApiFailureBase, #: TODO: HIP/AMD: not supported in HIP, enum hallucination fails for some reason
+    }
+
+    try:
+        gpus_count = getDeviceCount()
+    except CUDARuntimeError as e:
+        if e.status in notify_caller_errors:
+            raise e
+        # If there is no GPU detected, set `gpus_count` to -1
+        gpus_count = -1
+    except RuntimeError as e:
+        # getDeviceCount() can raise a RuntimeError
+        # when ``libcuda.so`` is missing.
+        # We don't want this to propagate up to the user.
+        warnings.warn(str(e))
+        return
+
+    if gpus_count > 0:
+        return
+    else:
+        warnings.warn("No AMD GPU detected")
