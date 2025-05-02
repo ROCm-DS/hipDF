@@ -1,0 +1,57 @@
+{
+  "packages" : {
+    "rocthrust" : {
+      "version" : "3.2.0",
+      "git_url" : "https://github.com/ROCm/rocThrust",
+      "git_tag" : "rocm-6.3.0"
+    },
+    "benchmark" : {
+      "version" : "1.8.0",
+      "git_url" : "https://github.com/google/benchmark.git",
+      "git_tag" : "v${version}"
+    },
+    "GTest" : {
+      "version" : "1.13.0",
+      "git_url" : "https://github.com/google/googletest.git",
+      "git_tag" : "v${version}"
+    },
+    "hipco" : {
+      "version" : "0.1.0",
+      "git_url" : "https://github.com/ROCm/hipCollections",
+      "git_tag" : "release/0.1.x",
+      "always_download": false
+    },
+    "hipmm" : {
+      "version" : "1.0.0",
+      "git_url" : "https://github.com/ROCm-DS/hipMM",
+      "git_tag" : "release/1.0.x",
+      "always_download": false
+    },
+    "hipcomp" : {
+      "version" : "2.2.0",
+      "git_url" : "https://github.com/ROCm/hipcomp-core",
+      "git_tag" : "release/2.2.x",
+      "always_download": false
+    },
+    "libhipcxx" : {
+      "version" : "2.2.0",
+      "git_url" : "https://github.com/ROCm/libhipcxx",
+      "git_tag" : "release/2.2.x",
+      "always_download": false
+    },
+    "hipbench": {
+      "version": "0.1",
+      "git_shallow": false,
+      "git_url": "https://github.com/ROCm/hipBench",
+      "git_tag": "release/0.1.x",
+      "always_download": false
+    },
+    "jitify-hip" : {
+      "version" : "0.0",
+      "git_url" : "https://github.com/ROCm/jitify",
+      "git_tag" : "release/0.0.x",
+      "git_shallow": true,
+      "always_download": false
+    }
+  }
+}

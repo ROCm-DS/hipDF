@@ -1,0 +1,102 @@
+#
+# Copyright (c) 2020-2023, NVIDIA CORPORATION. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# MIT License
+#
+# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+###
+# Build the image for cudf development environment.
+#
+# Arguments: CUDA_VERSION=11.X.Y
+#
+###
+ARG ROCM_VERSION=6.2
+ARG OS_RELEASE=22.04
+ARG TARGETPLATFORM=linux/amd64
+# TODO(HIP/AMD): enable multi-platform build
+FROM --platform=$TARGETPLATFORM rocm/dev-ubuntu-${OS_RELEASE}:${ROCM_VERSION}-complete
+ARG TOOLSET_VERSION=11
+
+### Install basic requirements
+# pin urllib3<2.0 for https://github.com/psf/requests/issues/6432
+RUN apt-get update && apt-get install -y  gcc-${TOOLSET_VERSION} openjdk-11-jdk python3 pip zlib1g-dev maven tar wget patch ninja-build git && \
+  python3 -m pip install requests 'urllib3<2.0'
+
+# Set environment variable to suppress interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Set build argument to handle conditional timezone setting
+ARG SET_TIMEZONE
+
+# Install sudo and tzdata if needed
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+
+# Check if SET_TIMEZONE is set and set the timezone accordingly
+RUN if [ ! -z "${SET_TIMEZONE}" ]; then \
+        TZ=Etc/UTC && \
+        ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
+        echo $TZ > /etc/timezone; \
+    fi
+
+# Install tzdata without unnecessary recommendations
+RUN apt-get install -y --no-install-recommends tzdata
+
+# Clean up to reduce image size
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+## pre-create the CMAKE_INSTALL_PREFIX folder, set writable by any user for Jenkins
+RUN mkdir -m 777 /usr/local/rapids /rapids
+
+ARG CMAKE_VERSION=3.26.4
+RUN cd /usr/local/ && wget --quiet https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz && \
+   tar zxf cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz && \
+   rm cmake-${CMAKE_VERSION}-linux-x86_64.tar.gz
+
+ENV PATH /usr/local/cmake-${CMAKE_VERSION}-linux-x86_64/bin:$PATH
+
+ARG CCACHE_VERSION=4.6
+RUN cd /tmp && wget --quiet https://github.com/ccache/ccache/releases/download/v${CCACHE_VERSION}/ccache-${CCACHE_VERSION}.tar.gz && \
+   tar zxf ccache-${CCACHE_VERSION}.tar.gz && \
+   rm ccache-${CCACHE_VERSION}.tar.gz && \
+   cd ccache-${CCACHE_VERSION} && \
+   mkdir build && \
+   cd build && \
+   cmake .. \
+         -DCMAKE_BUILD_TYPE=Release \
+         -DZSTD_FROM_INTERNET=ON \
+         -DREDIS_STORAGE_BACKEND=OFF && \
+      cmake --build . --parallel ${PARALLEL_LEVEL} --target install && \
+   cd ../.. && \
+   rm -rf ccache-${CCACHE_VERSION}

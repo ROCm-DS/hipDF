@@ -1,0 +1,204 @@
+/*
+ * Copyright (c) 2019-2023, NVIDIA CORPORATION.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <cudf/column/column.hpp>
+#include <cudf/column/column_factories.hpp>
+#include <cudf/detail/nvtx/ranges.hpp>
+#include <cudf/strings/detail/strings_column_factories.cuh>
+#include <cudf/strings/detail/utilities.cuh>
+#include <cudf/utilities/default_stream.hpp>
+#include <cudf/utilities/error.hpp>
+#include <cudf/utilities/span.hpp>
+
+#include <rmm/cuda_stream_view.hpp>
+#include <rmm/exec_policy.hpp>
+
+#include <thrust/iterator/transform_iterator.h>
+#include <thrust/pair.h>
+
+namespace cudf {
+
+namespace {
+struct string_view_to_pair {
+  string_view null_placeholder;
+  string_view_to_pair(string_view n) : null_placeholder(n) {}
+  __host__ __device__ thrust::pair<char const*, size_type> operator()(string_view const& i)
+  {
+    return (i.data() == null_placeholder.data())
+             ? thrust::pair<char const*, size_type>{nullptr, 0}
+             : thrust::pair<char const*, size_type>{i.data(), i.size_bytes()};
+  }
+};
+
+}  // namespace
+
+// Create a strings-type column from vector of pointer/size pairs
+std::unique_ptr<column> make_strings_column(
+  device_span<thrust::pair<char const*, size_type> const> strings,
+  rmm::cuda_stream_view stream,
+  rmm::mr::device_memory_resource* mr)
+{
+  CUDF_FUNC_RANGE();
+
+  return cudf::strings::detail::make_strings_column(strings.begin(), strings.end(), stream, mr);
+}
+
+std::unique_ptr<column> make_strings_column(device_span<char> chars,
+                                            device_span<size_type> offsets,
+                                            size_type null_count,
+                                            rmm::device_buffer&& null_mask,
+                                            rmm::cuda_stream_view stream,
+                                            rmm::mr::device_memory_resource* mr)
+{
+  CUDF_FUNC_RANGE();
+
+  return cudf::strings::detail::make_strings_column(chars.begin(),
+                                                    chars.end(),
+                                                    offsets.begin(),
+                                                    offsets.end(),
+                                                    null_count,
+                                                    std::move(null_mask),
+                                                    stream,
+                                                    mr);
+}
+
+std::unique_ptr<column> make_strings_column(device_span<string_view const> string_views,
+                                            string_view null_placeholder,
+                                            rmm::cuda_stream_view stream,
+                                            rmm::mr::device_memory_resource* mr)
+{
+  CUDF_FUNC_RANGE();
+
+  auto it_pair =
+    thrust::make_transform_iterator(string_views.begin(), string_view_to_pair{null_placeholder});
+  return cudf::strings::detail::make_strings_column(
+    it_pair, it_pair + string_views.size(), stream, mr);
+}
+
+// Create a strings-type column from device vector of chars and vector of offsets.
+std::unique_ptr<column> make_strings_column(cudf::device_span<char const> strings,
+                                            cudf::device_span<size_type const> offsets,
+                                            cudf::device_span<bitmask_type const> valid_mask,
+                                            size_type null_count,
+                                            rmm::cuda_stream_view stream,
+                                            rmm::mr::device_memory_resource* mr)
+{
+  CUDF_FUNC_RANGE();
+
+  // build null bitmask
+  rmm::device_buffer null_mask{
+    valid_mask.data(), valid_mask.size() * sizeof(bitmask_type), stream, mr};
+
+  return cudf::strings::detail::make_strings_column(strings.begin(),
+                                                    strings.end(),
+                                                    offsets.begin(),
+                                                    offsets.end(),
+                                                    null_count,
+                                                    std::move(null_mask),
+                                                    stream,
+                                                    mr);
+}
+
+//
+std::unique_ptr<column> make_strings_column(size_type num_strings,
+                                            std::unique_ptr<column> offsets_column,
+                                            std::unique_ptr<column> chars_column,
+                                            size_type null_count,
+                                            rmm::device_buffer&& null_mask)
+{
+  CUDF_FUNC_RANGE();
+
+  if (null_count > 0) CUDF_EXPECTS(null_mask.size() > 0, "Column with nulls must be nullable.");
+  CUDF_EXPECTS(num_strings == offsets_column->size() - 1,
+               "Invalid offsets column size for strings column.");
+  CUDF_EXPECTS(offsets_column->null_count() == 0, "Offsets column should not contain nulls");
+  CUDF_EXPECTS(chars_column->null_count() == 0, "Chars column should not contain nulls");
+
+  std::vector<std::unique_ptr<column>> children;
+  children.emplace_back(std::move(offsets_column));
+  children.emplace_back(std::move(chars_column));
+  return std::make_unique<column>(data_type{type_id::STRING},
+                                  num_strings,
+                                  rmm::device_buffer{},
+                                  std::move(null_mask),
+                                  null_count,
+                                  std::move(children));
+}
+
+std::unique_ptr<column> make_strings_column(size_type num_strings,
+                                            rmm::device_uvector<size_type>&& offsets,
+                                            rmm::device_uvector<char>&& chars,
+                                            rmm::device_buffer&& null_mask,
+                                            size_type null_count)
+{
+  CUDF_FUNC_RANGE();
+
+  auto const offsets_size = static_cast<size_type>(offsets.size());
+  auto const chars_size   = static_cast<size_type>(chars.size());
+
+  if (null_count > 0) CUDF_EXPECTS(null_mask.size() > 0, "Column with nulls must be nullable.");
+
+  CUDF_EXPECTS(num_strings == offsets_size - 1, "Invalid offsets column size for strings column.");
+
+  auto offsets_column = std::make_unique<column>(  //
+    data_type{type_id::INT32},
+    offsets_size,
+    offsets.release(),
+    rmm::device_buffer(),
+    0);
+
+  auto chars_column = std::make_unique<column>(  //
+    data_type{type_id::INT8},
+    chars_size,
+    chars.release(),
+    rmm::device_buffer(),
+    0);
+
+  auto children = std::vector<std::unique_ptr<column>>();
+
+  children.emplace_back(std::move(offsets_column));
+  children.emplace_back(std::move(chars_column));
+
+  return std::make_unique<column>(data_type{type_id::STRING},
+                                  num_strings,
+                                  rmm::device_buffer{},
+                                  std::move(null_mask),
+                                  null_count,
+                                  std::move(children));
+}
+
+}  // namespace cudf

@@ -1,0 +1,18 @@
+defaults:
+  numbered: False
+root: index
+subtrees:
+
+- caption: Install
+  entries:
+  - file: install/hipDF-support.rst
+  - file: install/INSTALL.md
+
+- caption: Reference
+  entries:
+  - file: reference/hipdf/index.rst
+    title: hipDF API reference
+
+- caption: About
+  entries:
+  - file: license.md
