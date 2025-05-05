@@ -41,7 +41,7 @@ hipDF requires ROCm 6.4.0 or later running on Ubuntu 22.04 or later.
 See {doc}`hipDF supported environments, features, and interfaces <./hipDF-support>`
 for more details, including supported GPU architectures.
 
-If you decide to build the hipDF dependency CuPy from source, the following ROCm components must be installed:
+The following ROCm components must be installed:
 
 - [hipBLAS](https://rocm.docs.amd.com/projects/hipBLAS/en/latest/index.html)
 - [hipFFT](https://rocm.docs.amd.com/projects/hipFFT/en/latest/index.html)
@@ -142,14 +142,36 @@ pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
 > this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
 > {doc}`any supported architecture <./hipDF-support>`.
 
-1. Clone CuPy into the work directory:
+1. In order to build CuPy from source, you will not only require the library
+   packages (`hipblas`, `hipfft`, ...) but also additional development packages
+   (`-dev` suffix on Ubuntu). Please ensure they are installed.
+
+   Typical install command (may require super user privileges):
+
+   ```bash
+   apt-get update
+
+   apt install -y rocthrust-dev hipcub hipblas \
+                  hipblas-dev hipfft hipsparse \
+                  hiprand rocsolver rocrand-dev
+   ```
+
+   > **NOTE:**
+   > Some ROCm installations may require that you append the ROCm version
+   > as suffix to the package names (example: `hipblas-dev6.4.0`). You can
+   > understand what to do via the `rocm-core` package, which will be installed
+   > for any ROCm installation. Check if the installed `rocm-core` package has
+   > the ROCm version as suffix via `apt list`, then install the CuPy build
+   > dependencies accordingly.
+
+2. Clone CuPy into the work directory:
 
    ```bash
    cd /tmp/hipdf
    git clone https://github.com/ROCm/cupy cupy -b rocmds/develop/13.4.x
    ```
 
-2. Build and install the CuPy wheel:
+3. Build and install the CuPy wheel:
 
    ```bash
    cd /tmp/hipdf
