@@ -1,0 +1,134 @@
+﻿hipdf.MultiIndex
+================
+
+.. currentmodule:: hipdf
+
+.. autoclass:: MultiIndex
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~MultiIndex.__init__
+      ~MultiIndex.abs
+      ~MultiIndex.all
+      ~MultiIndex.any
+      ~MultiIndex.append
+      ~MultiIndex.argsort
+      ~MultiIndex.astype
+      ~MultiIndex.copy
+      ~MultiIndex.deserialize
+      ~MultiIndex.device_deserialize
+      ~MultiIndex.device_serialize
+      ~MultiIndex.difference
+      ~MultiIndex.dot
+      ~MultiIndex.drop_duplicates
+      ~MultiIndex.droplevel
+      ~MultiIndex.dropna
+      ~MultiIndex.duplicated
+      ~MultiIndex.equals
+      ~MultiIndex.factorize
+      ~MultiIndex.fillna
+      ~MultiIndex.find_label_range
+      ~MultiIndex.from_arrow
+      ~MultiIndex.from_frame
+      ~MultiIndex.from_pandas
+      ~MultiIndex.from_product
+      ~MultiIndex.from_tuples
+      ~MultiIndex.get_level_values
+      ~MultiIndex.get_loc
+      ~MultiIndex.get_slice_bound
+      ~MultiIndex.head
+      ~MultiIndex.host_deserialize
+      ~MultiIndex.host_serialize
+      ~MultiIndex.intersection
+      ~MultiIndex.is_boolean
+      ~MultiIndex.is_categorical
+      ~MultiIndex.is_floating
+      ~MultiIndex.is_integer
+      ~MultiIndex.is_interval
+      ~MultiIndex.is_numeric
+      ~MultiIndex.is_object
+      ~MultiIndex.isin
+      ~MultiIndex.isna
+      ~MultiIndex.isnull
+      ~MultiIndex.join
+      ~MultiIndex.kurt
+      ~MultiIndex.kurtosis
+      ~MultiIndex.mask
+      ~MultiIndex.max
+      ~MultiIndex.mean
+      ~MultiIndex.median
+      ~MultiIndex.memory_usage
+      ~MultiIndex.min
+      ~MultiIndex.nans_to_nulls
+      ~MultiIndex.notna
+      ~MultiIndex.notnull
+      ~MultiIndex.nunique
+      ~MultiIndex.pipe
+      ~MultiIndex.prod
+      ~MultiIndex.product
+      ~MultiIndex.rename
+      ~MultiIndex.repeat
+      ~MultiIndex.rolling
+      ~MultiIndex.searchsorted
+      ~MultiIndex.serialize
+      ~MultiIndex.set_names
+      ~MultiIndex.shift
+      ~MultiIndex.skew
+      ~MultiIndex.sort_values
+      ~MultiIndex.std
+      ~MultiIndex.sum
+      ~MultiIndex.swaplevel
+      ~MultiIndex.tail
+      ~MultiIndex.take
+      ~MultiIndex.to_arrow
+      ~MultiIndex.to_cupy
+      ~MultiIndex.to_dlpack
+      ~MultiIndex.to_frame
+      ~MultiIndex.to_hdf
+      ~MultiIndex.to_json
+      ~MultiIndex.to_list
+      ~MultiIndex.to_numpy
+      ~MultiIndex.to_pandas
+      ~MultiIndex.to_series
+      ~MultiIndex.to_string
+      ~MultiIndex.tolist
+      ~MultiIndex.union
+      ~MultiIndex.unique
+      ~MultiIndex.var
+      ~MultiIndex.where
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MultiIndex.codes
+      ~MultiIndex.dtype
+      ~MultiIndex.empty
+      ~MultiIndex.has_duplicates
+      ~MultiIndex.hasnans
+      ~MultiIndex.is_monotonic
+      ~MultiIndex.is_monotonic_decreasing
+      ~MultiIndex.is_monotonic_increasing
+      ~MultiIndex.is_unique
+      ~MultiIndex.levels
+      ~MultiIndex.name
+      ~MultiIndex.names
+      ~MultiIndex.ndim
+      ~MultiIndex.nlevels
+      ~MultiIndex.shape
+      ~MultiIndex.size
+      ~MultiIndex.str
+      ~MultiIndex.values
+      ~MultiIndex.values_host
+   
+   
