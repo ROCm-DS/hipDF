@@ -1,0 +1,88 @@
+/*
+ * Copyright (c) 2020-2023, NVIDIA CORPORATION.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <cudf/column/column_device_view.cuh>
+#include <cudf/column/column_view.hpp>
+#include <cudf/detail/copy.hpp>
+#include <cudf/detail/iterator.cuh>
+#include <cudf/reduction/detail/reduction_functions.hpp>
+
+#include <rmm/cuda_stream_view.hpp>
+#include <rmm/device_uvector.hpp>
+#include <rmm/exec_policy.hpp>
+
+#include <thrust/binary_search.h>
+#include <thrust/iterator/transform_iterator.h>
+#include <thrust/scan.h>
+
+namespace cudf::reduction::detail {
+
+std::unique_ptr<cudf::scalar> nth_element(column_view const& col,
+                                          size_type n,
+                                          null_policy null_handling,
+                                          rmm::cuda_stream_view stream,
+                                          rmm::mr::device_memory_resource* mr)
+{
+  CUDF_EXPECTS(n >= -col.size() and n < col.size(), "Index out of bounds");
+  auto wrap_n = [n](size_type size) { return (n < 0 ? size + n : n); };
+  if (null_handling == null_policy::EXCLUDE and col.has_nulls()) {
+    auto valid_count = col.size() - col.null_count();
+    n                = wrap_n(valid_count);
+    CUDF_EXPECTS(n >= 0 and n < valid_count, "Index out of bounds");
+    auto dcol = column_device_view::create(col, stream);
+    auto bitmask_iterator =
+      thrust::make_transform_iterator(cudf::detail::make_validity_iterator(*dcol),
+                                      [] __device__(auto b) { return static_cast<size_type>(b); });
+    rmm::device_uvector<size_type> null_skipped_index(col.size(), stream);
+    // null skipped index for valids only.
+    thrust::inclusive_scan(rmm::exec_policy(stream),
+                           bitmask_iterator,
+                           bitmask_iterator + col.size(),
+                           null_skipped_index.begin());
+
+    auto n_pos = thrust::upper_bound(
+      rmm::exec_policy(stream),
+      null_skipped_index.begin(), null_skipped_index.end(), n);
+    auto null_skipped_n = n_pos - null_skipped_index.begin();
+    return cudf::detail::get_element(col, null_skipped_n, stream, mr);
+  } else {
+    n = wrap_n(col.size());
+    return cudf::detail::get_element(col, n, stream, mr);
+  }
+}
+
+}  // namespace cudf::reduction::detail

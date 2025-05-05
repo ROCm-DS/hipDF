@@ -1,0 +1,21 @@
+digraph hipdf_deps {
+    node [shape=rectangle];
+    label=< <b> HipDF Cython (build) and Python (runtime) dependencies </b> >
+    labelloc = "top"
+
+    hipDF [label="hipDF",URL="https://github.com/ROCm/hipDF",tooltip="https://github.com/ROCm/hipDF"];
+    hipMM [label="hipMM",URL="https://github.com/ROCm/hipMM",tooltip="https://github.com/ROCm/hipMM"];
+    CuPy [label="CuPy",URL="https://github.com/ROCm/CuPy/tree/aiss/cai-branch",tooltip="https://github.com/ROCm/Cupy/tree/aiss/cai-branch"];
+    NumbaHIP [label="Numba HIP",URL="https://github.com/ROCm/numba-hip",tooltip="https://github.com/ROCm/numba-hip"];
+    HIPPython [label="HIP Python",URL="https://github.com/ROCm/hip-python",tooltip="https://github.com/ROCm/hip-python"];
+    ROCMLLVMPython [label="ROCM LLVM Python",URL="https://github.com/ROCm/rocm-llvm-python",tooltip="https://github.com/ROCm/rocm-llvm-python"];
+
+    hipDF -> hipMM [label="Cython+Python"];
+    hipDF -> NumbaHIP [label="Python"];
+    hipMM -> NumbaHIP [label="Python"];
+    hipDF -> CuPy [label="Python"];
+    hipDF -> HIPPython [label="Cython+Python"];
+    hipMM -> HIPPython [label="Cython+Python"];
+    NumbaHIP -> HIPPython [label="Python"];
+    NumbaHIP -> ROCMLLVMPython [label="Python"];
+}

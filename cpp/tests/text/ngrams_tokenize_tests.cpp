@@ -1,0 +1,148 @@
+/*
+ * Copyright (c) 2020-2023, NVIDIA CORPORATION.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+#include <cudf/column/column.hpp>
+#include <cudf/scalar/scalar.hpp>
+#include <cudf/strings/strings_column_view.hpp>
+#include <nvtext/ngrams_tokenize.hpp>
+
+#include <cudf_test/base_fixture.hpp>
+#include <cudf_test/column_utilities.hpp>
+#include <cudf_test/column_wrapper.hpp>
+
+#include <thrust/iterator/transform_iterator.h>
+
+#include <vector>
+
+struct TextNgramsTokenizeTest : public cudf::test::BaseFixture {};
+
+TEST_F(TextNgramsTokenizeTest, Tokenize)
+{
+  std::vector<char const*> h_strings{"the fox jumped over the dog",
+                                     "the dog chased  the cat",
+                                     " the cat chased the mouse ",
+                                     nullptr,
+                                     "",
+                                     "the mousé ate the cheese"};
+  cudf::test::strings_column_wrapper strings(
+    h_strings.begin(),
+    h_strings.end(),
+    thrust::make_transform_iterator(h_strings.begin(), [](auto str) { return str != nullptr; }));
+
+  cudf::strings_column_view strings_view(strings);
+
+  {
+    cudf::test::strings_column_wrapper expected{"the_fox",
+                                                "fox_jumped",
+                                                "jumped_over",
+                                                "over_the",
+                                                "the_dog",
+                                                "the_dog",
+                                                "dog_chased",
+                                                "chased_the",
+                                                "the_cat",
+                                                "the_cat",
+                                                "cat_chased",
+                                                "chased_the",
+                                                "the_mouse",
+                                                "the_mousé",
+                                                "mousé_ate",
+                                                "ate_the",
+                                                "the_cheese"};
+    auto results = nvtext::ngrams_tokenize(strings_view, 2, std::string(), std::string("_"));
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
+  }
+  {
+    cudf::test::strings_column_wrapper expected{"the:fox:jumped",
+                                                "fox:jumped:over",
+                                                "jumped:over:the",
+                                                "over:the:dog",
+                                                "the:dog:chased",
+                                                "dog:chased:the",
+                                                "chased:the:cat",
+                                                "the:cat:chased",
+                                                "cat:chased:the",
+                                                "chased:the:mouse",
+                                                "the:mousé:ate",
+                                                "mousé:ate:the",
+                                                "ate:the:cheese"};
+    auto results = nvtext::ngrams_tokenize(strings_view, 3, std::string{" "}, std::string{":"});
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
+  }
+  {
+    cudf::test::strings_column_wrapper expected{"the--fox--jumped--over",
+                                                "fox--jumped--over--the",
+                                                "jumped--over--the--dog",
+                                                "the--dog--chased--the",
+                                                "dog--chased--the--cat",
+                                                "the--cat--chased--the",
+                                                "cat--chased--the--mouse",
+                                                "the--mousé--ate--the",
+                                                "mousé--ate--the--cheese"};
+    auto results = nvtext::ngrams_tokenize(strings_view, 4, std::string{" "}, std::string{"--"});
+    CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
+  }
+}
+
+TEST_F(TextNgramsTokenizeTest, TokenizeOneGram)
+{
+  cudf::test::strings_column_wrapper strings{"aaa bbb", "  ccc  ddd  ", "eee"};
+  cudf::strings_column_view strings_view(strings);
+  auto const empty = cudf::string_scalar("");
+
+  cudf::test::strings_column_wrapper expected{"aaa", "bbb", "ccc", "ddd", "eee"};
+  auto results = nvtext::ngrams_tokenize(strings_view, 1, empty, empty);
+  CUDF_TEST_EXPECT_COLUMNS_EQUAL(*results, expected);
+}
+
+TEST_F(TextNgramsTokenizeTest, TokenizeEmptyTest)
+{
+  auto strings = cudf::make_empty_column(cudf::data_type{cudf::type_id::STRING});
+  cudf::strings_column_view strings_view(strings->view());
+  auto const empty = cudf::string_scalar("");
+  auto results     = nvtext::ngrams_tokenize(strings_view, 2, empty, empty);
+  EXPECT_EQ(results->size(), 0);
+  EXPECT_EQ(results->has_nulls(), false);
+}
+
+TEST_F(TextNgramsTokenizeTest, TokenizeErrorTest)
+{
+  cudf::test::strings_column_wrapper strings{"this column intentionally left blank"};
+  cudf::strings_column_view strings_view(strings);
+  auto const empty = cudf::string_scalar("");
+  EXPECT_THROW(nvtext::ngrams_tokenize(strings_view, 0, empty, empty), cudf::logic_error);
+}

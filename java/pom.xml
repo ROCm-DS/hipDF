@@ -1,0 +1,636 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Copyright (c) 2019-2023, NVIDIA CORPORATION.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!--
+  MIT License
+  
+  Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>ai.rapids</groupId>
+    <artifactId>cudf</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <name>cudfjni</name>
+    <description>
+        This project provides java bindings for cudf, to be able to process large amounts of data on a GPU.
+        This is still a work in progress so some APIs may change until the 1.0 release.
+    </description>
+    <url>http://ai.rapids</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:https://github.com/rapidsai/cudf.git</connection>
+        <developerConnection>scm:git:git@github.com:rapidsai/cudf.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/rapidsai/cudf</url>
+    </scm>
+    <developers>
+        <developer>
+            <id>revans2</id>
+            <name>Robert Evans</name>
+            <email>bobby@apache.org</email>
+            <roles>
+                <role>Committer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <id>jlowe</id>
+            <name>Jason Lowe</name>
+            <email>jlowe@nvidia.com</email>
+            <roles>
+                <role>Committer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <id>abellina</id>
+            <name>Alessandro Bellina</name>
+            <email>abellina@nvidia.com</email>
+            <roles>
+                <role>Committer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <id>tgraves</id>
+            <name>Thomas Graves</name>
+            <email>tgraves@nvidia.com</email>
+            <roles>
+                <role>Committer</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <id>rjafri</id>
+            <name>Raza Jafri</name>
+            <email>rjafri@nvidia.com</email>
+            <roles>
+                <role>Committer</role>
+            </roles>
+            <timezone>-8</timezone>
+        </developer>
+        <developer>
+            <id>nartal</id>
+            <name>Niranjan Artal</name>
+            <email>nartal@nvidia.com</email>
+            <roles>
+                <role>Committer</role>
+            </roles>
+            <timezone>-8</timezone>
+        </developer>
+    </developers>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.25.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.arrow</groupId>
+            <artifactId>arrow-vector</artifactId>
+            <version>${arrow.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.parquet</groupId>
+            <artifactId>parquet-avro</artifactId>
+            <version>1.10.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-common</artifactId>
+            <version>3.2.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <junit.version>5.4.2</junit.version>
+        <ai.rapids.refcount.debug>false</ai.rapids.refcount.debug>
+        <ai.rapids.cudf.nvtx.enabled>false</ai.rapids.cudf.nvtx.enabled>
+        <native.build.path>${basedir}/target/cmake-build</native.build.path>
+        <skipNativeCopy>false</skipNativeCopy>
+        <cxx.flags/>
+        <CMAKE_EXPORT_COMPILE_COMMANDS>OFF</CMAKE_EXPORT_COMPILE_COMMANDS>
+        <CUDA_STATIC_RUNTIME>OFF</CUDA_STATIC_RUNTIME>
+        <CUDF_USE_PER_THREAD_DEFAULT_STREAM>OFF</CUDF_USE_PER_THREAD_DEFAULT_STREAM>
+        <USE_GDS>OFF</USE_GDS>
+        <GPU_ARCHS>RAPIDS</GPU_ARCHS>
+        <CUDF_USE_WARPSIZE_32>OFF</CUDF_USE_WARPSIZE_32>
+        <CUDF_JNI_LIBCUDF_STATIC>OFF</CUDF_JNI_LIBCUDF_STATIC>
+        <native.build.path>${project.build.directory}/cmake-build</native.build.path>
+        <slf4j.version>1.7.30</slf4j.version>
+        <arrow.version>0.15.1</arrow.version>
+        <parallel.level>4</parallel.level>
+        <CUDF_CPP_BUILD_DIR/>
+        <cmake.ccache.opts/>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>no-cxx-deprecation-warnings</id>
+            <properties>
+                <cxx.flags>-Wno-deprecated-declarations</cxx.flags>
+            </properties>
+        </profile>
+        <profile>
+            <id>default-tests</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/CudaFatalTest.java</exclude>
+                                <exclude>**/ColumnViewNonEmptyNullsTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>main-tests</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>non-empty-null-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-da:ai.rapids.cudf.AssertEmptyNulls</argLine>
+                                    <test>*/ColumnViewNonEmptyNullsTest.java</test>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>fatal-cuda-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <reuseForks>false</reuseForks>
+                                    <test>*/CudaFatalTest.java</test>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>no-cufile-tests</id>
+            <activation>
+                <property>
+                    <name>USE_GDS</name>
+                    <value>!ON</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/ColumnViewNonEmptyNullsTest.java</exclude>
+                                <exclude>**/CuFileTest.java</exclude>
+                                <exclude>**/CudaFatalTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>main-tests</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>fatal-cuda-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <reuseForks>false</reuseForks>
+                                    <test>*/CudaFatalTest.java</test>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>non-empty-null-test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                                <configuration>
+                                    <argLine>-da:ai.rapids.cudf.AssertEmptyNulls</argLine>
+                                    <test>*/ColumnViewNonEmptyNullsTest.java</test>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release</id>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
+            <properties>
+                <gpg.passphrase>${GPG_PASSPHRASE}</gpg.passphrase>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>test-jars</id>
+                                <goals>
+                                    <goal>test-jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <excludeResources>true</excludeResources>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                                <configuration>
+                                    <additionalparam>-Xdoclint:none</additionalparam>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <resources>
+            <resource>
+                <!-- Include the properties file to provide the build information. -->
+                <directory>${project.build.directory}/extra-resources</directory>
+                <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>${basedir}/..</directory>
+                <targetPath>META-INF</targetPath>
+                <includes>
+                    <include>LICENSE</include>
+                </includes>
+            </resource>
+        </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.gmaven</groupId>
+                    <artifactId>gmaven-plugin</artifactId>
+                    <version>1.5</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-exec-plugin</artifactId>
+                    <version>1.6.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <!-- downgrade version so symlinks are followed -->
+                    <version>2.6</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.22.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.junit.platform</groupId>
+                            <artifactId>junit-platform-surefire-provider</artifactId>
+                            <version>1.2.0</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.junit.jupiter</groupId>
+                            <artifactId>junit-jupiter-engine</artifactId>
+                            <version>5.4.2</version>
+                        </dependency>
+                        <dependency>
+                            <!-- to get around bug https://github.com/junit-team/junit5/issues/1367 -->
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-logger-api</artifactId>
+                            <version>2.21.0</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>2.22.0</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.0.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>2.8.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.7.1</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>cmake</id>
+                        <phase>validate</phase>
+                        <configuration>
+                            <tasks>
+                                <mkdir dir="${native.build.path}"/>
+                                <exec dir="${native.build.path}"
+                                      failonerror="true"
+                                      executable="cmake">
+                                    <arg value="${basedir}/src/main/native"/>
+                                    <arg line="${cmake.ccache.opts}"/>
+                                    <arg value="-DCUDA_STATIC_RUNTIME=${CUDA_STATIC_RUNTIME}" />
+                                    <arg value="-DCUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM}" />
+                                    <arg value="-DUSE_GDS=${USE_GDS}" />
+                                    <arg value="-DCMAKE_CXX_FLAGS=${cxx.flags}"/>
+                                    <arg value="-DCMAKE_EXPORT_COMPILE_COMMANDS=${CMAKE_EXPORT_COMPILE_COMMANDS}"/>
+                                    <arg value="-DCUDF_CPP_BUILD_DIR=${CUDF_CPP_BUILD_DIR}"/>
+                                    <arg value="-DGPU_ARCHS=${GPU_ARCHS}"/>
+                                    <arg value="-DCUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32}"/>
+                                    <arg value="-DCUDF_JNI_LIBCUDF_STATIC=${CUDF_JNI_LIBCUDF_STATIC}"/>
+                                    <arg value="-DCUDF_JNI_ENABLE_PROFILING=${CUDF_JNI_ENABLE_PROFILING}"/>
+                                    <arg value="-DBUILD_SHARED_LIBS=ON"/>
+                                </exec>
+                                <exec dir="${native.build.path}"
+                                      failonerror="true"
+                                      executable="cmake">
+                                    <arg value="--build"/>
+                                    <arg value="."/>
+                                    <arg value="--parallel"/>
+                                    <arg value="${parallel.level}"/>
+                                </exec>
+                                <mkdir dir="${project.build.directory}/extra-resources"/>
+                                <exec executable="bash"
+                                      output="${project.build.directory}/extra-resources/cudf-java-version-info.properties">
+                                    <arg value="${project.basedir}/buildscripts/build-info"/>
+                                    <arg value="${project.version}"/>
+                                </exec>
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>setproperty</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <source>
+                                def sout = new StringBuffer(), serr = new StringBuffer()
+                                //This only works on linux
+                                def proc = 'ldd ${native.build.path}/libcudfjni.so'.execute()
+                                proc.consumeProcessOutput(sout, serr)
+                                proc.waitForOrKill(10000)
+                                def libcudf = ~/libcudf.*\\.so\\s+=>\\s+(.*)libcudf.*\\.so\\s+.*/
+                                def cudfm = libcudf.matcher(sout)
+                                if (cudfm.find()) {
+                                    pom.properties['native.cudf.path'] = cudfm.group(1)
+                                } else {
+                                    fail("Could not find cudf as a dependency of libcudfjni out> $sout err> $serr")
+                                }
+
+                                def nvccout = new StringBuffer(), nvccerr = new StringBuffer()
+                                def nvccproc = 'hipcc --version'.execute()
+                                nvccproc.consumeProcessOutput(nvccout, nvccerr)
+                                nvccproc.waitForOrKill(10000)
+                                def cudaPattern = ~/HIP version: ([0-9]+)/
+                                def cm = cudaPattern.matcher(nvccout)
+                                if (cm.find()) {
+                                    def classifier = 'cuda' + cm.group(1)
+                                    pom.properties['cuda.classifier'] = classifier
+                                } else {
+                                    fail('could not find CUDA version')
+                                }
+                            </source>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <!--Set by groovy script-->
+                    <classifier>${cuda.classifier}</classifier>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                        <configuration>
+                            <classifier>tests</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- you can turn this off, by passing -DtrimStackTrace=true when running tests -->
+                    <trimStackTrace>false</trimStackTrace>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <systemPropertyVariables>
+                        <ai.rapids.refcount.debug>${ai.rapids.refcount.debug}</ai.rapids.refcount.debug>
+                        <ai.rapids.cudf.nvtx.enabled>${ai.rapids.cudf.nvtx.enabled}</ai.rapids.cudf.nvtx.enabled>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-native-libs</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <skip>${skipNativeCopy}</skip>
+                            <outputDirectory>${project.build.outputDirectory}/${os.arch}/${os.name}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${native.build.path}</directory>
+                                    <includes>
+                                        <include>libcudfjni.so</include>
+                                        <include>libcufilejni.so</include>
+                                        <include>libhipcomp.so</include> 
+                                    <!--   <include>libnvcomp_gdeflate.so</include> -->
+                                   <!--    <include>libnvcomp_bitcomp.so</include> -->
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <!--Set by groovy script-->
+                                    <directory>${native.cudf.path}</directory>
+                                    <includes>
+                                        <include>libcudf.so</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
