@@ -43,7 +43,7 @@ need to go into low-level HIP programming.
 
 In addition to containing all of the necessary tools to build powerful new data
 processing applications, hipDF enables you to easily port your existing Pandas
-and cuDF workloads to AMD GPUs. hipDF is derived from the NVIDIA RAPIDS™ open-source project cuDF.
+and cuDF workloads to AMD GPUs. hipDF is derived from the NVIDIA RAPIDS® open-source project cuDF.
 
 The hipDF code is open and hosted at
 `https://github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
