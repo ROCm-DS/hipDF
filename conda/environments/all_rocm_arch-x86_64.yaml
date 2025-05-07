@@ -26,104 +26,103 @@ channels:
 #:- rapidsai
 #:- rapidsai-nightly #: TODO(HIP/AMD): Add AMD channel
 - dask/label/dev
-- pytorch
 - conda-forge
 #:- nvidia #: TODO(HIP/AMD): Add AMD channel
 dependencies:
 - aiobotocore>=2.2.0
-- benchmark==1.8.0
 - boto3>=1.21.21
 - botocore>=1.24.21
+- breathe>=4.35.0
 #: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
-#- c-compiler
+# - c-compiler
 - cachetools
-- cmake>=3.26.4
+- clang-tools=16.0.6
+- clang==16.0.6
+- cmake>=3.26.4,!=3.30.0
 - cramjam
-#:- cubinlinker
-#:- cuda-nvtx=11.8
-#:- cuda-python>=11.7.1,<12.0a0  #: TODO(HIP/AMD): hip-python as its own conda package?
-#:- cuda-sanitizer-api=11.8.86
-#:- cuda-version=11.8 #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
-#:- cudatoolkit #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
+# - cuda-cudart-dev
+# - cuda-nvcc
+# - cuda-nvrtc-dev
+# - cuda-nvtx-dev
+# - cuda-python>=12.6.2,<13.0a0
+# - cuda-sanitizer-api
+# - cuda-version=12.8
 #:- cupy>=12.0.0
 #: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
 #: - cxx-compiler
-- cython>=3.0.0
-- dask-core>=2023.7.1
-#: - dask-cuda==23.10.*
-- dask>=2023.7.1
-- distributed>=2023.7.1
-# - dlpack>=0.5,<0.6.0a0
-- dlpack>=0.6,<0.7.0a0 #: TODO(HIP/AMD): upgrade to v0.8?
+- cython>=3.0.3
+#: - dask-cuda==25.2.*
+- dlpack>=0.8,<1.0
 - doxygen=1.9.1
 - fastavro>=0.22.9
-- fmt>=9.1.0,<10
+- flatbuffers==24.3.25
+- fmt>=11.0.2,<12
 - fsspec>=0.6.0
-- gcc_linux-64=11.* #: linker issues if uses other rt libs than hipcc
-- gmock>=1.13.0 #: Interferes with the gmock installed via the cpp/CMakeLists.txt (via rapids-cmake cpm)
-- gtest>=1.13.0 #: Interferes with the gtest installed via the cpp/CMakeLists.txt (via rapids-cmake cpm)
+- gcc_linux-64=13.* #: linker issues if uses other rt libs than hipcc
 - hypothesis
 - identify>=2.5.20
 - ipython
-- libarrow-all==14.0.1.*
-#: - libcufile-dev=1.4.0.31
-#: - libcufile=1.4.0.31
-#: - libcurand-dev=10.3.0.86
-#: - libcurand=10.3.0.86
-#: - libkvikio==23.10.*
-- librdkafka>=1.9.0,<1.10.0a0
-#: - librmm==23.10.* provide as local paclage
+- jupyter_client
+# - libcufile-dev
+# - libcurand-dev
+# - libkvikio==25.2.*
+- librdkafka>=2.5.0,<2.6.0a0
+#: - librmm==25.2.* provide as local paclage
 - make
-- mimesis>=4.1.0,<=13.0.0 # Parquet unit test requires age attribute which got removed in more recent mimesis releases
+- mmh3
 - moto>=4.0.8
 - msgpack-python
 - myst-nb
+- nbconvert
+- nbformat
 - nbsphinx
 - ninja
 - notebook
-- numba==0.58.1 #: TODO(HIP/AMD) ROCm version of Numba as its own conda package?
-- numpy==1.24.4
+#- numba-cuda>=0.2.0,<0.3.0a0
+- numba>=0.59.1,<0.61.0a0 #: TODO(HIP/AMD) ROCm version of Numba as its own conda package?
+- numpy>=1.23,<3.0a0
 - numpydoc
-#: - nvcc_linux-64=11.8 #: TODO(HIP/AMD): ROCm HIP SDK as its own conda package?
-#: - nvcomp==2.6.1 #: provide as local package
+#: - nvcomp==4.2.0.11 #: provide as local package
 #: - nvtx>=0.2.1 #: TODO(HIP/AMD) provide roctx via HIP Python?
-- packaging
-- pandas>=1.3,<1.6.0dev0
-- pandoc
-- pip
-- pre-commit
-- protobuf>=4.21,<5
-- ptxcompiler
-- pyarrow==14.0.1.*
-- pydata-sphinx-theme
-#: - pyorc
-- pytest==7.4.3 # NOTE(HIP/AMD): Changed 7.4.4 to 7.4.3 because this version captures the warning which is generated in python/cudf/cudf_pandas_tests/test_cudf_pandas.py:666
-- pytest-benchmark=4.0.0
-- pytest-cases==3.8.1
-- pytest-cov==4.1.0
-- pytest-xdist==3.5.0
-- python-confluent-kafka>=1.9.0,<1.10.0a0
-- python-snappy>=0.6.0
-- python>=3.9,<3.11
-- pytorch<1.12.0
-- rich
 - openpyxl
-#: - rmm==23.10.* #: provide as local package
+- packaging
+- pandas
+- pandas>=2.0,<2.2.4dev0
+- pandoc
+- polars>=1.20,<1.22
+- pre-commit
+- pyarrow>=14.0.0,<20.0.0a0
+- pydata-sphinx-theme>=0.15.4
+- pynvjitlink
+# - pynvml>=12.0.0,<13.0.0a0
+- pytest-benchmark
+- pytest-cases>=3.8.2
+- pytest-cov
+- pytest-xdist
+- pytest<8
+- python-confluent-kafka>=2.5.0,<2.6.0a0
+- python-xxhash
+- python>=3.10,<3.13
+- pytorch>=2.4.0
+- rapids-build-backend>=0.3.0,<0.4.0.dev0
+- rapids-dask-dependency==25.2.*
+- rich
+# - rmm==25.2.*: NOTE(HIP/AMD): provide as local package
 - s3fs>=2022.3.0
-- scikit-build>=0.13.1
-- scipy==1.11.4 # TODO(HIP/AMD): DeprecationWarning: Importing boxcar from 'scipy.signal' is deprecated and will raise an error in SciPy 1.13.0.
-- spdlog>=1.11.0,<1.12
-- sphinx
+- scikit-build-core>=0.10.0
+- scipy
 - sphinx-autobuild
 - sphinx-copybutton
 - sphinx-markdown-tables
+- sphinx-remove-toctrees
+- sphinx>=8.1.0
 - sphinxcontrib-websupport
 - streamz
-- sysroot_linux-64==2.17
-- tokenizers==0.13.1
-- transformers==4.24.0
+- sysroot_linux-64==2.28
+- tokenizers==0.15.2
+- transformers==4.39.3
 - typing_extensions>=4.0.0
 - zlib>=1.2.13
 - pip:
