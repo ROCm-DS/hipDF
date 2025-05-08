@@ -50,6 +50,19 @@ else()
   )
 endif()
 
+set(
+  RAPIDS_CMAKE_MODULE_PATH
+  $ENV{RAPIDS_CMAKE_MODULE_PATH}
+  CACHE FILEPATH
+  "Announce that ROCmDS-CMake is available via the provided module path."  
+)
+if (NOT "${RAPIDS_CMAKE_MODULE_PATH}" STREQUAL "")
+  list(APPEND CMAKE_MODULE_PATH "${RAPIDS_CMAKE_MODULE_PATH}")
+  # NOTE(HIP/AMD): needed to set rapids-cmake-dir variable
+  include(rapids-cmake)
+  return()
+endif()
+
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake")
 
   if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_BRANCH})
