@@ -382,17 +382,13 @@ endif()
 # find nvCOMP
 include(cmake/thirdparty/get_nvcomp.cmake)
 # find CCCL before rmm so that we get cudf's patched version of CCCL
-# include(cmake/thirdparty/get_cccl.cmake)
-# find thrust/cub
-include(cmake/thirdparty/get_rocthrust.cmake)
+include(cmake/thirdparty/get_cccl.cmake)
 # find rmm
 include(cmake/thirdparty/get_rmm.cmake)
 # find flatbuffers
 include(cmake/thirdparty/get_flatbuffers.cmake)
 # find dlpack
 include(cmake/thirdparty/get_dlpack.cmake)
-# find libhip++
-include(cmake/thirdparty/get_libcudacxx.cmake)
 # find cuCollections Should come after including thrust and libhipcxx
 include(cmake/thirdparty/get_cucollections.cmake)
 # find or install GoogleTest
