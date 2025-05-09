@@ -58,7 +58,7 @@ rapids_hip_init_architectures(CUDF)
 project(
   CUDF
   VERSION "${RAPIDS_VERSION}"
-  LANGUAGES C CXX
+  LANGUAGES C CXX HIP
 )
 
 # NOTE(HIP/AMD): required for rocThrust
