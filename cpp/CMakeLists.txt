@@ -1446,11 +1446,11 @@ endif()
 target_link_libraries(
   cudf
   PUBLIC CCCL::CCCL rmm::rmm rmm::rmm_logger $<BUILD_LOCAL_INTERFACE:BS::thread_pool> cudf_logger
-  PRIVATE $<BUILD_LOCAL_INTERFACE:nvtx3::nvtx3-cpp>
+  PRIVATE $<BUILD_LOCAL_INTERFACE:$<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>>
           cuco::cuco
           ZLIB::ZLIB
           nvcomp::nvcomp
-          kvikio::kvikio
+          $<TARGET_NAME_IF_EXISTS:kvikio::kvikio>
           $<TARGET_NAME_IF_EXISTS:CUDA::cuFile${_cufile_suffix}>
           nanoarrow
           rmm::rmm_logger_impl
