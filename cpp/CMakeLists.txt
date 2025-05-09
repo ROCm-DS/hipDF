@@ -376,7 +376,9 @@ rapids_make_logger(cudf EXPORT_SET cudf-exports LOGGER_DEFAULT_LEVEL WARN)
 # find jitify
 include(cmake/thirdparty/get_jitify.cmake)
 # find NVTX
-include(cmake/thirdparty/get_nvtx.cmake)
+if(USE_NVTX)
+  include(cmake/thirdparty/get_nvtx.cmake) #TODO(HIP/AMD): add rocTX
+endif()
 # find nvCOMP
 include(cmake/thirdparty/get_nvcomp.cmake)
 # find CCCL before rmm so that we get cudf's patched version of CCCL
