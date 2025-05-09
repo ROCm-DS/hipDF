@@ -117,7 +117,6 @@ mark_as_advanced(CUDF_BUILD_TESTUTIL)
 option(CUDF_USE_PROPRIETARY_NVCOMP "Download and use NVCOMP with proprietary extensions" OFF)
 handle_unsupported_cmake_option("CUDF_USE_PROPRIETARY_NVCOMP" TRUE)
 option(CUDF_EXPORT_NVCOMP "Export NVCOMP as a dependency" ON)
-handle_unsupported_cmake_option("CUDF_EXPORT_NVCOMP" TRUE)
 option(CUDF_LARGE_STRINGS_DISABLED "Build with large string support disabled" OFF)
 mark_as_advanced(CUDF_LARGE_STRINGS_DISABLED)
 option(
