@@ -1516,7 +1516,7 @@ if(CUDF_BUILD_TESTUTIL)
   set_cudftestutil_target()
 
   target_compile_options(
-    cudftestutil PUBLIC "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
+    cudftestutil INTERFACE "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:CXX>:${CUDF_CXX_FLAGS}>>"
                           "$<BUILD_INTERFACE:$<$<COMPILE_LANGUAGE:HIP>:${CUDF_GPU_FLAGS}>>"
   )
 
