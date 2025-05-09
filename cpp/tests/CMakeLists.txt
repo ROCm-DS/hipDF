@@ -89,7 +89,7 @@ function(ConfigureTest CMAKE_TEST_NAME)
             $<TARGET_NAME_IF_EXISTS:conda_env>
             "${_CUDF_TEST_EXTRA_LIBS}"
   )
-  rapids_cuda_set_runtime(${CMAKE_TEST_NAME} USE_STATIC ${CUDA_STATIC_RUNTIME})
+  rapids_hip_set_runtime(${CMAKE_TEST_NAME} USE_STATIC ${GPU_STATIC_RUNTIME})
   rapids_test_add(
     NAME ${CMAKE_TEST_NAME}
     COMMAND ${CMAKE_TEST_NAME}

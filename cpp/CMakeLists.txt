@@ -1462,7 +1462,7 @@ if(TARGET conda_env)
   target_link_libraries(cudf PRIVATE conda_env)
 endif()
 
-rapids_cuda_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
+rapids_hip_set_runtime(cudf USE_STATIC ${GPU_STATIC_RUNTIME})
 
 #TODO(HIP/AMD): do we need a linker script for HIP?
 if(FALSE)
@@ -1504,7 +1504,7 @@ if(CUDF_BUILD_TESTUTIL)
     PUBLIC cudf
     PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
   )
-  rapids_cuda_set_runtime(cudftest_default_stream USE_STATIC ${CUDA_STATIC_RUNTIME})
+  rapids_hip_set_runtime(cudftest_default_stream USE_STATIC ${GPU_STATIC_RUNTIME})
 
   target_include_directories(cudftest_default_stream PRIVATE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/include>")
   target_link_libraries(cudftest_default_stream PRIVATE rmm::rmm)
@@ -1529,7 +1529,7 @@ if(CUDF_BUILD_TESTUTIL)
     cudftestutil INTERFACE "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}>"
                            "$<BUILD_INTERFACE:${CUDF_SOURCE_DIR}/src>"
   )
-  rapids_cuda_set_runtime(cudftestutil USE_STATIC ${CUDA_STATIC_RUNTIME})
+  rapids_hip_set_runtime(cudftestutil USE_STATIC ${GPU_STATIC_RUNTIME})
   add_library(cudf::cudftestutil ALIAS cudftestutil)
 
   add_library(cudftestutil_impl INTERFACE)
@@ -1603,7 +1603,7 @@ if(CUDF_BUILD_STREAMS_TEST_UTIL)
     if(CUDF_BUILD_STACKTRACE_DEBUG)
       target_link_libraries(${_tgt} PRIVATE cudf_backtrace)
     endif()
-    rapids_cuda_set_runtime(${_tgt} USE_STATIC ${CUDA_STATIC_RUNTIME})
+    rapids_hip_set_runtime(${_tgt} USE_STATIC ${GPU_STATIC_RUNTIME})
     add_library(cudf::${_tgt} ALIAS ${_tgt})
 
     if("${_mode}" STREQUAL "testing")
