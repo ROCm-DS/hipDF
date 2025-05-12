@@ -269,7 +269,7 @@ inline void throw_cuda_error(cudaError_t error, char const* file, unsigned int l
 {
   // Calls cudaGetLastError to clear the error status. It is nearly certain that a fatal error
   // occurred if it still returns the same error after a cleanup.
-  cudaGetLastError();
+  (void) cudaGetLastError();
   auto const last = cudaFree(nullptr);
   auto const msg  = std::string{"CUDA error encountered at: " + std::string{file} + ":" +
                                std::to_string(line) + ": " + std::to_string(error) + " " +
