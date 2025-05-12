@@ -53,7 +53,7 @@ target_compile_options(
 target_link_libraries(
   cudf_datagen
   PUBLIC GTest::gmock GTest::gtest benchmark::benchmark nvbench::nvbench Threads::Threads cudf
-         cudf::cudftestutil nvtx3::nvtx3-cpp
+         cudf::cudftestutil $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>
   PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
 )
 
@@ -77,7 +77,7 @@ target_compile_options(
 
 target_link_libraries(
   ndsh_data_generator
-  PUBLIC cudf cudf::cudftestutil nvtx3::nvtx3-cpp
+  PUBLIC cudf cudf::cudftestutil $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>
   PRIVATE $<TARGET_NAME_IF_EXISTS:conda_env>
 )
 

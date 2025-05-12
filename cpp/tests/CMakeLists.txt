@@ -85,7 +85,7 @@ function(ConfigureTest CMAKE_TEST_NAME)
             GTest::gmock_main
             GTest::gtest
             GTest::gtest_main
-            nvtx3::nvtx3-cpp
+            $<TARGET_NAME_IF_EXISTS:nvtx3::nvtx3-cpp>
             $<TARGET_NAME_IF_EXISTS:conda_env>
             "${_CUDF_TEST_EXTRA_LIBS}"
   )
