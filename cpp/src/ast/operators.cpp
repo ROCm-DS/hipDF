@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/ast/detail/operators.hpp>
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/type_dispatcher.hpp>
@@ -64,7 +87,7 @@ struct return_type_functor {
             std::enable_if_t<!is_valid_binary_op<OperatorFunctor, LHS, RHS>>* = nullptr>
   void operator()(cudf::data_type& result)
   {
-#ifndef __CUDA_ARCH__
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
     CUDF_FAIL("Invalid binary operation. Return type cannot be determined.");
 #else
     CUDF_UNREACHABLE("Invalid binary operation. Return type cannot be determined.");
@@ -93,7 +116,7 @@ struct return_type_functor {
             std::enable_if_t<!is_valid_unary_op<OperatorFunctor, T>>* = nullptr>
   void operator()(cudf::data_type& result)
   {
-#ifndef __CUDA_ARCH__
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
     CUDF_FAIL("Invalid unary operation. Return type cannot be determined.");
 #else
     CUDF_UNREACHABLE("Invalid unary operation. Return type cannot be determined.");
@@ -128,7 +151,7 @@ struct single_dispatch_binary_operator_types {
             std::enable_if_t<!is_valid_binary_op<OperatorFunctor, LHS, LHS>>* = nullptr>
   inline void operator()(F&& f, Ts&&... args)
   {
-#ifndef __CUDA_ARCH__
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
     CUDF_FAIL("Invalid binary operation.");
 #else
     CUDF_UNREACHABLE("Invalid binary operation.");
@@ -214,7 +237,7 @@ struct dispatch_unary_operator_types {
             std::enable_if_t<!is_valid_unary_op<OperatorFunctor, InputT>>* = nullptr>
   inline void operator()(F&& f, Ts&&... args)
   {
-#ifndef __CUDA_ARCH__
+#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
     CUDF_FAIL("Invalid unary operation.");
 #else
     CUDF_UNREACHABLE("Invalid unary operation.");
