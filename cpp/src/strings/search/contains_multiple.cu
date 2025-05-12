@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf/column/column_device_view.cuh>
 #include <cudf/column/column_factories.hpp>
 #include <cudf/detail/iterator.cuh>
@@ -32,7 +55,7 @@
 #include <rmm/exec_policy.hpp>
 
 #include <cooperative_groups.h>
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
 #include <thrust/binary_search.h>
 #include <thrust/equal.h>
@@ -216,11 +239,11 @@ std::unique_ptr<table> contains_multiple(strings_column_view const& input,
     auto sv        = stream.value();
 
     std::size_t tmp_bytes = 0;
-    cub::DeviceMergeSort::SortPairsCopy(
-      nullptr, tmp_bytes, tgt_itr, count_itr, keys_out, vals_out, num_items, cmp_op, sv);
+    CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortPairsCopy(
+      nullptr, tmp_bytes, tgt_itr, count_itr, keys_out, vals_out, num_items, cmp_op, sv));
     auto tmp_stg = rmm::device_buffer(tmp_bytes, stream);
-    cub::DeviceMergeSort::SortPairsCopy(
-      tmp_stg.data(), tmp_bytes, tgt_itr, count_itr, keys_out, vals_out, num_items, cmp_op, sv);
+    CUDF_CUDA_TRY(hipcub::DeviceMergeSort::SortPairsCopy(
+      tmp_stg.data(), tmp_bytes, tgt_itr, count_itr, keys_out, vals_out, num_items, cmp_op, sv));
   }
 
   // remove duplicates to help speed up lower_bound

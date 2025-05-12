@@ -14,6 +14,29 @@
  * limitations under the License.
  */
 
+
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "text/utilities/tokenize_ops.cuh"
 
 #include <cudf/column/column.hpp>
@@ -38,7 +61,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuco/static_map.cuh>
 #include <cuda/std/functional>
 #include <thrust/copy.h>
@@ -248,7 +271,7 @@ CUDF_KERNEL void token_counts_fn(cudf::column_device_view const d_strings,
   auto const d_output     = d_results + offset;
   auto const d_output_end = d_output + d_str.size_bytes();
 
-  using warp_reduce = cub::WarpReduce<cudf::size_type>;
+  using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
   __shared__ typename warp_reduce::TempStorage warp_storage;
 
   cudf::size_type count = 0;

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 // MIT License
 //
 // Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
@@ -56,7 +57,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 #include <cuda/functional>
 #include <thrust/for_each.h>
@@ -305,7 +306,7 @@ CUDF_KERNEL void has_multibytes_kernel(char const* d_input_chars,
   auto const byte_idx = (static_cast<int64_t>(idx) * bytes_per_thread) + first_offset;
   auto const lane_idx = static_cast<cudf::size_type>(threadIdx.x);
 
-  using block_reduce = cub::BlockReduce<int64_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<int64_t, block_size>;
   __shared__ typename block_reduce::TempStorage temp_storage;
 
   // each thread processes 8 bytes (only 4 need to be checked)

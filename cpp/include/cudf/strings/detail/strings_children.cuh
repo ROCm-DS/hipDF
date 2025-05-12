@@ -13,6 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #pragma once
 
 #include <cudf/column/column.hpp>
@@ -30,7 +53,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/device/device_memcpy.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/functional>
 #include <thrust/for_each.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -98,10 +121,10 @@ rmm::device_uvector<char> make_chars_buffer(column_view const& offsets,
                                         uint32_t idx) { return output + offsets[idx]; }));
 
   size_t temp_storage_bytes = 0;
-  CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(
+  CUDF_CUDA_TRY(hipcub::DeviceMemcpy::Batched(
     nullptr, temp_storage_bytes, src_ptrs, dst_ptrs, src_sizes, strings_count, stream.value()));
   rmm::device_buffer d_temp_storage(temp_storage_bytes, stream);
-  CUDF_CUDA_TRY(cub::DeviceMemcpy::Batched(d_temp_storage.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceMemcpy::Batched(d_temp_storage.data(),
                                            temp_storage_bytes,
                                            src_ptrs,
                                            dst_ptrs,

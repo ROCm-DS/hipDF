@@ -49,7 +49,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/cub.cuh>
+#include <hipcub/hipcub.hpp>
 #include <thrust/device_ptr.h>
 #include <thrust/execution_policy.h>
 #include <thrust/fill.h>
@@ -426,7 +426,7 @@ void sparse_stack_op_to_top_of_stack(StackSymbolItT d_symbols,
       d_kv_operations.Current(),
       detail::AddStackLevelFromStackOp<StackSymbolToStackOpTypeT>{symbol_to_stack_op},
       num_symbols_in,
-      cub::Equality{},
+      hipcub::Equality{},
       stream));
     stack_level_scan_bytes = std::max(gen_segments_scan_bytes, scan_by_key_bytes);
   } else {

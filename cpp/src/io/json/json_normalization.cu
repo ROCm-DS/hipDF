@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "io/fst/lookup_tables.cuh"
 
 #include <cudf/detail/device_scalar.hpp>
@@ -28,7 +50,7 @@
 #include <rmm/device_uvector.hpp>
 #include <rmm/exec_policy.hpp>
 
-#include <cub/device/device_copy.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 #include <thrust/binary_search.h>
 #include <thrust/distance.h>
@@ -378,21 +400,21 @@ std::
   {
     // cub device batched copy
     size_t temp_storage_bytes = 0;
-    cub::DeviceCopy::Batched(nullptr,
+    CUDF_CUDA_TRY(hipcub::DeviceCopy::Batched(nullptr,
                              temp_storage_bytes,
                              input_it,
                              output_it,
                              inbuf_lengths.begin(),
                              inbuf_lengths_size,
-                             stream.value());
+                             stream.value()));
     rmm::device_buffer temp_storage(temp_storage_bytes, stream);
-    cub::DeviceCopy::Batched(temp_storage.data(),
+    CUDF_CUDA_TRY(hipcub::DeviceCopy::Batched(temp_storage.data(),
                              temp_storage_bytes,
                              input_it,
                              output_it,
                              inbuf_lengths.begin(),
                              inbuf_lengths_size,
-                             stream.value());
+                             stream.value()));
   }
 
   // whitespace normalization : get the indices of the unquoted whitespace characters
