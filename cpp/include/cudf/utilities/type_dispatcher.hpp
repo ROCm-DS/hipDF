@@ -161,7 +161,7 @@ constexpr bool type_id_matches_device_storage_type(type_id id)
 #ifndef CUDF_TYPE_MAPPING
 #define CUDF_TYPE_MAPPING(Type, Id)                        \
   template <>                                              \
-  constexpr inline type_id type_to_id<Type>()              \
+  CUDF_HOST_DEVICE constexpr inline type_id type_to_id<Type>()              \
   {                                                        \
     return Id;                                             \
   }                                                        \
@@ -215,7 +215,7 @@ CUDF_TYPE_MAPPING(cudf::struct_view, type_id::STRUCT)
  * @return id for 'char' type
  */
 template <>  // CUDF_TYPE_MAPPING(char,INT8) causes duplicate id_to_type_impl definition
-constexpr inline type_id type_to_id<char>()
+CUDF_HOST_DEVICE constexpr inline type_id type_to_id<char>()
 {
   return type_id::INT8;
 }
