@@ -43,6 +43,7 @@
  * @file Utility code involving integer arithmetic
  */
 
+#include <cudf/detail/utilities/assert.cuh>
 #include <cudf/fixed_point/temporary.hpp>
 #include <cudf/types.hpp>
 #include <cudf/utilities/error.hpp>
