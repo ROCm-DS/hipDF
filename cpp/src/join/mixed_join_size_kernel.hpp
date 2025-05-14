@@ -50,7 +50,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/resource_ref.hpp>
 
-#include <cooperative_groups.h>
+#include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
 #include <thrust/iterator/discard_iterator.h>
 

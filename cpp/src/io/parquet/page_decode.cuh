@@ -43,7 +43,7 @@
 #include "parquet_gpu.hpp"
 #include "rle_stream.cuh"
 
-#include <cooperative_groups.h>
+#include <hip/hip_cooperative_groups.h>
 #include <cuda/atomic>
 #include <cuda/std/tuple>
 

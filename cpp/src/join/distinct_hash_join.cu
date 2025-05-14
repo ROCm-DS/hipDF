@@ -52,7 +52,7 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <cooperative_groups.h>
+#include <hip/hip_cooperative_groups.h>
 #include <hipcub/hipcub.hpp>
 #include <cuco/static_set.cuh>
 #include <thrust/fill.h>
