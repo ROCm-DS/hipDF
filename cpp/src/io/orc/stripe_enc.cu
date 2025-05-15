@@ -1318,7 +1318,7 @@ template <int block_size>
 CUDF_KERNEL void decimal_sizes_to_offsets_kernel(device_2dspan<rowgroup_rows const> rg_bounds,
                                                  device_span<decimal_column_element_sizes> sizes)
 {
-  using block_scan = cub::BlockScan<uint32_t, block_size>;
+  using block_scan = hipcub::BlockScan<uint32_t, block_size>;
   __shared__ typename block_scan::TempStorage scan_storage;
   int const t = threadIdx.x;
 

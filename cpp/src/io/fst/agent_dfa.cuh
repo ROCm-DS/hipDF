@@ -172,7 +172,7 @@ class DFAWriteCallbackWrapper {
                StateIndexT const new_state,
                SymbolIndexT const symbol_id,
                SymbolT const read_symbol,
-               cub::Int2Type<MaxTranslatedOutChars_> /*MaxTranslatedOutChars*/)
+               hipcub::Int2Type<MaxTranslatedOutChars_> /*MaxTranslatedOutChars*/)
   {
     uint32_t const count = transducer_table(old_state, symbol_id, read_symbol);
 
@@ -199,7 +199,7 @@ class DFAWriteCallbackWrapper {
                StateIndexT const new_state,
                SymbolIndexT const symbol_id,
                SymbolT const read_symbol,
-               cub::Int2Type<MaxTranslatedOutChars_>)
+               hipcub::Int2Type<MaxTranslatedOutChars_>)
   {
     uint32_t const count = transducer_table(old_state, symbol_id, read_symbol);
 
@@ -222,7 +222,7 @@ class DFAWriteCallbackWrapper {
                new_state,
                symbol_id,
                read_symbol,
-               cub::Int2Type<MaxTranslatedOutChars>{});
+               hipcub::Int2Type<MaxTranslatedOutChars>{});
   }
 
   __device__ __forceinline__ void TearDown() {}
@@ -270,9 +270,9 @@ class WriteCoalescingCallbackWrapper {
     OutputT compacted_symbols[NumWriteBufferItems];
   };
   using offset_cache_t =
-    ::cuda::std::conditional_t<DiscardIndexOutput, cub::NullType, TempStorage_Offsets>;
+    ::cuda::std::conditional_t<DiscardIndexOutput, hipcub::NullType, TempStorage_Offsets>;
   using symbol_cache_t = ::cuda::std::
-    conditional_t<DiscardTranslatedOutput, cub::Uninitialized<cub::NullType>, TempStorage_Symbols>;
+    conditional_t<DiscardTranslatedOutput, hipcub::Uninitialized<hipcub::NullType>, TempStorage_Symbols>;
   struct TempStorage_ : offset_cache_t, symbol_cache_t {};
 
   __device__ __forceinline__ TempStorage_& PrivateStorage()
@@ -283,7 +283,7 @@ class WriteCoalescingCallbackWrapper {
   TempStorage_& temp_storage;
 
  public:
-  struct TempStorage : cub::Uninitialized<TempStorage_> {};
+  struct TempStorage : hipcub::Uninitialized<TempStorage_> {};
 
   __device__ __forceinline__ WriteCoalescingCallbackWrapper(TransducerTableT transducer_table,
                                                             TransducedOutItT out_it,

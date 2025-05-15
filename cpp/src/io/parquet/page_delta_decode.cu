@@ -152,7 +152,7 @@ struct delta_byte_array_decoder {
                                             uint32_t lane_id)
   {
     using cudf::detail::warp_size;
-    using WarpScan = cub::WarpScan<uint64_t>;
+    using WarpScan = hipcub::WarpScan<uint64_t>;
     __shared__ WarpScan::TempStorage scan_temp;
 
     if (start_idx >= suffixes.value_count) { return 0; }

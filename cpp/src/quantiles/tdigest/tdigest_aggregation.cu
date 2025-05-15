@@ -1110,7 +1110,7 @@ std::pair<rmm::device_uvector<double>, rmm::device_uvector<double>> generate_mer
 
   // perform the sort using the means as the key
   size_t temp_size;
-  CUDF_CUDA_TRY(cub::DeviceSegmentedSort::SortPairs(nullptr,
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortPairs(nullptr,
                                                     temp_size,
                                                     tdv.means().begin<double>(),
                                                     output_means.begin(),
@@ -1123,7 +1123,7 @@ std::pair<rmm::device_uvector<double>, rmm::device_uvector<double>> generate_mer
                                                     stream.value()));
 
   rmm::device_buffer temp_mem(temp_size, stream, temp_mr);
-  CUDF_CUDA_TRY(cub::DeviceSegmentedSort::SortPairs(temp_mem.data(),
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortPairs(temp_mem.data(),
                                                     temp_size,
                                                     tdv.means().begin<double>(),
                                                     output_means.begin(),

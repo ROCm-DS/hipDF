@@ -355,7 +355,7 @@ static __device__ int gpuUpdateValidityAndRowIndicesNested(
       int const is_valid = ((d >= ni.max_def_level) && in_row_bounds) ? 1 : 0;
 
       // thread and block validity count
-      using block_scan = cub::BlockScan<int, decode_block_size>;
+      using block_scan = hipcub::BlockScan<int, decode_block_size>;
       __shared__ typename block_scan::TempStorage scan_storage;
       int thread_valid_count, block_valid_count;
       block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);
@@ -468,7 +468,7 @@ static __device__ int gpuUpdateValidityAndRowIndicesFlat(
     }();
 
     // thread and block validity count
-    using block_scan = cub::BlockScan<int, decode_block_size>;
+    using block_scan = hipcub::BlockScan<int, decode_block_size>;
     __shared__ typename block_scan::TempStorage scan_storage;
     int thread_valid_count, block_valid_count;
     block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);

@@ -269,7 +269,7 @@ __device__ size_t gpuDecodeString(
     // compute string offsets
     size_t thread_string_offset, block_total_string_length;
     {
-      using scanner = cub::BlockScan<size_t, block_size>;
+      using scanner = hipcub::BlockScan<size_t, block_size>;
       __shared__ typename scanner::TempStorage scan_storage;
       scanner(scan_storage)
         .ExclusiveSum(string_length, thread_string_offset, block_total_string_length);

@@ -774,7 +774,7 @@ CUDF_KERNEL void __launch_bounds__(rowofs_block_dim)
     __syncthreads();
     // Return the number of rows out of range
 
-    using block_reduce = typename cub::BlockReduce<uint32_t, rowofs_block_dim>;
+    using block_reduce = typename hipcub::BlockReduce<uint32_t, rowofs_block_dim>;
     __shared__ typename block_reduce::TempStorage bk_storage;
     rows_out_of_range = block_reduce(bk_storage).Sum(rows_out_of_range);
     if (t == 0) { row_ctx[blockIdx.x] = rows_out_of_range; }

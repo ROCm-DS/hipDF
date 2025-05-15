@@ -111,7 +111,7 @@ __device__ void flush_output_cache(unsigned int const activemask,
   // (__shfl_sync instead of __shfl). __shfl is technically not guaranteed to
   // be safe by the compiler because it is not required by the standard to
   // converge divergent branches before executing.
-  output_offset = cub::ShuffleIndex<detail::warp_size>(output_offset, 0, activemask);
+  output_offset = hipcub::ShuffleIndex<detail::warp_size>(output_offset, 0, activemask);
 
   for (std::size_t shared_out_idx = static_cast<std::size_t>(lane_id);
        shared_out_idx < current_idx_shared[warp_id];
@@ -142,7 +142,7 @@ __device__ void flush_output_cache(unsigned int const activemask,
     output_offset = ref.fetch_add(current_idx_shared[warp_id], cuda::memory_order_relaxed);
   }
 
-  output_offset = cub::ShuffleIndex<detail::warp_size>(output_offset, 0, activemask);
+  output_offset = hipcub::ShuffleIndex<detail::warp_size>(output_offset, 0, activemask);
 
   for (std::size_t shared_out_idx = static_cast<std::size_t>(lane_id);
        shared_out_idx < current_idx_shared[warp_id];

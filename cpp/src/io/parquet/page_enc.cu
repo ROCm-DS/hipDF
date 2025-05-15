@@ -1677,7 +1677,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
                  bool is_split_stream)
 {
   __shared__ __align__(8) page_enc_state_s<0> state_g;
-  using block_scan = cub::BlockScan<uint32_t, block_size>;
+  using block_scan = hipcub::BlockScan<uint32_t, block_size>;
   __shared__ typename block_scan::TempStorage scan_storage;
 
   auto* const s = &state_g;
@@ -1915,7 +1915,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
                      bool write_v2_headers)
 {
   __shared__ __align__(8) rle_page_enc_state_s state_g;
-  using block_scan = cub::BlockScan<uint32_t, block_size>;
+  using block_scan = hipcub::BlockScan<uint32_t, block_size>;
   __shared__ typename block_scan::TempStorage scan_storage;
 
   auto* const s = &state_g;
@@ -2149,7 +2149,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
   __shared__ delta_binary_packer<int32_t> packer;
   __shared__ uint8_t const* first_string;
   __shared__ size_type string_data_len;
-  using block_reduce = cub::BlockReduce<uint32_t, block_size>;
+  using block_reduce = hipcub::BlockReduce<uint32_t, block_size>;
   __shared__ union {
     typename block_reduce::TempStorage reduce_storage;
     typename delta_binary_packer<uleb128_t>::index_scan::TempStorage delta_index_tmp;
@@ -2293,8 +2293,8 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
   __shared__ delta_binary_packer<int32_t> packer;
   __shared__ uint8_t* scratch_data;
   __shared__ size_t avg_suffix_len;
-  using block_scan   = cub::BlockScan<size_type, block_size>;
-  using block_reduce = cub::BlockReduce<size_t, block_size>;
+  using block_scan   = hipcub::BlockScan<size_type, block_size>;
+  using block_reduce = hipcub::BlockReduce<size_t, block_size>;
   __shared__ union {
     typename block_scan::TempStorage scan_storage;
     typename block_reduce::TempStorage reduce_storage;

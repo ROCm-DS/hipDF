@@ -107,7 +107,7 @@ CUDF_KERNEL void sorted_unique_fn(uint32_t const* d_values,
   auto const idx = cudf::detail::grid_1d::global_thread_id();
   if (idx >= (static_cast<cudf::thread_index_type>(rows) * cudf::detail::warp_size)) { return; }
 
-  using warp_reduce = cub::WarpReduce<cudf::size_type>;
+  using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
   __shared__ typename warp_reduce::TempStorage temp_storage;
 
   auto const row_idx  = idx / cudf::detail::warp_size;
@@ -167,7 +167,7 @@ CUDF_KERNEL void sorted_intersect_fn(uint32_t const* d_values1,
   auto const idx = cudf::detail::grid_1d::global_thread_id();
   if (idx >= (static_cast<cudf::thread_index_type>(rows) * cudf::detail::warp_size)) { return; }
 
-  using warp_reduce = cub::WarpReduce<cudf::size_type>;
+  using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
   __shared__ typename warp_reduce::TempStorage temp_storage;
 
   auto const row_idx  = idx / cudf::detail::warp_size;
@@ -252,7 +252,7 @@ CUDF_KERNEL void count_substrings_kernel(cudf::column_device_view const d_string
     return;
   }
 
-  using warp_reduce = cub::WarpReduce<cudf::size_type>;
+  using warp_reduce = hipcub::WarpReduce<cudf::size_type>;
   __shared__ typename warp_reduce::TempStorage temp_storage;
 
   auto const end        = d_str.data() + d_str.size_bytes();
@@ -339,10 +339,10 @@ void segmented_sort(uint32_t const* input,
 {
   rmm::device_buffer temp;
   std::size_t temp_bytes = 0;
-  cub::DeviceSegmentedSort::SortKeys(
+  hipcub::DeviceSegmentedSort::SortKeys(
     temp.data(), temp_bytes, input, output, items, segments, offsets, offsets + 1, stream.value());
   temp = rmm::device_buffer(temp_bytes, stream);
-  cub::DeviceSegmentedSort::SortKeys(
+  hipcub::DeviceSegmentedSort::SortKeys(
     temp.data(), temp_bytes, input, output, items, segments, offsets, offsets + 1, stream.value());
 }
 

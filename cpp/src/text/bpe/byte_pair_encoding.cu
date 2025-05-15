@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "text/bpe/byte_pair_encoding.cuh"
 
 #include <cudf/column/column_device_view.cuh>
@@ -152,7 +174,7 @@ CUDF_KERNEL void bpe_parallel_fn(cudf::column_device_view const d_strings,
   auto constexpr max_rank = cuda::std::numeric_limits<cudf::size_type>::max();
 
   __shared__ cudf::size_type block_min_rank;
-  using block_reduce = cub::BlockReduce<cudf::size_type, block_size>;
+  using block_reduce = hipcub::BlockReduce<cudf::size_type, block_size>;
   __shared__ typename block_reduce::TempStorage temp_storage;
   auto const num_valid = block_size < d_str.size_bytes() ? block_size : d_str.size_bytes();
 
@@ -212,7 +234,7 @@ CUDF_KERNEL void bpe_parallel_fn(cudf::column_device_view const d_strings,
     }
   }
   // compute the min rank across the block
-  auto const reduce_rank = block_reduce(temp_storage).Reduce(min_rank, cub::Min(), num_valid);
+  auto const reduce_rank = block_reduce(temp_storage).Reduce(min_rank, hipcub::Min(), num_valid);
   if (lane_idx == 0) { block_min_rank = reduce_rank; }
   __syncthreads();
 
@@ -277,7 +299,7 @@ CUDF_KERNEL void bpe_parallel_fn(cudf::column_device_view const d_strings,
     }
 
     // re-compute the minimum rank across the block (since new pairs are created above)
-    auto const reduce_rank = block_reduce(temp_storage).Reduce(min_rank, cub::Min(), num_valid);
+    auto const reduce_rank = block_reduce(temp_storage).Reduce(min_rank, hipcub::Min(), num_valid);
     if (lane_idx == 0) { block_min_rank = reduce_rank; }
     __syncthreads();
   }  // if no min ranks are found we are done, otherwise start again
@@ -321,7 +343,7 @@ CUDF_KERNEL void bpe_finalize(cudf::column_device_view const d_strings,
   auto const end_spaces = d_spaces + d_str.size_bytes();
   auto const num_valid  = block_size < d_str.size_bytes() ? block_size : d_str.size_bytes();
 
-  using block_reduce = cub::BlockReduce<cudf::size_type, block_size>;
+  using block_reduce = hipcub::BlockReduce<cudf::size_type, block_size>;
   __shared__ typename block_reduce::TempStorage temp_storage;
 
   // reset the first position -- no separator to be added here

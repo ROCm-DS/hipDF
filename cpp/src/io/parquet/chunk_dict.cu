@@ -85,7 +85,7 @@ struct map_insert_fn {
   __device__ void operator()(size_type const s_start_value_idx, size_type const end_value_idx)
   {
     if constexpr (column_device_view::has_element_accessor<T>()) {
-      using block_reduce = cub::BlockReduce<size_type, block_size>;
+      using block_reduce = hipcub::BlockReduce<size_type, block_size>;
       __shared__ typename block_reduce::TempStorage reduce_storage;
 
       auto const col                     = chunk->col_desc;

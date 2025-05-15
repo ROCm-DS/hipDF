@@ -95,7 +95,7 @@ __device__ size_type gpuDeltaLengthPageStringSize(page_state_s* s, int t)
 __device__ size_type gpuDeltaPageStringSize(page_state_s* s, int t)
 {
   using cudf::detail::warp_size;
-  using WarpReduce = cub::WarpReduce<uleb128_t>;
+  using WarpReduce = hipcub::WarpReduce<uleb128_t>;
   __shared__ typename WarpReduce::TempStorage temp_storage[2];
 
   __shared__ __align__(16) delta_binary_decoder prefixes;

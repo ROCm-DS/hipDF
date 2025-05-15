@@ -358,7 +358,7 @@ struct delta_binary_decoder {
     // DELTA_LENGTH_BYTE_ARRAY lengths are encoded as INT32 by convention (since the PLAIN encoding
     // uses 4-byte lengths).
     using delta_length_type = int32_t;
-    using warp_reduce       = cub::WarpReduce<size_t>;
+    using warp_reduce       = hipcub::WarpReduce<size_t>;
     __shared__ warp_reduce::TempStorage temp_storage;
     int const t = threadIdx.x;
 

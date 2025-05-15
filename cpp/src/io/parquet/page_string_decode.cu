@@ -520,7 +520,7 @@ __device__ thrust::pair<size_t, size_t> totalDeltaByteArraySize(uint8_t const* d
                                                                 int end_value)
 {
   using cudf::detail::warp_size;
-  using WarpReduce = cub::WarpReduce<uleb128_t>;
+  using WarpReduce = hipcub::WarpReduce<uleb128_t>;
   __shared__ typename WarpReduce::TempStorage temp_storage[2];
 
   __shared__ __align__(16) delta_binary_decoder prefixes;
@@ -573,7 +573,7 @@ __device__ thrust::pair<size_t, size_t> totalDeltaByteArraySize(uint8_t const* d
     // note: warp_sum will only be valid on lane 0.
     auto const warp_sum = WarpReduce(temp_storage[warp_id]).Sum(lane_sum);
     __syncwarp();
-    auto const warp_max = WarpReduce(temp_storage[warp_id]).Reduce(lane_max, cub::Max());
+    auto const warp_max = WarpReduce(temp_storage[warp_id]).Reduce(lane_max, hipcub::Max());
 
     if (lane_id == 0) {
       total_bytes += warp_sum;
@@ -771,7 +771,7 @@ CUDF_KERNEL void __launch_bounds__(delta_length_block_size) gpuComputeDeltaLengt
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
   using cudf::detail::warp_size;
-  using WarpReduce = cub::WarpReduce<uleb128_t>;
+  using WarpReduce = hipcub::WarpReduce<uleb128_t>;
   __shared__ typename WarpReduce::TempStorage temp_storage;
   __shared__ __align__(16) page_state_s state_g;
   __shared__ __align__(16) delta_binary_decoder string_lengths;
