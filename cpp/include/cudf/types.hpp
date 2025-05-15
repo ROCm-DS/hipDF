@@ -87,11 +87,6 @@ __device__ inline void __syncwarp(uint64_t activemask)
 #include <cstdint>
 #include <iterator>
 
-// NOTE(HIP/AMD): including thrust/optional.h leads to symbol conflicts when JIT-compiling
-#ifndef __HIPCC_RTC__
-#include <thrust/optional.h>
-#endif
-
 /**
  * @file
  * @brief Type declarations for libcudf.
@@ -106,21 +101,6 @@ class device_buffer;
 }  // namespace rmm
 
 namespace CUDF_EXPORT cudf {
-
-// NOTE(HIP/AMD): This is a WAR for thrust::optional::value() not being supported in device code (internal issue 6). 
-#ifdef __HIP_PLATFORM_AMD__
-// NOTE(HIP/AMD): including thrust/optional.h leads to symbol conflicts when JIT-compiling
-#ifndef __HIPCC_RTC__
-template<typename T>
-CUDF_HOST_DEVICE T inline THRUST_OPTIONAL_VALUE(thrust::optional<T> opt)
-{
-    return opt.value_or(T{});
-}
-#else
-#define THRUST_OPTIONAL_VALUE(opt) opt.value()
-#endif
-#endif
-
 // Forward declaration
 class column;
 class column_view;
