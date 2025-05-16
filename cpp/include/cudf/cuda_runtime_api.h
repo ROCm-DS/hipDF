@@ -457,6 +457,9 @@
 #ifndef cudaMemcpyDeviceToDevice
 #  define cudaMemcpyDeviceToDevice hipMemcpyDeviceToDevice
 #endif
+#ifndef cudaMemcpyHostToDevice
+#  define cudaMemcpyHostToDevice hipMemcpyHostToDevice
+#endif
 #ifndef cudaSuccess
 #  define cudaSuccess hipSuccess
 #endif
