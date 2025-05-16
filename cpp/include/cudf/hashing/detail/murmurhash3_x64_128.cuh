@@ -13,29 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-// MIT License
-//
-// Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
-
 #pragma once
 
 #include <cudf/fixed_point/fixed_point.hpp>
@@ -77,21 +54,21 @@ struct MurmurHash3_x64_128 {
 };
 
 template <>
-MurmurHash3_x64_128<bool>::result_type __host__ __device__ inline MurmurHash3_x64_128<bool>::operator()(
+MurmurHash3_x64_128<bool>::result_type __device__ inline MurmurHash3_x64_128<bool>::operator()(
   bool const& key) const
 {
   return this->compute<uint8_t>(key);
 }
 
 template <>
-MurmurHash3_x64_128<float>::result_type __host__ __device__ inline MurmurHash3_x64_128<float>::operator()(
+MurmurHash3_x64_128<float>::result_type __device__ inline MurmurHash3_x64_128<float>::operator()(
   float const& key) const
 {
   return this->compute(normalize_nans(key));
 }
 
 template <>
-MurmurHash3_x64_128<double>::result_type __host__ __device__ inline MurmurHash3_x64_128<double>::operator()(
+MurmurHash3_x64_128<double>::result_type __device__ inline MurmurHash3_x64_128<double>::operator()(
   double const& key) const
 {
   return this->compute(normalize_nans(key));
@@ -99,7 +76,7 @@ MurmurHash3_x64_128<double>::result_type __host__ __device__ inline MurmurHash3_
 
 template <>
 MurmurHash3_x64_128<cudf::string_view>::result_type
-  __host__ __device__ inline MurmurHash3_x64_128<cudf::string_view>::operator()(
+  __device__ inline MurmurHash3_x64_128<cudf::string_view>::operator()(
     cudf::string_view const& key) const
 {
   return this->compute_bytes(reinterpret_cast<cuda::std::byte const*>(key.data()),
@@ -108,7 +85,7 @@ MurmurHash3_x64_128<cudf::string_view>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal32>::result_type
-  __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal32>::operator()(
+  __device__ inline MurmurHash3_x64_128<numeric::decimal32>::operator()(
     numeric::decimal32 const& key) const
 {
   return this->compute(key.value());
@@ -116,7 +93,7 @@ MurmurHash3_x64_128<numeric::decimal32>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal64>::result_type
-  __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal64>::operator()(
+  __device__ inline MurmurHash3_x64_128<numeric::decimal64>::operator()(
     numeric::decimal64 const& key) const
 {
   return this->compute(key.value());
@@ -124,7 +101,7 @@ MurmurHash3_x64_128<numeric::decimal64>::result_type
 
 template <>
 MurmurHash3_x64_128<numeric::decimal128>::result_type
-  __host__ __device__ inline MurmurHash3_x64_128<numeric::decimal128>::operator()(
+  __device__ inline MurmurHash3_x64_128<numeric::decimal128>::operator()(
     numeric::decimal128 const& key) const
 {
   return this->compute(key.value());
