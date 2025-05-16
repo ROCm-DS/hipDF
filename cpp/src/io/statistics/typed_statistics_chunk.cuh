@@ -52,7 +52,7 @@
 #include <cudf/wrappers/timestamps.hpp>
 
 #include <cuda/std/limits>
-#include <math_constants.h>
+#include <hip/hip_math_constants.h>
 #include <thrust/extrema.h>
 
 namespace cudf {
