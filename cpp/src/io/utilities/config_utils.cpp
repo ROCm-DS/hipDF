@@ -39,7 +39,9 @@
 
 #include <cudf/utilities/error.hpp>
 
+#ifdef CUDF_HAS_KVIKIO
 #include <kvikio/defaults.hpp>
+#endif
 
 #include <string>
 
@@ -75,6 +77,7 @@ bool is_kvikio_enabled() { return get_env_policy() == usage_policy::KVIKIO; }
 
 void set_up_kvikio()
 {
+#ifdef CUDF_HAS_KVIKIO
   static std::once_flag flag{};
   std::call_once(flag, [] {
     auto const compat_mode = kvikio::getenv_or("KVIKIO_COMPAT_MODE", kvikio::CompatMode::ON);
@@ -83,6 +86,7 @@ void set_up_kvikio()
     auto const nthreads = getenv_or<unsigned int>("KVIKIO_NTHREADS", 4u);
     kvikio::defaults::thread_pool_nthreads_reset(nthreads);
   });
+#endif
 }
 }  // namespace cufile_integration
 

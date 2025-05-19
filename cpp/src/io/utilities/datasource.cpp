@@ -46,7 +46,7 @@
 #include <cudf/utilities/error.hpp>
 #include <cudf/utilities/span.hpp>
 
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
 #include <kvikio/file_handle.hpp>
 #endif
 
@@ -59,8 +59,10 @@
 #include <regex>
 #include <vector>
 
+#ifdef CUDF_HAS_KVIKIO
 #ifdef CUDF_KVIKIO_REMOTE_IO
 #include <kvikio/remote_handle.hpp>
+#endif
 #endif
 
 namespace cudf {
@@ -76,7 +78,7 @@ class file_source : public datasource {
   {
     detail::force_init_cuda_context();
     if (cufile_integration::is_kvikio_enabled()) {
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
       cufile_integration::set_up_kvikio();
       _kvikio_file = kvikio::FileHandle(filepath);
       CUDF_LOG_INFO("Reading a file using kvikIO, with compatibility mode %s.",
@@ -118,7 +120,7 @@ class file_source : public datasource {
 
   [[nodiscard]] bool supports_device_read() const override
   {
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
     return !_kvikio_file.closed() ||  _cufile_in != nullptr;
 #else
     return _cufile_in != nullptr;
@@ -129,8 +131,10 @@ class file_source : public datasource {
   {
     if (!supports_device_read()) { return false; }
 
+#ifdef CUDF_HAS_KVIKIO
     // Always prefer device reads if kvikio is enabled
     if (!_kvikio_file.closed()) { return true; }
+#endif
 
     return size >= _gds_read_preferred_threshold;
   }
@@ -143,7 +147,7 @@ class file_source : public datasource {
     CUDF_EXPECTS(supports_device_read(), "Device reads are not supported for this file.");
 
     auto const read_size = std::min(size, _file.size() - offset);
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
     if (!_kvikio_file.closed()) { return _kvikio_file.pread(dst, read_size, offset); }
 #endif
     return _cufile_in->read_async(offset, read_size, dst, stream);
@@ -175,7 +179,7 @@ class file_source : public datasource {
 
  private:
   std::unique_ptr<detail::cufile_input_impl> _cufile_in;
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
   kvikio::FileHandle _kvikio_file;
 #endif
   // The read size above which GDS is faster then posix-read + h2d-copy
@@ -435,6 +439,7 @@ class user_datasource_wrapper : public datasource {
   datasource* const source;  ///< A non-owning pointer to the user-implemented datasource
 };
 
+#ifdef CUDF_HAS_KVIKIO
 #ifdef CUDF_KVIKIO_REMOTE_IO
 /**
  * @brief Remote file source backed by KvikIO, which handles S3 filepaths seamlessly.
@@ -516,6 +521,7 @@ class remote_file_source : public datasource {
  private:
   kvikio::RemoteHandle _kvikio_file;
 };
+#endif
 #else
 /**
  * @brief When KvikIO remote IO is disabled, `is_supported_remote_url()` return false always.

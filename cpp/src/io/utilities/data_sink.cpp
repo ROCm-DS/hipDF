@@ -41,7 +41,7 @@
 #include <cudf/io/data_sink.hpp>
 #include <cudf/logger.hpp>
 #include <cudf/utilities/error.hpp>
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
 #include <kvikio/file_handle.hpp>
 #endif
 #include <rmm/cuda_stream_view.hpp>
@@ -63,7 +63,7 @@ class file_sink : public data_sink {
     if (!_output_stream.is_open()) { detail::throw_on_file_open_failure(filepath, true); }
 
     if (cufile_integration::is_kvikio_enabled()) {
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
       cufile_integration::set_up_kvikio();
       _kvikio_file = kvikio::FileHandle(filepath, "w");
       CUDF_LOG_INFO("Writing a file using kvikIO, with compatibility mode %s.",
@@ -93,7 +93,7 @@ class file_sink : public data_sink {
 
   [[nodiscard]] bool supports_device_write() const override
   {
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
      return !_kvikio_file.closed() ||  _cufile_out != nullptr;
 #else
      return _cufile_out != nullptr;
@@ -104,8 +104,10 @@ class file_sink : public data_sink {
   {
     if (!supports_device_write()) { return false; }
 
+#ifdef CUDF_HAS_KVIKIO
     // Always prefer device writes if kvikio is enabled
     if (!_kvikio_file.closed()) { return true; }
+#endif
 
     return size >= _gds_write_preferred_threshold;
   }
@@ -119,7 +121,7 @@ class file_sink : public data_sink {
     size_t const offset = _bytes_written;
     _bytes_written += size;
 
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
     if (!_kvikio_file.closed()) {
       // KvikIO's `pwrite()` returns a `std::future<size_t>` so we convert it
       // to `std::future<void>`
@@ -140,7 +142,7 @@ class file_sink : public data_sink {
   std::ofstream _output_stream;
   size_t _bytes_written = 0;
   std::unique_ptr<detail::cufile_output_impl> _cufile_out;
-#ifdef HAS_KVIKIO
+#ifdef CUDF_HAS_KVIKIO
   kvikio::FileHandle _kvikio_file;
 #endif
   // The write size above which GDS is faster then d2h-copy + posix-write

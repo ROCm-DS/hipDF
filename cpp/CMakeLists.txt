@@ -1376,6 +1376,10 @@ if(CUDF_USE_WARPSIZE_32)
 target_compile_definitions(cudf PUBLIC "CUDF_USE_WARPSIZE_32")
 endif()
 
+if(TARGET KvikIO)
+target_compile_definitions(cudf PUBLIC "CUDF_HAS_KVIKIO")
+endif()
+
 # Disable Jitify log printing. See https://github.com/NVIDIA/jitify/issues/79
 target_compile_definitions(cudf PRIVATE "JITIFY_PRINT_LOG=0")
 
