@@ -45,7 +45,9 @@
 #include <cuda/std/array>
 #include <cuda/std/functional>
 #include <cuda/std/type_traits>
-#include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
+
+#include <hipcub/agent/single_pass_scan_operators.hpp>
+
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/discard_iterator.h>
 #include <thrust/sequence.h>
@@ -866,7 +868,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) CUDF_KERNEL
       using StateVectorCompositeOpT = VectorCompositeOp<NUM_STATES>;
 
       using PrefixCallbackOpT_ =
-        hipcub_extensions::TilePrefixCallbackOp<StateVectorT, StateVectorCompositeOpT, TileStateT>;
+        hipcub::TilePrefixCallbackOp<StateVectorT, StateVectorCompositeOpT, TileStateT>;
 
       using ItemsBlockScan =
         hipcub::BlockScan<StateVectorT, BLOCK_THREADS, hipcub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;
@@ -923,7 +925,7 @@ __launch_bounds__(int32_t(AgentDFAPolicy::BLOCK_THREADS)) CUDF_KERNEL
     __syncthreads();
 
     using OffsetPrefixScanCallbackOpT_ =
-      hipcub_extensions::TilePrefixCallbackOp<OffsetT, cuda::std::plus<>, OutOffsetScanTileState>; //TODO(HIP/AMD): does cuda::std::plus work with hipcub?
+      hipcub::TilePrefixCallbackOp<OffsetT, cuda::std::plus<>, OutOffsetScanTileState>;
 
     using OutOffsetBlockScan =
       hipcub::BlockScan<OffsetT, BLOCK_THREADS, hipcub::BlockScanAlgorithm::BLOCK_SCAN_WARP_SCANS>;

@@ -42,7 +42,7 @@
 #include <rmm/resource_ref.hpp>
 
 #include <hipcub/block/block_scan.hpp>
-#include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
+#include <hipcub/hipcub.hpp>
 #include <cuda/atomic>
 
 namespace CUDF_EXPORT cudf {
@@ -84,7 +84,6 @@ struct scan_tile_state_view {
     tile_status[offset].store(scan_tile_status::inclusive);
   }
 
-  //: TODO(HIP/AMD): we use hipcub_extensions here to fix the hipcub error "no viable conversion from 'int' to 'cudf::io::text::detail::multistate'"
   __device__ inline T get_prefix(cudf::size_type tile_idx, scan_tile_status& status)
   {
     auto const offset = (tile_idx + num_tiles) % num_tiles;
@@ -99,9 +98,9 @@ struct scan_tile_state_view {
     __threadfence();
 
     if (status == scan_tile_status::partial) {
-      return hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(tile_partial + offset);
+      return hipcub::ThreadLoad<hipcub::LOAD_CG>(tile_partial + offset);
     } else {
-      return hipcub_extensions::ThreadLoad<hipcub::LOAD_CG>(tile_inclusive + offset);
+      return hipcub::ThreadLoad<hipcub::LOAD_CG>(tile_inclusive + offset);
     }
   }
 };
@@ -157,7 +156,6 @@ struct scan_tile_state_callback {
 
       // scan partials to form prefix
 
-      //: TODO(HIP/AMD): we use hipcub_extensions here to fix the hipcub error "no viable conversion from 'int' to 'cudf::io::text::detail::multistate'"
       auto window_partial = _tile_state.get_prefix(predecessor_idx, predecessor_status);
       while (predecessor_status != scan_tile_status::inclusive) {
         predecessor_idx--;
@@ -165,7 +163,6 @@ struct scan_tile_state_callback {
         window_partial          = predecessor_prefix + window_partial;
       }
       exclusive_prefix = window_partial;
-      //: TODO(HIP/AMD): we use hipcub_extensions here to fix the hipcub error "no viable conversion from 'int' to 'cudf::io::text::detail::multistate'"
 
       _tile_state.set_inclusive_prefix(_tile_idx, exclusive_prefix + block_aggregate);
     }

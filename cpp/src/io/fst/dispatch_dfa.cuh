@@ -43,7 +43,6 @@
 #include "in_reg_array.cuh"
 
 #include <hipcub/hipcub.hpp>
-#include <hip_extensions/hipcub_ext/hipcub_ext.cuh>
 
 #include <cstdint>
 
@@ -76,7 +75,7 @@ struct DeviceFSMPolicy {
   //------------------------------------------------------------------------------
   // Architecture-specific tuning policies
   //------------------------------------------------------------------------------
-  struct Policy900 : hipcub_extensions::ChainedPolicy<900, Policy900, Policy900> {
+  struct Policy900 /*: cub::ChainedPolicy<900, Policy900, Policy900>*/ { // NOTE(HIP): hipcub doesnt support chainedpolicy
     enum {
       BLOCK_THREADS    = 128,
       ITEMS_PER_THREAD = 16,
@@ -197,8 +196,9 @@ struct DispatchFSM : DeviceFSMPolicy {
 
     // Get PTX version
     int ptx_version;
-    error = hipcub_extensions::PtxVersion(ptx_version);
-    if (error != cudaSuccess) return error;
+    // NOTE(HIP): HIP does not support PtxVersion
+    // error = hipcub::PtxVersion(ptx_version);
+    // if (error != cudaSuccess) return error;
 
     // Create dispatch functor
     DispatchFSM dispatch(d_temp_storage,
@@ -212,8 +212,8 @@ struct DispatchFSM : DeviceFSMPolicy {
                          d_num_transduced_out_it,
                          stream,
                          ptx_version);
-
-    error = MaxPolicyT::Invoke(ptx_version, dispatch);
+    // NOTE(HIP): Invoke the dispatcher directly
+    error = dispatch.template Invoke<MaxPolicyT>();
     return error;
   }
 
@@ -235,15 +235,17 @@ struct DispatchFSM : DeviceFSMPolicy {
 
   {
     cudaError_t error = cudaSuccess;
-    hipcub_extensions::KernelConfig dfa_simulation_config;
+    // NOTE(HIP): hipcub doesnt support KernelConfig
+    // cub::KernelConfig dfa_simulation_config;
 
     using PolicyT = typename ActivePolicyT::AgentDFAPolicy;
-    if (HipcubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
+    // if (HipcubDebug(error = dfa_simulation_config.Init<PolicyT>(dfa_kernel))) return error;
 
     // Kernel invocation
     uint32_t grid_size = std::max(
       1u, HIPCUB_QUOTIENT_CEILING(num_chars, PolicyT::BLOCK_THREADS * PolicyT::ITEMS_PER_THREAD));
-    uint32_t block_threads = dfa_simulation_config.block_threads;
+    // uint32_t block_threads = dfa_simulation_config.block_threads;
+    uint32_t block_threads = PolicyT::BLOCK_THREADS;
 
     dfa_kernel<<<grid_size, block_threads, 0, stream>>>(dfa,
                                                         d_chars_in,
@@ -357,10 +359,10 @@ struct DispatchFSM : DeviceFSMPolicy {
     using StateVectorT = MultiFragmentInRegArray<MAX_NUM_STATES, MAX_NUM_STATES - 1>;
 
     // Scan tile state used for propagating composed state transition vectors
-    using ScanTileStateT = typename hipcub_extensions::ScanTileState<StateVectorT>;
+    using ScanTileStateT = typename hipcub::ScanTileState<StateVectorT>;
 
     // Scan tile state used for propagating transduced output offsets
-    using FstScanTileStateT = typename hipcub_extensions::ScanTileState<OffsetT>;
+    using FstScanTileStateT = typename hipcub::ScanTileState<OffsetT>;
 
     // STATE-TRANSITION IDENTITY VECTOR
     StateVectorT state_identity_vector;
@@ -420,7 +422,7 @@ struct DispatchFSM : DeviceFSMPolicy {
     // Alias the temporary allocations from the single storage blob (or compute the necessary size
     // of the blob)
     error =
-      hipcub_extensions::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
+      hipcub::AliasTemporaries(d_temp_storage, temp_storage_bytes, allocations, allocation_sizes);
     if (error != cudaSuccess) return error;
 
     // Return if the caller is simply requesting the size of the storage allocation
