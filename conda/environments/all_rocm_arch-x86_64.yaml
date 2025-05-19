@@ -52,7 +52,7 @@ dependencies:
 #: NOTE(HIP/AMD): We need to use hipcc as CXX and C compiler because of CMake target rocThrust->...->hip::device, which
 #:                leads to the addition of flags such as `-x hip`; hipcc can compile host and HIP device code.
 #: - cxx-compiler
-- cython>=3.0.3
+- cython>=3.0.3,<=3.0.12
 #: - dask-cuda==25.2.*
 - dlpack>=0.8,<1.0
 - doxygen=1.9.1
