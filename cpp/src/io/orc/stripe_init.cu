@@ -477,7 +477,7 @@ CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size, 8) gpuParseRowGr
                                                                  size_type rowidx_stride,
                                                                  bool use_base_stride)
 {
-  _extern __shared__ __align__(16) rowindex_state_s state_g[];
+  extern __shared__ __align__(16) rowindex_state_s state_g[];
   rowindex_state_s* const s = &state_g[0];
   auto const col_idx        = blockIdx.x / num_stripes;
   auto const stripe_idx     = blockIdx.x % num_stripes;
