@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <benchmarks/common/generate_input.hpp>
 #include <benchmarks/fixture/benchmark_fixture.hpp>
 #include <benchmarks/io/cuio_common.hpp>
@@ -103,7 +125,9 @@ void BM_orc_multithreaded_read_common(nvbench::state& state,
   auto mem_stats_logger = cudf::memory_stats_logger();
 
   {
+#ifndef NVTX_DISABLE
     cudf::scoped_range range{("(read) " + label).c_str()};
+#endif
     state.exec(nvbench::exec_tag::sync | nvbench::exec_tag::timer,
                [&](nvbench::launch& launch, auto& timer) {
                  auto read_func = [&](int index) {
@@ -133,7 +157,9 @@ void BM_orc_multithreaded_read_common(nvbench::state& state,
 void BM_orc_multithreaded_read_mixed(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_common(
     state, {cudf::type_id::INT32, cudf::type_id::DECIMAL64, cudf::type_id::STRING}, label);
 }
@@ -141,21 +167,27 @@ void BM_orc_multithreaded_read_mixed(nvbench::state& state)
 void BM_orc_multithreaded_read_fixed_width(nvbench::state& state)
 {
   auto label = get_label("fixed width", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_common(state, {cudf::type_id::INT32}, label);
 }
 
 void BM_orc_multithreaded_read_string(nvbench::state& state)
 {
   auto label = get_label("string", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_common(state, {cudf::type_id::STRING}, label);
 }
 
 void BM_orc_multithreaded_read_list(nvbench::state& state)
 {
   auto label = get_label("list", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_common(state, {cudf::type_id::LIST}, label);
 }
 
@@ -180,7 +212,9 @@ void BM_orc_multithreaded_read_chunked_common(nvbench::state& state,
   auto mem_stats_logger = cudf::memory_stats_logger();
 
   {
+  #ifndef NVTX_DISABLE
     cudf::scoped_range range{("(read) " + label).c_str()};
+  #endif
     std::vector<cudf::io::table_with_metadata> chunks;
     state.exec(nvbench::exec_tag::sync | nvbench::exec_tag::timer,
                [&](nvbench::launch& launch, auto& timer) {
@@ -222,7 +256,9 @@ void BM_orc_multithreaded_read_chunked_common(nvbench::state& state,
 void BM_orc_multithreaded_read_chunked_mixed(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_chunked_common(
     state, {cudf::type_id::INT32, cudf::type_id::DECIMAL64, cudf::type_id::STRING}, label);
 }
@@ -230,21 +266,27 @@ void BM_orc_multithreaded_read_chunked_mixed(nvbench::state& state)
 void BM_orc_multithreaded_read_chunked_fixed_width(nvbench::state& state)
 {
   auto label = get_label("fixed width", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_chunked_common(state, {cudf::type_id::INT32}, label);
 }
 
 void BM_orc_multithreaded_read_chunked_string(nvbench::state& state)
 {
   auto label = get_label("string", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_chunked_common(state, {cudf::type_id::STRING}, label);
 }
 
 void BM_orc_multithreaded_read_chunked_list(nvbench::state& state)
 {
   auto label = get_label("list", state);
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{label.c_str()};
+#endif
   BM_orc_multithreaded_read_chunked_common(state, {cudf::type_id::LIST}, label);
 }
 auto const thread_range    = std::vector<nvbench::int64_t>{1, 2, 4, 8};

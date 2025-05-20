@@ -159,7 +159,9 @@ distinct_hash_join::inner_join(cudf::table_view const& probe,
                                rmm::cuda_stream_view stream,
                                rmm::device_async_resource_ref mr) const
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_hash_join::inner_join"};
+#endif
 
   size_type const probe_table_num_rows{probe.num_rows()};
 
@@ -255,7 +257,9 @@ std::unique_ptr<rmm::device_uvector<size_type>> distinct_hash_join::left_join(
   rmm::cuda_stream_view stream,
   rmm::device_async_resource_ref mr) const
 {
+#ifndef NVTX_DISABLE
   cudf::scoped_range range{"distinct_hash_join::left_join"};
+#endif
 
   size_type const probe_table_num_rows{probe.num_rows()};
 
