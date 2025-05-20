@@ -108,7 +108,7 @@ __device__ void initialize_shmem_aggregations(cooperative_groups::thread_block c
                                               cudf::aggregation::Kind const* d_agg_kinds)
 {
   for (auto col_idx = col_start; col_idx < col_end; col_idx++) {
-    for (auto idx = block.thread_rank(); idx < cardinality; idx += block.num_threads()) {
+    for (auto idx = block.thread_rank(); idx < cardinality; idx += block.size()) { // FIXME(HIP/AMD): switch to num_threads() when available
       auto target =
         reinterpret_cast<cuda::std::byte*>(shmem_agg_storage + shmem_agg_res_offsets[col_idx]);
       auto target_mask =
@@ -174,7 +174,7 @@ __device__ void compute_final_aggregations(cooperative_groups::thread_block cons
                                            cudf::aggregation::Kind const* d_agg_kinds)
 {
   // Aggregates shared memory sources to global memory targets
-  for (auto idx = block.thread_rank(); idx < cardinality; idx += block.num_threads()) {
+  for (auto idx = block.thread_rank(); idx < cardinality; idx += block.size()) { // FIXME(HIP/AMD): switch to num_threads() when available
     auto const target_idx =
       global_mapping_index[block.group_index().x * GROUPBY_SHM_MAX_ELEMENTS + idx];
     for (auto col_idx = col_start; col_idx < col_end; col_idx++) {
