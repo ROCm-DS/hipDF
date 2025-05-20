@@ -265,7 +265,7 @@ struct cumulative_centroid_weight {
    * @brief Returns the cumulative weight for a given value index. The index `n` is the index of
    * `n`-th non-empty cluster.
    */
-  std::tuple<size_type, size_type, double> operator() __device__(size_type value_index) const
+  std::tuple<size_type, size_type, double> __device__ operator()(size_type value_index) const
   {
     auto const tdigest_index =
       static_cast<size_type>(
