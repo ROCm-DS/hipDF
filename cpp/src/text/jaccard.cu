@@ -339,11 +339,11 @@ void segmented_sort(uint32_t const* input,
 {
   rmm::device_buffer temp;
   std::size_t temp_bytes = 0;
-  hipcub::DeviceSegmentedSort::SortKeys(
-    temp.data(), temp_bytes, input, output, items, segments, offsets, offsets + 1, stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortKeys(
+    temp.data(), temp_bytes, input, output, items, segments, offsets, offsets + 1, stream.value()));
   temp = rmm::device_buffer(temp_bytes, stream);
-  hipcub::DeviceSegmentedSort::SortKeys(
-    temp.data(), temp_bytes, input, output, items, segments, offsets, offsets + 1, stream.value());
+  CUDF_CUDA_TRY(hipcub::DeviceSegmentedSort::SortKeys(
+    temp.data(), temp_bytes, input, output, items, segments, offsets, offsets + 1, stream.value()));
 }
 
 /**
