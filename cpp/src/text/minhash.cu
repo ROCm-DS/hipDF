@@ -161,7 +161,9 @@ CUDF_KERNEL void minhash_seed_kernel(cudf::column_device_view const d_strings,
     if constexpr (std::is_same_v<hash_value_type, uint32_t>) {
       hv = hasher(hash_str);
     } else {
-      hv = thrust::get<0>(hasher(hash_str));
+      //FIXME(HIP/AMD): Workaround for thrust::get not being applicable
+      // to cuda::std:array
+      hv = cuda::std::get<0>(hasher(hash_str));
     }
     // disallowing hash to zero case
     *seed_hashes = cuda::std::max(hv, hash_value_type{1});
