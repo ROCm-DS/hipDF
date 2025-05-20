@@ -172,9 +172,9 @@ static __device__ uint8_t* StoreCopy(uint8_t* dst,
  * @brief Returns mask of any thread in the warp that has a hash value
  * equal to that of the calling thread
  */
-static inline __device__ uint32_t HashMatchAny(uint32_t v, uint32_t t)
+static inline __device__ cudf::bitmask_type HashMatchAny(uint32_t v, uint32_t t)
 {
-  return __match_any_sync(~0, v);
+  return __match_any_sync(cudf::LANE_MASK_ALL, v);
 }
 
 /**
@@ -205,7 +205,7 @@ static __device__ uint32_t FindFourByteMatch(snap_state_s* s,
     bool valid4               = (pos + t + 4 <= len);
     uint32_t data32           = (valid4) ? fetch4(src + pos + t) : 0;
     uint32_t hash             = (valid4) ? snap_hash(data32) : 0;
-    uint32_t local_match      = HashMatchAny(hash, t);
+    uint32_t local_match      = HashMatchAny(hash, t); // TODO(HIP/AMD): this code might have to be ported when using it on HIP platform with wavefront size 64!
     uint32_t local_match_lane = 31 - __clz(local_match & ((1 << t) - 1));
     uint32_t local_match_data = shuffle(data32, min(local_match_lane, t));
     uint32_t offset, match;

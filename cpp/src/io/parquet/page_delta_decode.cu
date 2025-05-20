@@ -113,7 +113,7 @@ struct delta_byte_array_decoder {
     offsets[lane_id]     = lane_out;
 
     // if all prefix_len's are zero, then there's nothing to do
-    if (__all_sync(0xffff'ffff, prefix_len == 0)) { return; }
+    if (__all_sync((uint64_t) cudf::LANE_MASK_ALL, prefix_len == 0)) { return; }
 
     // find a neighbor to the left that has a prefix length less than this lane. once that
     // neighbor is complete, this lane can be completed.
@@ -137,7 +137,7 @@ struct delta_byte_array_decoder {
       }
 
       // check for finished
-      if (__all_sync(0xffff'ffff, prefix_len == 0)) { return; }
+      if (__all_sync(cudf::LANE_MASK_ALL, prefix_len == 0)) { return; }
     }
   }
 
