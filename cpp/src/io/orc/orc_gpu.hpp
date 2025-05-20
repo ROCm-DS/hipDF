@@ -52,7 +52,7 @@
 
 #include <rmm/cuda_stream_view.hpp>
 
-#include <hipco/static_map.cuh>
+#include <cuco/static_map.cuh>
 
 namespace cudf {
 namespace io {
