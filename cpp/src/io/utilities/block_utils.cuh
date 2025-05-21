@@ -39,6 +39,7 @@
 #include <cstdint>
 #include <cudf/cuda_runtime.h>
 #include <cudf/cuda_runtime_api.h>
+#include <cudf/types.hpp>
 #include <hip/hip_cooperative_groups.h>
 namespace cudf {
 namespace io {
