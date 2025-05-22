@@ -46,7 +46,7 @@
 namespace cudf::io::parquet::detail {
 
 template <int num_threads>
-__device__ constexpr int rle_stream_required_run_buffer_size()
+__host__ __device__ constexpr int rle_stream_required_run_buffer_size()
 {
   constexpr int num_rle_stream_decode_warps = (num_threads / cudf::detail::warp_size) - 1;
   return (num_rle_stream_decode_warps * 2);
