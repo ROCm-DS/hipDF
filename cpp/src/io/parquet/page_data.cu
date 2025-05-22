@@ -79,12 +79,13 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                          kernel_error::pointer error_code)
 {
   using cudf::detail::warp_size;
-  __shared__ __align__(16) page_state_s state_g;
+  //__shared__ __align__(16) page_state_s state_g;
+  extern __shared__ __align__(16) page_state_s state_g[];
   __shared__ __align__(16)
     page_state_buffers_s<rolling_buf_size, rolling_buf_size, rolling_buf_size>
       state_buffers;
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int page_idx          = blockIdx.x;
   int t                 = threadIdx.x;
@@ -483,10 +484,10 @@ void __host__ DecodeSplitPageData(cudf::detail::hostdevice_span<PageInfo> pages,
   dim3 dim_grid(pages.size(), 1);  // 1 threadblock per page
 
   if (level_type_size == 1) {
-    gpuDecodeSplitPageData<rolling_buf_size, uint8_t><<<dim_grid, dim_block, 0, stream.value()>>>(
+    gpuDecodeSplitPageData<rolling_buf_size, uint8_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, error_code);
   } else {
-    gpuDecodeSplitPageData<rolling_buf_size, uint16_t><<<dim_grid, dim_block, 0, stream.value()>>>(
+    gpuDecodeSplitPageData<rolling_buf_size, uint16_t><<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows, error_code);
   }
 }

@@ -988,14 +988,16 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size_t, 8)
   constexpr int rolling_buf_size    = decode_block_size_t * 2;
   constexpr int rle_run_buffer_size = rle_stream_required_run_buffer_size<decode_block_size_t>();
 
-  __shared__ __align__(16) page_state_s state_g;
+  //__shared__ __align__(16) page_state_s state_g;
+  extern __shared__ __align__(16) page_state_s state_g[];
+
   constexpr bool use_dict_buffers = has_dict_t || has_bools_t || has_strings_t;
   using state_buf_t               = page_state_buffers_s<rolling_buf_size,  // size of nz_idx buffer
                                            use_dict_buffers ? rolling_buf_size : 1,
                                            has_strings_t ? rolling_buf_size : 1>;
   __shared__ __align__(16) state_buf_t state_buffers;
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   auto* const sb        = &state_buffers;
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
@@ -1229,11 +1231,11 @@ void __host__ DecodePageData(cudf::detail::hostdevice_span<PageInfo> pages,
 
     if (level_type_size == 1) {
       gpuDecodePageDataGeneric<uint8_t, decode_block_size, mask>
-        <<<dim_grid, dim_block, 0, stream.value()>>>(
+        <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
           pages.device_ptr(), chunks, min_row, num_rows, initial_str_offsets, error_code);
     } else {
       gpuDecodePageDataGeneric<uint16_t, decode_block_size, mask>
-        <<<dim_grid, dim_block, 0, stream.value()>>>(
+        <<<dim_grid, dim_block, sizeof(page_state_s), stream.value()>>>(
           pages.device_ptr(), chunks, min_row, num_rows, initial_str_offsets, error_code);
     }
   };

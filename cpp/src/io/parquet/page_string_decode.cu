@@ -689,9 +689,10 @@ CUDF_KERNEL void __launch_bounds__(preprocess_block_size) gpuComputeStringPageBo
 CUDF_KERNEL void __launch_bounds__(delta_preproc_block_size) gpuComputeDeltaPageStringSizes(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  //__shared__ __align__(16) page_state_s state_g;
+  extern __shared__ __align__(16) page_state_s state_g[];
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
   PageInfo* const pp    = &pages[page_idx];
@@ -773,10 +774,11 @@ CUDF_KERNEL void __launch_bounds__(delta_length_block_size) gpuComputeDeltaLengt
   using cudf::detail::warp_size;
   using WarpReduce = hipcub::WarpReduce<uleb128_t>;
   __shared__ typename WarpReduce::TempStorage temp_storage;
-  __shared__ __align__(16) page_state_s state_g;
+  //__shared__ __align__(16) page_state_s state_g;
+  extern __shared__ __align__(16) page_state_s state_g[];
   __shared__ __align__(16) delta_binary_decoder string_lengths;
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
   PageInfo* const pp    = &pages[page_idx];
@@ -872,9 +874,10 @@ CUDF_KERNEL void __launch_bounds__(delta_length_block_size) gpuComputeDeltaLengt
 CUDF_KERNEL void __launch_bounds__(preprocess_block_size) gpuComputePageStringSizes(
   PageInfo* pages, device_span<ColumnChunkDesc const> chunks, size_t min_row, size_t num_rows)
 {
-  __shared__ __align__(16) page_state_s state_g;
+  //__shared__ __align__(16) page_state_s state_g;
+  extern __shared__ __align__(16) page_state_s state_g[];
 
-  page_state_s* const s = &state_g;
+  page_state_s* const s = &state_g[0];
   int const page_idx    = blockIdx.x;
   int const t           = threadIdx.x;
   PageInfo* const pp    = &pages[page_idx];
@@ -1003,16 +1006,16 @@ void ComputePageStringSizes(cudf::detail::hostdevice_span<PageInfo> pages,
   int s_idx = 0;
   if (BitAnd(kernel_mask, decode_kernel_mask::DELTA_BYTE_ARRAY) != 0) {
     dim3 dim_delta(delta_preproc_block_size, 1);
-    gpuComputeDeltaPageStringSizes<<<dim_grid, dim_delta, 0, streams[s_idx++].value()>>>(
+    gpuComputeDeltaPageStringSizes<<<dim_grid, dim_delta, sizeof(page_state_s), streams[s_idx++].value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows);
   }
   if (BitAnd(kernel_mask, decode_kernel_mask::DELTA_LENGTH_BA) != 0) {
     dim3 dim_delta(delta_length_block_size, 1);
-    gpuComputeDeltaLengthPageStringSizes<<<dim_grid, dim_delta, 0, streams[s_idx++].value()>>>(
+    gpuComputeDeltaLengthPageStringSizes<<<dim_grid, dim_delta, sizeof(page_state_s), streams[s_idx++].value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows);
   }
   if (BitAnd(kernel_mask, STRINGS_MASK_NON_DELTA) != 0) {
-    gpuComputePageStringSizes<<<dim_grid, dim_block, 0, streams[s_idx++].value()>>>(
+    gpuComputePageStringSizes<<<dim_grid, dim_block, sizeof(page_state_s), streams[s_idx++].value()>>>(
       pages.device_ptr(), chunks, min_row, num_rows);
   }
 
