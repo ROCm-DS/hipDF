@@ -157,6 +157,7 @@ __device__ void skip_struct_field(byte_stream_s* bs, int field_type)
         }
       } break;
       case FieldType::STRUCT: struct_depth++; break;
+      default: break;
     }
   } while (rep_cnt || struct_depth);
 }

@@ -438,6 +438,7 @@ inline void __device__ set_page_data_start(state_type* s)
       if (s->col.num_rep_level_bits() != 0) { s->cur += RLE_LENGTH_FIELD_LEN; }
       break;
     case PageType::DATA_PAGE_V2: s->cur += s->page.max_lvl_size; break;
+    default: break;
   }
 }
 
@@ -548,6 +549,7 @@ __device__ encode_kernel_mask data_encoding_for_col(EncColumnChunk const* chunk,
       case column_encoding::DELTA_LENGTH_BYTE_ARRAY: return encode_kernel_mask::DELTA_LENGTH_BA;
       case column_encoding::DELTA_BYTE_ARRAY: return encode_kernel_mask::DELTA_BYTE_ARRAY;
       case column_encoding::BYTE_STREAM_SPLIT: return encode_kernel_mask::BYTE_STREAM_SPLIT;
+      default: break;
     }
   }
 
@@ -559,6 +561,7 @@ __device__ encode_kernel_mask data_encoding_for_col(EncColumnChunk const* chunk,
       case INT32:
       case INT64: return encode_kernel_mask::DELTA_BINARY;
       case BYTE_ARRAY: return encode_kernel_mask::DELTA_LENGTH_BA;
+      default: break;
     }
   }
 
@@ -1832,6 +1835,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
               case type_id::TIMESTAMP_NANOSECONDS: {
                 return julian_days_with_time<cuda::std::micro>(v);
               } break;
+              default: break;
             }
             return julian_days_with_time<cuda::std::nano>(0);
           }();
@@ -1891,6 +1895,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
               }
             }
           }
+        default: break;
         } break;
       }
     }
