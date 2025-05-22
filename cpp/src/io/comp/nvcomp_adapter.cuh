@@ -46,8 +46,6 @@
 #include <rmm/cuda_stream_view.hpp>
 #include <rmm/device_uvector.hpp>
 
-#include <hipcomp.h>
-
 #include <optional>
 
 namespace cudf::io::detail::nvcomp {
