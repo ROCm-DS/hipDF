@@ -290,9 +290,40 @@ size_type get_available_shared_memory_size(cudf::size_type grid_size)
   auto const active_blocks_per_sm =
     cudf::util::div_rounding_up_safe(grid_size, cudf::detail::num_multiprocessors());
 
-  size_t dynamic_shmem_size = 0;
-  CUDF_CUDA_TRY(cudaOccupancyAvailableDynamicSMemPerBlock(
-    &dynamic_shmem_size, single_pass_shmem_aggs_kernel, active_blocks_per_sm, GROUPBY_BLOCK_SIZE));
+  auto const max_dynamic_shmem_size = cudf::detail::max_shared_mem_per_multiprocessor();
+
+  auto const max_threads_per_sm = cudf::detail::max_threads_per_multiprocessor();
+
+  // NOTE(HIP/AMD): This assumes that blocks of static and dynamic shared memory
+  // should only be allocated in chunks of 128 bytes
+  auto constexpr allocation_granularity = 128;
+
+  cudaFuncAttributes attr;
+  CUDF_CUDA_TRY(cudaFuncGetAttributes(&attr, (void*)single_pass_shmem_aggs_kernel));
+  auto const static_shared_memory_per_block = attr.sharedSizeBytes;
+
+  size_type dynamic_shmem_size = 0;
+
+  // TODO(HIP/AMD): Switch to HIP equivalent of, see internal issue 257
+  // cudaOccupancyAvailableDynamicSMemPerBlock when available
+  // CUDF_CUDA_TRY(cudaOccupancyAvailableDynamicSMemPerBlock(
+  //   &dynamic_shmem_size, single_pass_shmem_aggs_kernel, 
+  //   active_blocks_per_sm, GROUPBY_BLOCK_SIZE));
+
+  dynamic_shmem_size = 
+      (max_dynamic_shmem_size - active_blocks_per_sm * static_shared_memory_per_block) / active_blocks_per_sm;
+
+  // Enforce allocation granularity for static + dynamic shmem per each block
+  dynamic_shmem_size = 
+      allocation_granularity * 
+      ((dynamic_shmem_size + static_shared_memory_per_block) / allocation_granularity) 
+      - static_shared_memory_per_block;
+
+  // Handle invalid case where maximum number of threads is exceeded
+  // TODO(HIP/AMD): Handle all invalid cases based on GROUPBY_BLOCK_SIZE
+  if(GROUPBY_BLOCK_SIZE * active_blocks_per_sm>max_threads_per_sm)
+    CUDF_FAIL("Unsupported configuration: The total number of threads per SM exceeds the maximum number of threads.");
+  
   return cudf::util::round_down_safe(static_cast<cudf::size_type>(0.5 * dynamic_shmem_size),
                                      ALIGNMENT);
 }
