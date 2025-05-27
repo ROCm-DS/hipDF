@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <tests/groupby/groupby_test_util.hpp>
 
 #include <cudf_test/base_fixture.hpp>
@@ -121,6 +143,44 @@ TYPED_TEST(groupby_max_test, null_keys_and_values)
   cudf::test::fixed_width_column_wrapper<K> expect_keys({1, 2, 3, 4}, no_nulls());
   //  { 0, 3,     1, 4, 5,   2, 8,    -}
   cudf::test::fixed_width_column_wrapper<R> expect_vals({3, 5, 8, 0}, {1, 1, 1, 0});
+
+  auto agg = cudf::make_max_aggregation<cudf::groupby_aggregation>();
+  test_single_agg(keys, vals, expect_keys, expect_vals, std::move(agg));
+
+  auto agg2 = cudf::make_max_aggregation<cudf::groupby_aggregation>();
+  test_single_agg(keys, vals, expect_keys, expect_vals, std::move(agg2), force_use_sort_impl::YES);
+}
+
+template <typename V>
+struct groupby_max_large_ints_test : public cudf::test::BaseFixture {};
+
+using K = int32_t;
+using GroupbyMaxLargeIntsTypes = cudf::test::Types<int32_t, int64_t, uint32_t, uint64_t>;
+TYPED_TEST_SUITE(groupby_max_large_ints_test, GroupbyMaxLargeIntsTypes);
+
+TYPED_TEST(groupby_max_large_ints_test, basic_large_input)
+{
+  // NOTE: This test only works for larger value types (due to overflow otherwise)
+  auto constexpr num_rows = 100000;
+  auto constexpr num_unique_keys = 4; 
+
+  using V = TypeParam;
+  using R = cudf::detail::target_type_t<V, cudf::aggregation::MAX>;
+
+  static_assert(num_rows % num_unique_keys == 0, "num_rows must be evenly divisible by num_unique_keys.");
+  static_assert(sizeof(V)>=4, "This test only works for larger value types (due to overflow otherwise).");
+
+  auto key_it = cudf::detail::make_counting_transform_iterator(0, [](auto i){return i/(num_rows/num_unique_keys);});
+  cudf::test::fixed_width_column_wrapper<K> keys(key_it, key_it + num_rows);
+
+  auto val_it = cudf::detail::make_counting_transform_iterator(0, [](auto i){return i+1;});
+  cudf::test::fixed_width_column_wrapper<R> vals(val_it, val_it + num_rows);
+
+  auto expect_key_it = cudf::detail::make_counting_transform_iterator(0, [](auto i){return i;});
+  cudf::test::fixed_width_column_wrapper<K> expect_keys(expect_key_it, expect_key_it + num_unique_keys);
+
+  auto expect_val_it = cudf::detail::make_counting_transform_iterator(0, [](auto i){return (i+1)*(num_rows/num_unique_keys);});
+  cudf::test::fixed_width_column_wrapper<R> expect_vals(expect_val_it, expect_val_it + num_unique_keys);
 
   auto agg = cudf::make_max_aggregation<cudf::groupby_aggregation>();
   test_single_agg(keys, vals, expect_keys, expect_vals, std::move(agg));
