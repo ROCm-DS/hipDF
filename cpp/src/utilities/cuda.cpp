@@ -60,4 +60,15 @@ cudf::size_type max_shared_mem_per_multiprocessor()
   return max_shared_mem_per_sm;
 }
 
+cudf::size_type max_threads_per_multiprocessor()
+{
+  int device = 0;
+  CUDF_CUDA_TRY(cudaGetDevice(&device));
+  int max_threads_per_sm;
+  CUDF_CUDA_TRY(cudaDeviceGetAttribute(&max_threads_per_sm, 
+                                        cudaDevAttrMaxThreadsPerMultiprocessor, 
+                                        device));
+  return max_threads_per_sm;
+}
+
 }  // namespace cudf::detail

@@ -59,6 +59,11 @@ cudf::size_type num_multiprocessors();
 cudf::size_type max_shared_mem_per_multiprocessor();
 
 /**
+ * @brief Get the maximum number of threads per multiprocessor.
+ */
+cudf::size_type max_threads_per_multiprocessor();
+
+/**
  * @brief Get the number of elements that can be processed per thread.
  *
  * @param[in] kernel The kernel for which the elements per thread needs to be assessed

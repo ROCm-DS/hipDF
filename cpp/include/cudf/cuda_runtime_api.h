@@ -85,6 +85,9 @@
 #ifndef cudaDevAttrMaxSharedMemoryPerMultiprocessor
 #  define cudaDevAttrMaxSharedMemoryPerMultiprocessor hipDeviceAttributeMaxSharedMemoryPerMultiprocessor
 #endif
+#ifndef cudaDevAttrMaxThreadsPerMultiprocessor
+#  define cudaDevAttrMaxThreadsPerMultiprocessor hipDeviceAttributeMaxThreadsPerMultiProcessor
+#endif
 #ifndef CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT
 #  define CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT hipDeviceAttributeMultiprocessorCount
 #endif
