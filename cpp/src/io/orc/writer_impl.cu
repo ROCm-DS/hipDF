@@ -1371,7 +1371,10 @@ encoded_footer_statistics finish_statistic_blobs(Footer const& footer,
   // That many chunks need to be copied at a time to the proper destination.
   size_t num_entries_seen        = 0;
   auto const num_buffers_to_copy = per_chunk_stats.stripe_stat_chunks.size() * num_columns * 2;
-  auto h_srcs = cudf::detail::make_empty_host_vector<void*>(num_buffers_to_copy, stream);
+  // TODO(HIP/AMD): WAR for internal issue 260, as rocPrim/hipcub
+  // batched_memcpy's presently do not accept input iterators that return
+  // void*.
+  auto h_srcs = cudf::detail::make_empty_host_vector<unsigned char*>(num_buffers_to_copy, stream);
   auto h_dsts = cudf::detail::make_empty_host_vector<void*>(num_buffers_to_copy, stream);
   auto h_lens = cudf::detail::make_empty_host_vector<size_t>(num_buffers_to_copy, stream);
 
@@ -1379,11 +1382,19 @@ encoded_footer_statistics finish_statistic_blobs(Footer const& footer,
     auto const stripes_per_col = per_chunk_stats.stripe_stat_chunks[i].size() / num_columns;
 
     for (size_t col = 0; col < num_columns; ++col) {
-      h_srcs.push_back(per_chunk_stats.stripe_stat_chunks[i].data() + col * stripes_per_col);
+      // TODO(HIP/AMD): WAR for internal issue 260, as rocPrim/hipcub
+      // batched_memcpy's presently do not accept input iterators that return
+      // void*.
+      void *src_ptr_tmp = per_chunk_stats.stripe_stat_chunks[i].data() + col * stripes_per_col;
+      h_srcs.push_back(static_cast<unsigned char*>(src_ptr_tmp));
       h_dsts.push_back(stat_chunks.data() + (num_stripes * col) + num_entries_seen);
       h_lens.push_back(stripes_per_col * sizeof(statistics_chunk));
 
-      h_srcs.push_back(per_chunk_stats.stripe_stat_merge[i].device_ptr() + col * stripes_per_col);
+      // TODO(HIP/AMD): WAR for internal issue 260, as rocPrim/hipcub
+      // batched_memcpy's presently do not accept input iterators that return
+      // void*.
+      src_ptr_tmp = per_chunk_stats.stripe_stat_merge[i].device_ptr() + col * stripes_per_col;
+      h_srcs.push_back(static_cast<unsigned char*>(src_ptr_tmp));
       h_dsts.push_back(stats_merge.device_ptr() + (num_stripes * col) + num_entries_seen);
       h_lens.push_back(stripes_per_col * sizeof(statistics_merge_group));
     }
