@@ -40,6 +40,7 @@
 
 package ai.rapids.cudf;
 
+
 import ai.rapids.cudf.HostColumnVector.BasicType;
 import ai.rapids.cudf.HostColumnVector.Builder;
 import ai.rapids.cudf.HostColumnVector.DataType;
@@ -64,6 +65,8 @@ import org.apache.parquet.schema.MessageType;
 import org.apache.parquet.schema.OriginalType;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import org.junit.jupiter.api.Disabled;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -98,6 +101,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+
 public class TableTest extends CudfTestBase {
 
   private static final HostMemoryAllocator hostMemoryAllocator = DefaultHostMemoryAllocator.get();
@@ -112,6 +116,11 @@ public class TableTest extends CudfTestBase {
   private static final File TEST_ALL_TYPES_PLAIN_AVRO_FILE = TestUtils.getResourceAsFile("alltypes_plain.avro");
   private static final File TEST_SIMPLE_CSV_FILE = TestUtils.getResourceAsFile("simple.csv");
   private static final File TEST_SIMPLE_JSON_FILE = TestUtils.getResourceAsFile("people.json");
+  private static final File TEST_JSON_ERROR_FILE = TestUtils.getResourceAsFile("people_with_invalid_lines.json");
+  private static final File TEST_JSON_SINGLE_QUOTES_FILE = TestUtils.getResourceAsFile("single_quotes.json");
+  private static final File TEST_JSON_WHITESPACES_FILE = TestUtils.getResourceAsFile("whitespaces.json");
+  private static final File TEST_MIXED_TYPE_1_JSON = TestUtils.getResourceAsFile("mixed_types_1.json");
+  private static final File TEST_MIXED_TYPE_2_JSON = TestUtils.getResourceAsFile("mixed_types_2.json");
 
   private static final Schema CSV_DATA_BUFFER_SCHEMA = Schema.builder()
       .column(DType.INT32, "A")
@@ -334,6 +343,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
+  //@Test
   @Test
   void testReadJSONFile() {
     Schema schema = Schema.builder()
@@ -349,6 +359,580 @@ public class TableTest extends CudfTestBase {
         .build();
         Table table = Table.readJSON(schema, opts, TEST_SIMPLE_JSON_FILE)) {
       assertTablesAreEqual(expected, table);
+    }
+  }
+
+  private static final byte[] EMPTY_JSON_DATA_BUFFER = ("{}\n").getBytes(StandardCharsets.UTF_8);
+
+  @Test
+  void testReadEmptyJson() {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "name")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withKeepQuotes(true)
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeSingleQuotes(true)
+        .withNormalizeWhitespace(true)
+        .withLines(true)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column((String)null)
+        .build();
+         Table table = Table.readJSON(schema, opts, EMPTY_JSON_DATA_BUFFER, 0,
+             EMPTY_JSON_DATA_BUFFER.length, 1)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  private static final byte[] EMPTY_ARRAY_JSON_DATA_BUFFER =
+      ("{'a':[]}\n").getBytes(StandardCharsets.UTF_8);
+
+  @Test
+  void testReadEmptyArrayJson() {
+    Schema.Builder builder = Schema.builder();
+    Schema.Builder listBuilder = builder.addColumn(DType.LIST, "a");
+    // INT8 is selected here because CUDF always returns INT8 for this no matter what we ask for.
+    listBuilder.addColumn(DType.INT8, "child");
+    Schema schema = builder.build();
+    JSONOptions opts = JSONOptions.builder()
+        .withKeepQuotes(true)
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeSingleQuotes(true)
+        .withNormalizeWhitespace(true)
+        .withLines(true)
+        .build();
+    ListType lt = new ListType(true, new BasicType(true, DType.INT8));
+    try (Table expected = new Table.TestBuilder()
+        .column(lt, new ArrayList<Byte>())
+        .build();
+         Table table = Table.readJSON(schema, opts, EMPTY_ARRAY_JSON_DATA_BUFFER, 0,
+             EMPTY_ARRAY_JSON_DATA_BUFFER.length, 1)) {
+      TableDebug.get().debug("OUTPUT", table);
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadSingleQuotesJSONFile() throws IOException {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "A")
+            .build();
+    JSONOptions opts = JSONOptions.builder()
+            .withLines(true)
+            .withNormalizeSingleQuotes(true)
+            .build();
+    try (Table expected = new Table.TestBuilder()
+            .column("TEST\"", "TESTER'")
+            .build();
+         MultiBufferDataSource source = sourceFrom(TEST_JSON_SINGLE_QUOTES_FILE);
+         Table table = Table.readJSON(schema, opts, source)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadSingleQuotesJSONFileFeatureDisabled() throws IOException {
+    Schema schema = Schema.builder()
+      .column(DType.STRING, "A")
+      .build();
+    JSONOptions opts = JSONOptions.builder()
+      .withLines(true)
+      .withNormalizeSingleQuotes(false)
+      .build();
+    try (MultiBufferDataSource source = sourceFrom(TEST_JSON_SINGLE_QUOTES_FILE)) {
+      assertThrows(CudfException.class, () ->
+        Table.readJSON(schema, opts, source));
+    }
+  }
+
+  @Test
+  void testReadWhitespacesJSONFile() throws IOException {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "a")
+            .build();
+    JSONOptions opts = JSONOptions.builder()
+            .withLines(true)
+            .withMixedTypesAsStrings(true)
+            .withNormalizeWhitespace(true)
+            .build();
+    try (Table expected = new Table.TestBuilder()
+            .column("b", "50", "[1,2,3,4,5,6,7,8]", "{\"c\":\"d\"}", "b")
+            .build();
+         MultiBufferDataSource source = sourceFrom(TEST_JSON_WHITESPACES_FILE);
+         Table table = Table.readJSON(schema, opts, source)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadSingleQuotesJSONFileKeepQuotes() throws IOException {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "A")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withLines(true)
+        .withNormalizeSingleQuotes(true)
+        .withKeepQuotes(true)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column("\"TEST\"\"", "\"TESTER'\"") // Note that escapes are also processed
+        .build();
+         MultiBufferDataSource source = sourceFrom(TEST_JSON_SINGLE_QUOTES_FILE);
+         Table table = Table.readJSON(schema, opts, source)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  private static final byte[] JSON_VALIDATION_BUFFER = (
+      "{\"a\":true}\n" +
+      "{\"a\":false}\n" +
+      "{\"a\":null}\n" +
+      "{\"a\":true, \"b\":truee}\n" +
+      "{\"a\":true, \"b\":\"nulll\"}\n" +
+      "{\"a\": 1}\n" +
+      "{\"a\": 0}\n" +
+      "{\"a\": -}\n" +
+      "{\"a\": -0}\n" +
+      "{\"a\": -01}\n" +
+
+      "{\"a\": 01}\n" +
+      "{\"a\": -0.1}\n" +
+      "{\"a\": -00.1}\n" +
+      "{\"a\": NaN}\n" +
+      "{\"a\": INF}\n" +
+      "{\"a\": +INF}\n" +
+      "{\"a\": -INF}\n" +
+      "{\"a\": +Infinity}\n" +
+      "{\"a\": Infinity}\n" +
+      "{\"a\": -Infinity}\n" +
+
+      "{\"a\": INFinity}\n" +
+      "{\"a\":\"3710-11-10T02:46:58.732Z\"}\n" +
+      "{\"a\":12.}\n" +
+      "{\"a\": -3.4e+38}\n" +
+      "{\"a\": -3.4e-38}\n" +
+      "{\"a\": 1.4e38}\n" +
+      "{\"a\": -3.4E+38}\n" +
+      "{\"a\": -3.4E-38}\n" +
+      "{\"a\": 1.4E38}\n" +
+      "{\"a\": -3.4E+}\n" +
+
+      "{\"a\": -3.4E-}\n" +
+      "{\"a\": \"A\u0000B\"}\n" +
+      "{\"a\": \"A\\u0000B\"}\n" +
+      "{\"a\": \"A\u0001B\"}\n" +
+      "{\"a\": \"A\\u0001B\"}\n" +
+      "{\"a\": \"A\u001FB\"}\n" +
+      "{\"a\": \"A\\u001FB\"}\n" +
+      "{\"a\": \"A\u0020B\"}\n" +
+      "{\"a\": \"A\\u0020B\"}\n" +
+      "{\"a\": \"\\u12\"}\n" +
+
+      "{\"a\": \"\\z\"}\n" +
+      "{\"a\": \"\\r\"}\n" +
+      "{\"a\": \"something\", \"b\": \"\\z\"}\n"
+  ).getBytes(StandardCharsets.UTF_8);
+
+  @Test
+  void testJSONValidationNoStrict() {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "a")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeWhitespace(true)
+        .withKeepQuotes(true)
+        .withNormalizeSingleQuotes(true)
+        .withStrictValidation(false)
+        .withLeadingZeros(false)
+        .withNonNumericNumbers(false)
+        .withUnquotedControlChars(true)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column(
+            "true", "false", null, "true", "true", "1", "0", "-", "-0", "-01",
+            "01", "-0.1", "-00.1", "NaN", "INF", "+INF", "-INF", "+Infinity", "Infinity", "-Infinity",
+            "INFinity", "\"3710-11-10T02:46:58.732Z\"", "12.", "-3.4e+38", "-3.4e-38", "1.4e38", "-3.4E+38", "-3.4E-38", "1.4E38", "-3.4E+",
+            "-3.4E-", "\"A\u0000B\"", "\"A\u0000B\"", "\"A\u0001B\"", "\"A\u0001B\"", "\"A\u001FB\"", "\"A\u001FB\"", "\"A B\"", "\"A B\"", null,
+            null, "\"\r\"", "\"something\"")
+        .build();
+         MultiBufferDataSource source = sourceFrom(JSON_VALIDATION_BUFFER);
+         Table table = Table.readJSON(schema, opts, source, (int)expected.getRowCount())) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testJSONValidation() {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "a")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeWhitespace(true)
+        .withKeepQuotes(true)
+        .withNormalizeSingleQuotes(true)
+        .withStrictValidation(true)
+        .withLeadingZeros(false)
+        .withNonNumericNumbers(false)
+        .withUnquotedControlChars(true)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column(
+            "true", "false", null, null, "true", "1", "0", null, "-0", null,
+            null, "-0.1", null, null, null, null, null, null, null, null,
+            null, "\"3710-11-10T02:46:58.732Z\"", null, "-3.4e+38", "-3.4e-38", "1.4e38", "-3.4E+38", "-3.4E-38", "1.4E38", null,
+            null, "\"A\u0000B\"", "\"A\u0000B\"", "\"A\u0001B\"", "\"A\u0001B\"", "\"A\u001FB\"", "\"A\u001FB\"", "\"A B\"", "\"A B\"", null,
+            null, "\"\r\"", null)
+        .build();
+         MultiBufferDataSource source = sourceFrom(JSON_VALIDATION_BUFFER);
+         Table table = Table.readJSON(schema, opts, source, (int)expected.getRowCount())) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testJSONValidationLeadingZeros() {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "a")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeWhitespace(true)
+        .withKeepQuotes(true)
+        .withNormalizeSingleQuotes(true)
+        .withStrictValidation(true)
+        .withLeadingZeros(true)
+        .withNonNumericNumbers(false)
+        .withUnquotedControlChars(true)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column(
+            "true", "false", null, null, "true", "1", "0", null, "-0", "-01",
+            "01", "-0.1", "-00.1", null, null, null, null, null, null, null,
+            null, "\"3710-11-10T02:46:58.732Z\"", null, "-3.4e+38", "-3.4e-38", "1.4e38", "-3.4E+38", "-3.4E-38", "1.4E38", null,
+            null, "\"A\u0000B\"", "\"A\u0000B\"", "\"A\u0001B\"", "\"A\u0001B\"", "\"A\u001FB\"", "\"A\u001FB\"", "\"A B\"", "\"A B\"", null,
+            null, "\"\r\"", null)
+        .build();
+         MultiBufferDataSource source = sourceFrom(JSON_VALIDATION_BUFFER);
+         Table table = Table.readJSON(schema, opts, source, (int)expected.getRowCount())) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testJSONValidationNonNumeric() {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "a")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeWhitespace(true)
+        .withKeepQuotes(true)
+        .withNormalizeSingleQuotes(true)
+        .withStrictValidation(true)
+        .withLeadingZeros(false)
+        .withNonNumericNumbers(true)
+        .withUnquotedControlChars(true)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column(
+            "true", "false", null, null, "true", "1", "0", null, "-0", null,
+            null, "-0.1", null, "NaN", null, "+INF", "-INF", "+Infinity", "Infinity", "-Infinity",
+            null, "\"3710-11-10T02:46:58.732Z\"", null, "-3.4e+38", "-3.4e-38", "1.4e38", "-3.4E+38", "-3.4E-38", "1.4E38", null,
+            null, "\"A\u0000B\"", "\"A\u0000B\"", "\"A\u0001B\"", "\"A\u0001B\"", "\"A\u001FB\"", "\"A\u001FB\"", "\"A B\"", "\"A B\"", null,
+            null, "\"\r\"", null)
+        .build();
+         MultiBufferDataSource source = sourceFrom(JSON_VALIDATION_BUFFER);
+         Table table = Table.readJSON(schema, opts, source, (int)expected.getRowCount())) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testJSONValidationUnquotedControl() {
+    Schema schema = Schema.builder()
+        .column(DType.STRING, "a")
+        .build();
+    JSONOptions opts = JSONOptions.builder()
+        .withRecoverWithNull(true)
+        .withMixedTypesAsStrings(true)
+        .withNormalizeWhitespace(true)
+        .withKeepQuotes(true)
+        .withNormalizeSingleQuotes(true)
+        .withStrictValidation(true)
+        .withLeadingZeros(false)
+        .withNonNumericNumbers(false)
+        .withUnquotedControlChars(false)
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column(
+            "true", "false", null, null, "true", "1", "0", null, "-0", null,
+            null, "-0.1", null, null, null, null, null, null, null, null,
+            null, "\"3710-11-10T02:46:58.732Z\"", null, "-3.4e+38", "-3.4e-38", "1.4e38", "-3.4E+38", "-3.4E-38", "1.4E38", null,
+            null, null, "\"A\u0000B\"", null, "\"A\u0001B\"", null, "\"A\u001FB\"", "\"A B\"", "\"A B\"", null,
+            null, "\"\r\"", null)
+        .build();
+         MultiBufferDataSource source = sourceFrom(JSON_VALIDATION_BUFFER);
+         Table table = Table.readJSON(schema, opts, source, (int)expected.getRowCount())) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  private static final byte[] CR_JSON_TEST_BUFFER = ("{\"a\":\"12\n3\"}\0" +
+      "{\"a\":\"AB\nC\"}\0").getBytes(StandardCharsets.UTF_8);
+
+  @Test
+  void testReadJSONDelim() {
+    Schema schema = Schema.builder().addColumn(DType.STRING, "a").build();
+    JSONOptions opts = JSONOptions.builder()
+        .withLines(true)
+        .withLineDelimiter('\0')
+        .build();
+    try (Table expected = new Table.TestBuilder()
+        .column("12\n3", "AB\nC")
+        .build();
+        Table found = Table.readJSON(schema, opts, CR_JSON_TEST_BUFFER)) {
+      assertTablesAreEqual(expected, found);
+    }
+  }
+
+  private static final byte[] NESTED_JSON_DATA_BUFFER = ("{\"a\":{\"c\":\"C1\"}}\n" +
+      "{\"a\":{\"c\":\"C2\", \"b\":\"B2\"}}\n" +
+      "{\"d\":[1,2,3]}\n" +
+      "{\"e\": [{\"g\": 1}, {\"f\": 2}, {\"f\": 3, \"g\": 4}], \"d\":[]}").getBytes(StandardCharsets.UTF_8);
+
+  @Test
+  void testReadJSONNestedTypes() {
+    Schema.Builder root = Schema.builder();
+    Schema.Builder a = root.addColumn(DType.STRUCT, "a");
+    a.addColumn(DType.STRING, "b");
+    a.addColumn(DType.STRING, "c");
+    a.addColumn(DType.STRING, "missing");
+    Schema.Builder d = root.addColumn(DType.LIST, "d");
+    d.addColumn(DType.INT64, "ignored");
+    root.addColumn(DType.INT64, "also_missing");
+    Schema.Builder e = root.addColumn(DType.LIST, "e");
+    Schema.Builder eChild = e.addColumn(DType.STRUCT, "ignored");
+    eChild.addColumn(DType.INT64, "f");
+    eChild.addColumn(DType.STRING, "missing_in_list");
+    eChild.addColumn(DType.INT64, "g");
+    Schema schema = root.build();
+    JSONOptions opts = JSONOptions.builder()
+        .withLines(true)
+        .build();
+    StructType aStruct = new StructType(true,
+        new BasicType(true, DType.STRING),
+        new BasicType(true, DType.STRING),
+        new BasicType(true, DType.STRING));
+    ListType dList = new ListType(true, new BasicType(true, DType.INT64));
+    StructType eChildStruct = new StructType(true,
+        new BasicType(true, DType.INT64),
+        new BasicType(true, DType.STRING),
+        new BasicType(true, DType.INT64));
+    ListType eList = new ListType(true, eChildStruct);
+    try (Table expected = new Table.TestBuilder()
+        .column(aStruct,
+            new StructData(null, "C1", null),
+            new StructData("B2", "C2", null),
+            null,
+            null)
+        .column(dList,
+            null,
+            null,
+            Arrays.asList(1L,2L,3L),
+            new ArrayList<Long>())
+        .column((Long)null, null, null, null) // also_missing
+        .column(eList,
+            null,
+            null,
+            null,
+            Arrays.asList(new StructData(null, null, 1L), new StructData(2L, null, null), new StructData(3L, null, 4L)))
+        .build();
+        Table table = Table.readJSON(schema, opts, NESTED_JSON_DATA_BUFFER)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadJSONNestedTypesVerySmallChanges() {
+    Schema.Builder root = Schema.builder();
+    Schema.Builder e = root.addColumn(DType.LIST, "e");
+    Schema.Builder eChild = e.addColumn(DType.STRUCT, "ignored");
+    eChild.addColumn(DType.INT64, "g");
+    eChild.addColumn(DType.INT64, "f");
+    Schema schema = root.build();
+    JSONOptions opts = JSONOptions.builder()
+        .withLines(true)
+        .build();
+    StructType eChildStruct = new StructType(true,
+        new BasicType(true, DType.INT64),
+        new BasicType(true, DType.INT64));
+    ListType eList = new ListType(true, eChildStruct);
+    try (Table expected = new Table.TestBuilder()
+        .column(eList,
+            null,
+            null,
+            null,
+            Arrays.asList(new StructData(1L, null), new StructData(null, 2L), new StructData(4L, 3L)))
+        .build();
+         Table table = Table.readJSON(schema, opts, NESTED_JSON_DATA_BUFFER)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadJSONNestedTypesDataSource() {
+    Schema.Builder root = Schema.builder();
+    Schema.Builder a = root.addColumn(DType.STRUCT, "a");
+    a.addColumn(DType.STRING, "b");
+    a.addColumn(DType.STRING, "c");
+    a.addColumn(DType.STRING, "missing");
+    Schema.Builder d = root.addColumn(DType.LIST, "d");
+    d.addColumn(DType.INT64, "ignored");
+    root.addColumn(DType.INT64, "also_missing");
+    Schema.Builder e = root.addColumn(DType.LIST, "e");
+    Schema.Builder eChild = e.addColumn(DType.STRUCT, "ignored");
+    eChild.addColumn(DType.INT64, "g");
+    Schema schema = root.build();
+    JSONOptions opts = JSONOptions.builder()
+        .withLines(true)
+        .build();
+    StructType aStruct = new StructType(true,
+        new BasicType(true, DType.STRING),
+        new BasicType(true, DType.STRING),
+        new BasicType(true, DType.STRING));
+    ListType dList = new ListType(true, new BasicType(true, DType.INT64));
+    StructType eChildStruct = new StructType(true,
+        new BasicType(true, DType.INT64));
+    ListType eList = new ListType(true, eChildStruct);
+    try (Table expected = new Table.TestBuilder()
+        .column(aStruct,
+            new StructData(null, "C1", null),
+            new StructData("B2", "C2", null),
+            null,
+            null)
+        .column(dList,
+            null,
+            null,
+            Arrays.asList(1L,2L,3L),
+            new ArrayList<Long>())
+        .column((Long)null, null, null, null) // also_missing
+        .column(eList,
+            null,
+            null,
+            null,
+            Arrays.asList(new StructData(1L), new StructData((Long)null), new StructData(4L)))
+        .build();
+         MultiBufferDataSource source = sourceFrom(NESTED_JSON_DATA_BUFFER);
+         Table table = Table.readJSON(schema, opts, source)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  void testReadMixedType2JSONFileFeatureDisabled() {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "a")
+            .build();
+    JSONOptions opts = JSONOptions.builder()
+            .withLines(true)
+            .withMixedTypesAsStrings(false)
+            .build();
+    assertThrows(CudfException.class, () ->
+      Table.readJSON(schema, opts, TEST_MIXED_TYPE_2_JSON));
+  }
+
+  @Test
+  void testReadMixedType1JSONFile() {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "a")
+            .build();
+    JSONOptions opts = JSONOptions.builder()
+            .withLines(true)
+            .withMixedTypesAsStrings(true)
+            .build();
+    try (Table expected = new Table.TestBuilder()
+            .column("123", "123" )
+            .build();
+         Table table = Table.readJSON(schema, opts, TEST_MIXED_TYPE_1_JSON)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadMixedType2JSONFile() throws IOException {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "a")
+            .build();
+    JSONOptions opts = JSONOptions.builder()
+            .withLines(true)
+            .withMixedTypesAsStrings(true)
+            .build();
+    try (Table expected = new Table.TestBuilder()
+            .column("[1,2,3]", "{ \"b\": 1 }" )
+            .build();
+         MultiBufferDataSource source = sourceFrom(TEST_MIXED_TYPE_2_JSON);
+         Table table = Table.readJSON(schema, opts, source)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadJSONFromDataSource() throws IOException {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "name")
+            .column(DType.INT32, "age")
+            .build();
+    JSONOptions opts = JSONOptions.builder()
+            .withLines(true)
+            .build();
+    try (Table expected = new Table.TestBuilder()
+            .column("Michael", "Andy", "Justin")
+            .column(null, 30, 19)
+            .build();
+         MultiBufferDataSource source = sourceFrom(TEST_SIMPLE_JSON_FILE);
+         Table table = Table.readJSON(schema, opts, source)) {
+      assertTablesAreEqual(expected, table);
+    }
+  }
+
+  @Test
+  void testReadJSONFileWithInvalidLines() {
+    Schema schema = Schema.builder()
+            .column(DType.STRING, "name")
+            .column(DType.INT32, "age")
+            .build();
+
+    // test with recoverWithNulls=true
+    {
+      JSONOptions opts = JSONOptions.builder()
+              .withLines(true)
+              .withRecoverWithNull(true)
+              .build();
+      try (Table expected = new Table.TestBuilder()
+              .column("Michael", "Andy", null, "Justin")
+              .column(null, 30, null, 19)
+              .build();
+           Table table = Table.readJSON(schema, opts, TEST_JSON_ERROR_FILE)) {
+        assertTablesAreEqual(expected, table);
+      }
+    }
+
+    // test with recoverWithNulls=false
+    {
+      JSONOptions opts = JSONOptions.builder()
+              .withLines(true)
+              .withRecoverWithNull(false)
+              .build();
+      assertThrows(CudfException.class, () ->
+        Table.readJSON(schema, opts, TEST_JSON_ERROR_FILE));
     }
   }
 
@@ -3522,8 +4106,8 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
-  void testChunkedPackTwoPasses() {
+  @Test // fails with:  NULL for Column 0 Row 15 ==> expected: <true> but was: <false>
+  void DPasses() {
     // this test packes ~2MB worth of long into a 1MB bounce buffer
     // this is 3 iterations because of the validity buffer
     Long[] longs = new Long[256*1024];
@@ -4394,7 +4978,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testCreateTDigestReduction() {
     try (Table t1 = new Table.TestBuilder()
             .column(100, 150, 160, 70, 110, 160)
@@ -4420,7 +5004,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testMergeTDigestReduction() {
     StructType centroidStruct = new StructType(false,
             new BasicType(false, DType.FLOAT64), // mean
@@ -4786,7 +5370,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Needs Scalar
   void testWindowingCount() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4824,7 +5408,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testWindowingMin() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4865,7 +5449,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingMax() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4906,7 +5490,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingSum() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -4936,7 +5520,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingRowNumber() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5021,7 +5605,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingCollectList() {
     RollingAggregation aggCollectWithNulls = RollingAggregation.collectList(NullPolicy.INCLUDE);
     RollingAggregation aggCollect = RollingAggregation.collectList();
@@ -5097,7 +5681,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingCollectSet() {
     RollingAggregation aggCollect = RollingAggregation.collectSet();
     RollingAggregation aggCollectWithEqNulls = RollingAggregation.collectSet(NullPolicy.INCLUDE,
@@ -5206,7 +5790,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingLead() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5427,7 +6011,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testWindowingLag() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -5646,7 +6230,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test 
   void testWindowingMean() {
     try (Table unsorted = new Table.TestBuilder().column( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
         .column( 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3) // GBY Key
@@ -6121,7 +6705,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test   // Scalar
   void testRangeWindowingWithoutGroupByColumns() {
     try (Table unsorted = new Table.TestBuilder()
         .column(             7, 5, 1, 9, 7, 9, 8, 2, 8, 0, 6, 6, 8) // Agg Column
@@ -6163,7 +6747,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  //Scalar
   void testRangeWindowingOrderByUnsupportedDataTypeExceptions() {
     try (Table table = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6187,7 +6771,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testInvalidWindowTypeExceptions() {
     try (Scalar one = Scalar.fromInt(1);
          Table table = new Table.TestBuilder()
@@ -6215,7 +6799,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testRangeWindowingCountUnboundedPreceding() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6259,7 +6843,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testRangeWindowingWithStringOrderByColumn() {
     final String X = null;
     final int orderIndex = 3; // Index of order-by column.
@@ -6311,7 +6895,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  //Scalar
   void testRangeWindowingCountUnboundedASCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6400,7 +6984,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  //Scalar
   void testRangeWindowingCountUnboundedDESCWithNullsFirst() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6495,7 +7079,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testRangeWindowingCountUnboundedASCWithNullsLast() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1,  1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6583,7 +7167,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  //Scalar
   void testRangeWindowingCountUnboundedDESCWithNullsLast() {
     Integer X = null;
     try (Table unsorted = new Table.TestBuilder()
@@ -6708,7 +7292,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testRangeWindowsWithDecimalOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
         .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -6813,7 +7397,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testRangeWindowsWithFloatOrderBy() {
     try (Table unsorted = new Table.TestBuilder()
             .column(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1) // GBY Key
@@ -7973,7 +8557,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalars
   void testScatterScalars() {
     try (Scalar s1 = Scalar.fromInt(0);
          Scalar s2 = Scalar.fromString("A");
@@ -8559,7 +9143,7 @@ public class TableTest extends CudfTestBase {
     }
   }
 
-  @Test
+  @Test  // Scalar
   void testParquetWriteMap() throws IOException {
     ParquetWriterOptions options = ParquetWriterOptions.builder()
         .withMapColumn(mapColumn("my_map",
@@ -9213,73 +9797,6 @@ public class TableTest extends CudfTestBase {
          Table expected = new Table(expectedStructs)) {
       assertEquals(expected.getRowCount(), 3L, "Expected column row count is incorrect");
       assertTablesAreEqual(expected, filteredTable);
-    }
-  }
-
-  @Test  // fails with  Null Count For Column 0 ==> expected: <1> but was: <4>
-  void fixedWidthRowsRoundTripWide() {
-    TestBuilder tb = new TestBuilder();
-    IntStream.range(0, 10).forEach(i -> tb.column(3l, 9l, 4l, 2l, 20l, null));
-    IntStream.range(0, 10).forEach(i -> tb.column(5.0d, 9.5d, 0.9d, 7.23d, 2.8d, null));
-    IntStream.range(0, 10).forEach(i -> tb.column(5, 1, 0, 2, 7, null));
-    IntStream.range(0, 10).forEach(i -> tb.column(true, false, false, true, false, null));
-    IntStream.range(0, 10).forEach(i -> tb.column(1.0f, 3.5f, 5.9f, 7.1f, 9.8f, null));
-    IntStream.range(0, 10).forEach(i -> tb.column(new Byte[]{2, 3, 4, 5, 9, null}));
-    IntStream.range(0, 10).forEach(i -> tb.decimal32Column(-3, RoundingMode.UNNECESSARY, 5.0d,
-        9.5d, 0.9d, 7.23d, 2.8d, null));
-    IntStream.range(0, 10).forEach(i -> tb.decimal64Column(-8, 3L, 9L, 4L, 2L, 20L, null));
-    try (Table origTable = tb.build()) {
-      ColumnVector[] rowMajorTable = origTable.convertToRows();
-      try {
-        // We didn't overflow
-        assert rowMajorTable.length == 1;
-        ColumnVector cv = rowMajorTable[0];
-        assert cv.getRowCount() == origTable.getRowCount();
-        DType[] types = new DType[origTable.getNumberOfColumns()];
-        for (int i = 0; i < origTable.getNumberOfColumns(); i++) {
-          types[i] = origTable.getColumn(i).getType();
-        }
-        try (Table backAgain = Table.convertFromRows(cv, types)) {
-          assertTablesAreEqual(origTable, backAgain);
-        }
-      } finally {
-        for (ColumnVector cv : rowMajorTable) {
-          cv.close();
-        }
-      }
-    }
-  }
-
-  @Test @Disabled // hangs
-  void fixedWidthRowsRoundTrip() {
-    try (Table origTable = new TestBuilder()
-        .column(3l, 9l, 4l, 2l, 20l, null)
-        .column(5.0d, 9.5d, 0.9d, 7.23d, 2.8d, null)
-        .column(5, 1, 0, 2, 7, null)
-        .column(true, false, false, true, false, null)
-        .column(1.0f, 3.5f, 5.9f, 7.1f, 9.8f, null)
-        .column(new Byte[]{2, 3, 4, 5, 9, null})
-        .decimal32Column(-3, RoundingMode.UNNECESSARY, 5.0d, 9.5d, 0.9d, 7.23d, 2.8d, null)
-        .decimal64Column(-8, 3L, 9L, 4L, 2L, 20L, null)
-        .build()) {
-      ColumnVector[] rowMajorTable = origTable.convertToRowsFixedWidthOptimized();
-      try {
-        // We didn't overflow
-        assert rowMajorTable.length == 1;
-        ColumnVector cv = rowMajorTable[0];
-        assert cv.getRowCount() == origTable.getRowCount();
-        DType[] types = new DType[origTable.getNumberOfColumns()];
-        for (int i = 0; i < origTable.getNumberOfColumns(); i++) {
-          types[i] = origTable.getColumn(i).getType();
-        }
-        try (Table backAgain = Table.convertFromRowsFixedWidthOptimized(cv, types)) {
-          assertTablesAreEqual(origTable, backAgain);
-        }
-      } finally {
-        for (ColumnVector cv : rowMajorTable) {
-          cv.close();
-        }
-      }
     }
   }
 
