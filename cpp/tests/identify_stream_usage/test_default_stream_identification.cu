@@ -51,7 +51,6 @@ void test_cudaLaunchKernel()
   if (err != cudaSuccess) { throw std::runtime_error("Kernel failed on non-default stream!"); }
 
   try {
-   //  (void) cudaLaunchKernel((void*)kernel, dim3(1,1,1), dim3(1,1,1), nullptr, 0, 0);
     kernel<<<1, 1>>>();
   } catch (std::runtime_error&) {
     return;
