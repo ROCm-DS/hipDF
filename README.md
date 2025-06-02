@@ -50,32 +50,31 @@ hipDF provides a pandas-like API that will be familiar to data engineers & data 
 
 For example, the following snippet downloads a CSV, then uses the GPU to parse it into rows and columns and run calculations:
 ```python
-import cudf, requests
-from io import StringIO
+import cudf
 
-url = "https://github.com/plotly/datasets/raw/master/tips.csv"
-content = requests.get(url).content.decode('utf-8')
-
-tips_df = cudf.read_csv(StringIO(content))
-tips_df['tip_percentage'] = tips_df['tip'] / tips_df['total_bill'] * 100
+tips_df = cudf.read_csv("https://github.com/plotly/datasets/raw/master/tips.csv")
+tips_df["tip_percentage"] = tips_df["tip"] / tips_df["total_bill"] * 100
 
 # display average tip by dining party size
-print(tips_df.groupby('size').tip_percentage.mean())
+print(tips_df.groupby("size").tip_percentage.mean())
 ```
 
-Output:
-```
-size
-1    21.729201548727808
-2    16.571919173482897
-3    15.215685473711837
-4    14.594900639351332
-5    14.149548965142023
-6    15.622920072028379
-Name: tip_percentage, dtype: float64
-```
+Or, you can use hipDF as a no-code-change accelerator for pandas, using
+[`cudf.pandas`](https://docs.rapids.ai/api/cudf/stable/cudf_pandas).
+`cudf.pandas` supports 100% of the pandas API, utilizing hipDF for
+supported operations and falling back to pandas when needed:
 
-For additional examples, browse the complete [cuDF API documentation](https://docs.rapids.ai/api/cudf/stable/), or check out the more detailed [cuDF notebooks](https://github.com/rapidsai/notebooks-contrib).
+```python
+%load_ext cudf.pandas  # pandas operations now use the GPU!
+
+import pandas as pd
+
+tips_df = pd.read_csv("https://github.com/plotly/datasets/raw/master/tips.csv")
+tips_df["tip_percentage"] = tips_df["tip"] / tips_df["total_bill"] * 100
+
+# display average tip by dining party size
+print(tips_df.groupby("size").tip_percentage.mean())
+```
 
 ## Quick Start
 
