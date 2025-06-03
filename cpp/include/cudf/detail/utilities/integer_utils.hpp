@@ -75,7 +75,7 @@ CUDF_HOST_DEVICE constexpr S round_up_safe(S number_to_round, S modulus)
   if (remainder == 0) { return number_to_round; }
   auto rounded_up = number_to_round - remainder + modulus;
   if (rounded_up < number_to_round) {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("Attempt to round up beyond the type's maximum value", cudf::data_type_error);
 #else
     CUDF_UNREACHABLE("Attempt to round up beyond the type's maximum value");

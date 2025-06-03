@@ -118,7 +118,7 @@ struct DeviceSum {
   template <typename T, std::enable_if_t<cudf::is_fixed_point<T>()>* = nullptr>
   CUDF_HOST_DEVICE static constexpr T identity()
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("fixed_point does not yet support device operator identity");
 #else
     CUDF_UNREACHABLE("fixed_point does not yet support device operator identity");
@@ -180,7 +180,7 @@ struct DeviceMin {
   template <typename T, std::enable_if_t<cudf::is_fixed_point<T>()>* = nullptr>
   CUDF_HOST_DEVICE static constexpr T identity()
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("fixed_point does not yet support DeviceMin identity");
 #else
     CUDF_UNREACHABLE("fixed_point does not yet support DeviceMin identity");
@@ -232,7 +232,7 @@ struct DeviceMax {
   template <typename T, std::enable_if_t<cudf::is_fixed_point<T>()>* = nullptr>
   CUDF_HOST_DEVICE static constexpr T identity()
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("fixed_point does not yet support DeviceMax identity");
 #else
     CUDF_UNREACHABLE("fixed_point does not yet support DeviceMax identity");
@@ -272,7 +272,7 @@ struct DeviceProduct {
   template <typename T, std::enable_if_t<cudf::is_fixed_point<T>()>* = nullptr>
   CUDF_HOST_DEVICE static constexpr T identity()
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("fixed_point does not yet support DeviceProduct identity");
 #else
     CUDF_UNREACHABLE("fixed_point does not yet support DeviceProduct identity");

@@ -497,7 +497,7 @@ class base_2dspan {
   constexpr base_2dspan(RowType<T, dynamic_extent> flat_view, size_t columns)
     : _flat{flat_view}, _size{columns == 0 ? 0 : flat_view.size() / columns, columns}
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_EXPECTS(_size.first * _size.second == flat_view.size(), "Invalid 2D span size");
 #endif
   }

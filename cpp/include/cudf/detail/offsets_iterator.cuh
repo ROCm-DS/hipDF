@@ -94,7 +94,7 @@ struct input_offsetalator : base_normalator<input_offsetalator, int64_t> {
         dtype, dtype.id() == type_id::INT32 ? sizeof(int32_t) : sizeof(int64_t)),
       p_{static_cast<char const*>(data)}
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_EXPECTS(dtype.id() == type_id::INT32 || dtype.id() == type_id::INT64,
                  "Unexpected offsets type");
 #else
@@ -172,7 +172,7 @@ struct output_offsetalator : base_normalator<output_offsetalator, int64_t> {
         dtype, dtype.id() == type_id::INT32 ? sizeof(int32_t) : sizeof(int64_t)),
       p_{static_cast<char*>(data)}
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_EXPECTS(dtype.id() == type_id::INT32 || dtype.id() == type_id::INT64,
                  "Unexpected offsets type");
 #else

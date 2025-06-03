@@ -87,7 +87,7 @@ struct return_type_functor {
             std::enable_if_t<!is_valid_binary_op<OperatorFunctor, LHS, RHS>>* = nullptr>
   void operator()(cudf::data_type& result)
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("Invalid binary operation. Return type cannot be determined.");
 #else
     CUDF_UNREACHABLE("Invalid binary operation. Return type cannot be determined.");
@@ -116,7 +116,7 @@ struct return_type_functor {
             std::enable_if_t<!is_valid_unary_op<OperatorFunctor, T>>* = nullptr>
   void operator()(cudf::data_type& result)
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("Invalid unary operation. Return type cannot be determined.");
 #else
     CUDF_UNREACHABLE("Invalid unary operation. Return type cannot be determined.");
@@ -151,7 +151,7 @@ struct single_dispatch_binary_operator_types {
             std::enable_if_t<!is_valid_binary_op<OperatorFunctor, LHS, LHS>>* = nullptr>
   inline void operator()(F&& f, Ts&&... args)
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("Invalid binary operation.");
 #else
     CUDF_UNREACHABLE("Invalid binary operation.");
@@ -237,7 +237,7 @@ struct dispatch_unary_operator_types {
             std::enable_if_t<!is_valid_unary_op<OperatorFunctor, InputT>>* = nullptr>
   inline void operator()(F&& f, Ts&&... args)
   {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
     CUDF_FAIL("Invalid unary operation.");
 #else
     CUDF_UNREACHABLE("Invalid unary operation.");

@@ -229,7 +229,7 @@ struct alignas(16) base_normalator {
     template <typename T, CUDF_ENABLE_IF(not cudf::is_integral_not_bool<T>())>
     CUDF_HOST_DEVICE std::size_t operator()() const
     {
-#if !defined(__CUDA_ARCH__) && !defined(__HIP_DEVICE_COMPILE__)
+#ifndef __HIP_DEVICE_COMPILE__
       CUDF_FAIL("only integral types are supported");
 #else
       CUDF_UNREACHABLE("only integral types are supported");
