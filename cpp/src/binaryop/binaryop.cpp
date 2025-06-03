@@ -166,7 +166,7 @@ void binary_operation(mutable_column_view& out,
 
   std::string cuda_source;
   std::string parsed_llvm_ir;
-  if(HIP_PLATFORM_AMD) {
+  if constexpr(HIP_PLATFORM_AMD) {
     cuda_source = "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
                 + output_type_name +"*"
                 + ","
