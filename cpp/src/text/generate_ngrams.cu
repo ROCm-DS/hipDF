@@ -60,7 +60,9 @@
 #include <rmm/exec_policy.hpp>
 
 #include <hip/hip_cooperative_groups.h>
-#include <cooperative_groups/reduce.h>
+//TODO(HIP/AMD): This is a temporary workaround for 
+// the missing cg::reduce APIs in HIP's cooperative groups.
+#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
 #include <cuda/functional>
 #include <thrust/copy.h>
 #include <thrust/functional.h>

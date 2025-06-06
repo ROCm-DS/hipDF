@@ -56,7 +56,12 @@
 #include <rmm/cuda_stream_view.hpp>
 
 #include <hip/hip_cooperative_groups.h>
-#include <cooperative_groups/reduce.h>
+//#include <cooperative_groups/reduce.h>
+//TODO(HIP/AMD): This is a temporary workaround for 
+// the missing cg::reduce APIs in HIP's cooperative groups.
+#include <hip_extensions/hip_cooperative_groups_ext/hip_cooperative_groups_reduce.h>
+#include <hip/amd_detail/amd_warp_sync_functions.h>
+
 #include <cuda/std/utility>
 #include <thrust/iterator/constant_iterator.h>
 #include <thrust/iterator/counting_iterator.h>
