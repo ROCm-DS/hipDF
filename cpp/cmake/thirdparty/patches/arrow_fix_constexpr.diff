@@ -20,19 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-diff --git a/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h b/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h
-index 2f7eb5fcf..9f045a9e3 100644
---- a/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h
-+++ b/cpp/thirdparty/flatbuffers/include/flatbuffers/flatbuffers.h
-@@ -1005,10 +1005,10 @@ class vector_downward {
-     swap(own_allocator_, other.own_allocator_);
+diff --git a/cpp/src/arrow/util/basic_decimal.h b/cpp/src/arrow/util/basic_decimal.h
+index b5404bb7b..f1fb3172e 100644
+--- a/cpp/src/arrow/util/basic_decimal.h
++++ b/cpp/src/arrow/util/basic_decimal.h
+@@ -202,7 +202,7 @@ class ARROW_EXPORT SmallBasicDecimal {
+     return WordArray{static_cast<typename WordArray::value_type>(value_)};
    }
  
-+  vector_downward &operator=(const vector_downward &);
-  private:
-   // You shouldn't really be copying instances of this class.
-   FLATBUFFERS_DELETE_FUNC(vector_downward(const vector_downward &))
--  FLATBUFFERS_DELETE_FUNC(vector_downward &operator=(const vector_downward &))
- 
-   Allocator *allocator_;
-   bool own_allocator_;
+-  constexpr const WordArray little_endian_array() const {
++  constexpr __host__ const WordArray little_endian_array() const {
+     return bit_util::little_endian::FromNative(
+         WordArray{static_cast<typename WordArray::value_type>(value_)});
+   }
