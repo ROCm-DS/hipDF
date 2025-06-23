@@ -37,6 +37,10 @@
   #define HIP_API_PER_THREAD_DEFAULT_STREAM
 #endif
 
+#if defined(hipStreamDefault) && !defined(cudaStreamDefault)
+#  define cudaStreamDefault hipStreamDefault
+#endif
+
 #if defined(hipStreamLegacy) && !defined(cudaStreamLegacy)
 #  define cudaStreamLegacy hipStreamLegacy
 #endif
