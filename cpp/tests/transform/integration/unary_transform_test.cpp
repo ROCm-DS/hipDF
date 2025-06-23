@@ -84,7 +84,7 @@ __device__ inline void    fdsf   (
 )***";
 
   // c = a*a*a*a
-  std::string amd_llvm_ir_str = 
+  std::string amd_llvm_ir = 
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, float %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
@@ -125,8 +125,6 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 !11 = !{!12, !12, i64 0}
 !12 = !{!"float", !9, i64 0}
     )'''";
-
-  const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   std::string const ptx =
     R"***(
@@ -182,7 +180,7 @@ TEST_F(UnaryOperationIntegrationTest, Transform_INT32_INT32)
     "__device__ inline void f(int* output,int input){*output = input*input - input;}";
 
   // c = a * a - a
-  std::string amd_llvm_ir_str = 
+  std::string amd_llvm_ir = 
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i32 %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
@@ -221,8 +219,6 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 !11 = !{!12, !12, i64 0}
 !12 = !{!"int", !9, i64 0}
     )'''";
-
-  const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   std::string const ptx =
     R"***(
@@ -273,7 +269,7 @@ __device__ inline void f(
 )***";
 
   // LLVM IR equivalent to cuda UDF
-  std::string amd_llvm_ir_str = 
+  std::string amd_llvm_ir = 
     R"'''(
 define hidden void @udf_funcname_from_numba_to_be_replaced_in_libcudf(ptr %0, i8 signext %1) #0 {
   %3 = alloca ptr, align 8, addrspace(5)
@@ -331,8 +327,6 @@ attributes #0 = { convergent mustprogress noreturn nounwind "no-trapping-math"="
 !10 = !{!"Simple C++ TBAA"}
 !11 = !{!9, !9, i64 0} 
     )'''";
-
-  const char* amd_llvm_ir = amd_llvm_ir_str.c_str();
 
   std::string const ptx =
     R"***(
