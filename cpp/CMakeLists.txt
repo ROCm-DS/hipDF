@@ -1437,7 +1437,7 @@ endif()
 target_compile_definitions(cudf PRIVATE THRUST_FORCE_32_BIT_OFFSET_TYPE=1)
 
 # Compile stringified JIT sources first
-#add_dependencies(cudf jitify_preprocess_run) # TODO(HIP/AMD): re-enable when libhipcxx/jitify have been upgraded
+add_dependencies(cudf jitify_preprocess_run)
 
 # TODO(HIP/AMD): WAR for thrust_create_target not being available in rocThrust
 if(FALSE)
