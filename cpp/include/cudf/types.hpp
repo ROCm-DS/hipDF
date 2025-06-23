@@ -45,7 +45,14 @@
 /**
  * @brief Indicates that the function is a CUDA kernel
  */
+// TODO(HIP/AMD): With hipRTC, kernels are not loadable
+// from the module when using static.
+#if !defined(__HIPCC_RTC__)
 #define CUDF_KERNEL __global__ static
+#else
+#define CUDF_KERNEL __global__
+#endif
+
 #include "cudf/cuda_runtime.h" //: including "hip/device_functions.h" causes errors
 
 
