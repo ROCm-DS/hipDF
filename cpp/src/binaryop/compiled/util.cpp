@@ -108,7 +108,7 @@ struct is_binary_operation_supported {
                   column_device_view::has_element_accessor<TypeRhs>()) {
       if constexpr (binary_op_has_common_type_v<TypeLhs, TypeRhs>) {
         using common_t = binary_op_common_type_t<TypeLhs, TypeRhs>;
-        return std::is_invocable_v<BinaryOperator, common_t, common_t>;
+        return cuda::std::is_invocable_v<BinaryOperator, common_t, common_t>;
       } else {
         return cuda::std::is_invocable_v<BinaryOperator, TypeLhs, TypeRhs>;
       }
@@ -125,8 +125,8 @@ struct is_binary_operation_supported {
       if (has_mutable_element_accessor(out_type) or is_fixed_point(out_type)) {
         if constexpr (binary_op_has_common_type_v<TypeLhs, TypeRhs>) {
           using common_t = binary_op_common_type_t<TypeLhs, TypeRhs>;
-          if constexpr (std::is_invocable_v<BinaryOperator, common_t, common_t>) {
-            using ReturnType = std::invoke_result_t<BinaryOperator, common_t, common_t>;
+          if constexpr (cuda::std::is_invocable_v<BinaryOperator, common_t, common_t>) {
+            using ReturnType = cuda::std::invoke_result_t<BinaryOperator, common_t, common_t>;
             return is_constructible<ReturnType>(out_type) or
                    (is_fixed_point<ReturnType>() and is_fixed_point(out_type));
           }
