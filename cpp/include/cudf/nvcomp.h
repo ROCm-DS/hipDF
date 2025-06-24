@@ -23,6 +23,7 @@
 #pragma once
 
 #include "hipcomp.h"
+#include "hipcomp/lz4.h"
 
 #include "cudf/nvcomp/snappy.h"
 

@@ -586,7 +586,7 @@ add_library(
   src/io/comp/cpu_unbz2.cpp
   src/io/comp/debrotli.cu
   src/io/comp/gpuinflate.cu
-  # src/io/comp/nvcomp_adapter.cpp #  error: use of undeclared identifier 'hipcompBatchedSnappyDecompressGetTempSizeEx'
+  src/io/comp/nvcomp_adapter.cpp
   src/io/comp/nvcomp_adapter.cu
   src/io/comp/snap.cu
   src/io/comp/uncomp.cpp
