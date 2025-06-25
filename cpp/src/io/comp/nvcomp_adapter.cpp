@@ -711,16 +711,29 @@ std::optional<std::string> is_decompression_disabled(compression_type compressio
 
 size_t required_alignment(compression_type compression)
 {
-  //TODO(HIP/AMD): hipcomp does not support this API
-  // Are there any alignment requirements?
-  // switch (compression) {
-  //   case compression_type::GZIP:
-  //   case compression_type::DEFLATE: return nvcompDeflateRequiredAlignment;
-  //   case compression_type::SNAPPY: return nvcompSnappyRequiredAlignment;
-  //   case compression_type::ZSTD: return nvcompZstdRequiredAlignment;
-  //   case compression_type::LZ4: return nvcompLZ4RequiredAlignment;
-  //   default: CUDF_FAIL("Unsupported compression type");
-  // }
+  switch (compression) {
+#if NVCOMP_HAS_GZIP(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
+     case compression_type::GZIP:
+#else
+     CUDF_FAIL("Compression error: " +
+                nvcomp::is_compression_disabled(nvcomp::compression_type::GZIP).value());
+#endif
+#if NVCOMP_HAS_DEFLATE(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
+     case compression_type::DEFLATE: return nvcompDeflateRequiredAlignment;
+#else
+    CUDF_FAIL("Compression error: " +
+               nvcomp::is_compression_disabled(nvcomp::compression_type::DEFLATE).value());
+#endif
+     case compression_type::SNAPPY: return nvcompSnappyRequiredAlignment;
+#if NVCOMP_HAS_ZSTD_COMP(NVCOMP_MAJOR_VERSION, NVCOMP_MINOR_VERSION, NVCOMP_PATCH_VERSION)
+     case compression_type::ZSTD: return nvcompZstdRequiredAlignment;
+#else
+     CUDF_FAIL("Compression error: " +
+                nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD).value());
+#endif
+     case compression_type::LZ4: return nvcompLZ4RequiredAlignment;
+     default: CUDF_FAIL("Unsupported compression type");
+  }
   return 1;
 }
 

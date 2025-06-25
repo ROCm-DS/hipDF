@@ -109,6 +109,12 @@
 #ifndef nvcompErrorInternal
 #  define nvcompErrorInternal hipcompErrorInternal
 #endif
+#ifndef nvcompLZ4RequiredAlignment
+#  define nvcompLZ4RequiredAlignment hipcompLZ4RequiredAlignment
+#endif
+#ifndef nvcompSnappyRequiredAlignment
+#  define nvcompSnappyRequiredAlignment hipcompSnappyRequiredAlignment
+#endif
 #ifndef nvcompStatus_t
 #  define nvcompStatus_t hipcompStatus_t
 #endif
