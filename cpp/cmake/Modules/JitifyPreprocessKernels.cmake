@@ -58,7 +58,8 @@ function(jit_preprocess_files)
     if(CUDF_USE_WARPSIZE_32)
       set(CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS "-DCUDF_USE_WARPSIZE_32")
     endif()
-
+    
+    # FIXME(HIP/AMD): Workaround for libhipcxx to ensure build with nostdinc++
     # Note: need to pass _FILE_OFFSET_BITS=64 in COMMAND due to a limitation in how conda builds
     # glibc
     add_custom_command(
@@ -71,7 +72,7 @@ function(jit_preprocess_files)
         "${CMAKE_COMMAND}" -E env LD_LIBRARY_PATH=${HIP_LIB_INSTALL_DIR}
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
 	      ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
-	      -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS} -I${CUDF_SOURCE_DIR}/include # NOTE(HIP/AMD): -remove-unused-globals?
+	      -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ -DLIBHIPCXX_ENABLE_HIPRTC_WORKAROUND ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS} -I${CUDF_SOURCE_DIR}/include # NOTE(HIP/AMD): -remove-unused-globals?
 	-I${CUDF_SOURCE_DIR}/src ${includes} -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}  --no-replace-pragma-once # TODO(HIP/AMD): --no-preinclude-workarounds
       COMMENT "Custom command to JIT-compile files."
     )
