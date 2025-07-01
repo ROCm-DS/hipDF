@@ -140,8 +140,10 @@ struct DeviceRolling {
   }
 
   // perform the windowing operation
+  // TODO(HIP/AMD): with optimization, OOB accesses happen in some
+  // hipcc builds (internal issue 278)
   template <typename OutputType, bool has_nulls>
-  bool __device__ operator()(column_device_view const& input,
+  bool __device__ __attribute__((optnone)) operator()(column_device_view const& input,
                              column_device_view const&,
                              mutable_column_device_view& output,
                              size_type start_index,
