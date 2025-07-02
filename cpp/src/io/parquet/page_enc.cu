@@ -1186,12 +1186,12 @@ static __device__ void RleEncode(
     uint32_t pos = rle_pos + t;
     if (rle_run > 0 && !(rle_run & 1)) {
       // Currently in a long repeat run
-      uint32_t mask = ballot(pos < numvals && s->vals[rolling_idx(pos)] == s->run_val);
+      bitmask_type mask = ballot(pos < numvals && s->vals[rolling_idx(pos)] == s->run_val);
       uint32_t rle_rpt_count, max_rpt_count;
       if (lane_id == 0) { s->rpt_map[warp_id] = mask; }
       __syncthreads();
       if (t < warp_size) {
-        uint32_t c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
+        bitmask_type c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
         if (t == 0) {
           uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
