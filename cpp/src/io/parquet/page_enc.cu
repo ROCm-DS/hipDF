@@ -510,8 +510,8 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   if (t == 0) { frag[blockIdx.x] = s->frag; }
 }
 
-// blockDim {4 * cudf::detail::warp_size,1,1}
-CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
+// blockDim {encode_block_size,1,1}
+CUDF_KERNEL void __launch_bounds__(encode_block_size)
   gpuInitFragmentStats(device_span<statistics_group> groups,
                        device_span<PageFragment const> fragments)
 {
@@ -619,8 +619,8 @@ __device__ size_t delta_data_len(Type physical_type,
   return header_size + num_blocks * num_dbp_blocks * block_size + char_data_len;
 }
 
-// blockDim {128,1,1}
-CUDF_KERNEL void __launch_bounds__(4 * cudf::detail::warp_size)
+// blockDim {encode_block_size,1,1}
+CUDF_KERNEL void __launch_bounds__(encode_block_size)
   gpuInitPages(device_2dspan<EncColumnChunk> chunks,
                device_span<EncPage> pages,
                device_span<size_type> page_sizes,
@@ -1099,7 +1099,7 @@ inline __device__ void PackLiteralsRoundRobin(
   // Scratch space to temporarily write to. Needed because we will use atomics to write 32 bit
   // words but the destination mem may not be a multiple of 4 bytes.
   // TODO (dm): This assumes blockdim = 128. Reduce magic numbers.
-  constexpr uint32_t NUM_THREADS  = 4 * cudf::detail::warp_size; // this needs to match gpuEncodePages block_size parameter
+  constexpr uint32_t NUM_THREADS  = encode_block_size; // this needs to match gpuEncodePages block_size parameter
   constexpr uint32_t NUM_BYTES    = (NUM_THREADS * MAX_DICT_BITS) >> 3;
   constexpr uint32_t SCRATCH_SIZE = NUM_BYTES / sizeof(uint32_t);
   __shared__ uint32_t scratch[SCRATCH_SIZE];
@@ -1170,7 +1170,7 @@ inline __device__ void PackLiterals(
  * @param[in] numvals Total count of input values
  * @param[in] nbits number of bits per symbol (1..16)
  * @param[in] flush nonzero if last batch in block
- * @param[in] t thread id (0.. 4 * cudf::detail::warp_size -1)
+ * @param[in] t thread id (0.. encode_block_size -1)
  */
 static __device__ void RleEncode(
   rle_page_enc_state_s* s, uint32_t numvals, uint32_t nbits, uint32_t flush, uint32_t t)
@@ -1441,7 +1441,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
       __syncthreads();
       while (s->rle_numvals < s->page.num_rows) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nrows       = min(s->page.num_rows - rle_numvals, cudf::detail::warp_size * 4);
+        uint32_t nrows       = min(s->page.num_rows - rle_numvals, encode_block_size);
         auto row             = s->page.start_row + rle_numvals + t;
         // Definition level encodes validity. Checks the valid map and if it is valid, then sets the
         // def_lvl accordingly and sets it in s->vals which is then given to RleEncode to encode
@@ -1518,7 +1518,7 @@ CUDF_KERNEL void __launch_bounds__(block_size, 8)
       size_type col_last_val_idx   = s->col.level_offsets[s->col.num_rows];
       while (s->rle_numvals < s->page.num_values) {
         uint32_t rle_numvals = s->rle_numvals;
-        uint32_t nvals       = min(s->page.num_values - rle_numvals, 4 * cudf::detail::warp_size);
+        uint32_t nvals       = min(s->page.num_values - rle_numvals, encode_block_size);
         uint32_t idx         = page_first_val_idx + rle_numvals + t;
         uint32_t lvl_val =
           (rle_numvals + t < s->page.num_values && idx < col_last_val_idx) ? lvl_val_data[idx] : 0;
