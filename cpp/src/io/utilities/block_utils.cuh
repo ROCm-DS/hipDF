@@ -63,7 +63,7 @@ inline __device__ void syncwarp() {
 
 }
 
-inline __device__ lane_mask ballot(int pred) { return __ballot_sync((uint64_t) LANE_MASK_ALL, pred); } // NOTE(HIP/AMD): See SWDEV-490930
+inline __device__ bitmask_type ballot(int pred) { return __ballot_sync((uint64_t) LANE_MASK_ALL, pred); } // NOTE(HIP/AMD): See SWDEV-490930
 
 // Warp reduction helpers
 template <typename T>
