@@ -54,7 +54,7 @@ namespace {
 // Also, this provides the ability to compute warp_bits & lane_mask manually, which we need for
 // lists.
 struct block_scan_results {
-  uint32_t warp_bits;
+  bitmask_type warp_bits;
   int thread_count_within_warp;
   int warp_count;
 
@@ -75,9 +75,9 @@ __device__ inline static void scan_block_exclusive_sum(
   int const t              = threadIdx.x;
   int const warp_index     = t / cudf::detail::warp_size;
   int const warp_lane      = t % cudf::detail::warp_size;
-  uint32_t const lane_mask = (uint32_t(1) << warp_lane) - 1;
+  bitmask_type const lane_mask = (bitmask_type(1) << warp_lane) - 1;
 
-  uint32_t warp_bits = ballot(thread_bit);
+  bitmask_type warp_bits = ballot(thread_bit);
   scan_block_exclusive_sum<decode_block_size>(
     warp_bits, warp_lane, warp_index, lane_mask, results, temp_storage);
 }
@@ -85,10 +85,10 @@ __device__ inline static void scan_block_exclusive_sum(
 // Similar to CUB, must __syncthreads() after calling if reusing temp_storage
 template <int decode_block_size>
 __device__ static void scan_block_exclusive_sum(
-  uint32_t warp_bits,
+  bitmask_type warp_bits,
   int warp_lane,
   int warp_index,
-  uint32_t lane_mask,
+  bitmask_type lane_mask,
   block_scan_results& results,
   block_scan_temp_storage<decode_block_size>& temp_storage)
 {
@@ -97,8 +97,8 @@ __device__ static void scan_block_exclusive_sum(
 
   // Compute the warp-wide results
   results.warp_bits                = warp_bits;
-  results.warp_count               = __popc(results.warp_bits);
-  results.thread_count_within_warp = __popc(results.warp_bits & lane_mask);
+  results.warp_count               = __POPC(results.warp_bits);
+  results.thread_count_within_warp = __POPC(results.warp_bits & lane_mask);
 
   // Share the warp counts amongst the block threads
   if (warp_lane == 0) { temp_storage[warp_index] = results.warp_count; }
@@ -345,8 +345,8 @@ static __device__ int gpuUpdateValidityAndRowIndicesNested(
     // compute our row index, whether we're in row bounds, and validity
     int const row_index           = thread_value_count + value_count;
     int const in_row_bounds       = (row_index >= row_index_lower_bound) && (row_index < last_row);
-    int const in_write_row_bounds = ballot(row_index >= first_row && row_index < last_row);
-    int const write_start = __ffs(in_write_row_bounds) - 1;  // first bit in the warp to store
+    bitmask_type const in_write_row_bounds = ballot(row_index >= first_row && row_index < last_row);
+    int const write_start = __FFS(in_write_row_bounds) - 1;  // first bit in the warp to store
 
     // iterate by depth
     for (int d_idx = 0; d_idx <= max_depth; d_idx++) {
@@ -369,7 +369,7 @@ static __device__ int gpuUpdateValidityAndRowIndicesNested(
       // here we need to adjust our computed mask to take into account the write row bounds.
       int warp_null_count = 0;
       if (ni.valid_map != nullptr) {
-        uint32_t const warp_validity_mask = ballot(is_valid);
+        bitmask_type const warp_validity_mask = ballot(is_valid);
         // lane 0 from each warp writes out validity
         if ((write_start >= 0) && ((t % cudf::detail::warp_size) == 0)) {
           int const valid_map_offset = ni.valid_map_offset;
@@ -377,9 +377,9 @@ static __device__ int gpuUpdateValidityAndRowIndicesNested(
           int const bit_offset = (valid_map_offset + vindex + write_start) -
                                  first_row;  // absolute bit offset into the output validity map
           int const write_end =
-            cudf::detail::warp_size - __clz(in_write_row_bounds);  // last bit in the warp to store
+            cudf::detail::warp_size - __CLZ(in_write_row_bounds);  // last bit in the warp to store
           int const bit_count = write_end - write_start;
-          warp_null_count     = bit_count - __popc(warp_validity_mask >> write_start);
+          warp_null_count     = bit_count - __POPC(warp_validity_mask >> write_start);
 
           store_validity(bit_offset, ni.valid_map, warp_validity_mask >> write_start, bit_count);
         }
@@ -472,7 +472,7 @@ static __device__ int gpuUpdateValidityAndRowIndicesFlat(
     __shared__ typename block_scan::TempStorage scan_storage;
     int thread_valid_count, block_valid_count;
     block_scan(scan_storage).ExclusiveSum(is_valid, thread_valid_count, block_valid_count);
-    uint32_t const warp_validity_mask = ballot(is_valid);
+    bitmask_type const warp_validity_mask = ballot(is_valid);
 
     // validity is processed per-warp
     //
@@ -481,8 +481,8 @@ static __device__ int gpuUpdateValidityAndRowIndicesFlat(
     // at the first value, even if that is before first_row, because we cannot trivially jump to
     // the correct position to start reading. since we are about to write the validity vector
     // here we need to adjust our computed mask to take into account the write row bounds.
-    int const in_write_row_bounds = ballot(row_index >= first_row && row_index < last_row);
-    int const write_start = __ffs(in_write_row_bounds) - 1;  // first bit in the warp to store
+    bitmask_type const in_write_row_bounds = ballot(row_index >= first_row && row_index < last_row);
+    int const write_start = __FFS(in_write_row_bounds) - 1;  // first bit in the warp to store
     int warp_null_count   = 0;
     // lane 0 from each warp writes out validity
     if ((write_start >= 0) && ((t % cudf::detail::warp_size) == 0)) {
@@ -490,9 +490,9 @@ static __device__ int gpuUpdateValidityAndRowIndicesFlat(
       int const bit_offset = (valid_map_offset + vindex + write_start) -
                              first_row;  // absolute bit offset into the output validity map
       int const write_end =
-        cudf::detail::warp_size - __clz(in_write_row_bounds);  // last bit in the warp to store
+        cudf::detail::warp_size - __CLZ(in_write_row_bounds);  // last bit in the warp to store
       int const bit_count = write_end - write_start;
-      warp_null_count     = bit_count - __popc(warp_validity_mask >> write_start);
+      warp_null_count     = bit_count - __POPC(warp_validity_mask >> write_start);
 
       store_validity(bit_offset, ni.valid_map, warp_validity_mask >> write_start, bit_count);
     }
@@ -702,11 +702,15 @@ static __device__ int gpuUpdateValidityAndRowIndicesLists(int32_t target_value_c
       // Not all values visited by this block will represent a value at this nesting level.
       // the validity bit for thread t might actually represent output value t-6.
       // the correct position for thread t's bit is thread_value_count.
-      uint32_t const warp_valid_mask =
+      bitmask_type const warp_valid_mask =
+#if defined(CUDF_USE_WARPSIZE_32)
         WarpReduceOr32((uint32_t)is_valid << thread_value_count_within_warp);
+#else
+        WarpReduceOr64((uint64_t)is_valid << thread_value_count_within_warp);
+#endif
       int thread_valid_count, block_valid_count;
       {
-        auto thread_mask = (uint32_t(1) << thread_value_count_within_warp) - 1;
+        auto thread_mask = (bitmask_type(1) << thread_value_count_within_warp) - 1;
 
         block_scan_results valid_count_scan_results;
         scan_block_exclusive_sum<decode_block_size>(warp_valid_mask,
