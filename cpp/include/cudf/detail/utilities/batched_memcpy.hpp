@@ -70,6 +70,10 @@ void batched_memcpy_async(SrcIterator src_iter,
                           size_t num_buffs,
                           rmm::cuda_stream_view stream)
 {
+  // FIXME(HIP/AMD): Early exit if num_buffs is zero.
+  // FIXME(HIP/AMD): hipcub batched_memcpy does not like offsets.size()==0
+  if(num_buffs==0) return;
+
   size_t temp_storage_bytes = 0;
   CUDF_CUDA_TRY(hipcub::DeviceMemcpy::Batched(
     nullptr, temp_storage_bytes, src_iter, dst_iter, size_iter, num_buffs, stream.value()));
