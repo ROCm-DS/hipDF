@@ -292,7 +292,8 @@ struct set_row_index {
     size_t const page_end_row = chunk.start_row + page.chunk_row + page.num_rows;
     // this cap is necessary because in the chunked reader, we use estimations for the row
     // counts for list columns, which can result in values > than the absolute number of rows.
-    c_info[i].end_row_index = min(max_row, page_end_row);
+    // NOTE(HIP/AMD): Potential instance of internal issue 92
+    c_info[i].end_row_index = std::min(max_row, page_end_row);
   }
 };
 
@@ -732,13 +733,15 @@ std::vector<row_range> compute_page_splits_by_row(device_span<cumulative_page_in
   size_t cur_pos             = find_start_index(h_aggregated_info, skip_rows);
   size_t cur_row_index       = skip_rows;
   size_t cur_cumulative_size = 0;
-  auto const max_row         = min(skip_rows + num_rows, h_aggregated_info.back().end_row_index);
+  // NOTE(HIP/AMD): Potential instance of internal issue 92.
+  auto const max_row         = std::min(skip_rows + num_rows, h_aggregated_info.back().end_row_index);
   while (cur_row_index < max_row) {
     auto const split_pos = find_next_split(
       cur_pos, cur_row_index, cur_cumulative_size, h_aggregated_info, size_limit, 1);
 
     auto const start_row = cur_row_index;
-    cur_row_index        = min(max_row, h_aggregated_info[split_pos].end_row_index);
+    // NOTE(HIP/AMD): Potential instance of internal issue 92.
+    cur_row_index        = std::min(max_row, h_aggregated_info[split_pos].end_row_index);
     splits.push_back({start_row, cur_row_index - start_row});
     cur_pos             = split_pos;
     cur_cumulative_size = h_aggregated_info[split_pos].size_bytes;

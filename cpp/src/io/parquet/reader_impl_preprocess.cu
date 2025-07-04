@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "error.hpp"
 #include "io/comp/common.hpp"
 #include "reader_impl.hpp"
@@ -1514,13 +1536,16 @@ void reader::impl::preprocess_subpass_pages(read_mode mode, size_t chunk_read_li
       max_col_row--;
     }
 
-    max_row = min(max_row, max_col_row);
+    // NOTE(HIP/AMD): This line misbehaves with min from HIP clang headers and causes subsequent failures!
+    // (internal issue 92)
+    max_row = std::min(max_row, max_col_row);
 
     first_page_index += subpass.column_page_count[idx];
   }
   subpass.skip_rows   = pass.skip_rows + pass.processed_rows;
   auto const pass_end = pass.skip_rows + pass.num_rows;
-  max_row             = min(max_row, pass_end);
+  // NOTE(HIP/AMD): Potential instance of internal issue 92.
+  max_row             = std::min(max_row, pass_end);
   subpass.num_rows    = max_row - subpass.skip_rows;
 
   // now split up the output into chunks as necessary

@@ -157,8 +157,9 @@ struct delta_byte_array_decoder {
     __shared__ WarpScan::TempStorage scan_temp;
 
     if (start_idx >= suffixes.value_count) { return 0; }
-    auto end_idx = start_idx + min(suffixes.values_per_mb, num_values);
-    end_idx      = min(end_idx, static_cast<uint32_t>(suffixes.value_count));
+    // NOTE(HIP/AMD): Potential instances of issue 92.
+    auto end_idx = start_idx + std::min(suffixes.values_per_mb, num_values);
+    end_idx      = std::min(end_idx, static_cast<uint32_t>(suffixes.value_count));
 
     auto p_strings_out = strings_out;
     auto p_temp_out    = temp_buf;
@@ -389,10 +390,11 @@ CUDF_KERNEL void __launch_bounds__(cudf::detail::warp_size * 3)
     uint32_t target_pos;
     uint32_t const src_pos = s->src_pos;
 
+    //NOTE(HIP/AMD): Potential instances of internal issue 92
     if (t < 2 * warp_size) {  // warp0..1
-      target_pos = min(src_pos + 2 * batch_size, s->nz_count + batch_size);
+      target_pos = std::min(src_pos + 2 * batch_size, s->nz_count + batch_size);
     } else {  // warp2
-      target_pos = min(s->nz_count, src_pos + batch_size);
+      target_pos = std::min(static_cast<uint32_t>(s->nz_count), src_pos + batch_size); // FIXME(HIP/AMD): should nz_count be unsigned?
     }
     // this needs to be here to prevent warp 2 modifying src_pos before all threads have read it
     __syncthreads();

@@ -75,7 +75,8 @@ inline __device__ unsigned int getb(byte_stream_s* bs)
 
 inline __device__ void skip_bytes(byte_stream_s* bs, size_t bytecnt)
 {
-  bytecnt = min(bytecnt, (size_t)(bs->end - bs->cur));
+  // NOTE(HIP/AMD): Potential instance of internal issue 92
+  bytecnt = std::min(bytecnt, (size_t)(bs->end - bs->cur));
   bs->cur += bytecnt;
 }
 
