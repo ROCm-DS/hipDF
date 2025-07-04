@@ -516,7 +516,7 @@ CUDF_KERNEL void __launch_bounds__(encode_block_size)
                        device_span<PageFragment const> fragments)
 {
   uint32_t const lane_id = threadIdx.x & WARP_MASK;
-  uint32_t const frag_id = blockIdx.x * 4 + (threadIdx.x / cudf::detail::warp_size);
+  uint32_t const frag_id = blockIdx.x * (encode_block_size/cudf::detail::warp_size) + (threadIdx.x / cudf::detail::warp_size);
   if (frag_id < fragments.size()) {
     if (lane_id == 0) {
       statistics_group g;
