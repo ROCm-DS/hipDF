@@ -3510,8 +3510,8 @@ void EncodePages(device_span<EncPage> pages,
     auto const strm = streams[s_idx++];
     gpuEncodePageLevels<encode_block_size><<<num_pages, encode_block_size, 0, strm.value()>>>(
       pages, write_v2_headers, encode_kernel_mask::DELTA_BINARY);
-    gpuEncodeDeltaBinaryPages<encode_block_size>
-      <<<num_pages, encode_block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
+    gpuEncodeDeltaBinaryPages<delta::block_size>
+      <<<num_pages, delta::block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
   }
   if (BitAnd(kernel_mask, encode_kernel_mask::DELTA_LENGTH_BA) != 0) {
     auto const strm = streams[s_idx++];

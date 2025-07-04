@@ -72,7 +72,11 @@ inline __device__ void put_zz128(uint8_t*& p, zigzag128_t v)
 // to be a multiple of 32.
 // TODO: if these are ever made configurable, be sure to fix the page size calculation in
 // delta_data_len() (page_enc.cu).
+#ifdef CUDF_USE_WARPSIZE_32
 constexpr int block_size            = 128;
+#else
+constexpr int block_size            = 256;
+#endif
 constexpr int num_mini_blocks       = 4;
 constexpr int values_per_mini_block = block_size / num_mini_blocks;
 constexpr int buffer_size           = 2 * block_size;
