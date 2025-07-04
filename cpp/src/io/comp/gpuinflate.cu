@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2018-2024, NVIDIA CORPORATION.
  *
@@ -64,6 +63,8 @@ misrepresented as being the original software.
 
 Mark Adler    madler@alumni.caltech.edu
 */
+
+#include "cudf/cuda_runtime.h"
 
 #include "gpuinflate.hpp"
 #include "io/utilities/block_utils.cuh"

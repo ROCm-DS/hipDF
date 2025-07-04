@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2019-2024, NVIDIA CORPORATION.
  *
@@ -37,6 +36,8 @@
 // SOFTWARE.
 
 #pragma once
+
+#include "cudf/cuda_runtime.h"
 
 #include <cudf/detail/utilities/integer_utils.hpp>
 #include <cudf/types.hpp>

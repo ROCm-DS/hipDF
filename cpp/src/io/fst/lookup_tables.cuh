@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2022-2024, NVIDIA CORPORATION.
  *
@@ -37,6 +36,8 @@
 // SOFTWARE.
 
 #pragma once
+
+#include "cudf/cuda_runtime.h"
 
 #include "io/fst/device_dfa.cuh"
 #include "io/utilities/hostdevice_vector.hpp"

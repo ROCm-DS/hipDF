@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2018-2024, NVIDIA CORPORATION.
  *
@@ -75,6 +74,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 */
+
+#include "cudf/cuda_runtime.h"
 
 #include "brotli_dict.hpp"
 #include "gpuinflate.hpp"

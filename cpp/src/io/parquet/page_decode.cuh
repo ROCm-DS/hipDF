@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2018-2025, NVIDIA CORPORATION.
  *
@@ -37,6 +36,8 @@
 // SOFTWARE.
 
 #pragma once
+
+#include "cudf/cuda_runtime.h"
 
 #include "error.hpp"
 #include "io/utilities/block_utils.cuh"

@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2019-2025, NVIDIA CORPORATION.
  *
@@ -35,6 +34,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+
+#include "cudf/cuda_runtime.h"
 
 #include "delta_enc.cuh"
 #include "io/parquet/parquet_gpu.hpp"

@@ -1,4 +1,3 @@
-#include "cudf/cuda_runtime.h"
 /*
  * Copyright (c) 2022-2025, NVIDIA CORPORATION.
  *
@@ -38,6 +37,8 @@
 // SOFTWARE.
 
 #pragma once
+
+#include "cudf/cuda_runtime.h"
 
 #include "in_reg_array.cuh"
 
