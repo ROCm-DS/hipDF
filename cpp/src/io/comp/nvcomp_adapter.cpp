@@ -49,12 +49,12 @@
 
 #include <mutex>
 
-#define NVCOMP_DEFLATE_HEADER <nvcomp/deflate.h>
+#define NVCOMP_DEFLATE_HEADER <hipcomp/deflate.h>
 #if __has_include(NVCOMP_DEFLATE_HEADER)
 #include NVCOMP_DEFLATE_HEADER
 #endif
 
-#define NVCOMP_ZSTD_HEADER <nvcomp/zstd.h>
+#define NVCOMP_ZSTD_HEADER <hipcomp/zstd.h>
 #if __has_include(NVCOMP_ZSTD_HEADER)
 #include NVCOMP_ZSTD_HEADER
 #endif
