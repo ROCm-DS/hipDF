@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "reader_impl_helpers.hpp"
 
 #include "compact_protocol_reader.hpp"
@@ -1459,8 +1481,14 @@ aggregate_reader_metadata::select_columns(
     // Find which of the selected paths are valid and get their schema index
     std::vector<path_info> valid_selected_paths;
     // vector reference pushback (*use_names). If filter names passed.
-    std::vector<std::reference_wrapper<std::vector<std::string> const>> const column_names{
-      *use_names, *filter_columns_names};
+    // TODO(HIP/AMD): Are there cases where use_names is std::nullopt?
+    std::vector<std::reference_wrapper<std::vector<std::string> const>> column_names{*use_names};
+
+    // NOTE(HIP/AMD): Fixes prior UB if std::optional has no value.
+    if(filter_columns_names.has_value()) {
+      column_names.push_back(*filter_columns_names);
+    }
+
     for (auto const& used_column_names : column_names) {
       for (auto const& selected_path : used_column_names.get()) {
         auto found_path =
