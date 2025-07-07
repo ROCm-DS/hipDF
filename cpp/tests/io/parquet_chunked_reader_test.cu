@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "parquet_common.hpp"
 
 #include <cudf_test/base_fixture.hpp>
@@ -1075,14 +1097,14 @@ TEST_F(ParquetChunkedReaderTest, TestChunkedReadNullCount)
 }
 
 namespace {
-constexpr size_t input_limit_expected_file_count = 4;
+constexpr size_t input_limit_expected_file_count = 3; // TODO(HIP/AMD): Add zstd
 
 std::vector<std::string> input_limit_get_test_names(std::string const& base_filename)
 {
   return {base_filename + "_a.parquet",
           base_filename + "_b.parquet",
-          base_filename + "_c.parquet",
-          base_filename + "_d.parquet"};
+          base_filename + "_c.parquet"};
+          // base_filename + "_d.parquet"};  // TODO(HIP/AMD): re-add when ZSTD is available
 }
 
 void input_limit_test_write_one(std::string const& filepath,
@@ -1100,7 +1122,7 @@ void input_limit_test_write_one(std::string const& filepath,
 void input_limit_test_write(std::vector<std::string> const& test_filenames,
                             cudf::table_view const& t)
 {
-  CUDF_EXPECTS(test_filenames.size() == 4, "Unexpected count of test filenames");
+  CUDF_EXPECTS(test_filenames.size() == 3, "Unexpected count of test filenames"); // TODO(HIP/AMD): Increase to 4 when ZSTD is available
   CUDF_EXPECTS(test_filenames.size() == input_limit_expected_file_count,
                "Unexpected count of test filenames");
 
@@ -1109,13 +1131,16 @@ void input_limit_test_write(std::vector<std::string> const& test_filenames,
     test_filenames[0], t, cudf::io::compression_type::NONE, cudf::io::dictionary_policy::NEVER);
   // compression with a codec that uses a lot of scratch space at decode time (2.5x the total
   // decompressed buffer size)
-  input_limit_test_write_one(
-    test_filenames[1], t, cudf::io::compression_type::ZSTD, cudf::io::dictionary_policy::NEVER);
+  
+  // TODO(HIP/AMD): ZSTD is presently not supported on AMD platform
+  //input_limit_test_write_one(
+  //  test_filenames[1], t, cudf::io::compression_type::ZSTD, cudf::io::dictionary_policy::NEVER);
+
   // compression with a codec that uses no scratch space at decode time
   input_limit_test_write_one(
-    test_filenames[2], t, cudf::io::compression_type::SNAPPY, cudf::io::dictionary_policy::NEVER);
+    test_filenames[1], t, cudf::io::compression_type::SNAPPY, cudf::io::dictionary_policy::NEVER);
   input_limit_test_write_one(
-    test_filenames[3], t, cudf::io::compression_type::SNAPPY, cudf::io::dictionary_policy::ALWAYS);
+    test_filenames[2], t, cudf::io::compression_type::SNAPPY, cudf::io::dictionary_policy::ALWAYS);
 }
 
 void input_limit_test_read(std::vector<std::string> const& test_filenames,

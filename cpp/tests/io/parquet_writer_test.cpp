@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include "parquet_common.hpp"
 
 #include <cudf_test/base_fixture.hpp>
@@ -1201,7 +1223,7 @@ TEST_F(ParquetWriterTest, DictionaryAdaptiveTest)
   auto const filepath = temp_env->get_temp_filepath("DictionaryAdaptiveTest.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .dictionary_policy(cudf::io::dictionary_policy::ADAPTIVE);
   cudf::io::write_parquet(out_opts);
 
@@ -1252,7 +1274,7 @@ TEST_F(ParquetWriterTest, DictionaryAlwaysTest)
   auto const filepath = temp_env->get_temp_filepath("DictionaryAlwaysTest.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -1306,7 +1328,7 @@ TEST_F(ParquetWriterTest, DictionaryPageSizeEst)
   auto const filepath = temp_env->get_temp_filepath("DictionaryPageSizeEst.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .dictionary_policy(cudf::io::dictionary_policy::ALWAYS);
   cudf::io::write_parquet(out_opts);
 
@@ -1404,8 +1426,11 @@ TEST_F(ParquetWriterTest, SkipCompression)
   constexpr auto row_group_rows = 2 * page_rows;
   constexpr auto num_rows       = 2 * row_group_rows;
 
-  auto sequence = thrust::make_counting_iterator(0);
-  column_wrapper<int> col(sequence, sequence + num_rows, no_nulls());
+  auto ones_zeroes = cudf::detail::make_counting_transform_iterator(0, [&](int index) { return index % 2; });; 
+                                                                          // NOTE(HIP/AMD): Modified to have
+                                                                          // well-compressible data, a sequence is
+                                                                          // not well-enough compressed with SNAPPY.
+  column_wrapper<int> col(ones_zeroes, ones_zeroes + num_rows, no_nulls());
 
   auto expected          = table_view{{col, col}};
   auto expected_metadata = cudf::io::table_input_metadata{expected};
@@ -1414,7 +1439,7 @@ TEST_F(ParquetWriterTest, SkipCompression)
   auto const filepath = temp_env->get_temp_filepath("SkipCompression.parquet");
   cudf::io::parquet_writer_options out_opts =
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD)
+      .compression(cudf::io::compression_type::SNAPPY) /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
       .max_page_size_rows(page_rows)
       .row_group_size_rows(row_group_rows)
       .max_page_fragment_size(page_rows)
@@ -1434,7 +1459,7 @@ TEST_F(ParquetWriterTest, SkipCompression)
   read_footer(source, &fmd);
 
   EXPECT_EQ(fmd.row_groups[0].columns[0].meta_data.codec, cudf::io::parquet::detail::UNCOMPRESSED);
-  EXPECT_EQ(fmd.row_groups[0].columns[1].meta_data.codec, cudf::io::parquet::detail::ZSTD);
+  EXPECT_EQ(fmd.row_groups[0].columns[1].meta_data.codec, cudf::io::parquet::detail::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
 }
 
 TEST_F(ParquetWriterTest, NoNullsAsNonNullable)
@@ -1588,7 +1613,7 @@ TEST_F(ParquetWriterTest, RowGroupMetadata)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, table)
       .dictionary_policy(cudf::io::dictionary_policy::NEVER)
       .sorting_columns({{0, false, false}})
-      .compression(cudf::io::compression_type::ZSTD);
+      .compression(cudf::io::compression_type::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
   cudf::io::write_parquet(opts);
 
   // check row group metadata to make sure total_byte_size is the uncompressed value
@@ -1729,7 +1754,7 @@ TEST_F(ParquetWriterTest, UserRequestedEncodings)
     cudf::io::parquet_writer_options::builder(cudf::io::sink_info{filepath}, table)
       .metadata(table_metadata)
       .stats_level(cudf::io::statistics_freq::STATISTICS_COLUMN)
-      .compression(cudf::io::compression_type::ZSTD);
+      .compression(cudf::io::compression_type::SNAPPY); /* TODO(HIP/AMD): We do not support ZSTD currently. Used Snappy instead.*/
   cudf::io::write_parquet(opts);
 
   // check page headers to make sure each column is encoded with the appropriate encoder
