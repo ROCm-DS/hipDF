@@ -47,7 +47,18 @@
 
 #include <algorithm>
 #include <cassert>
+
+// NOTE(HIP/AMD): Do not include cmath 
+// when JIT-compiling through jitify.
+// Jitify does not provide a jitsafe
+// cmath builtin header and requires -nostdinc
+// to avoid duplicate definition conflicts. 
+// With -nostdinc, JIT compilation of cmath would fail
+// in recent ROCm builds as the system header <cmath> 
+// then can't be found.
+#ifndef __HIPCC_RTC__
 #include <cmath>
+#endif
 #include <string>
 
 /// `fixed_point` and supporting types
