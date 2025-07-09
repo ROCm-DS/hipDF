@@ -1191,11 +1191,11 @@ static __device__ void RleEncode(
       if (lane_id == 0) { s->rpt_map[warp_id] = mask; }
       __syncthreads();
       if (t < warp_size) {
-        bitmask_type c32 = ballot(t >= 4 || s->rpt_map[t] != LANE_MASK_ALL);
+        bitmask_type c32 = ballot(t >= num_encode_warps || s->rpt_map[t] != LANE_MASK_ALL);
         if (t == 0) {
           uint32_t last_idx = __FFS(c32) - 1;
           s->rle_rpt_count =
-            last_idx * warp_size + ((last_idx < 4) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
+            last_idx * warp_size + ((last_idx < num_encode_warps) ? __FFS(~s->rpt_map[last_idx]) - 1 : 0);
         }
       }
       __syncthreads();
@@ -1227,8 +1227,8 @@ static __device__ void RleEncode(
         // Repeat run can only start on a multiple of 8 values
         uint32_t idx8        = (t * 8) / warp_size;
         uint32_t pos8        = (t * 8) % warp_size;
-        bitmask_type m0          = (idx8 < 4) ? s->rpt_map[idx8] : 0;
-        bitmask_type m1          = (idx8 < 3) ? s->rpt_map[idx8 + 1] : 0;
+        bitmask_type m0          = (idx8 < num_encode_warps) ? s->rpt_map[idx8] : 0;
+        bitmask_type m1          = (idx8 < num_encode_warps-1) ? s->rpt_map[idx8 + 1] : 0;
         uint32_t needed_mask = kRleRunMask[nbits - 1];
 #if !defined(CUDF_USE_WARPSIZE_32)
         mask                 = ballot((::cudf::detail::__m_funnelshift_r(m0, m1, pos8) & needed_mask) == needed_mask);
@@ -1241,9 +1241,9 @@ static __device__ void RleEncode(
           if (rle_run_start < maxvals) {
             uint32_t idx_cur = rle_run_start / warp_size;
             uint32_t idx_ofs = rle_run_start % warp_size;
-            while (idx_cur < 4) {
-              m0   = (idx_cur < 4) ? s->rpt_map[idx_cur] : 0;
-              m1   = (idx_cur < 3) ? s->rpt_map[idx_cur + 1] : 0;
+            while (idx_cur < num_encode_warps) {
+              m0   = (idx_cur < num_encode_warps) ? s->rpt_map[idx_cur] : 0;
+              m1   = (idx_cur < num_encode_warps-1) ? s->rpt_map[idx_cur + 1] : 0;
 #if !defined(CUDF_USE_WARPSIZE_32)
               mask = ~::cudf::detail::__m_funnelshift_r(m0, m1, idx_ofs);
 #else
