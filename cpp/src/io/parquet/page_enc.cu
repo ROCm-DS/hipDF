@@ -990,7 +990,9 @@ inline __device__ void PackLiteralsShuffle(
   constexpr uint32_t MASK8T = 7;  // mask for 8 thread leader
   uint64_t v64;
 
-  if (t > (count | 0x1f)) { return; }
+  // NOTE(HIP/AMD): Round up to warpsize to make sure that all threads
+  // participate in shuffle_xor
+  if (t > (count | LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) { return; }
 
   switch (w) {
     case 1:
