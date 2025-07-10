@@ -565,7 +565,7 @@ __device__ thrust::pair<size_t, size_t> totalDeltaByteArraySize(uint8_t const* d
       db->calc_mini_block_values(lane_id);
 
       // get per lane sum for mini-block
-      for (uint32_t i = 0; i < db->values_per_mb; i += 32) {
+      for (uint32_t i = 0; i < db->values_per_mb; i += warp_size) {
         uint32_t const idx = db->current_value_idx + i + lane_id;
         if (idx >= start_value && idx < end_value && idx < db->value_count) {
           lane_sum += db->value[rolling_index<delta_rolling_buf_size>(idx)];

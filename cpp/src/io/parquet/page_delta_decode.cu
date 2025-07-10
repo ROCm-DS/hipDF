@@ -194,7 +194,7 @@ struct delta_byte_array_decoder {
 
       // save the position of the last computed string. this will be used in
       // the next iteration to reconstruct the string in lane 0.
-      if (ln_idx == end - 1 || (ln_idx < end && lane_id == 31)) {
+      if (ln_idx == end - 1 || (ln_idx < end && lane_id == warp_size-1)) {
         // set last_string to this lane's string
         last_string     = out + string_off;
         last_string_len = string_len;
@@ -304,14 +304,14 @@ struct delta_byte_array_decoder {
     uint32_t skip_pos = 0;
     while (prefixes.current_value_idx < start_val) {
       // warp 0 gets prefixes and warp 1 gets suffixes
-      auto* const db = t < 32 ? &prefixes : &suffixes;
+      auto* const db = t < cudf::detail::warp_size ? &prefixes : &suffixes;
 
       // this will potentially decode past start_val, but that's ok
-      if (t < 64) { db->decode_batch(); }
+      if (t < 2 * cudf::detail::warp_size) { db->decode_batch(); }
       __syncthreads();
 
       // warp 0 decodes the batch.
-      if (t < 32) {
+      if (t < cudf::detail::warp_size) {
         auto const num_to_decode = min(batch_size, start_val - skip_pos);
         auto const bytes_written =
           use_char_ll ? calculate_string_values_cp(temp_buf, skip_pos, num_to_decode, lane_id)
