@@ -52,7 +52,11 @@ namespace cudf::io::parquet::detail {
 
 namespace {
 
+#ifndef CUDF_USE_WARPSIZE_32
+constexpr int decode_block_size = 256;
+#else
 constexpr int decode_block_size = 128;
+#endif
 
 // DELTA_BYTE_ARRAY encoding (incremental encoding or front compression), is used for BYTE_ARRAY
 // columns. For each element in a sequence of strings, a prefix length from the preceding string

@@ -60,8 +60,18 @@ namespace {
 
 // TODO(HIP/AMD): investigate the setting of these constants
 constexpr int preprocess_block_size    = 512;
+// NOTE(HIP/AMD): Need two wavefronts for gpuComputeDeltaPageStringSizes
+#ifdef CUDF_USE_WARPSIZE_32
 constexpr int delta_preproc_block_size = 64;
+#else
+constexpr int delta_preproc_block_size = 128;
+#endif
+// NOTE(HIP/AMD): Need one wavefront for gpuComputeDeltaLengthPageStringSizes
+#ifdef CUDF_USE_WARPSIZE_32
 constexpr int delta_length_block_size  = 32;
+#else
+constexpr int delta_length_block_size  = 64;
+#endif
 constexpr int preproc_buf_size         = LEVEL_DECODE_BUF_SIZE;
 
 /**
