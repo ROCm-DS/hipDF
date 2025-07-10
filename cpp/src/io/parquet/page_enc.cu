@@ -3519,15 +3519,15 @@ void EncodePages(device_span<EncPage> pages,
     auto const strm = streams[s_idx++];
     gpuEncodePageLevels<encode_block_size><<<num_pages, encode_block_size, 0, strm.value()>>>(
       pages, write_v2_headers, encode_kernel_mask::DELTA_LENGTH_BA);
-    gpuEncodeDeltaLengthByteArrayPages<encode_block_size>
-      <<<num_pages, encode_block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
+    gpuEncodeDeltaLengthByteArrayPages<delta::block_size>
+      <<<num_pages, delta::block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
   }
   if (BitAnd(kernel_mask, encode_kernel_mask::DELTA_BYTE_ARRAY) != 0) {
     auto const strm = streams[s_idx++];
     gpuEncodePageLevels<encode_block_size><<<num_pages, encode_block_size, 0, strm.value()>>>(
       pages, write_v2_headers, encode_kernel_mask::DELTA_BYTE_ARRAY);
-    gpuEncodeDeltaByteArrayPages<encode_block_size>
-      <<<num_pages, encode_block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
+    gpuEncodeDeltaByteArrayPages<delta::block_size>
+      <<<num_pages, delta::block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
   }
   if (BitAnd(kernel_mask, encode_kernel_mask::DICTIONARY) != 0) {
     auto const strm = streams[s_idx++];
