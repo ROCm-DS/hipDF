@@ -1365,26 +1365,6 @@ if(BUILD_ASAN)
   target_link_options(cudf PRIVATE "-g;-fsanitize=address;-shared-libsan")
 endif()
 
-if((CMAKE_BUILD_TYPE MATCHES Debug) OR BUILD_ASAN)
-  message(VERBOSE "CUDF: Building with debugging flags")
-
-  # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is hanging)
-  # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround.
-  set_source_files_properties(src/join/mixed_join_kernel.cu
-                              src/join/mixed_join_kernel_nulls.cu
-                              src/join/mixed_join_kernels_semi.cu
-                              src/join/mixed_join_semi.cu
-                              src/join/mixed_join_size_kernel.cu
-                              src/join/mixed_join_size_kernel_nulls.cu
-                              src/join/mixed_join_size_kernels_semi.cu
-                              src/join/conditional_join.cu
-                              src/join/cross_join.cu
-                              src/join/hash_join.cu
-                              src/join/join.cu
-                              src/join/join_utils.cu
-                              src/join/semi_join.cu
-                              PROPERTIES COMPILE_FLAGS "-DNDEBUG")
-endif()
 
 # Anything that includes jitify needs to be compiled with _FILE_OFFSET_BITS=64 due to a limitation
 # in how conda builds glibc
