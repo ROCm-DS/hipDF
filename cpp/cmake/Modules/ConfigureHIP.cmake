@@ -50,6 +50,8 @@ endif()
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(VERBOSE "CUDF: Building with debugging flags")
+  # NOTE(HIP/AMD): CMake incorrectly sets -O as default debug flag, see https://github.com/Kitware/CMake/commit/b805f55325382ede2e3b4e426e4e837d371b7330
+  set(CMAKE_HIP_FLAGS_DEBUG "-Og -g -ggdb")
 endif()
 
 macro(set_cudf_target_properties)
