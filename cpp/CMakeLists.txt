@@ -909,6 +909,7 @@ if(BUILD_ASAN)
     src/aggregation/result_cache.cpp
     src/ast/expression_parser.cpp
     src/ast/expressions.cpp
+    src/ast/operators.cpp
     src/binaryop/binaryop.cpp
     src/binaryop/compiled/ATan2.cu
     src/binaryop/compiled/Add.cu
@@ -928,6 +929,7 @@ if(BUILD_ASAN)
     src/binaryop/compiled/Mod.cu
     src/binaryop/compiled/Mul.cu
     src/binaryop/compiled/NullEquals.cu
+    src/binaryop/compiled/NullNotEquals.cu
     src/binaryop/compiled/NullLogicalAnd.cu
     src/binaryop/compiled/NullLogicalOr.cu
     src/binaryop/compiled/NullMax.cu
@@ -975,7 +977,7 @@ if(BUILD_ASAN)
     src/dictionary/dictionary_column_view.cpp
     src/dictionary/dictionary_factories.cu
     src/dictionary/encode.cu
-    #src/dictionary/remove_keys.cu
+    src/dictionary/remove_keys.cu
     src/dictionary/replace.cu
     src/dictionary/search.cu
     src/dictionary/set_keys.cu
@@ -984,11 +986,23 @@ if(BUILD_ASAN)
     src/filling/repeat.cu
     src/filling/sequence.cu
     src/groupby/groupby.cu
+    src/groupby/hash/compute_aggregations.cu
+    src/groupby/hash/compute_aggregations_null.cu
+    src/groupby/hash/compute_global_memory_aggs.cu
+    src/groupby/hash/compute_global_memory_aggs_null.cu
+    src/groupby/hash/compute_groupby.cu
+    src/groupby/hash/compute_mapping_indices.cu
+    src/groupby/hash/compute_mapping_indices_null.cu
+    src/groupby/hash/compute_shared_memory_aggs.cu
+    src/groupby/hash/create_sparse_results_table.cu
+    src/groupby/hash/flatten_single_pass_aggs.cpp
     src/groupby/hash/groupby.cu
+    src/groupby/hash/hash_compound_agg_finalizer.cu
+    src/groupby/hash/sparse_to_dense_results.cu
     src/groupby/sort/aggregate.cpp
     src/groupby/sort/group_argmax.cu
     src/groupby/sort/group_argmin.cu
-    #src/groupby/sort/group_collect.cu
+    src/groupby/sort/group_collect.cu
     src/groupby/sort/group_correlation.cu
     src/groupby/sort/group_count.cu
     src/groupby/sort/group_histogram.cu
@@ -1003,35 +1017,47 @@ if(BUILD_ASAN)
     src/groupby/sort/group_quantiles.cu
     src/groupby/sort/group_std.cu
     src/groupby/sort/group_sum.cu
-    src/groupby/sort/scan.cpp
     src/groupby/sort/group_count_scan.cu
     src/groupby/sort/group_max_scan.cu
     src/groupby/sort/group_min_scan.cu
+    src/groupby/sort/group_product_scan.cu
     src/groupby/sort/group_rank_scan.cu
     src/groupby/sort/group_replace_nulls.cu
     src/groupby/sort/group_sum_scan.cu
+    src/groupby/sort/host_udf_aggregation.cpp
+    src/groupby/sort/scan.cpp
     src/groupby/sort/sort_helper.cu
-    src/hash/hashing.cu
     src/hash/md5_hash.cu
     src/hash/murmurhash3_x86_32.cu
     src/hash/murmurhash3_x64_128.cu
-    src/hash/spark_murmurhash3_x86_32.cu
+    src/hash/sha1_hash.cu
+    src/hash/sha224_hash.cu
+    src/hash/sha256_hash.cu
+    src/hash/sha384_hash.cu
+    src/hash/sha512_hash.cu
+    src/hash/xxhash_32.cu
     src/hash/xxhash_64.cu
     src/interop/dlpack.cpp
-    src/interop/from_arrow.cu
-    src/interop/to_arrow.cu
-    src/interop/detail/arrow_allocator.cpp
+    src/interop/arrow_utilities.cpp
+    src/interop/decimal_conversion_utilities.cu
+    src/interop/to_arrow_device.cu
+    src/interop/to_arrow_host.cu
+    src/interop/from_arrow_device.cu
+    src/interop/from_arrow_host.cu
+    src/interop/from_arrow_stream.cu
+    src/interop/to_arrow_schema.cpp
     src/io/avro/avro.cpp
     src/io/avro/avro_gpu.cu
     src/io/avro/reader_impl.cu
     src/io/comp/brotli_dict.cpp
+    src/io/comp/comp.cpp
+    src/io/comp/comp.cu
     src/io/comp/cpu_unbz2.cpp
     src/io/comp/debrotli.cu
     src/io/comp/gpuinflate.cu
     src/io/comp/nvcomp_adapter.cpp
     src/io/comp/nvcomp_adapter.cu
     src/io/comp/snap.cu
-    src/io/comp/statistics.cu
     src/io/comp/uncomp.cpp
     src/io/comp/unsnap.cu
     src/io/csv/csv_gpu.cu
@@ -1039,24 +1065,31 @@ if(BUILD_ASAN)
     src/io/csv/reader_impl.cu
     src/io/csv/writer_impl.cu
     src/io/functions.cpp
-    src/io/json/byte_range_info.cu
+    src/io/json/host_tree_algorithms.cu
     src/io/json/json_column.cu
+    src/io/json/column_tree_construction.cu
+    src/io/json/json_normalization.cu
     src/io/json/json_tree.cu
     src/io/json/nested_json_gpu.cu
     src/io/json/read_json.cu
-    src/io/json/legacy/json_gpu.cu
-    src/io/json/legacy/reader_impl.cu
+    src/io/json/parser_features.cpp
+    src/io/json/process_tokens.cu
     src/io/json/write_json.cu
     src/io/orc/aggregate_orc_metadata.cpp
     src/io/orc/dict_enc.cu
     src/io/orc/orc.cpp
     src/io/orc/reader_impl.cu
+    src/io/orc/reader_impl_chunking.cu
+    src/io/orc/reader_impl_decode.cu
+    src/io/orc/reader_impl_helpers.cpp
     src/io/orc/stats_enc.cu
     src/io/orc/stripe_data.cu
     src/io/orc/stripe_enc.cu
     src/io/orc/stripe_init.cu
     src/datetime/timezone.cpp
-    #src/io/orc/writer_impl.cu
+    src/io/orc/writer_impl.cu
+    src/io/parquet/arrow_schema_writer.cpp
+    src/io/parquet/bloom_filter_reader.cu
     src/io/parquet/compact_protocol_reader.cpp
     src/io/parquet/compact_protocol_writer.cpp
     src/io/parquet/decode_preprocess.cu
@@ -1069,9 +1102,12 @@ if(BUILD_ASAN)
     src/io/parquet/predicate_pushdown.cpp
     src/io/parquet/reader.cpp
     src/io/parquet/reader_impl.cpp
+    src/io/parquet/reader_impl_chunking.cu
     src/io/parquet/reader_impl_helpers.cpp
     src/io/parquet/reader_impl_preprocess.cu
-    #src/io/parquet/writer_impl.cu
+    src/io/parquet/writer_impl.cu
+    src/io/parquet/writer_impl_helpers.cpp
+    src/io/parquet/decode_fixed.cu
     src/io/statistics/orc_column_statistics.cu
     src/io/statistics/parquet_column_statistics.cu
     src/io/text/byte_range_info.cpp
@@ -1079,14 +1115,14 @@ if(BUILD_ASAN)
     src/io/text/bgzip_data_chunk_source.cu
     src/io/text/bgzip_utils.cpp
     src/io/text/multibyte_split.cu
-    src/io/utilities/arrow_io_source.cpp
+    src/io/utilities/base64_utilities.cpp
     src/io/utilities/column_buffer.cpp
+    src/io/utilities/column_buffer_strings.cu
     src/io/utilities/config_utils.cpp
     src/io/utilities/data_casting.cu
     src/io/utilities/data_sink.cpp
     src/io/utilities/datasource.cpp
     src/io/utilities/file_io_utilities.cpp
-    src/io/utilities/parsing_utils.cu
     src/io/utilities/row_selection.cpp
     src/io/utilities/type_inference.cu
     src/io/utilities/trie.cu
@@ -1095,6 +1131,7 @@ if(BUILD_ASAN)
     src/jit/util.cpp
     src/join/conditional_join.cu
     src/join/cross_join.cu
+    src/join/distinct_hash_join.cu
     src/join/hash_join.cu
     src/join/join.cu
     src/join/join_utils.cu
@@ -1105,8 +1142,8 @@ if(BUILD_ASAN)
     src/join/mixed_join_semi.cu
     src/join/mixed_join_size_kernel.cu
     src/join/mixed_join_size_kernel_nulls.cu
-    src/join/mixed_join_size_kernels_semi.cu
     src/join/semi_join.cu
+    src/json/json_path.cu
     src/lists/contains.cu
     src/lists/combine/concatenate_list_elements.cu
     src/lists/combine/concatenate_rows.cu
@@ -1125,7 +1162,7 @@ if(BUILD_ASAN)
     src/lists/reverse.cu
     src/lists/segmented_sort.cu
     src/lists/sequences.cu
-    #src/lists/set_operations.cu
+    src/lists/set_operations.cu
     src/lists/stream_compaction/apply_boolean_mask.cu
     src/lists/stream_compaction/distinct.cu
     src/lists/utilities.cu
@@ -1139,7 +1176,7 @@ if(BUILD_ASAN)
     src/quantiles/quantiles.cu
     src/reductions/all.cu
     src/reductions/any.cu
-    #src/reductions/collect_ops.cu
+    src/reductions/collect_ops.cu
     src/reductions/histogram.cu
     src/reductions/max.cu
     src/reductions/mean.cu
@@ -1149,6 +1186,7 @@ if(BUILD_ASAN)
     src/reductions/product.cu
     src/reductions/reductions.cpp
     src/reductions/scan/rank_scan.cu
+    src/reductions/scan/ewm.cu
     src/reductions/scan/scan.cpp
     src/reductions/scan/scan_exclusive.cu
     src/reductions/scan/scan_inclusive.cu
@@ -1199,12 +1237,12 @@ if(BUILD_ASAN)
     src/sort/stable_segmented_sort.cu
     src/sort/stable_sort_column.cu
     src/sort/stable_sort.cu
-    #src/stream_compaction/apply_boolean_mask.cu
+    src/stream_compaction/apply_boolean_mask.cu
     src/stream_compaction/distinct.cu
     src/stream_compaction/distinct_count.cu
     src/stream_compaction/distinct_helpers.cu
-    #src/stream_compaction/drop_nans.cu
-    #src/stream_compaction/drop_nulls.cu
+    src/stream_compaction/drop_nans.cu
+    src/stream_compaction/drop_nulls.cu
     src/stream_compaction/stable_distinct.cu
     src/stream_compaction/unique.cu
     src/stream_compaction/unique_count.cu
@@ -1230,6 +1268,7 @@ if(BUILD_ASAN)
     src/strings/convert/convert_lists.cu
     src/strings/copying/concatenate.cu
     src/strings/copying/copying.cu
+    src/strings/copying/copy_range.cu
     src/strings/copying/shift.cu
     src/strings/count_matches.cu
     src/strings/extract/extract.cu
@@ -1237,18 +1276,23 @@ if(BUILD_ASAN)
     src/strings/filling/fill.cu
     src/strings/filter_chars.cu
     src/strings/like.cu
+    src/strings/merge/merge.cu
     src/strings/padding.cu
-    src/strings/json/json_path.cu
-    #src/strings/regex/regcomp.cpp
+    src/strings/regex/regcomp.cpp
     src/strings/regex/regexec.cpp
     src/strings/regex/regex_program.cpp
     src/strings/repeat_strings.cu
     src/strings/replace/backref_re.cu
+    src/strings/replace/find_replace.cu
     src/strings/replace/multi.cu
     src/strings/replace/multi_re.cu
     src/strings/replace/replace.cu
+    src/strings/replace/replace_nulls.cu
     src/strings/replace/replace_re.cu
+    src/strings/replace/replace_slice.cu
     src/strings/reverse.cu
+    src/strings/scan/scan_inclusive.cu
+    src/strings/search/contains_multiple.cu
     src/strings/search/findall.cu
     src/strings/search/find.cu
     src/strings/search/find_multiple.cu
@@ -1265,6 +1309,7 @@ if(BUILD_ASAN)
     src/strings/utilities.cu
     src/strings/wrap.cu
     src/structs/copying/concatenate.cu
+    src/structs/scan/scan_inclusive.cu
     src/structs/structs_column_factories.cu
     src/structs/structs_column_view.cpp
     src/structs/utilities.cpp
@@ -1274,17 +1319,17 @@ if(BUILD_ASAN)
     src/table/table_view.cpp
     src/text/detokenize.cu
     src/text/edit_distance.cu
-    #src/text/generate_ngrams.cu
+    src/text/generate_ngrams.cu
     src/text/jaccard.cu
     src/text/minhash.cu
     src/text/ngrams_tokenize.cu
     src/text/normalize.cu
     src/text/replace.cu
     src/text/stemmer.cu
-    src/text/subword/bpe_tokenizer.cu
+    src/text/bpe/byte_pair_encoding.cu
+    src/text/bpe/load_merge_pairs.cu
     src/text/subword/data_normalizer.cu
     src/text/subword/load_hash_file.cu
-    src/text/subword/load_merges_file.cu
     src/text/subword/subword_tokenize.cu
     src/text/subword/wordpiece_tokenizer.cu
     src/text/tokenize.cu
@@ -1302,10 +1347,13 @@ if(BUILD_ASAN)
     src/unary/math_ops.cu
     src/unary/nan_ops.cu
     src/unary/null_ops.cu
+    src/utilities/cuda.cpp
+    src/utilities/cuda_memcpy.cu
     src/utilities/default_stream.cpp
+    src/utilities/host_memory.cpp
     src/utilities/jit_amd_utilities.cpp
     src/utilities/linked_column.cpp
-    src/utilities/logger.cpp
+    src/utilities/prefetch.cpp
     src/utilities/stacktrace.cpp
     src/utilities/stream_pool.cpp
     src/utilities/traits.cpp
