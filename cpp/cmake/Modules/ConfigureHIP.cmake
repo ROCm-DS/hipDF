@@ -52,6 +52,10 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
   message(VERBOSE "CUDF: Building with debugging flags")
   # NOTE(HIP/AMD): CMake incorrectly sets -O as default debug flag, see https://github.com/Kitware/CMake/commit/b805f55325382ede2e3b4e426e4e837d371b7330
   set(CMAKE_HIP_FLAGS_DEBUG "-Og -g -ggdb")
+  # NOTE(HIP/AMD): We use -mcmodel=large here to ensure that all code and data references remain valid, 
+  # even if the executable or shared object becomes very large. The default small code model 
+  # on x86-64 uses 32-bit relative addressing, which can overflow for large binaries. 
+  add_compile_options(-mcmodel=large)
 endif()
 
 macro(set_cudf_target_properties)
