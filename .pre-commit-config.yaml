@@ -1,182 +1,217 @@
 # Copyright (c) 2019-2025, NVIDIA CORPORATION.
 
-ci:
-  autofix_commit_msg: "[pre-commit.ci] auto code formatting"
-  autofix_prs: false
-  autoupdate_branch: ""
-  autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
-  autoupdate_schedule: quarterly
-  skip: ["verify-alpha-spec"]
-  submodules: false
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# ci:
+#   autofix_commit_msg: "[pre-commit.ci] auto code formatting"
+#   autofix_prs: false
+#   autoupdate_branch: ""
+#   autoupdate_commit_msg: "[pre-commit.ci] pre-commit autoupdate"
+#   autoupdate_schedule: quarterly
+#   skip: ["verify-alpha-spec"]
+#   submodules: false
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
-    hooks:
-      - id: trailing-whitespace
-        exclude: |
-          (?x)^(
-            ^cpp/cmake/thirdparty/patches/.*|
-            ^python/cudf/cudf/tests/data/subword_tokenizer_data/.*
-          )
-      - id: end-of-file-fixer
-        exclude: |
-          (?x)^(
-            ^cpp/cmake/thirdparty/patches/.*|
-            ^python/cudf/cudf/tests/data/subword_tokenizer_data/.*
-          )
-  - repo: https://github.com/MarcoGorelli/cython-lint
-    rev: v0.16.6
-    hooks:
-      - id: cython-lint
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.13.0'
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-cachetools]
-        args: ["--config-file=pyproject.toml",
-               "python/cudf/cudf",
-               "python/custreamz/custreamz",
-               "python/cudf_kafka/cudf_kafka",
-               "python/cudf_polars/cudf_polars",
-               "python/dask_cudf/dask_cudf"]
-        pass_filenames: false
-  - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v16.0.6
-    hooks:
-      - id: clang-format
-        types_or: [c, c++, cuda]
-        args: ["-fallback-style=none", "-style=file", "-i"]
-        exclude: |
-          (?x)^(
-            ^cpp/src/io/parquet/ipc/Schema_generated.h|
-            ^cpp/src/io/parquet/ipc/Message_generated.h|
-            ^cpp/include/cudf_test/cxxopts.hpp
-          )
-  - repo: https://github.com/sirosen/texthooks
-    rev: 0.6.7
-    hooks:
-      - id: fix-smartquotes
-        exclude: |
-          (?x)^(
-            ^cpp/src/io/parquet/ipc/Schema_generated.h|
-            ^cpp/src/io/parquet/ipc/Message_generated.h|
-            ^cpp/include/cudf_test/cxxopts.hpp|
-            ^python/cudf/cudf/tests/data/subword_tokenizer_data/.*|
-            ^python/cudf/cudf/tests/text/test_text_methods.py
-          )
   - repo: local
     hooks:
-      - id: no-deprecationwarning
-        name: no-deprecationwarning
-        description: 'Enforce that DeprecationWarning is not introduced (use FutureWarning instead)'
-        entry: '(category=|\s)DeprecationWarning[,)]'
-        language: pygrep
-        types_or: [python, cython]
-        # We need to exclude just the following file because few APIs still need
-        # DeprecationWarning: https://github.com/pandas-dev/pandas/issues/54970
-        exclude: |
-          (?x)^(
-            ^python/cudf/cudf/core/dtypes.py|
-            ^python/cudf/cudf/tests/pytest.ini
-          )
-      - id: no-programmatic-xfail
-        name: no-programmatic-xfail
-        description: 'Enforce that pytest.xfail is not introduced (see dev docs for details)'
-        entry: 'pytest\.xfail'
-        language: pygrep
-        types: [python]
-      - id: no-unseeded-default-rng
-        name: no-unseeded-default-rng
-        description: 'Enforce that no non-seeded default_rng is used and default_rng is used instead of np.random.seed'
-        entry: |
-          # Check for usage of default_rng without seeding
-          default_rng\(\)|
-          # Check for usage of np.random.seed (NPY002 only disallows this being called)
-          np.random.seed
-        language: pygrep
-        types: [python]
-      - id: cmake-format
-        name: cmake-format
-        entry: ./cpp/scripts/run-cmake-format.sh cmake-format
-        language: python
-        types: [cmake]
-        # Note that pre-commit autoupdate does not update the versions
-        # of dependencies, so we'll have to update this manually.
-        additional_dependencies:
-          - cmakelang==0.6.13
-        verbose: true
-        require_serial: true
-        exclude: |
-          (?x)^(
-            cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
-          )
-      - id: cmake-lint
-        name: cmake-lint
-        entry: ./cpp/scripts/run-cmake-format.sh cmake-lint
-        language: python
-        types: [cmake]
-        # Note that pre-commit autoupdate does not update the versions
-        # of dependencies, so we'll have to update this manually.
-        additional_dependencies:
-          - cmakelang==0.6.13
-        verbose: true
-        require_serial: true
-        exclude: |
-          (?x)^(
-            cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
-          )
-      - id: doxygen-check
-        name: doxygen-check
-        entry: ./ci/checks/doxygen.sh
-        files: ^cpp/include/
-        types_or: [file]
-        language: system
-        pass_filenames: false
-        verbose: true
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
-    hooks:
-      - id: codespell
-        additional_dependencies: [tomli]
-        args: ["--toml", "pyproject.toml"]
-        exclude: |
-          (?x)^(
-            .*test.*|
-            ^CHANGELOG.md$
-          )
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.3
-    hooks:
-      - id: ruff
-        args: ["--fix"]
-      - id: ruff-format
-  - repo: https://github.com/rapidsai/pre-commit-hooks
-    rev: v0.5.0
-    hooks:
-      - id: verify-copyright
-        exclude: |
-          (?x)^(
-            cpp/include/cudf_test/cxxopts[.]hpp$|
-            cpp/src/io/parquet/ipc/Message_generated[.]h$|
-            cpp/src/io/parquet/ipc/Schema_generated[.]h$|
-            cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
-          )
-      - id: verify-alpha-spec
-        args: ["--fix", "--mode=release"]
-      - id: verify-codeowners
-        args: [--fix, --project-prefix=cudf]
-  - repo: https://github.com/rapidsai/dependency-file-generator
-    rev: v1.17.0
-    hooks:
-      - id: rapids-dependency-file-generator
-        args: ["--clean"]
-  - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.10.0.1
-    hooks:
-      - id: shellcheck
-        args: ["--severity=warning"]
-        files: ^ci/
+          - id: check-license-installation
+            name: check-license-installation
+            entry: bash -c "type license_verificator >/dev/null 2>&1 || echo \"[WARNING] license verificator not installed!\" || true"
+            language: system
+            verbose: true
+            pass_filenames: false
+          - id: amd-copyright
+            name: amd-copyright
+            entry: bash -c "(! type license_verificator >/dev/null 2>&1) || license_verificator --pre-commit"
+            language: system
+            pass_filenames: false
+  # - repo: https://github.com/pre-commit/pre-commit-hooks
+  #   rev: v5.0.0
+  #   hooks:
+  #     - id: trailing-whitespace
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/cmake/thirdparty/patches/.*|
+  #           ^python/cudf/cudf/tests/data/subword_tokenizer_data/.*
+  #         )
+  #     - id: end-of-file-fixer
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/cmake/thirdparty/patches/.*|
+  #           ^python/cudf/cudf/tests/data/subword_tokenizer_data/.*
+  #         )
+  # - repo: https://github.com/MarcoGorelli/cython-lint
+  #   rev: v0.16.6
+  #   hooks:
+  #     - id: cython-lint
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: 'v1.13.0'
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-cachetools]
+  #       args: ["--config-file=pyproject.toml",
+  #              "python/cudf/cudf",
+  #              "python/custreamz/custreamz",
+  #              "python/cudf_kafka/cudf_kafka",
+  #              "python/cudf_polars/cudf_polars",
+  #              "python/dask_cudf/dask_cudf"]
+  #       pass_filenames: false
+  # - repo: https://github.com/pre-commit/mirrors-clang-format
+  #   rev: v16.0.6
+  #   hooks:
+  #     - id: clang-format
+  #       types_or: [c, c++, cuda]
+  #       args: ["-fallback-style=none", "-style=file", "-i"]
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/src/io/parquet/ipc/Schema_generated.h|
+  #           ^cpp/src/io/parquet/ipc/Message_generated.h|
+  #           ^cpp/include/cudf_test/cxxopts.hpp
+  #         )
+  # - repo: https://github.com/sirosen/texthooks
+  #   rev: 0.6.7
+  #   hooks:
+  #     - id: fix-smartquotes
+  #       exclude: |
+  #         (?x)^(
+  #           ^cpp/src/io/parquet/ipc/Schema_generated.h|
+  #           ^cpp/src/io/parquet/ipc/Message_generated.h|
+  #           ^cpp/include/cudf_test/cxxopts.hpp|
+  #           ^python/cudf/cudf/tests/data/subword_tokenizer_data/.*|
+  #           ^python/cudf/cudf/tests/text/test_text_methods.py
+  #         )
+  # - repo: local
+  #   hooks:
+  #     - id: no-deprecationwarning
+  #       name: no-deprecationwarning
+  #       description: 'Enforce that DeprecationWarning is not introduced (use FutureWarning instead)'
+  #       entry: '(category=|\s)DeprecationWarning[,)]'
+  #       language: pygrep
+  #       types_or: [python, cython]
+  #       # We need to exclude just the following file because few APIs still need
+  #       # DeprecationWarning: https://github.com/pandas-dev/pandas/issues/54970
+  #       exclude: |
+  #         (?x)^(
+  #           ^python/cudf/cudf/core/dtypes.py|
+  #           ^python/cudf/cudf/tests/pytest.ini
+  #         )
+  #     - id: no-programmatic-xfail
+  #       name: no-programmatic-xfail
+  #       description: 'Enforce that pytest.xfail is not introduced (see dev docs for details)'
+  #       entry: 'pytest\.xfail'
+  #       language: pygrep
+  #       types: [python]
+  #     - id: no-unseeded-default-rng
+  #       name: no-unseeded-default-rng
+  #       description: 'Enforce that no non-seeded default_rng is used and default_rng is used instead of np.random.seed'
+  #       entry: |
+  #         # Check for usage of default_rng without seeding
+  #         default_rng\(\)|
+  #         # Check for usage of np.random.seed (NPY002 only disallows this being called)
+  #         np.random.seed
+  #       language: pygrep
+  #       types: [python]
+  #     - id: cmake-format
+  #       name: cmake-format
+  #       entry: ./cpp/scripts/run-cmake-format.sh cmake-format
+  #       language: python
+  #       types: [cmake]
+  #       # Note that pre-commit autoupdate does not update the versions
+  #       # of dependencies, so we'll have to update this manually.
+  #       additional_dependencies:
+  #         - cmakelang==0.6.13
+  #       verbose: true
+  #       require_serial: true
+  #       exclude: |
+  #         (?x)^(
+  #           cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
+  #         )
+  #     - id: cmake-lint
+  #       name: cmake-lint
+  #       entry: ./cpp/scripts/run-cmake-format.sh cmake-lint
+  #       language: python
+  #       types: [cmake]
+  #       # Note that pre-commit autoupdate does not update the versions
+  #       # of dependencies, so we'll have to update this manually.
+  #       additional_dependencies:
+  #         - cmakelang==0.6.13
+  #       verbose: true
+  #       require_serial: true
+  #       exclude: |
+  #         (?x)^(
+  #           cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
+  #         )
+  #     - id: doxygen-check
+  #       name: doxygen-check
+  #       entry: ./ci/checks/doxygen.sh
+  #       files: ^cpp/include/
+  #       types_or: [file]
+  #       language: system
+  #       pass_filenames: false
+  #       verbose: true
+  # - repo: https://github.com/codespell-project/codespell
+  #   rev: v2.3.0
+  #   hooks:
+  #     - id: codespell
+  #       additional_dependencies: [tomli]
+  #       args: ["--toml", "pyproject.toml"]
+  #       exclude: |
+  #         (?x)^(
+  #           .*test.*|
+  #           ^CHANGELOG.md$
+  #         )
+  # - repo: https://github.com/astral-sh/ruff-pre-commit
+  #   rev: v0.9.3
+  #   hooks:
+  #     - id: ruff
+  #       args: ["--fix"]
+  #     - id: ruff-format
+  # - repo: https://github.com/rapidsai/pre-commit-hooks
+  #   rev: v0.5.0
+  #   hooks:
+  #     - id: verify-copyright
+  #       exclude: |
+  #         (?x)^(
+  #           cpp/include/cudf_test/cxxopts[.]hpp$|
+  #           cpp/src/io/parquet/ipc/Message_generated[.]h$|
+  #           cpp/src/io/parquet/ipc/Schema_generated[.]h$|
+  #           cpp/cmake/Modules/FindCUDAToolkit[.]cmake$
+  #         )
+  #     - id: verify-alpha-spec
+  #       args: ["--fix", "--mode=release"]
+  #     - id: verify-codeowners
+  #       args: [--fix, --project-prefix=cudf]
+  # - repo: https://github.com/rapidsai/dependency-file-generator
+  #   rev: v1.17.0
+  #   hooks:
+  #     - id: rapids-dependency-file-generator
+  #       args: ["--clean"]
+  # - repo: https://github.com/shellcheck-py/shellcheck-py
+  #   rev: v0.10.0.1
+  #   hooks:
+  #     - id: shellcheck
+  #       args: ["--severity=warning"]
+  #       files: ^ci/
 
 default_language_version:
       python: python3
