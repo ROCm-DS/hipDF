@@ -36,7 +36,7 @@
 # =============================================================================
 
 file(READ "${CMAKE_CURRENT_LIST_DIR}/VERSION" _rapids_version)
-if(_rapids_version MATCHES [[^([0-9][0-9]?)\.([0-9][0-9]?)\.([0-9][0-9])]])
+if(_rapids_version MATCHES [[^([0-9][0-9]?)\.([0-9][0-9]?)\.([0-9][0-9])(a[0-9])?]])
   set(RAPIDS_VERSION_MAJOR "${CMAKE_MATCH_1}")
   set(RAPIDS_VERSION_MINOR "${CMAKE_MATCH_2}")
   set(RAPIDS_VERSION_PATCH "${CMAKE_MATCH_3}")
