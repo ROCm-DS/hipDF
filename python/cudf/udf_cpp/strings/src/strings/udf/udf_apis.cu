@@ -49,6 +49,12 @@
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/transform.h>
 
+#include <rocm-core/rocm_version.h>
+
+// NOTE(HIP/AMD): Encode the ROCm version so that it can be decoded into major and minor part by
+//                function '_get_cuda_build_version' in `python/cudf/cudf/utils/_numba.py`.
+#define CUDA_VERSION (ROCM_VERSION_MAJOR*1000 + ROCM_VERSION_MINOR*10)
+
 namespace cudf {
 namespace strings {
 namespace udf {
