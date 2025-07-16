@@ -87,9 +87,9 @@ if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MI
   list(GET DOWNLOAD_STATUS 1 ERROR_MESSAGE)
 
   if(${STATUS_CODE} EQUAL 0)
-    message(STATUS "Downloaded 'CUDF_RAPIDS-"${RAPIDS_VERSION_MAJOR_MINOR}".cmake' successfully!")
+    message(STATUS "Downloaded CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake' successfully!")
   else()
-    message(FATAL_ERROR "Failed to download 'CUDF_RAPIDS-"${RAPIDS_VERSION_MAJOR_MINOR}".cmake'. Reason: ${ERROR_MESSAGE}")
+    message(FATAL_ERROR "Failed to download 'CUDF_RAPIDS-${RAPIDS_VERSION_MAJOR_MINOR}.cmake'. Reason: ${ERROR_MESSAGE}")
   endif()
 endif()
 
