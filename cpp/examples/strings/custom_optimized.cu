@@ -45,7 +45,7 @@
 #include <rmm/exec_policy.hpp>
 
 #include <cudf/cuda_runtime.h>
-#include <nvtx3/nvToolsExt.h>
+//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 #include <thrust/scan.h>
 
 /**
@@ -151,7 +151,7 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   constexpr int block_size = 128;  // this arbitrary size should be a power of 2
   int const blocks         = (names.size() + block_size - 1) / block_size;
 
-  nvtxRangePushA("redact_strings");
+  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
 
   // create offsets vector
   auto offsets = rmm::device_uvector<cudf::size_type>(names.size() + 1, stream);
@@ -184,6 +184,6 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   // wait for all of the above to finish
   stream.synchronize();
 
-  nvtxRangePop();
+  //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
   return result;
 }

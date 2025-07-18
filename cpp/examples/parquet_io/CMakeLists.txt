@@ -1,5 +1,27 @@
 # Copyright (c) 2024-2025, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 cmake_minimum_required(VERSION 3.26.4)
 
 include(../set_cuda_architecture.cmake)
@@ -24,14 +46,14 @@ target_link_libraries(parquet_io_utils PRIVATE cudf::cudf)
 
 # Build and install parquet_io
 add_executable(parquet_io parquet_io.cpp)
-target_link_libraries(parquet_io PRIVATE cudf::cudf nvToolsExt $<TARGET_OBJECTS:parquet_io_utils>)
+target_link_libraries(parquet_io PRIVATE cudf::cudf $<TARGET_OBJECTS:parquet_io_utils>) # nvToolsExt) # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 target_compile_features(parquet_io PRIVATE cxx_std_17)
 install(TARGETS parquet_io DESTINATION bin/examples/libcudf)
 
 # Build and install parquet_io_multithreaded
 add_executable(parquet_io_multithreaded parquet_io_multithreaded.cpp)
 target_link_libraries(
-  parquet_io_multithreaded PRIVATE cudf::cudf nvToolsExt $<TARGET_OBJECTS:parquet_io_utils>
+  parquet_io_multithreaded PRIVATE cudf::cudf $<TARGET_OBJECTS:parquet_io_utils> # nvToolsExt # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 )
 target_compile_features(parquet_io_multithreaded PRIVATE cxx_std_17)
 install(TARGETS parquet_io_multithreaded DESTINATION bin/examples/libcudf)

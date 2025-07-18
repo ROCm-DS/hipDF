@@ -44,7 +44,7 @@
 #include <rmm/device_uvector.hpp>
 
 #include <cudf/cuda_runtime.h>
-#include <nvtx3/nvToolsExt.h>
+//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 
 /**
  * @brief Builds the output for each row
@@ -116,7 +116,7 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   constexpr int block_size = 128;  // this arbitrary size should be a power of 2
   auto const blocks        = (names.size() + block_size - 1) / block_size;
 
-  nvtxRangePushA("redact_strings");
+  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
 
   auto const scv     = cudf::strings_column_view(names);
   auto const offsets = scv.offsets().begin<cudf::size_type>();
@@ -142,6 +142,6 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   // wait for all of the above to finish
   stream.synchronize();
 
-  nvtxRangePop();
+  //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
   return result;
 }

@@ -46,7 +46,7 @@
 #include <cudf/strings/strings_column_view.hpp>
 
 #include <cudf/cuda_runtime.h>
-#include <nvtx3/nvToolsExt.h>
+//#include <nvtx3/nvToolsExt.h> # TODO(HIP/AMD): Reenable once nvtx equivalent is available
 
 /**
  * @brief Redacts each name per the corresponding visibility entry
@@ -63,7 +63,7 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
   auto const visible   = cudf::string_scalar(std::string("public"));
   auto const redaction = cudf::string_scalar(std::string("X X"));
 
-  nvtxRangePushA("redact_strings");
+  //nvtxRangePushA("redact_strings"); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
 
   auto const allowed      = cudf::strings::contains(visibilities, visible);
   auto const redacted     = cudf::copy_if_else(names, redaction, allowed->view());
@@ -78,6 +78,6 @@ std::unique_ptr<cudf::column> redact_strings(cudf::column_view const& names,
 
   cudaStreamSynchronize(0);
 
-  nvtxRangePop();
+  //nvtxRangePop(); // TODO(HIP/AMD): Reenable once nvtx equivalent is available
   return result;
 }
