@@ -32,7 +32,7 @@ rapids_cuda_init_architectures(billion_rows)
 project(
   billion_rows
   VERSION 0.0.1
-  LANGUAGES CXX CUDA
+  LANGUAGES CXX HIP
 )
 
 include(../fetch_dependencies.cmake)

@@ -35,7 +35,7 @@ rapids_cuda_init_architectures(strings_examples)
 project(
   strings_examples
   VERSION 0.0.1
-  LANGUAGES CXX CUDA
+  LANGUAGES CXX HIP
 )
 
 include(../fetch_dependencies.cmake)

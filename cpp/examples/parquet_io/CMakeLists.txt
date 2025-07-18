@@ -32,7 +32,7 @@ rapids_cuda_init_architectures(parquet_io)
 project(
   parquet_io
   VERSION 0.0.1
-  LANGUAGES CXX CUDA
+  LANGUAGES CXX HIP
 )
 
 include(../fetch_dependencies.cmake)
