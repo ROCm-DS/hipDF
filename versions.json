@@ -16,15 +16,15 @@
       "git_tag" : "v${version}"
     },
     "hipco" : {
-      "version" : "0.1.0",
+      "version" : "0.3.0",
       "git_url" : "https://github.com/ROCm/hipCollections",
-      "git_tag" : "release/0.1.x",
+      "git_tag" : "release/0.3.x",
       "always_download": false
     },
     "hipmm" : {
-      "version" : "1.0.0",
+      "version" : "3.0.0",
       "git_url" : "https://github.com/ROCm-DS/hipMM",
-      "git_tag" : "release/1.0.x",
+      "git_tag" : "release/3.0.x",
       "always_download": false
     },
     "hipcomp" : {
