@@ -473,3 +473,12 @@
 #ifndef cudaSuccess
 #  define cudaSuccess hipSuccess
 #endif
+#ifndef cudaLimitMallocHeapSize
+#  define cudaLimitMallocHeapSize hipLimitMallocHeapSize
+#endif
+#ifndef cudaDeviceSetLimit
+#  define cudaDeviceSetLimit hipDeviceSetLimit
+#endif
+#ifndef cudaDeviceGetLimit
+#  define cudaDeviceGetLimit hipDeviceGetLimit
+#endif
