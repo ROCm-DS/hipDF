@@ -1481,12 +1481,14 @@ aggregate_reader_metadata::select_columns(
     // Find which of the selected paths are valid and get their schema index
     std::vector<path_info> valid_selected_paths;
     // vector reference pushback (*use_names). If filter names passed.
-    // TODO(HIP/AMD): Are there cases where use_names is std::nullopt?
-    std::vector<std::reference_wrapper<std::vector<std::string> const>> column_names{*use_names};
+    std::vector<std::reference_wrapper<std::vector<std::string> const>> column_names{};
 
     // NOTE(HIP/AMD): Fixes prior UB if std::optional has no value.
+    if(use_names.has_value()) {
+      column_names.push_back(use_names.value());
+    }
     if(filter_columns_names.has_value()) {
-      column_names.push_back(*filter_columns_names);
+      column_names.push_back(filter_columns_names.value());
     }
 
     for (auto const& used_column_names : column_names) {
