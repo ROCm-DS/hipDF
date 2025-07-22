@@ -3513,6 +3513,8 @@ void EncodePages(device_span<EncPage> pages,
     auto const strm = streams[s_idx++];
     gpuEncodePageLevels<encode_block_size><<<num_pages, encode_block_size, 0, strm.value()>>>(
       pages, write_v2_headers, encode_kernel_mask::DELTA_BINARY);
+    // NOTE(HIP/AMD): Need to use delta::block_size here to make sure that
+    // delta_binary_packer has enough warps available
     gpuEncodeDeltaBinaryPages<delta::block_size>
       <<<num_pages, delta::block_size, 0, strm.value()>>>(pages, comp_in, comp_out, comp_results);
   }
