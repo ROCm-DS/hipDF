@@ -892,6 +892,12 @@ add_library(
   src/utilities/type_dispatcher.cpp
 )
 
+# TODO(HIP/AMD): WAR for internal issue 282
+set_source_files_properties(
+  src/io/json/write_json.cu
+  PROPERTIES COMPILE_FLAGS "-O0")
+
+
 if(BUILD_ASAN)
   list(APPEND SUPPORTED_ASAN_ARCHS "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
                                    "gfx942:xnack+")
