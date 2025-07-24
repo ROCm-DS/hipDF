@@ -1097,7 +1097,7 @@ TEST_F(ParquetChunkedReaderTest, TestChunkedReadNullCount)
 }
 
 namespace {
-constexpr size_t input_limit_expected_file_count = 3; // TODO(HIP/AMD): Add zstd
+constexpr size_t input_limit_expected_file_count = 3; // TODO(HIP/AMD): // TODO(HIP/AMD): Increase to 4 when ZSTD is available
 
 std::vector<std::string> input_limit_get_test_names(std::string const& base_filename)
 {
@@ -1132,7 +1132,7 @@ void input_limit_test_write(std::vector<std::string> const& test_filenames,
   // compression with a codec that uses a lot of scratch space at decode time (2.5x the total
   // decompressed buffer size)
   
-  // TODO(HIP/AMD): ZSTD is presently not supported on AMD platform
+  // TODO(HIP/AMD): ZSTD is presently not supported on AMD platform, adapt below indices when it becomes available
   //input_limit_test_write_one(
   //  test_filenames[1], t, cudf::io::compression_type::ZSTD, cudf::io::dictionary_policy::NEVER);
 

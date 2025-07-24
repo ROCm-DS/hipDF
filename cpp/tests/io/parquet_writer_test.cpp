@@ -1425,11 +1425,10 @@ TEST_F(ParquetWriterTest, SkipCompression)
   constexpr auto page_rows      = 1000;
   constexpr auto row_group_rows = 2 * page_rows;
   constexpr auto num_rows       = 2 * row_group_rows;
-
-  auto ones_zeroes = cudf::detail::make_counting_transform_iterator(0, [&](int index) { return index % 2; });; 
-                                                                          // NOTE(HIP/AMD): Modified to have
-                                                                          // well-compressible data, a sequence is
-                                                                          // not well-enough compressed with SNAPPY.
+                                          // NOTE(HIP/AMD): Modified to have
+  // well-compressible data, a sequence is
+  // not well-enough compressed with SNAPPY.
+  auto ones_zeroes = cudf::detail::make_counting_transform_iterator(0, [&](int index) { return index % 2; });
   column_wrapper<int> col(ones_zeroes, ones_zeroes + num_rows, no_nulls());
 
   auto expected          = table_view{{col, col}};

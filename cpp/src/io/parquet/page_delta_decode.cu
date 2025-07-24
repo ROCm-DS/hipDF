@@ -398,7 +398,7 @@ CUDF_KERNEL void __launch_bounds__(cudf::detail::warp_size * 3)
     if (t < 2 * warp_size) {  // warp0..1
       target_pos = std::min(src_pos + 2 * batch_size, s->nz_count + batch_size);
     } else {  // warp2
-      target_pos = std::min(static_cast<uint32_t>(s->nz_count), src_pos + batch_size); // FIXME(HIP/AMD): should nz_count be unsigned?
+      target_pos = std::min(static_cast<uint32_t>(std::max(s->nz_count,0)), src_pos + batch_size); // NOTE(HIP/AMD): While nz_count is defined as signed integer, it is used in a way that it is always non-negative. We leave the datatype unchanged to avoid diverging from the original code.
     }
     // this needs to be here to prevent warp 2 modifying src_pos before all threads have read it
     __syncthreads();

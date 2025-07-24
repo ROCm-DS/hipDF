@@ -295,4 +295,4 @@ INSTANTIATE_TEST_CASE_P(ParquetCompressionTest,
                                           cudf::io::compression_type::LZ4,
                                           // NOTE(HIP/AMD): ZSTD is not supported presently.
                                           // cudf::io::compression_type::ZSTD
-                                          )); 
+                                          ));
