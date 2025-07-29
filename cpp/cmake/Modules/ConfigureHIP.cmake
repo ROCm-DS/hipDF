@@ -56,6 +56,9 @@ if(CMAKE_BUILD_TYPE MATCHES Debug)
   # even if the executable or shared object becomes very large. The default small code model 
   # on x86-64 uses 32-bit relative addressing, which can overflow for large binaries. 
   add_compile_options(-mcmodel=large)
+  add_link_options(-mcmodel=large)
+  add_link_options(-fuse-ld=lld)
+
 endif()
 
 macro(set_cudf_target_properties)
