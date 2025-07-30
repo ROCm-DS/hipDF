@@ -487,7 +487,7 @@ void orc_init_statistics_groups(statistics_group* groups,
     rowgroup_bounds.size().second;
 
   dim3 dim_block(init_threads_per_group, init_groups_per_block);
-  gpu_init_statistics_groups<<<num_blocks, dim_block, 0, stream.value()>>>(
+  gpu_init_statistics_groups<<<num_blocks, dim_block, sizeof(statistics_group)*init_groups_per_block, stream.value()>>>(
     groups, cols, rowgroup_bounds);
 }
 
