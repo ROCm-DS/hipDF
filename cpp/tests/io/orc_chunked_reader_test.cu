@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
@@ -992,11 +1014,13 @@ TEST_F(OrcChunkedReaderTest, TestChunkedReadNullCount)
 
 namespace {
 
-std::size_t constexpr input_limit_expected_file_count = 3;
+// NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+std::size_t constexpr input_limit_expected_file_count = 2; //3;
 
 std::vector<std::string> input_limit_get_test_names(std::string const& base_filename)
 {
-  return {base_filename + "_a.orc", base_filename + "_b.orc", base_filename + "_c.orc"};
+  // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+  return {base_filename + "_a.orc", base_filename + "_b.orc"/*, base_filename + "_c.orc"*/};
 }
 
 void input_limit_test_write_one(std::string const& filepath,
@@ -1027,10 +1051,11 @@ void input_limit_test_write(
   // As such, we may see smaller output chunks for the input data compressed by ZSTD.
   input_limit_test_write_one(
     test_files[0], input, stripe_size_rows, cudf::io::compression_type::NONE);
+  // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+  // input_limit_test_write_one(
+  //   test_files[1], input, stripe_size_rows, cudf::io::compression_type::ZSTD);
   input_limit_test_write_one(
-    test_files[1], input, stripe_size_rows, cudf::io::compression_type::ZSTD);
-  input_limit_test_write_one(
-    test_files[2], input, stripe_size_rows, cudf::io::compression_type::SNAPPY);
+    test_files[1], input, stripe_size_rows, cudf::io::compression_type::SNAPPY);
 }
 
 void input_limit_test_read(int test_location,
@@ -1070,13 +1095,15 @@ TEST_F(OrcChunkedReaderInputLimitTest, SingleFixedWidthColumn)
   input_limit_test_write(test_files, input);
 
   {
-    int constexpr expected[] = {50, 50, 50};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {50, /*50,*/ 50};
     input_limit_test_read(
       __LINE__, test_files, input, output_limit{0UL}, input_limit{1UL}, expected);
   }
 
   {
-    int constexpr expected[] = {17, 13, 10};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {17, /*13,*/ 10};
     input_limit_test_read(
       __LINE__, test_files, input, output_limit{0UL}, input_limit{2 * 1024 * 1024UL}, expected);
   }
@@ -1106,13 +1133,15 @@ TEST_F(OrcChunkedReaderInputLimitTest, MixedColumns)
   input_limit_test_write(test_files, input);
 
   {
-    int constexpr expected[] = {50, 50, 50};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {50, /*50,*/ 50};
     input_limit_test_read(
       __LINE__, test_files, input, output_limit{0UL}, input_limit{1UL}, expected);
   }
 
   {
-    int constexpr expected[] = {17, 50, 17};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {17, /*50,*/ 17};
     input_limit_test_read(
       __LINE__, test_files, input, output_limit{0UL}, input_limit{2 * 1024 * 1024UL}, expected);
   }
@@ -1179,13 +1208,15 @@ TEST_F(OrcChunkedReaderInputLimitTest, ListType)
   input_limit_test_write(test_files, input, cudf::io::default_stripe_size_rows);
 
   {
-    int constexpr expected[] = {3, 40, 3};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {3, /*40,*/ 3};
     input_limit_test_read(
       __LINE__, test_files, input, output_limit{0UL}, input_limit{5 * 1024 * 1024UL}, expected);
   }
 
   {
-    int constexpr expected[] = {8, 40, 9};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {8, /*40,*/ 9};
     input_limit_test_read(__LINE__,
                           test_files,
                           input,
@@ -1262,13 +1293,15 @@ TEST_F(OrcChunkedReaderInputLimitTest, MixedColumnsHavingList)
   input_limit_test_write(test_files, input, cudf::io::default_stripe_size_rows);
 
   {
-    int constexpr expected[] = {13, 8, 6};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {13, /*8,*/ 6};
     input_limit_test_read(
       __LINE__, test_files, input, output_limit{0UL}, input_limit{128 * 1024 * 1024UL}, expected);
   }
 
   {
-    int constexpr expected[] = {13, 15, 17};
+    // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+    int constexpr expected[] = {13, /*15,*/ 17};
     input_limit_test_read(__LINE__,
                           test_files,
                           input,

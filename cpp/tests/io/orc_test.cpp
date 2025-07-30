@@ -14,6 +14,28 @@
  * limitations under the License.
  */
 
+// MIT License
+//
+// Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
 #include <cudf_test/base_fixture.hpp>
 #include <cudf_test/column_utilities.hpp>
 #include <cudf_test/column_wrapper.hpp>
@@ -1135,7 +1157,8 @@ TEST_F(OrcReaderTest, SingleInputs)
   CUDF_TEST_EXPECT_TABLES_EQUAL(*result.tbl, *table1);
 }
 
-TEST_F(OrcReaderTest, zstdCompressionRegression)
+// NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+TEST_F(OrcReaderTest, DISABLED_zstdCompressionRegression)
 {
   if (nvcomp::is_decompression_disabled(nvcomp::compression_type::ZSTD)) {
     GTEST_SKIP() << "Newer nvCOMP version is required";
@@ -1700,7 +1723,8 @@ TEST_F(OrcMetadataReaderTest, TestNested)
   EXPECT_EQ(out_float_col.type_kind(), cudf::io::orc::FLOAT);
 }
 
-TEST_F(OrcReaderTest, ZstdMaxCompressionRate)
+// NOTE(HIP/AMD): hipComp currently does not support zstd compression so we disable it for the tests
+TEST_F(OrcReaderTest, DISABLED_ZstdMaxCompressionRate)
 {
   if (nvcomp::is_decompression_disabled(nvcomp::compression_type::ZSTD) or
       nvcomp::is_compression_disabled(nvcomp::compression_type::ZSTD)) {
@@ -2070,8 +2094,8 @@ INSTANTIATE_TEST_CASE_P(OrcCompressionTest,
                         ::testing::Values(cudf::io::compression_type::NONE,
                                           cudf::io::compression_type::AUTO,
                                           cudf::io::compression_type::SNAPPY,
-                                          cudf::io::compression_type::LZ4,
-                                          cudf::io::compression_type::ZSTD));
+                                          cudf::io::compression_type::LZ4));
+                                          //cudf::io::compression_type::ZSTD));
 
 TEST_F(OrcWriterTest, BounceBufferBug)
 {
@@ -2082,9 +2106,10 @@ TEST_F(OrcWriterTest, BounceBufferBug)
   table_view expected({col});
 
   auto filepath = temp_env->get_temp_filepath("BounceBufferBug.orc");
+  // NOTE(HIP/AMD): hipComp currently does not support zstd compression so we switch to SNAPPY for the tests
   cudf::io::orc_writer_options out_opts =
     cudf::io::orc_writer_options::builder(cudf::io::sink_info{filepath}, expected)
-      .compression(cudf::io::compression_type::ZSTD);
+      .compression(cudf::io::compression_type::SNAPPY);
   cudf::io::write_orc(out_opts);
 }
 
