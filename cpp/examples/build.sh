@@ -70,7 +70,7 @@ build_example() {
   # TODO(HIP/AMD): adjus this so that this can be set via environment variable.
   CUDF_CMAKE_HIP_ARCHITECTURES="gfx90a"
   # Configure
-  cmake -S ${example_dir} -B ${build_dir} -Dcudf_ROOT="${LIB_BUILD_DIR}" -DCMAKE_CXX_COMPILER=hipcc -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES}
+  cmake -S ${example_dir} -B ${build_dir} -Dcudf_ROOT="${LIB_BUILD_DIR}" -DCMAKE_C_COMPILER=hipcc -DCMAKE_CXX_COMPILER=hipcc -DCMAKE_HIP_ARCHITECTURES=${CUDF_CMAKE_HIP_ARCHITECTURES}
   # Build
   cmake --build ${build_dir} -j${PARALLEL_LEVEL}
   # Install if needed
