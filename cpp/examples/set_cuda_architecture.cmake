@@ -34,14 +34,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
-#  file(DOWNLOAD https://raw.githubusercontent.com/rapidsai/rapids-cmake/${CUDF_TAG}/RAPIDS.cmake
-#       ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake
-#  )
-#endif()
-#include(${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
+if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_REPO})
+  set(RAPIDS_CMAKE_SCRIPT_REPO "$ENV{RAPIDS_CMAKE_SCRIPT_REPO}")
+else()
+  set(RAPIDS_CMAKE_SCRIPT_REPO ROCm-DS/ROCmDS-CMake)
+endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/../../rapids_config.cmake)
+if(DEFINED ENV{RAPIDS_CMAKE_SCRIPT_BRANCH})
+  set(RAPIDS_CMAKE_SCRIPT_BRANCH "$ENV{RAPIDS_CMAKE_SCRIPT_BRANCH}")
+else()
+  set(RAPIDS_CMAKE_SCRIPT_BRANCH release/1.0.x)
+endif()
+
+if(NOT EXISTS ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
+  file(DOWNLOAD "https://raw.githubusercontent.com/${RAPIDS_CMAKE_SCRIPT_REPO}/${RAPIDS_CMAKE_SCRIPT_BRANCH}/RAPIDS.cmake"
+       ${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake
+  )
+endif()
+include(${CMAKE_CURRENT_BINARY_DIR}/libcudf_cpp_examples_RAPIDS.cmake)
+
 include(rapids-cmake)
 include(rapids-cpm)
 include(rapids-cuda)
