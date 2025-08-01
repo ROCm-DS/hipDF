@@ -48,14 +48,7 @@ import numba
 import numpy as np
 import pandas as pd
 import pyarrow as pa
-#: from nvtx import annotate #: TODO: HIP/AMD use roctx
-import contextlib
-class annotate(contextlib.nullcontext):
-     def __init__(self, *args, **kwargs):
-         super().__init__()
-
-     def __call__(self, func):
-        return func
+#: from nvtx import annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 
 from packaging import version
 from pandas.io.formats import console
@@ -123,6 +116,7 @@ from cudf.utils.dtypes import (
     min_signed_type,
 )
 from cudf.utils.performance_tracking import _performance_tracking
+from cudf.utils.performance_tracking import nvtx_annotate as annotate  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (2/2)
 from cudf.utils.utils import (
     GetAttrGetItemMixin,
     _external_only_api,
