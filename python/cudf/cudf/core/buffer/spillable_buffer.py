@@ -1,5 +1,27 @@
 # Copyright (c) 2022-2024, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from __future__ import annotations
 
 import collections.abc
@@ -9,7 +31,7 @@ from threading import RLock
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy
-import nvtx
+#: import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (1/2)
 from typing_extensions import Self
 
 import rmm
@@ -22,6 +44,7 @@ from cudf.core.buffer.buffer import (
 )
 from cudf.core.buffer.exposure_tracked_buffer import ExposureTrackedBuffer
 from cudf.utils.performance_tracking import _get_color_for_nvtx
+from cudf.utils.performance_tracking import nvtx  # NOTE(HIP/AMD): we use the mock class from performance_tracking instead (2/2)
 from cudf.utils.string import format_bytes
 
 if TYPE_CHECKING:
