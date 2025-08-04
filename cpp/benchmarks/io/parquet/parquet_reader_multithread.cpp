@@ -24,8 +24,8 @@
 #include <cudf/utilities/default_stream.hpp>
 #include <cudf/utilities/memory_resource.hpp>
 #include <cudf/utilities/pinned_memory.hpp>
-
-#include <nvtx3/nvtx3.hpp>
+// NOTE(HIP): Not supported
+// #include <nvtx3/nvtx3.hpp>
 
 #include <BS_thread_pool.hpp>
 #include <nvbench/nvbench.cuh>
@@ -109,7 +109,7 @@ void BM_parquet_multithreaded_read_common(nvbench::state& state,
 
   auto mem_stats_logger = cudf::memory_stats_logger();
 
-  nvtxRangePushA(("(read) " + label).c_str());
+  // nvtxRangePushA(("(read) " + label).c_str());
   state.exec(nvbench::exec_tag::sync | nvbench::exec_tag::timer,
              [&, num_files = num_files](nvbench::launch& launch, auto& timer) {
                auto read_func = [&](int index) {
@@ -130,7 +130,7 @@ void BM_parquet_multithreaded_read_common(nvbench::state& state,
                cudf::detail::join_streams(streams, cudf::get_default_stream());
                timer.stop();
              });
-  nvtxRangePop();
+  // nvtxRangePop();
 
   auto const time = state.get_summary("nv/cold/time/gpu/mean").get_float64("value");
   state.add_element_count(num_iterations * static_cast<double>(data_size) / time,
@@ -143,34 +143,34 @@ void BM_parquet_multithreaded_read_common(nvbench::state& state,
 void BM_parquet_multithreaded_read_mixed(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_common(
     state, {cudf::type_id::INT32, cudf::type_id::DECIMAL64, cudf::type_id::STRING}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_fixed_width(nvbench::state& state)
 {
   auto label = get_label("fixed width", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_common(state, {cudf::type_id::INT32}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_string(nvbench::state& state)
 {
   auto label = get_label("string", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_common(state, {cudf::type_id::STRING}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_list(nvbench::state& state)
 {
   auto label = get_label("list", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_common(state, {cudf::type_id::LIST}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_chunked_common(nvbench::state& state,
@@ -196,7 +196,7 @@ void BM_parquet_multithreaded_read_chunked_common(nvbench::state& state,
 
   auto mem_stats_logger = cudf::memory_stats_logger();
 
-  nvtxRangePushA(("(read) " + label).c_str());
+  // nvtxRangePushA(("(read) " + label).c_str());
   std::vector<cudf::io::table_with_metadata> chunks;
   state.exec(nvbench::exec_tag::sync | nvbench::exec_tag::timer,
              [&, num_files = num_files](nvbench::launch& launch, auto& timer) {
@@ -228,7 +228,7 @@ void BM_parquet_multithreaded_read_chunked_common(nvbench::state& state,
                cudf::detail::join_streams(streams, cudf::get_default_stream());
                timer.stop();
              });
-  nvtxRangePop();
+  // nvtxRangePop();
 
   auto const time = state.get_summary("nv/cold/time/gpu/mean").get_float64("value");
   state.add_element_count(num_iterations * static_cast<double>(data_size) / time,
@@ -241,34 +241,34 @@ void BM_parquet_multithreaded_read_chunked_common(nvbench::state& state,
 void BM_parquet_multithreaded_read_chunked_mixed(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_chunked_common(
     state, {cudf::type_id::INT32, cudf::type_id::DECIMAL64, cudf::type_id::STRING}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_chunked_fixed_width(nvbench::state& state)
 {
   auto label = get_label("mixed", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_chunked_common(state, {cudf::type_id::INT32}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_chunked_string(nvbench::state& state)
 {
   auto label = get_label("string", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_chunked_common(state, {cudf::type_id::STRING}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 void BM_parquet_multithreaded_read_chunked_list(nvbench::state& state)
 {
   auto label = get_label("list", state);
-  nvtxRangePushA(label.c_str());
+  // nvtxRangePushA(label.c_str());
   BM_parquet_multithreaded_read_chunked_common(state, {cudf::type_id::LIST}, label);
-  nvtxRangePop();
+  // nvtxRangePop();
 }
 
 // mixed data types: fixed width and strings
