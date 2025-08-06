@@ -26,7 +26,7 @@ cmake_minimum_required(VERSION 3.26.4)
 
 include(../set_cuda_architecture.cmake)
 
-rapids_cuda_init_architectures(interop_example)
+rapids_hip_init_architectures(interop_example)
 
 project(
   interop_example

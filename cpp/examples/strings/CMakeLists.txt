@@ -30,7 +30,7 @@ set(CMAKE_USER_MAKE_RULES_OVERRIDE "${CMAKE_CURRENT_LIST_DIR}/../../../overrides
 include(../set_cuda_architecture.cmake)
 
 # initialize cuda architecture
-rapids_cuda_init_architectures(strings_examples)
+rapids_hip_init_architectures(strings_examples)
 
 project(
   strings_examples

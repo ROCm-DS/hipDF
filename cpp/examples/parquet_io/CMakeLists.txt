@@ -27,7 +27,7 @@ cmake_minimum_required(VERSION 3.26.4)
 include(../set_cuda_architecture.cmake)
 
 # initialize cuda architecture
-rapids_cuda_init_architectures(parquet_io)
+rapids_hip_init_architectures(parquet_io)
 
 project(
   parquet_io
