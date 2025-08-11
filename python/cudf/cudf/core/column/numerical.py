@@ -695,7 +695,7 @@ class NumericalColumn(NumericalBaseColumn):
                 # Yet, to stay as closely as possible to how CUDA cuDF and Pandas behave, we exclude np.iinfo(np.int64).max from the column before checking 
                 # if the cast is safe.
                 # This fixes the unit tests test_to_numeric_downcast_* for downcast=float in test_numerical.py.
-                s = cudf.Series(self)
+                s = cudf.Series._from_column(self)
                 non_maxs = s[~((s == np.iinfo(np.int64).max))]
                 col = non_maxs._column
                 filled = non_maxs.fillna(0)
