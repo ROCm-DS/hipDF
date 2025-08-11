@@ -1,27 +1,5 @@
 # Copyright (c) 2018-2025, NVIDIA CORPORATION.
 
-# MIT License
-#
-# Modifications Copyright (C) 2023-2025 Advanced Micro Devices, Inc. All rights reserved.
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 from __future__ import annotations
 
 import functools
@@ -685,20 +663,7 @@ class NumericalColumn(NumericalBaseColumn):
             ):
                 return True
             else:
-                # TODO(HIP/AMD): We remove np.iinfo(np.int64).max from the column for the checks
-                # because both on CUDA side as well as on Pandas
-                # np.iinfo(np.int64).max is downcasted to float, *although this results in a loss of precision/rounding up*:
-                # On CUDA/Pandas: np.iinfo(np.int64).max == 9223372036854775807 -> (as float) 9223372036854775808.000000 -> (when casted back to int64) 9223372036854775807
-                # On AMD: np.iinfo(np.int64).max == 9223372036854775807 -> (as float) 9223372036854775808.000000 -> (when casted back to int64) -9223372036854775808 or 4890909195324358656
-                # Because of the different cast behavior on AMD side, the following return would return false, preventing downcast to float in some instances (unlike pandas/CUDA cudf).
-                # One may argue that because the cast from float 9223372036854775808 to int64 is UB in the first place (overflow), AMD actually behaves correctly.
-                # Yet, to stay as closely as possible to how CUDA cuDF and Pandas behave, we exclude np.iinfo(np.int64).max from the column before checking 
-                # if the cast is safe.
-                # This fixes the unit tests test_to_numeric_downcast_* for downcast=float in test_numerical.py.
-                s = cudf.Series._from_column(self)
-                non_maxs = s[~((s == np.iinfo(np.int64).max))]
-                col = non_maxs._column
-                filled = non_maxs.fillna(0)
+                filled = self.fillna(0)
                 return (
                     filled.astype(to_dtype).astype(filled.dtype) == filled
                 ).all()
