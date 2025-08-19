@@ -43,12 +43,16 @@
 #include <cuda/std/limits>
 #include <cuda/std/type_traits>
 
+// NOTE(AMD/HIP): Redefinition error
+#ifndef __HIPCC_RTC__
 #include <algorithm>
 #include <string>
+#endif
 
 namespace CUDF_EXPORT numeric {
 namespace detail {
-
+// NOTE(AMD/HIP): Redefinition error (issue 304).
+#ifndef __HIPCC_RTC__
 template <typename T>
 auto to_string(T value) -> std::string
 {
@@ -74,6 +78,7 @@ auto to_string(T value) -> std::string
   }
   return std::string{};  // won't ever hit here, need to suppress warning though
 }
+#endif
 
 template <typename T>
 CUDF_HOST_DEVICE constexpr auto abs(T value)

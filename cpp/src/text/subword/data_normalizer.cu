@@ -156,7 +156,12 @@ extract_code_points_from_utf8(unsigned char const* strings,
   constexpr uint8_t max_utf8_blocks_for_char    = 4;
   uint8_t utf8_blocks[max_utf8_blocks_for_char] = {0};
 
-  for (int i = 0; i < cuda::std::min(static_cast<size_t>(max_utf8_blocks_for_char),
+  // NOTE(AMD/HIP): Redefinition error (issue 304).
+#ifdef __HIPCC_RTC__
+      for (int i = 0; i < min(static_cast<size_t>(max_utf8_blocks_for_char),
+#else
+      for (int i = 0; i < cuda::std::min(static_cast<size_t>(max_utf8_blocks_for_char),
+#endif
                                      total_bytes - start_byte_for_thread);
        ++i) {
     utf8_blocks[i] = strings[start_byte_for_thread + i];

@@ -45,7 +45,10 @@
 #include <cuda/std/type_traits>
 #include <cuda/std/utility>
 
+// NOTE(AMD/HIP): Redefinition error (issue 304).
+#ifndef __HIPCC_RTC__
 #include <algorithm>
+#endif
 #include <cassert>
 
 // NOTE(HIP/AMD): Do not include cmath 
@@ -59,7 +62,10 @@
 #ifndef __HIPCC_RTC__
 #include <cmath>
 #endif
+// NOTE(AMD/HIP): Redefinition error (issue 304).
+#ifndef __HIPCC_RTC__
 #include <string>
+#endif
 
 /// `fixed_point` and supporting types
 namespace CUDF_EXPORT numeric {
@@ -115,7 +121,7 @@ CUDF_HOST_DEVICE constexpr inline scale_type min(scale_type const& a, scale_type
 {
   // TODO This is a temporary workaround because <cuda/std/functional> is not self-contained when
   // built with NVRTC 11.8. Replace this with cuda::std::min once the underlying issue is resolved.
-#ifdef __CUDA_ARCH__
+#ifdef __HIP_DEVICE_COMPILE__
   return scale_type{min(static_cast<int>(a), static_cast<int>(b))};
 #else
   return std::min(a, b);
@@ -669,7 +675,9 @@ class fixed_point {
   /**
    * @brief Returns a string representation of the fixed_point value.
    */
-  explicit operator std::string() const
+// NOTE(AMD/HIP): Redefinition error (issue 304).
+#ifndef __HIPCC_RTC__  
+   explicit operator std::string() const
   {
     if (_scale < 0) {
       auto const av = detail::abs(_value);
@@ -685,6 +693,7 @@ class fixed_point {
     auto const zeros = std::string(_scale, '0');
     return detail::to_string(_value) + zeros;
   }
+#endif
 };
 
 /**

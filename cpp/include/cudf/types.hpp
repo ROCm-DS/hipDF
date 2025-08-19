@@ -53,6 +53,12 @@
 #define CUDF_KERNEL __global__
 #endif
 
+// NOTE(HIP/AMD): We need to use int64_t from __hip_internal namespace as a WAR (issue 304).
+#ifdef __HIPCC_RTC__
+using int64_t = __hip_internal::int64_t;
+using uint64_t = __hip_internal::uint64_t;
+#endif
+
 #include "cudf/cuda_runtime.h" //: including "hip/device_functions.h" causes errors
 
 
@@ -69,11 +75,18 @@
 
 #include <cudf/utilities/export.hpp>
 
+// NOTE(AMD/HIP): Redefinition error (issue 304).
+#ifndef __HIPCC_RTC__
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-
+#else
+#include <cuda/std/cassert>
+#include <cuda/std/cstddef>
+#include <cuda/std/cstdint>
+#include <cuda/std/iterator>
+#endif
 /**
  * @file
  * @brief Type declarations for libcudf.
