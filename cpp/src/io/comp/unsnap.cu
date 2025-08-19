@@ -36,6 +36,7 @@
 // SOFTWARE.
 
 #include "cudf/cuda_runtime.h"
+#include <cudf/detail/utilities/cuda.cuh>
 
 #include "gpuinflate.hpp"
 #include "io/utilities/block_utils.cuh"
@@ -46,7 +47,7 @@
 
 namespace cudf::io::detail {
 constexpr int log2_batch_count = 2;  // 1..5
-#ifdef __HIP_PLATFORM_AMD__
+#if defined(__HIP_PLATFORM_AMD__) && !defined(CUDF_USE_WARPSIZE_32)
 // TODO(HIP/AMD): fine-tune these parameters, need a size of 10 here so that 
 // with warp_size=64, enough bytes are getting prefetched for WARP0 (decode_symbols)
 constexpr int log2_prefetch_size = 10;  // Must be at least LOG2_BATCH_SIZE+3
@@ -724,15 +725,15 @@ CUDF_KERNEL void __launch_bounds__(block_size)
   }
   __syncthreads();
   if (!s->error) {
-    if (t < 32) {
+    if (t < cudf::detail::warp_size) {
       // WARP0: decode lengths and offsets
       snappy_decode_symbols(s, t);
-    } else if (t < 64) {
+    } else if (t < 2 * cudf::detail::warp_size) {
       // WARP1: prefetch byte stream for WARP0
-      snappy_prefetch_bytestream(s, t & 0x1f);
-    } else if (t < 96) {
+      snappy_prefetch_bytestream(s, t & (cudf::detail::warp_size-1));
+    } else if (t < 3 * cudf::detail::warp_size) {
       // WARP2: LZ77
-      snappy_process_symbols(s, t & 0x1f, temp_storage);
+      snappy_process_symbols(s, t & (cudf::detail::warp_size-1), temp_storage);
     }
     __syncthreads();
   }
@@ -748,9 +749,9 @@ void gpu_unsnap(device_span<device_span<uint8_t const> const> inputs,
                 device_span<compression_result> results,
                 rmm::cuda_stream_view stream)
 {
-  dim3 dim_block(128, 1);           // 4 warps per stream, 1 stream per block
+  dim3 dim_block(4 * cudf::detail::warp_size, 1);           // 4 warps per stream, 1 stream per block
   dim3 dim_grid(inputs.size(), 1);  // TODO: Check max grid dimensions vs max expected count
-  unsnap_kernel<128><<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
+  unsnap_kernel<4 * cudf::detail::warp_size><<<dim_grid, dim_block, sizeof(unsnap_state_s), stream.value()>>>(inputs, outputs, results);
 }
 
 }  // namespace cudf::io::detail
