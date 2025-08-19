@@ -167,7 +167,9 @@ void binary_operation(mutable_column_view& out,
   std::string cuda_source;
   std::string parsed_llvm_ir;
   if constexpr(HIP_PLATFORM_AMD) {
-    cuda_source = "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
+    // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+    cuda_source = std::string("using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;")
+                + "extern \"C\" __device__ void GENERIC_BINARY_OP(" 
                 + output_type_name +"*"
                 + ","
                 + cudf::type_to_name(lhs.type())

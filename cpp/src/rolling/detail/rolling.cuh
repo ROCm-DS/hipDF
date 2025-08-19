@@ -1288,7 +1288,9 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
   switch (udf_agg.kind) {
     case aggregation::Kind::PTX:
       if constexpr (HIP_PLATFORM_AMD) {
-        cuda_source = "extern \"C\" __device__ void rolling_udf("
+        // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+        cuda_source = std::string("using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;")
+             + "extern \"C\" __device__ void rolling_udf("
              + cudf::type_to_name(output->type()) + "*,"
              + "void*, void*, long long, long long, "
              + "const " + cudf::type_to_name(input.type()) + "*,"
@@ -1306,6 +1308,8 @@ std::unique_ptr<column> rolling_window_udf(column_view const& input,
       }                                                 
       break;
     case aggregation::Kind::CUDA:
+      // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+      cuda_source += std::string("using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;");
       cuda_source += cudf::jit::parse_single_function_cuda(udf_agg._source, udf_agg._function_name);
       break;
     default: CUDF_FAIL("Unsupported UDF type.");

@@ -73,7 +73,7 @@ function(jit_preprocess_files)
         $<TARGET_FILE:jitify_preprocess> ${ARG_FILE} -o
 	      ${CUDF_GENERATED_INCLUDE_DIR}/include/jit_preprocessed_files -i -m -std=c++17
 	      -D_FILE_OFFSET_BITS=64 -D__HIPCC_RTC__ ${CUDF_JITIFY_EXTRA_PREPROCESSING_FLAGS} -I${CUDF_SOURCE_DIR}/include # NOTE(HIP/AMD): -remove-unused-globals?
-	-I${CUDF_SOURCE_DIR}/src ${includes} -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}  --no-builtin-headers --no-preinclude-workarounds --no-system-headers-workaround --no-replace-pragma-once # TODO(HIP/AMD): --no-preinclude-workarounds
+	-I${CUDF_SOURCE_DIR}/src ${includes} -I${_libhipcxx_INCLUDE_DIR} -I${HIP_INCLUDE_DIRS}  --no-preinclude-workarounds --no-replace-pragma-once
       COMMENT "Custom command to JIT-compile files."
     )
   endforeach()

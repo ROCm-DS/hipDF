@@ -73,7 +73,9 @@ void unary_operation(mutable_column_view output,
   std::string parsed_udf_llvm_ir;
   
   if(is_ptx && HIP_PLATFORM_AMD) {
-    cuda_source = "extern \"C\" __device__ void GENERIC_UNARY_OP(" 
+    // NOTE(HIPRTC): This is a workaround for Jitify issue #55
+    cuda_source = std::string("using int64_t = __hip_internal::int64_t;using uint64_t = __hip_internal::uint64_t;")
+                + "extern \"C\" __device__ void GENERIC_UNARY_OP(" 
                 + cudf::type_to_name(output.type()) +"*"
                 + ","
                 + cudf::type_to_name(input.type())
