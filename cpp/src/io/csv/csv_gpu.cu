@@ -583,7 +583,8 @@ static inline __device__ void rowctx_merge_transform(device_span<uint64_t> ctxtr
   ctx_merge<4, 0x7, 64, 3>(ctxtree, &ctxb, t);
   ctx_merge<8, 0xf, 32, 4>(ctxtree, &ctxb, t);
   __syncthreads();
-  if (t < 32) {
+  // NOTE(HIP/AMD): Further adaptations may be needed/desirable for WS64
+  if (t < cudf::detail::warp_size) {
     ctxb = ctxtree[32 + t];
     ctx_merge<1, 0x1, 16, 1>(ctxtree, &ctxb, t);
     ctx_merge<2, 0x3, 8, 2>(ctxtree, &ctxb, t);
