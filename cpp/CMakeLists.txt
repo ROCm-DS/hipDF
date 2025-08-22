@@ -892,6 +892,16 @@ add_library(
   src/utilities/type_dispatcher.cpp
 )
 
+if((CMAKE_BUILD_TYPE MATCHES Debug) OR BUILD_ASAN)
+  message(VERBOSE "CUDF: Building with debugging flags")
+
+  # TODO(HIP/AMD): The following files do not complete build in acceptable time (or the build is hanging)
+  # in DEBUG mode. We therefore compile them with -DNDEBUG as a workaround (issue 66).
+  set_source_files_properties(src/join/mixed_join_size_kernel.cu
+                              src/join/mixed_join_size_kernel_nulls.cu
+                              PROPERTIES COMPILE_FLAGS "-DNDEBUG")
+endif()
+
 if(BUILD_ASAN)
   list(APPEND SUPPORTED_ASAN_ARCHS "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
                                    "gfx942:xnack+")
