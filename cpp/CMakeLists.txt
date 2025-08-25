@@ -174,7 +174,7 @@ list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx940" "gfx941" "gfx942"
                         "gfx942:sramecc+:xnack-"
                         "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
                         "gfx942:xnack+")
-                    
+
 list(APPEND WS_32_ARCHS "gfx1100")
 
 if(CUDF_USE_WARPSIZE_32)
@@ -909,7 +909,7 @@ if(BUILD_ASAN)
   list(APPEND SUPPORTED_ASAN_ARCHS "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
                                    "gfx942:xnack+")
   foreach(arch ${CMAKE_HIP_ARCHITECTURES})
-    if(NOT ${arch} IN_LIST SUPPORTED_ASAN_ARCHS) 
+    if(NOT ${arch} IN_LIST SUPPORTED_ASAN_ARCHS)
       message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with ASAN.\n"
                           "Please make sure you compile for xnack+, e.g., with CMAKE_HIP_ARCHITECTURES=\"gfx90a:xnack+\"")
     endif()
@@ -1696,7 +1696,6 @@ endif()
 # ##################################################################################################
 # * install targets -------------------------------------------------------------------------------
 rapids_cmake_install_lib_dir(lib_dir)
-include(CPack)
 include(GNUInstallDirs)
 
 set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME cudf)
@@ -1817,3 +1816,17 @@ add_custom_target(
 if(Thrust_SOURCE_DIR AND rmm_SOURCE_DIR)
   configure_file(scripts/load-pretty-printers.in load-pretty-printers @ONLY)
 endif()
+
+# ##################################################################################################
+# * build packages ---------------------------------------------------------------------------------
+
+set(CPACK_PACKAGE_NAME "hipdf" CACHE STRING "Overwrite package name.")
+set(CPACK_PACKAGE_VENDOR "Advanced Micro Devices, Inc.")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_VENDOR}")
+set(CPACK_OUTPUT_FILE_PREFIX "dist" CACHE PATH "Package output file prefix.")
+set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_PACKAGING_INSTALL_PREFIX "/opt/rocm-ds" CACHE PATH "Package install prefix.")
+include(CPack)
