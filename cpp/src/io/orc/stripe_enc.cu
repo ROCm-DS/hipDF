@@ -626,7 +626,7 @@ static __device__ void StoreStringData(uint8_t* dst,
   dst += pos - len;
   __syncthreads();
   constexpr int nwarps = (512 / cudf::detail::warp_size);
-  if (t < 2 * nwarps) {
+  if (t < cudf::detail::warp_size) {
     uint32_t wlen = (wt < nwarps) ? strenc->lengths_red[wt] : 0;
     uint32_t wpos = wlen;
     for (uint32_t n = 1; n < nwarps; n <<= 1) {
