@@ -353,7 +353,7 @@ static inline __device__ void StoreBytesBigEndian(uint8_t* dst, T v, uint32_t w)
 static inline __device__ void StoreBitsBigEndian(
   uint8_t* dst, uint32_t v, uint32_t w, int num_vals, int t)
 {
-  if (t <= (num_vals | 0x1f)) {
+  if (t <= (num_vals | LANE_MASK_ALL_UNTIL_EXCL(LOG2_WARPSIZE))) {
     uint32_t mask;
     if (w <= 1) {
       v    = (v << 1) | (shuffle_xor(v, 1) & 0x1);
