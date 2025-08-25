@@ -40,7 +40,7 @@
       "always_download": false
     },
     "hipbench": {
-      "version": "0.1",
+      "version": "0.2",
       "git_shallow": false,
       "git_url": "https://github.com/ROCm/hipBench",
       "git_tag": "release/0.1.x",
@@ -51,6 +51,13 @@
       "git_url" : "https://github.com/ROCm/jitify",
       "git_tag" : "release/0.0.x",
       "git_shallow": true,
+      "always_download": false
+    },
+    "rocmds_logger" : {
+      "version" : "1.0.0",
+      "git_shallow": false,
+      "git_url": "https://github.com/ROCm-DS/ROCmDS-Logger",
+      "git_tag": "release/1.0.x",
       "always_download": false
     }
   }
