@@ -339,7 +339,9 @@ endfunction()
 
 # ##################################################################################################
 # * conda environment -----------------------------------------------------------------------------
-rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH)
+# TODO(HIP/AMD): We keep debug flags as they are and set them separately, as rapids_cmake_support_conda_env
+# would set them to O0 which is presently not supported for hipDF (internal issue 307)
+rapids_cmake_support_conda_env(conda_env MODIFY_PREFIX_PATH KEEP_DEBUG_FLAGS)
 
 # ##################################################################################################
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
