@@ -41,6 +41,12 @@ def _load_wheel_installation(soname: str):
         lib := os.path.join(os.path.dirname(__file__), "lib64", soname)
     ):
         return ctypes.CDLL(lib, PREFERRED_LOAD_FLAG)
+
+    if os.path.isfile(
+        lib := os.path.join(os.path.dirname(__file__), "lib", soname)
+    ):
+        return ctypes.CDLL(lib, PREFERRED_LOAD_FLAG)
+
     return None
 
 
