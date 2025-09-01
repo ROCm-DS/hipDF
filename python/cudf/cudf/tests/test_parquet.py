@@ -3406,7 +3406,7 @@ def test_writer_lz4():
     got = pd.read_parquet(buffer)
     assert_eq(gdf, got)
 
-
+@pytest.mark.skipif(cudf.__is_hip_amd_port__, reason="hipcomp does not support zstd")
 def test_parquet_reader_zstd_huff_tables(datadir):
     # Ensure that this zstd-compressed file does not overrun buffers. The
     # problem was fixed in nvcomp 3.0.6.
