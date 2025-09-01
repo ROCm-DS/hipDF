@@ -39,6 +39,7 @@ _runtime_version = rmm._cuda.gpu.runtimeGetVersion()
 _CUDA_JIT128INT_SUPPORTED = (_driver_version >= 11050) and (
     _runtime_version >= 11050
 )
+_CUDA_JIT128INT_SUPPORTED = True # NOTE(HIP/AMD): ROCm>=7.0.0 supports this
 
 
 @pytest.mark.skipif(not _CUDA_JIT128INT_SUPPORTED, reason="requires CUDA 11.5")
