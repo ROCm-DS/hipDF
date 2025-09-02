@@ -1278,7 +1278,11 @@ def test_parquet_reader_v2(tmpdir, simple_pdf):
 
 
 def test_parquet_delta_byte_array(datadir):
-    fname = datadir / "delta_byte_arr.parquet"
+    # NOTE(HIP/AMD): The original file uses zstd which is not supported yet
+    if cudf.__is_hip_amd_port__:
+      fname = datadir / "delta_byte_arr_snappy.parquet"
+    else:
+      fname = datadir / "delta_byte_arr.parquet"
     assert_eq(cudf.read_parquet(fname), pd.read_parquet(fname))
 
 
