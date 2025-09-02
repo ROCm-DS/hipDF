@@ -587,8 +587,8 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
                         : dba->calculate_string_values(strings_data, string_pos, nproc, lane_id);
       string_pos += nproc;
 
-      // process the mini-block in batches of 32
-      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += 32) {
+      // process the mini-block in batches of warp_size
+      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += cudf::detail::warp_size) {
         // the position in the output column/buffer
         int dst_pos = sb->nz_idx[rolling_index<delta_rolling_buf_size>(sp)];
 
@@ -750,8 +750,8 @@ CUDF_KERNEL void __launch_bounds__(decode_block_size)
       int const nproc = min(batch_size, s->page.end_val - string_pos);
       string_pos += nproc;
 
-      // process the mini-block in batches of 32
-      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += 32) {
+      // process the mini-block in batches of warp_size
+      for (uint32_t sp = src_pos + lane_id; sp < src_pos + batch_size; sp += cudf::detail::warp_size) {
         // the position in the output column/buffer
         int dst_pos = sb->nz_idx[rolling_index<delta_rolling_buf_size>(sp)];
 
