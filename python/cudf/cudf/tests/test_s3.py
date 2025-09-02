@@ -208,6 +208,9 @@ def test_read_parquet(
     bytes_per_thread,
     columns,
 ):
+    if kvikio_remote_io and cudf.__is_hip_amd_port__:
+      pytest.skip("KvikIO with HIP is not supported yet")
+
     fname = "test_parquet_reader.parquet"
     bucket = "parquet"
     buffer = BytesIO()
