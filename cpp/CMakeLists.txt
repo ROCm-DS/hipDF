@@ -164,8 +164,9 @@ option(CUDF_CLANG_TIDY_AUTOFIX "Enable clang-tidy autofixes" OFF)
 option(
   CUDF_KVIKIO_REMOTE_IO
   "Enable remote IO (e.g. AWS S3) support through KvikIO. If disabled, cudf-python will still be able to do remote IO through fsspec."
-  ON
+  OFF
 )
+handle_unsupported_cmake_option("CUDF_KVIKIO_REMOTE_IO" TRUE)
 
 list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx940" "gfx941" "gfx942"
                         "gfx90a:sramecc+:xnack-" "gfx908:sramecc+:xnack-"
