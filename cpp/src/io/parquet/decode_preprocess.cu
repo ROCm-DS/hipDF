@@ -127,7 +127,8 @@ __device__ size_type gpuDeltaPageStringSize(page_state_s* s, int t)
       // get per lane sum for mini-block
       for (uint32_t i = 0; i < db->values_per_mb; i += warp_size) {
         uint32_t const idx = db->current_value_idx + i + lane_id;
-        if (idx < db->value_count) {
+        // NOTE(HIP/AMD): We ensure here that only values_per_mb threads access db->value[]
+        if (idx < db->value_count && lane_id < db->values_per_mb) {
           lane_sum += db->value[rolling_index<delta_rolling_buf_size>(idx)];
         }
       }

@@ -279,7 +279,7 @@ struct delta_binary_decoder {
 
     // NOTE(HIP/AMD): On AMD, it may happen that batch_len==values_per_mb==32, so we need
     // to mask out threads.
-    if(lane_id<batch_len) {
+    if(lane_id < batch_len) {
       for (int i = 0; i < num_pass; i++) {
         // position at end of the current mini-block since the following calculates
         // negative indexes
@@ -381,7 +381,8 @@ struct delta_binary_decoder {
 
       for (uint32_t p = 0; p < num_pass; p++) {
         auto const pidx     = idx + p * warp_size;
-        size_t const val    = pidx < skip ? static_cast<delta_length_type>(value_at(pidx)) : 0;
+        // NOTE(HIP/AMD): We ensure here that only values_per_mb threads access value[]
+        size_t const val    = (pidx < skip) && (t < values_per_mb) ? static_cast<delta_length_type>(value_at(pidx)) : 0;
         auto const warp_sum = warp_reduce(temp_storage).Sum(val);
         if (t == 0) { sum += warp_sum; }
       }

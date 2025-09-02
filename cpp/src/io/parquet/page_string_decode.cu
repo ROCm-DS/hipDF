@@ -567,11 +567,13 @@ __device__ thrust::pair<size_t, size_t> totalDeltaByteArraySize(uint8_t const* d
       // get per lane sum for mini-block
       for (uint32_t i = 0; i < db->values_per_mb; i += warp_size) {
         uint32_t const idx = db->current_value_idx + i + lane_id;
-        if (idx >= start_value && idx < end_value && idx < db->value_count) {
+        // NOTE(HIP/AMD): We ensure here that only values_per_mb threads access db->value[]
+        if (idx >= start_value && idx < end_value && idx < db->value_count && lane_id < db->values_per_mb) {
           lane_sum += db->value[rolling_index<delta_rolling_buf_size>(idx)];
         }
         // need lane_max over all values, not just in bounds
-        if (idx < db->value_count) {
+        // NOTE(HIP/AMD): We ensure here that only values_per_mb threads access db->value[]
+        if (idx < db->value_count && lane_id < db->values_per_mb) {
           lane_max = max(lane_max, db->value[rolling_index<delta_rolling_buf_size>(idx)]);
         }
       }
@@ -851,7 +853,8 @@ CUDF_KERNEL void __launch_bounds__(delta_length_block_size) gpuComputeDeltaLengt
       // get per lane sum for mini-block
       for (uint32_t i = 0; i < string_lengths.values_per_mb; i += warp_size) {
         uint32_t const idx = string_lengths.current_value_idx + i + t;
-        if (idx >= start_value && idx < end_value && idx < string_lengths.value_count) {
+        // NOTE(HIP/AMD): We ensure here that only values_per_mb threads access db->value[]
+        if (idx >= start_value && idx < end_value && idx < string_lengths.value_count && t < string_lengths.values_per_mb) {
           lane_sum += string_lengths.value[rolling_index<delta_rolling_buf_size>(idx)];
         }
       }
