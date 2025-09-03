@@ -1,8 +1,29 @@
 # Copyright (c) 2024, NVIDIA CORPORATION.
 
+# MIT License
+#
+# Modifications Copyright (C) 2025 Advanced Micro Devices, Inc. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import numpy as np
 import pyarrow as pa
-import pyarrow.compute as pc
 import pytest
 from utils import assert_column_eq
 
@@ -172,26 +193,51 @@ def test_reverse(list_column):
     assert_column_eq(expect, res)
 
 
-def test_segmented_gather(test_data):
-    list_column1, list_column2 = test_data[0]
-
-    plc_column1 = plc.interop.from_arrow(pa.array(list_column1))
-    plc_column2 = plc.interop.from_arrow(pa.array(list_column2))
-
-    res = plc.lists.segmented_gather(plc_column2, plc_column1)
-
-    expect = pa.array([[8, 9], [14], [0], [0, 0]])
-
-    assert_column_eq(expect, res)
+@pytest.fixture
+def segmented_gather_input_data() -> list[list[str | None]]:
+    return [["a", "b"], ["c"], [], ["d", None, "e"]]
 
 
-def test_extract_list_element_scalar(list_column):
-    plc_column = plc.interop.from_arrow(pa.array(list_column))
+@pytest.mark.parametrize(
+    "bounds_policy",
+    [
+        plc.copying.OutOfBoundsPolicy.DONT_CHECK,
+        plc.copying.OutOfBoundsPolicy.NULLIFY,
+    ],
+    ids=["DONT_CHECK", "NULLIFY"],
+)
+def test_segmented_gather_in_bounds(
+    segmented_gather_input_data: list[list[str | None]],
+    bounds_policy: plc.copying.OutOfBoundsPolicy,
+) -> None:
+    input_column = plc.interop.from_arrow(pa.array(segmented_gather_input_data))
+    # these are all in-bounds for input_column.
+    gather_map_list = plc.interop.from_arrow(
+        pa.array([[0, 0], [0], [], [1, 2]])
+    )
+    got = plc.lists.segmented_gather(
+        input_column, gather_map_list, bounds_policy=bounds_policy
+    )
 
-    res = plc.lists.extract_list_element(plc_column, 0)
-    expect = pc.list_element(list_column, 0)
+    expect = pa.array([["a", "a"], ["c"], [], [None, "e"]])
 
-    assert_column_eq(expect, res)
+    assert_column_eq(expect, got)
+
+
+def test_segmented_gather_out_of_bounds(
+    segmented_gather_input_data: list[list[str | None]],
+) -> None:
+    input_column = plc.interop.from_arrow(pa.array(segmented_gather_input_data))
+    gather_map_list = plc.interop.from_arrow(
+        pa.array([[0, 1], [2], [], [-5, 1, 2]])
+    )
+    got = plc.lists.segmented_gather(
+        input_column, gather_map_list, plc.copying.OutOfBoundsPolicy.NULLIFY
+    )
+
+    expect = pa.array([["a", "b"], [None], [], [None, None, "e"]])
+
+    assert_column_eq(expect, got)
 
 
 def test_extract_list_element_column(list_column):
