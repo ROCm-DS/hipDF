@@ -9,6 +9,14 @@ from pylibcudf.libcudf cimport binaryop as cpp_binaryop
 from pylibcudf.libcudf.binaryop cimport binary_operator
 from pylibcudf.libcudf.column.column cimport column
 
+# NOTE(HIP/AMD): The imports are necessary for binaryop_udf
+from pylibcudf.libcudf.types cimport data_type, type_id
+from pylibcudf.libcudf.column.column_view cimport column_view
+from libcpp.string cimport string
+from cudf.core.buffer import acquire_spill_lock
+from cudf.utils.dtypes import SUPPORTED_NUMPY_TO_PYLIBCUDF_TYPES
+import cudf
+
 from pylibcudf.libcudf.binaryop import \
     binary_operator as BinaryOperator  # no-cython-lint
 
@@ -114,3 +122,37 @@ cpdef bool is_supported_operation(
         rhs.c_obj,
         op
     )
+
+# NOTE(HIP/AMD): Thi method is removed from cudf-24.04. 
+# We have added it for additional testing puposes.
+@acquire_spill_lock()
+def binaryop_udf(Column lhs, Column rhs, udf_ptx, dtype):
+    """
+    Apply a user-defined binary operator (a UDF) defined in `udf_ptx` on
+    the two input columns `lhs` and `rhs`. The output type of the UDF
+    has to be specified in `dtype`, a numpy data type.
+    Currently ONLY int32, int64, float32 and float64 are supported.
+    """
+    cdef column_view c_lhs = lhs.view()
+    cdef column_view c_rhs = rhs.view()
+
+    cdef type_id tid = (
+        <type_id> (SUPPORTED_NUMPY_TO_PYLIBCUDF_TYPES[cudf.dtype(dtype)])
+    )
+    cdef data_type c_dtype = data_type(tid)
+
+    cdef string cpp_str = udf_ptx.encode("UTF-8")
+
+    cdef unique_ptr[column] c_result
+
+    with nogil:
+        c_result = move(
+            cpp_binaryop.binary_operation(
+                c_lhs,
+                c_rhs,
+                cpp_str,
+                c_dtype
+            )
+        )
+
+    return Column.from_libcudf(move(c_result))
