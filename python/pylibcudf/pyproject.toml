@@ -31,8 +31,7 @@ requires = [
 
 [project]
 name = "amd-pylibhipdf"
-version = "2.0.0a0"
-# dynamic = ["version"]
+dynamic = ["version"]
 description = "pylibhipdf - Python bindings for libhipdf"
 readme = { file = "README.md", content-type = "text/markdown" }
 authors = [
