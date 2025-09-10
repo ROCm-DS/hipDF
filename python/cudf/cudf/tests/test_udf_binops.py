@@ -30,8 +30,9 @@ from numba.np import numpy_support
 import rmm
 
 import cudf
-from cudf import Series, _lib as libcudf
+from cudf import Series
 from cudf.utils import dtypes as dtypeutils
+import pylibcudf as plc
 
 _driver_version = rmm._cuda.gpu.driverGetVersion()
 _runtime_version = rmm._cuda.gpu.runtimeGetVersion()
@@ -67,8 +68,16 @@ def test_generic_ptx(dtype):
 
     dtype = numpy_support.as_dtype(output_type).type
 
-    out_col = libcudf.binaryop.binaryop_udf(lhs_col, rhs_col, ptx_code, dtype)
+    out_col = plc.binaryop.binaryop_udf(
+        lhs_col.to_pylibcudf(mode="read"), 
+        rhs_col.to_pylibcudf(mode="read"), 
+        ptx_code, 
+        dtype)
+    # Wrap the plc column into a cuDF Series
+    out_series = Series.from_pylibcudf(out_col)
+    # Convert to NumPy array on host
+    out_arr = out_series.to_numpy()
 
     result = lhs_arr**3 + rhs_arr
 
-    np.testing.assert_almost_equal(result, out_col.values_host)
+    np.testing.assert_almost_equal(result, out_arr)
