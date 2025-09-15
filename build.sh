@@ -74,6 +74,12 @@ HELP="$0 [clean] [libcudf] [pylibcudf] [cudf] [cudf_polars] [cudfjar] [dask_cudf
    then 'dask_cudf' targets
 "
 
+# set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
+export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-ROCm-DS}"
+
+# set ROCm GITHUB organization to ROCm if not set in environment
+export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"
+
 LIB_BUILD_DIR=${LIB_BUILD_DIR:=${REPODIR}/cpp/build}
 KAFKA_LIB_BUILD_DIR=${KAFKA_LIB_BUILD_DIR:=${REPODIR}/cpp/libcudf_kafka/build}
 CUDF_KAFKA_BUILD_DIR=${REPODIR}/python/cudf_kafka/build

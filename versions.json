@@ -17,47 +17,47 @@
     },
     "hipco" : {
       "version" : "0.3.0",
-      "git_url" : "https://github.com/ROCm/hipCollections",
-      "git_tag" : "release/0.3.x",
+      "git_url": "https://github.com/$ENV{GITHUB_ROCM_ORG}/hipCollections",
+      "git_tag" : "amd-integration/0.3.x",
       "always_download": false
     },
     "hipmm" : {
       "version" : "3.0.0",
-      "git_url" : "https://github.com/ROCm-DS/hipMM",
-      "git_tag" : "release/3.0.x",
+      "git_url": "https://github.com/$ENV{GITHUB_ROCM_DS_ORG}/hipMM",
+      "git_tag" : "amd-integration/3.0.x",
       "always_download": false
     },
     "hipcomp" : {
       "version" : "2.2.0",
-      "git_url" : "https://github.com/ROCm/hipcomp-core",
-      "git_tag" : "release/2.2.x",
+      "git_url" : "https://github.com/$ENV{GITHUB_ROCM_ORG}/hipcomp-core",
+      "git_tag" : "amd-integration",
       "always_download": false
     },
     "libhipcxx" : {
-      "version" : "2.2.0",
-      "git_url" : "https://github.com/ROCm/libhipcxx",
-      "git_tag" : "release/2.2.x",
+      "version" : "2.7.0",
+      "git_url": "https://github.com/$ENV{GITHUB_ROCM_ORG}/libhipcxx",
+      "git_tag" : "amd-integration/2.7.x",
       "always_download": false
     },
     "hipbench": {
       "version": "0.2",
       "git_shallow": false,
-      "git_url": "https://github.com/ROCm/hipBench",
-      "git_tag": "release/0.1.x",
+      "git_url": "https://github.com/$ENV{GITHUB_ROCM_ORG}/hipbench",
+      "git_tag": "amd-integration/0.2.x",
       "always_download": false
     },
     "jitify-hip" : {
       "version" : "0.0",
-      "git_url" : "https://github.com/ROCm/jitify",
-      "git_tag" : "release/0.0.x",
+      "git_url" : "https://github.com/$ENV{GITHUB_ROCM_ORG}/jitify",
+      "git_tag" : "amd-integration",
       "git_shallow": true,
       "always_download": false
     },
     "rocmds_logger" : {
       "version" : "1.0.0",
       "git_shallow": false,
-      "git_url": "https://github.com/ROCm-DS/ROCmDS-Logger",
-      "git_tag": "release/1.0.x",
+      "git_url": "https://github.com/$ENV{GITHUB_ROCM_DS_ORG}/ROCmDS-Logger",
+      "git_tag": "amd-integration/1.0.x",
       "always_download": false
     }
   }
