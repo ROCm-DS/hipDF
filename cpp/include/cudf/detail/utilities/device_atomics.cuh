@@ -245,6 +245,8 @@ struct genericAtomicOperationImpl<uint64_t, DeviceSum, 8> {
   }
 };
 
+// NOTE(HIP/AMD): Use atomicCAS instead of atomicMin and atomicMax on MI2XX. Issue #318.
+#ifndef __gfx90a__
 // `atomicMin`, `atomicMax` support int32_t, int64_t, uint32_t, uint64_t.
 
 template <>
@@ -330,7 +332,7 @@ struct genericAtomicOperationImpl<uint64_t, DeviceMax, 8> {
     return ret;
   }
 };
-
+#endif
 // -----------------------------------------------------------------------
 // the implementation of `typesAtomicCASImpl`
 template <typename T, size_t N = sizeof(T)>
