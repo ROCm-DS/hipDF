@@ -28,6 +28,12 @@
 
 set -euo pipefail
 
+# set ROCm-DS GITHUB organization to ROCm-DS if not set in environment
+export GITHUB_ROCM_DS_ORG="${GITHUB_ROCM_DS_ORG:-ROCm-DS}"
+
+# set ROCm GITHUB organization to ROCm if not set in environment
+export GITHUB_ROCM_ORG="${GITHUB_ROCM_ORG:-ROCm}"
+
 # Parallelism control
 PARALLEL_LEVEL=${PARALLEL_LEVEL:-4}
 # Installation disabled by default
