@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import cudf
-from cudf.testing._utils import assert_eq
+from cudf.testing import assert_eq
 
 import pandas as pd
 import numpy as np
