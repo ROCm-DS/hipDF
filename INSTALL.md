@@ -30,7 +30,7 @@
 
 ## Requirements
 
-hipDF requires ROCm 6.4.0 or later running on Ubuntu 22.04 or later.
+hipDF requires ROCm 7.0.0 or later running on Ubuntu 22.04 or later.
 See [hipDF supported environments, features, and interfaces ](docs/install/hipDF-support.rst)
 for more details, including supported GPU architectures.
 
@@ -65,15 +65,40 @@ hipDF can then be installed into this environment using pip and the AMD PyPI URL
 pip install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
 ```
 
-## Build hipDF from source
+## For developers: How to build hipDF from source
 
 > [!IMPORTANT]
 > The following section walks you through all necessary steps for the build process.
-> For your convenience, we condensed these steps also into the
+> For your convenience, we condensed the steps for the full installation including python enablement also into the
 > [install_hipdf.sh](install_hipdf.sh) script. Read and edit the
 > script carefully to adapt the environment variables for your installation.
 
-### Installation Procedure
+### Installation Procedure for cpp-only part of hipDF and run test + benchmarks
+
+The installation of the cpp-only part of hipDF can be done via.
+
+```
+./build.sh libcudf tests benchmarks
+```
+
+where `tests` and `benchmarks` are optional flags that enable the respective additional functionalities. Use the following commands to run the tests and the benchmarks.
+
+>[!Note]
+> In order to fetch the dependencies `git` needs to be installed on your system.
+
+To run the tests use:
+
+```
+ctest --test-dir cpp/build/
+```
+
+To run the benchmarks use:
+
+```
+find cpp/build/benchmarks/ -type f -executable -exec {} \;
+```
+
+### Installation Procedure of hipDF including the Python layer
 
 You will perform the following steps:
 
@@ -96,6 +121,15 @@ hipDF Conda environment before you can build and run the package. The
 following diagram gives an overview:
 
 ![hipDF Cython (build) and Python (runtime) dependencies.](docs/data/install/hipdf_cypy_deps.svg)
+
+On an x86 Linux machine it is possible to download and install [Miniforge](https://conda-forge.org/download/) via
+
+```
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+sh Miniforge3-Linux-x86_64.sh
+```
+
+For other architectures and operating systems take a look at the webpage of [Miniforge](https://conda-forge.org/download/).
 
 #### Step 2: Clone the hipDF repository
 
