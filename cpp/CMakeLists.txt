@@ -168,20 +168,22 @@ option(
 )
 handle_unsupported_cmake_option("CUDF_KVIKIO_REMOTE_IO" TRUE)
 
-list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx940" "gfx941" "gfx942"
+list(APPEND WS_64_ARCHS "gfx90a" "gfx908" "gfx942"
                         "gfx90a:sramecc+:xnack-" "gfx908:sramecc+:xnack-"
-                        "gfx940:sramecc+:xnack-" "gfx941:sramecc+:xnack-"
-                        "gfx942:sramecc+:xnack-"
-                        "gfx90a:xnack+" "gfx940:xnack+" "gfx941:xnack+"
-                        "gfx942:xnack+")
+                        "gfx942:sramecc+:xnack-" "gfx950:sramecc+:xnack-"
+                        "gfx90a:xnack+" "gfx942:xnack+" "gfx950:xnack+"
+                        "gfx90a:xnack-" "gfx942:xnack-" "gfx950:xnack-")
 
 list(APPEND WS_32_ARCHS "gfx1100")
+
+list(APPEND EXPERIMENTAL_WS_64_ARCHS "gfx950" "gfx950:sramecc+:xnack-"
+                                     "gfx950:xnack+" "gfx950:xnack-")
 
 if(CUDF_USE_WARPSIZE_32)
 message(WARNING "Support for warp size 32 is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
 
 foreach(arch ${CMAKE_HIP_ARCHITECTURES})
-  if(${arch} IN_LIST WS_64_ARCHS)
+  if(${arch} IN_LIST WS_64_ARCHS OR ${arch} IN_LIST EXPERIMENTAL_WS_64_ARCHS)
     message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported with warp size 32.")
   endif()
 endforeach()
@@ -191,6 +193,9 @@ else()
 foreach(arch ${CMAKE_HIP_ARCHITECTURES})
   if(${arch} IN_LIST WS_32_ARCHS)
     message(FATAL_ERROR "Aborting, as the provided architecture ${arch} is not supported when building hipDF for warp size 64. Consider enabling the experimental flag CUDF_USE_WARPSIZE_32 (in CMake) or set --warpsize32 (build.sh) to proceed with the build.")
+  endif()
+  if(${arch} IN_LIST EXPERIMENTAL_WS_64_ARCHS)
+    message(WARNING "The provided architecture ${arch} is currently in the experimental stage. Features and functionality may change and are not guaranteed to be stable or production-ready. Use at your own risk.")
   endif()
 endforeach()
 
