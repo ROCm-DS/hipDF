@@ -73,7 +73,9 @@ pip install amd-hipdf==2.0.0 --extra-index-url=https://pypi.amd.com/simple
 > [install_hipdf.sh](install_hipdf.sh) script. Read and edit the
 > script carefully to adapt the environment variables for your installation.
 
-### Installation Procedure for cpp-only part of hipDF and run test + benchmarks
+In the following, we give a detailed overview on how to build the C++ components, how to run the tests and the benchmarks, and how to build the full hipDF installation including the Python layer.
+
+### Installation and Build Procedure for C++ Components
 
 The installation of the cpp-only part of hipDF can be done via.
 
@@ -85,6 +87,8 @@ where `tests` and `benchmarks` are optional flags that enable the respective add
 
 >[!Note]
 > In order to fetch the dependencies `git` needs to be installed on your system.
+
+### Running the tests and the benchmarks
 
 To run the tests use:
 
@@ -296,7 +300,7 @@ export LDFLAGS="-Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,no
 
 export CUDF_CMAKE_HIP_ARCHITECTURES="gfx942" # NOTE: adapt to your AMD GPU architecture
 
-export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake" bash build.sh libcudf pylibcudf cudf # NOTE: the build target is called 'cudf'
+bash build.sh libcudf pylibcudf cudf # NOTE: the build target is called 'cudf'
 ```
 
 > [!IMPORTANT]
