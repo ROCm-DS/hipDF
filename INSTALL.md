@@ -62,7 +62,7 @@ conda activate hipdf
 hipDF can then be installed into this environment using pip and the AMD PyPI URL:
 
 ```bash
-pip install amd-hipdf==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
+pip install amd-hipdf==2.0.0 --extra-index-url=https://pypi.amd.com/simple
 ```
 
 ## For developers: How to build hipDF from source
@@ -139,7 +139,7 @@ We create a work directory `/tmp/hipdf` and clone hipDF into this repository:
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
 
 cd /tmp/hipdf
-git clone https://github.com/ROCm-DS/hipDF hipdf -b release/1.0.x
+git clone https://github.com/ROCm-DS/hipDF hipdf -b release/2.0.x
 ```
 
 #### Step 3: Create and activate hipDF Conda environment `hipdf_dev`.
@@ -159,7 +159,7 @@ conda activate hipdf_dev
 
 ```bash
 conda activate hipdf_dev
-pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
+pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
 ```
 
 ##### From source
@@ -185,7 +185,7 @@ pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
 
    > [!NOTE]
    > Some ROCm installations may require that you append the ROCm version
-   > as suffix to the package names (example: `hipblas-dev6.4.0`). You can
+   > as suffix to the package names (example: `hipblas-dev7.0.0`). You can
    > understand what to do via the `rocm-core` package, which will be installed
    > for any ROCm installation. Check if the installed `rocm-core` package has
    > the ROCm version as suffix via `apt list`, then install the CuPy build
@@ -195,7 +195,7 @@ pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm/cupy cupy -b rocmds/develop/13.4.x
+   git clone https://github.com/ROCm/cupy cupy -b release/v13
    ```
 
 3. Build and install the CuPy wheel:
@@ -203,13 +203,14 @@ pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
    ```bash
    cd /tmp/hipdf
    git submodule update --init
-
    conda activate hipdf_dev
+   python3 -m pip install build scipy
    export CUPY_INSTALL_USE_HIP=1
    export ROCM_HOME=/opt/rocm        # NOTE: adapt to your environment
    export HCC_AMDGPU_TARGET="gfx942" # NOTE: set AMD GPU architecture(s)
-   python3 setup.py --cupy-package-name amd-cupy bdist_wheel # build the wheel
-   pip install ./dist/amd_cupy*.whl
+   SETUPTOOLS_BUILD_PARALLEL=${MAX_JOBS:-1} python3 -m build --wheel
+   CUPY_WHEEL=$(find ~+ -type f -name "*cupy*.whl")
+   pip install ${CUPY_WHEEL}
    ```
 
 > [!IMPORTANT]
@@ -228,8 +229,8 @@ pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
 conda activate hipdf_dev
 
 pip install --upgrade pip
-pip install --extra-index-url https://test.pypi.org/simple \
-  numba-hip[rocm-6-4-0]@git+https://github.com/rocm/numba-hip.git
+pip install --extra-index-url https://pypi.amd.com/simple \
+  numba-hip[rocm-7-0-0]@git+https://github.com/rocm/numba-hip.git
   # NOTE: adapt ROCm key to your Python version
 ```
 
@@ -238,7 +239,7 @@ pip install --extra-index-url https://test.pypi.org/simple \
 ##### Via AMD PyPI (recommended)
 
 ```bash
-pip install amd-hipmm==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
+pip install amd-hipmm==3.0.0b1 --extra-index-url=https://pypi.amd.com/simple
 ```
 
 ##### From source
@@ -252,7 +253,7 @@ pip install amd-hipmm==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/1.0.x
+   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/3.0.x
    ```
 
 2. Build and install the hipMM wheel:
@@ -260,15 +261,12 @@ pip install amd-hipmm==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
    ```bash
    conda activate hipdf_dev
 
-   cd /tmp/hipdf
-   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/1.0.x
-
    cd /tmp/hipdf/hipmm
    export RAPIDS_CMAKE_HIP_ARCHITECTURES="gfx942" # NOTE: set AMD GPU architecture(s)
    export CXX="hipcc"  # Cython CXX compiler, adapt to your environment
    export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake" # NOTE: ROCm CMake package location, adapt to your environment
 
-   ./build.sh rmm # Build rmm and install into `hipdf_dev` conda env.
+   ./build.sh librmm rmm # Build rmm and install into `hipdf_dev` conda env.
    ```
 
    > [!IMPORTANT]
@@ -298,7 +296,7 @@ export LDFLAGS="-Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,no
 
 export CUDF_CMAKE_HIP_ARCHITECTURES="gfx942" # NOTE: adapt to your AMD GPU architecture
 
-bash build.sh libcudf cudf # NOTE: the build target is called 'cudf'
+export CMAKE_PREFIX_PATH="${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake" bash build.sh libcudf pylibcudf cudf # NOTE: the build target is called 'cudf'
 ```
 
 > [!IMPORTANT]
