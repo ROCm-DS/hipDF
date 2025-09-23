@@ -41,14 +41,16 @@ CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
 CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
 CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
 
-NUMBA_URL=${NUMBA_URL:-"https://github.com/ROCm/numba-hip"}
+NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
 NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
-CUPY_URL=${CUPY_URL:-"https://github.com/ROCm/cupy"}
-CUPY_BRANCH=${CUPY_BRANCH:-"rocmds/develop/13.4.x"}
-HIPMM_URL=${HIPMM_URL:-"https://github.com/ROCm-DS/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"release/1.0.x"}
-HIPDF_URL=${HIPDF_URL:-"https://github.com/ROCm-DS/hipDF"}
-HIPDF_BRANCH=${HIPDF_BRANCH:-"release/1.0.x"}
+CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
+CUPY_BRANCH=${CUPY_BRANCH:-"amd-integration/v13"}
+HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"amd-integration/3.0.x"}
+HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
+HIPDF_BRANCH=${HIPDF_BRANCH:-"amd-integration/2.0.x"}
+
+AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/simple"}
 
 # We assume that you have already installed ROCm into /opt/rocm
 
@@ -167,7 +169,10 @@ fi
 # Step 2: Create build folder
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
+
+if [ ! -d "hipDF" ]; then
 git clone ${HIPDF_URL} -b ${HIPDF_BRANCH} hipDF
+fi
 
 # Step 3: Create and activate hipDF Conda environment `hipdf_dev`
 cd ${BUILD_DIR}/hipDF
@@ -176,41 +181,48 @@ conda activate hipdf_dev
 
 # Step 4: Install CuPy into hipdf_dev
 if [ $(is_false "${BUILD_CUPY}") ]; then
-  pip install amd-cupy~=13.4 --extra-index-url=https://pypi.amd.com/simple
+  pip install amd-cupy~=13.5.1 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
-  git clone ${CUPY_URL} -b ${CUPY_BRANCH} cupy
+
+  if [ ! -d "cupy" ]; then
+    git clone ${CUPY_URL} -b ${CUPY_BRANCH} cupy
+  fi
 
   # Step 4: Create CuPy wheel
   cd ${BUILD_DIR}/cupy
   git submodule update --init
 
   pip install --upgrade pip
+  python3 -m pip install build scipy
   export CUPY_INSTALL_USE_HIP=1
   export ROCM_HOME=/opt/rocm
   export HCC_AMDGPU_TARGET=${AMDGPU_TARGETS//;/,}
-  python3 setup.py --cupy-package-name amd-cupy bdist_wheel
+  SETUPTOOLS_BUILD_PARALLEL=${MAX_JOBS:-1} python3 -m build --wheel
   CUPY_WHEEL=$(find ~+ -type f -name "*cupy*.whl")
   pip install ${CUPY_WHEEL}
 fi
 
 # Step 5: Install Numba HIP into `hipdf_dev`
 ROCM_KEY=$(get_rocm_pip_key)
-pip install --extra-index-url https://test.pypi.org/simple \
+pip install --extra-index-url=${AMD_PYPI_URL} \
   numba-hip[${ROCM_KEY}]@git+${NUMBA_URL}#${NUMBA_BRANCH}
 
 # Step 6: Install hipMM into `hipdf_dev`.
 if [ $(is_false "${BUILD_HIPMM}") ]; then
-  pip install amd-hipmm==1.0.0b1 --extra-index-url=https://pypi.amd.com/simple
+  pip install amd-hipmm==3.0.0b1 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
+
+  if [ ! -d "hipMM" ]; then
   git clone ${HIPMM_URL} -b ${HIPMM_BRANCH} hipMM
+  fi
 
   cd ${BUILD_DIR}/hipMM
   export CXX=hipcc
   export CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}:/opt/rocm/lib/cmake
   export RAPIDS_CMAKE_HIP_ARCHITECTURES="${AMDGPU_TARGETS}"
-  bash build.sh rmm
+  bash build.sh librmm rmm
 fi
 
 # Step 7: Install hipDF into `hipdf_dev`
@@ -222,7 +234,7 @@ export CUDF_CMAKE_HIP_ARCHITECTURES="${AMDGPU_TARGETS}"
 # determine installation components
 components=" libcudf " # these components are always built, optionally add "tests benchmarks"
 if [[ ${BUILD_CUDF_PYTHON} == "true" ]]; then
-  components+=" cudf"
+  components+=" pylibcudf cudf"
 fi
 if [[ ${BUILD_DASK_CUDF} == "true" ]]; then
   components+=" cudf dask_cudf"
