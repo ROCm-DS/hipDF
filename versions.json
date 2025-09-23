@@ -36,7 +36,7 @@
     "libhipcxx" : {
       "version" : "2.7.0",
       "git_url": "https://github.com/$ENV{GITHUB_ROCM_ORG}/libhipcxx",
-      "git_tag" : "amd-integration/2.7.x",
+      "git_tag" : "amd-integration/v2.7.0",
       "always_download": false
     },
     "hipbench": {
