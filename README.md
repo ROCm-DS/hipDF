@@ -24,8 +24,6 @@
 
 # <div align="left">&nbsp;hipDF - GPU DataFrames on AMD GPUs</div>
 
-> [!CAUTION] 
-> This release is an *early-access* software technology preview. Running production workloads is *not* recommended.
 ***
 > [!NOTE]
 > This README is derived from the original RAPIDSAI project's README. More care is necessary to remove/modify parts that are only applicable to the original version.
