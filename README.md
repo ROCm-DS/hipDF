@@ -33,7 +33,9 @@
 follow the latter's directory structure and API naming as closely as possible to minimize porting friction for users that are interested in using both projects.
 
 ## Resources
-
+<!---
+TODO(HIP/AMD): needs revision to point only to AMD resources
+-->
 - [Try cudf.pandas now](https://nvda.ws/rapids-cudf): Explore `cudf.pandas` on a free GPU enabled instance on Google Colab!
 - [Install](https://docs.rapids.ai/install): Instructions for installing cuDF and other [RAPIDS](https://rapids.ai) libraries.
 - [cudf (Python) documentation](https://docs.rapids.ai/api/cudf/stable/)
