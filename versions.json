@@ -47,7 +47,7 @@
       "always_download": false
     },
     "jitify-hip" : {
-      "version" : "0.0",
+      "version" : "0.1",
       "git_url" : "https://github.com/$ENV{GITHUB_ROCM_ORG}/jitify",
       "git_tag" : "amd-integration",
       "git_shallow": true,
