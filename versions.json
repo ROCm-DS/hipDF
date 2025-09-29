@@ -1,9 +1,9 @@
 {
   "packages" : {
     "rocthrust" : {
-      "version" : "3.2.0",
+      "version" : "4.0.0",
       "git_url" : "https://github.com/ROCm/rocThrust",
-      "git_tag" : "rocm-6.3.0"
+      "git_tag" : "rocm-7.0.0"
     },
     "benchmark" : {
       "version" : "1.8.0",
