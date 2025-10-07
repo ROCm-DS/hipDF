@@ -22,12 +22,14 @@
     SOFTWARE.
 -->
 
+<!---
 ---
 myst:
   html_meta:
     "description": "ROCm Data Science (ROCm-DS) library for Data Frames."
     "keywords": "ROCm, ROCm-DS, Data Science, RAPIDS, AMD, CUDA, Data Frames, SDK"
 ---
+-->
 
 # Installing hipDF
 
