@@ -27,9 +27,9 @@ hipDF supported environments, features, and interfaces
 
 .. note::
 
-    The focus of this EA release of hipDF is on functionality. Performance is defocused in favor of functionality.
+    The focus of this release of hipDF is on functionality. Performance is defocused in favor of functionality.
 
-hipDF requires ROCm 6.4.0 or later running on Ubuntu 22.04 or later. See
+hipDF requires ROCm 7.0.0 or later running on Ubuntu 22.04 or later. See
 `ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
 for installation instructions.
 
@@ -43,11 +43,11 @@ There is no support for:
 
 Support is limited to C++ and Python interfaces. There is no official Java interface support.
 
-hipDF only supports features from cuDF 23.10.
+hipDF only supports features from cuDF 25.02.
 
 There is no official support for:
 
-* Per-thread default stream (PTDS)
+* Per-thread default streams (PTDS)
 * Integration with Dask hipDF or Dask HIP
 * Interoperability with Polars
 * The ``hipstreamz`` and ``hipdf_kafka`` Python packages
