@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-rocm-docs-core==1.17.0
+sphinx-book-theme==1.1.3
+rocm-docs-core==1.25.0
 autodoc
 # amd-hipdf # must be locally installed
