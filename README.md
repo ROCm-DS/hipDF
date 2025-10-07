@@ -142,8 +142,11 @@ of the latest cuDF development branch.
 
 See the [RAPIDS installation guide](https://docs.rapids.ai/install) for more OS and version info. -->
 
+## Install from AMD PyPI
+See install [instructions](docs/install/INSTALL.md).
+
 ## Build/Install from Source
-See build [instructions](INSTALL.md).
+See build [instructions](docs/install/BUILD.md).
 
 
 ## Open GPU Data Science
