@@ -243,7 +243,7 @@ pip install --extra-index-url https://pypi.amd.com/simple \
 ##### Via AMD PyPI (recommended)
 
 ```bash
-pip install amd-hipmm==3.0.0b1 --extra-index-url=https://pypi.amd.com/simple
+pip install amd-hipmm==3.0.0 --extra-index-url=https://pypi.amd.com/simple
 ```
 
 ##### From source
