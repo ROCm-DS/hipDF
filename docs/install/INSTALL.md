@@ -37,7 +37,7 @@ myst:
 
 ## Requirements
 
-hipDF requires ROCm 7.0.0 or later running on Ubuntu 22.04 or later.
+hipDF requires ROCm 7.0.0 or later running on a ROCm-supported operating system. Using Ubuntu 22.04 or later is recommended.
 See [hipDF supported environments, features, and interfaces ](docs/install/hipDF-support.rst)
 for more details, including supported GPU architectures.
 

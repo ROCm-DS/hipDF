@@ -29,8 +29,8 @@ hipDF supported environments, features, and interfaces
 
     The focus of this release of hipDF is on functionality. Performance is defocused in favor of functionality.
 
-hipDF requires ROCm 7.0.0 or later running on Ubuntu 22.04 or later. See
-`ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
+hipDF requires ROCm 7.0.0 or later running on a ROCm-supported operating system. Using Ubuntu 22.04 or later is recommended.
+See `ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
 for installation instructions.
 
 hipDF is supported on gfx942 and gfx90a only.
