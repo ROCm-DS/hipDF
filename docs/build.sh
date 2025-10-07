@@ -22,4 +22,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-python3 -m sphinx -T -E -b html -d _build/doctrees -D language=en . _build/html
+python3 -m sphinx -j 8 -T -E -b html -d _build/doctrees -D language=en . _build/html
