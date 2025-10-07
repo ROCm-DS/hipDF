@@ -34,11 +34,11 @@ _today = _datetime.today()
 external_projects_remote_repository = ""
 # TODO extend with ROCm-DS projects
 external_projects = [
-    "hipDF",
-    "hipMM",
+    "hipdf",
+    "hipmm",
     "python", "rocm"
 ]
-external_projects_current_project = "hipDF"
+external_projects_current_project = "hipdf"
 
 setting_all_article_info = True
 all_article_info_os = ["linux"]
@@ -77,7 +77,7 @@ extensions = [
 
 
 # for PDF output on Read the Docs
-version_number = "v1.0.0b1"
+version_number = "v2.0.0"
 project = "hipDF Documentation"
 author = "Advanced Micro Devices, Inc."
 copyright = f"Copyright (c) 2023-{_today.strftime(r'%Y')} Advanced Micro Devices, Inc. All rights reserved."
