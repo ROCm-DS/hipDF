@@ -217,7 +217,7 @@ pip install --extra-index-url=${AMD_PYPI_URL} \
 
 # Step 6: Install hipMM into `hipdf_dev`.
 if [ $(is_false "${BUILD_HIPMM}") ]; then
-  pip install amd-hipmm==3.0.0b1 --extra-index-url=${AMD_PYPI_URL}
+  pip install amd-hipmm==3.0.0 --extra-index-url=${AMD_PYPI_URL}
 else
   cd ${BUILD_DIR}
 
