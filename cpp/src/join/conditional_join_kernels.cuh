@@ -339,7 +339,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
       //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
       // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
       // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly.
-      __syncwarp(activemask);
+      __syncwarp(static_cast<uint64_t>(activemask));
 
       // flush output cache if next iteration does not fit
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
@@ -358,13 +358,13 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
         //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
         // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
         // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
-        __syncwarp(flush_mask);
+        __syncwarp(static_cast<uint64_t>(flush_mask));
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
       //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
       // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
       // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
-      __syncwarp(activemask);
+      __syncwarp(static_cast<uint64_t>(activemask));
     }
 
     // Left, left anti, and full joins all require saving left columns that
@@ -388,7 +388,7 @@ CUDF_KERNEL void conditional_join(table_device_view left_table,
     //: TODO(HIP/AMD): We do not have an equivalent of __syncwarp(activemask); here due to missing IFP.
     // Also, this change breaks CUDA backend compatibility, as the hip_extensions do not support CUDA backend yet.
     // We could add backend-dependent code (if CUDA support is desired) here or in the hip_extensions directly. 
-    __syncwarp(activemask);
+    __syncwarp(static_cast<uint64_t>(activemask));
 
     // final flush of output cache
     auto const do_flush   = current_idx_shared[warp_id] > 0;
@@ -461,10 +461,10 @@ CUDF_KERNEL void conditional_join_anti_semi(
         found_match = true;
       }
 
-      __syncwarp(activemask);
+      __syncwarp(static_cast<uint64_t>(activemask));
 
       auto const do_flush   = current_idx_shared[warp_id] + detail::warp_size >= output_cache_size;
-      auto const flush_mask = __ballot_sync(activemask, do_flush);
+      auto const flush_mask = __ballot_sync(static_cast<uint64_t>(activemask), do_flush);
       if (do_flush) {
         flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                          max_size,
@@ -474,20 +474,20 @@ CUDF_KERNEL void conditional_join_anti_semi(
                                                          current_idx_shared,
                                                          join_shared_l,
                                                          join_output_l);
-        __syncwarp(flush_mask);
+        __syncwarp(static_cast<uint64_t>(flush_mask));
         if (0 == lane_id) { current_idx_shared[warp_id] = 0; }
       }
-      __syncwarp(activemask);
+      __syncwarp(static_cast<uint64_t>(activemask));
     }
 
     if ((join_type == join_kind::LEFT_ANTI_JOIN) && (!found_match)) {
       add_left_to_cache(outer_row_index, current_idx_shared, warp_id, join_shared_l[warp_id]);
     }
 
-    __syncwarp(activemask);
+    __syncwarp(static_cast<uint64_t>(activemask));
 
     auto const do_flush   = current_idx_shared[warp_id] > 0;
-    auto const flush_mask = __ballot_sync(activemask, do_flush);
+    auto const flush_mask = __ballot_sync(static_cast<uint64_t>(activemask), do_flush);
     if (do_flush) {
       flush_output_cache<num_warps, output_cache_size>(flush_mask,
                                                        max_size,

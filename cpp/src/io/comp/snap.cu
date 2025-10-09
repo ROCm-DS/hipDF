@@ -175,7 +175,7 @@ static __device__ uint8_t* StoreCopy(uint8_t* dst,
  */
 static inline __device__ cudf::bitmask_type HashMatchAny(uint32_t v, uint32_t t)
 {
-  return __match_any_sync(cudf::LANE_MASK_ALL, v);
+  return __match_any_sync(static_cast<uint64_t>(cudf::LANE_MASK_ALL), v);
 }
 
 /**

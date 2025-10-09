@@ -142,7 +142,7 @@ struct delta_byte_array_decoder {
       }
 
       // check for finished
-      if (__all_sync(cudf::LANE_MASK_ALL, prefix_len == 0)) { return; }
+      if (__all_sync(static_cast<uint64_t>(cudf::LANE_MASK_ALL), prefix_len == 0)) { return; }
     }
   }
 
