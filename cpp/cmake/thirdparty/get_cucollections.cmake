@@ -42,8 +42,3 @@ function(find_and_configure_cucollections)
 endfunction()
 
 find_and_configure_cucollections()
-
-# Wave size 32
-if(TARGET cuco AND CUDF_USE_WARPSIZE_32)
-	target_compile_definitions(cuco INTERFACE CUCO_USE_WARPSIZE_32)
-endif()
