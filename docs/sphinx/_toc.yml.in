@@ -31,9 +31,10 @@ subtrees:
   - file: install/INSTALL.md
   - file: install/BUILD.md
 
-- caption: How-to
+- caption: How to
   entries:
   - file: how-to/cudf_pandas.rst
+    title: Use hipDF's cudf.pandas
 
 - caption: Reference
   entries:
