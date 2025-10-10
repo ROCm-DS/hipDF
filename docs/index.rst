@@ -50,7 +50,7 @@ The hipDF code is open and hosted at
 
 The hipDF documentation is structured as follows:
 
-.. grid:: 2
+.. grid:: 3
   :gutter: 3
 
   .. grid-item-card:: Installation
@@ -58,6 +58,10 @@ The hipDF documentation is structured as follows:
     * :doc:`hipDF supported environments, features, and interfaces <./install/hipDF-support>`
     * `Install hipDF <./install/INSTALL.html>`_
     * `Build hipDF <./install/BUILD.html>`_
+
+  .. grid-item-card:: How to
+
+    * :doc:`Using hipDF's cudf.pandas acceleration with HIP managed memory <./how-to/cudf_pandas>`
 
   .. grid-item-card:: Reference
 
