@@ -26,13 +26,13 @@
 # Skip the entire file if running on the HIP AMD port with Python 3.11
 import cudf
 import sys
+import pytest
 if getattr(cudf, "__is_hip_amd_port__", False) and sys.version_info[:2] == (3, 11):
   pytest.skip("TensorFlow is not available on ROCm/HIP for Python 3.11", 
               allow_module_level=True)
 
 import numpy as np
 import pandas as pd
-import pytest
 import tensorflow as tf
 
 SHUFFLE_BUFFER = 500
