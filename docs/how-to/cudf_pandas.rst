@@ -44,6 +44,7 @@ Experimental: When to use HSA_XNACK=0
 -----------------------
 
 .. warning::
+
    ``HSA_XNACK=0`` is **officially unsupported** as it may cause stability issues with recent AMDGPU drivers. This configuration is provided for experimental use only and is not recommended for production workloads.
 
 If ``HSA_XNACK`` is unset or set to ``0``, ``cudf.pandas`` will raise an error by default. To bypass this check for experimental purposes, set:
@@ -72,6 +73,7 @@ Summary
   - Disables page-fault retry; pages remain resident in host memory.
   - GPU accesses host memory via zero-copy.
   - Can avoid thrashing and may be used for datasets exceeding the available device memory.
+  - Instablities observed with some recent ROCm driver versions.
   - Not recommended for any production workloads.
 
 References
