@@ -49,13 +49,13 @@ CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"
 
 # TODO: adjust branch names for release
 NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
-NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
+NUMBA_BRANCH=${NUMBA_BRANCH:-"release/rocmds-ga-25.10"}
 CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
-CUPY_BRANCH=${CUPY_BRANCH:-"amd-integration/v13"}
+CUPY_BRANCH=${CUPY_BRANCH:-"release/rocmds-ga-25.10"}
 HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"amd-integration/3.0.x"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"release/rocmds-ga-25.10"}
 HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
-HIPDF_BRANCH=${HIPDF_BRANCH:-"amd-integration/2.0.x"}
+HIPDF_BRANCH=${HIPDF_BRANCH:-"release/rocmds-ga-25.10"}
 
 AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/simple"}
 
