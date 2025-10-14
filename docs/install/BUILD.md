@@ -22,7 +22,7 @@
     SOFTWARE.
 -->
 
-# Building and Installing hipDF from Source
+# Building and installing hipDF from source
 
 > [!IMPORTANT]
 > The following section walks you through all necessary steps for the build process.
@@ -32,7 +32,7 @@
 
 In the following, we give a detailed overview on how to build the C++ components, how to run the tests and the benchmarks, and how to build the full hipDF installation including the Python layer.
 
-## Build Procedure for C++ Components
+## Build procedure for the C++ components
 
 Building the C++/HIP components of hipDF can be achieved via the following command
 
