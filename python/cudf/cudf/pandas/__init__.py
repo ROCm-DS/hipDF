@@ -88,14 +88,14 @@ def install():
             )
         if hsa_xnack == "0" and not bypass_check:
             raise RuntimeError(
-                f"cudf.pandas requires HSA_XNACK=1 for managed memory operations. "
+                "cudf.pandas requires HSA_XNACK=1 for managed memory operations. "
                 f"Current setting HSA_XNACK={hsa_xnack!r}. Please set HSA_XNACK=1 in your environment. "
-                f"To bypass this check (experimental, not recommended), set CUDF_PANDAS_BYPASS_XNACK_CHECK=1."
+                "To bypass this check (experimental, not recommended), set CUDF_PANDAS_BYPASS_XNACK_CHECK=1."
             )
         elif hsa_xnack == "0" and bypass_check:
             warnings.warn(
                 f"HSA_XNACK check bypassed. Current HSA_XNACK={hsa_xnack!r}. "
-                f"This may cause crashes with managed memory operations on recent AMDGPU drivers.",
+                "This may cause crashes with managed memory operations on recent AMDGPU drivers.",
                 UserWarning
             )
 
