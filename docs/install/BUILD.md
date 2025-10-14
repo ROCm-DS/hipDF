@@ -59,7 +59,7 @@ To run the benchmarks use:
 find cpp/build/benchmarks/ -type f -executable -exec {} \;
 ```
 
-## Build & Installation Procedure of hipDF including the Python layer
+## Building and installing hipDF including the Python layer
 
 You will perform the following steps:
 
