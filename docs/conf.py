@@ -77,7 +77,7 @@ extensions = [
 
 
 # for PDF output on Read the Docs
-version_number = "v2.0.0"
+version_number = "2.0.0"
 project = "hipDF Documentation"
 author = "Advanced Micro Devices, Inc."
 copyright = f"Copyright (c) 2023-{_today.strftime(r'%Y')} Advanced Micro Devices, Inc. All rights reserved."
