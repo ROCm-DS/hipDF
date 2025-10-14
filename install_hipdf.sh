@@ -47,7 +47,6 @@ CUDF_USE_WARPSIZE_32=${CUDF_USE_WARPSIZE_32:-"false"}
 CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
 CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
 
-# TODO: adjust branch names for release
 NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
 NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
 CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
