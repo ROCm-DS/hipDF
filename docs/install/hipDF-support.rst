@@ -50,4 +50,5 @@ There is no official support for:
 * Per-thread default streams (PTDS)
 * Integration with Dask hipDF or Dask HIP
 * Interoperability with Polars
+* Integration with third-party packages cuML, cuGraph, ibis, and stumpy
 * The ``hipstreamz`` and ``hipdf_kafka`` Python packages
