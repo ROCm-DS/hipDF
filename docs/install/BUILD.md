@@ -36,7 +36,7 @@ In the following, we give a detailed overview on how to build the C++ components
 
 Building the C++/HIP components of hipDF can be achieved via the following command
 
-```
+```bash
 ./build.sh libcudf tests benchmarks
 ```
 
@@ -49,13 +49,13 @@ Here, `tests` and `benchmarks` are optional flags that enable the respective add
 
 To run the tests use:
 
-```
+```bash
 ctest --test-dir cpp/build/
 ```
 
 To run the benchmarks use:
 
-```
+```bash
 find cpp/build/benchmarks/ -type f -executable -exec {} \;
 ```
 
@@ -85,7 +85,7 @@ following diagram gives an overview:
 
 On an x86 Linux machine it is possible to download and install [Miniforge](https://conda-forge.org/download/) via
 
-```
+```bash
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
 sh Miniforge3-Linux-x86_64.sh
 ```
