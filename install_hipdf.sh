@@ -49,7 +49,7 @@ CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"
 
 # TODO: adjust branch names for release
 NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
-NUMBA_BRANCH=${NUMBA_BRANCH:-"release/rocmds-ga-25.10"}
+NUMBA_BRANCH=${NUMBA_BRANCH:-"dev"}
 CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
 CUPY_BRANCH=${CUPY_BRANCH:-"release/rocmds-ga-25.10"}
 HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
@@ -161,8 +161,8 @@ err_if_blank HIPDF_BRANCH
 # Allow to find ROCm-related CMake package config files
 export CMAKE_PREFIX_PATH="${ROCM_PATH}/lib/cmake"
 
-if ((  $(get_rocm_version_linearized) < 60400 )); then
-  echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 6.4.0"
+if ((  $(get_rocm_version_linearized) < 70000 )); then
+  echo "Error: The ROCm version you are using is not compatible, please install at least ROCm 7.0.0"
   exit -1
 fi
 
