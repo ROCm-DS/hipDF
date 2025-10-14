@@ -100,7 +100,7 @@ We create a work directory `/tmp/hipdf` and clone hipDF into this repository:
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
 
 cd /tmp/hipdf
-git clone https://github.com/ROCm-DS/hipDF hipdf -b release/2.0.x
+git clone https://github.com/ROCm-DS/hipDF hipdf -b release/rocmds-ga-25.10
 ```
 
 ### Step 3: Create and activate hipDF Conda environment `hipdf_dev`.
@@ -156,7 +156,7 @@ pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm/cupy cupy -b release/v13
+   git clone https://github.com/ROCm/cupy cupy -b release/rocmds-ga-25.10
    ```
 
 3. Build and install the CuPy wheel:
@@ -214,7 +214,7 @@ pip install amd-hipmm==3.0.0 --extra-index-url=https://pypi.amd.com/simple
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/3.0.x
+   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/rocmds-ga-25.10
    ```
 
 2. Build and install the hipMM wheel:
