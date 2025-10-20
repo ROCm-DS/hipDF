@@ -78,13 +78,13 @@ extensions = [
 
 # for PDF output on Read the Docs
 version_number = "2.0.0"
-project = "hipDF Documentation"
+project = "hipDF"
 author = "Advanced Micro Devices, Inc."
 copyright = f"Copyright (c) 2023-{_today.strftime(r'%Y')} Advanced Micro Devices, Inc. All rights reserved."
 version = version_number
 release = version_number
 cpp_maximum_signature_line_length = 10
-left_nav_title = f"hipDF {version_number} Documentation"
+left_nav_title = f"hipDF {version_number} documentation"
 
 doxygen_root = "../cpp/doxygen"
 doxysphinx_enabled = False
