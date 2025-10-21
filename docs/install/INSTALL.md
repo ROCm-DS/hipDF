@@ -33,9 +33,8 @@ myst:
 
 # Installing hipDF
 
-> **IMPORTANT:**
-> You can install hipDF via AMD PyPI (recommended for regular users) or build
-> and install it from source (for developers).
+You can install hipDF via AMD PyPI, which is recommended for regular users, or build
+and install it from source as described in [Building hipDF from source](BUILD.md).
 
 ## Requirements
 

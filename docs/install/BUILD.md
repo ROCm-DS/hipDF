@@ -24,17 +24,17 @@
 
 # Building and installing hipDF from source
 
-> [!IMPORTANT]
-> The following section walks you through all necessary steps for the build process.
-> For your convenience, we condensed the steps for the full installation including python enablement also into the
-> [install_hipdf.sh](install_hipdf.sh) script. Read and edit the
-> script carefully to adapt the environment variables for your installation.
+The following topic walks you through all necessary steps for building hipDF from source files.
+For your convenience, the steps for the full installation including python enablement are condensed
+into the [install_hipdf.sh](install_hipdf.sh) script. Read and edit the
+script carefully to adapt the environment variables for your installation.
 
-In the following, we give a detailed overview on how to build the C++ components, how to run the tests and the benchmarks, and how to build the full hipDF installation including the Python layer.
+The following provides detailed instructions on how to build the C++ components, how to run the tests
+and the benchmarks, and how to build the full hipDF installation including the Python layer.
 
 ## Build procedure for the C++ components
 
-Building the C++/HIP components of hipDF can be achieved via the following command
+Building the C++/HIP components of hipDF can be achieved via the following command:
 
 ```bash
 ./build.sh libcudf tests benchmarks
@@ -42,7 +42,7 @@ Building the C++/HIP components of hipDF can be achieved via the following comma
 
 Here, `tests` and `benchmarks` are optional flags that enable the respective additional functionalities. 
 
->[!Note]
+> **Note**
 > In order to fetch the dependencies `git` needs to be installed on your system.
 
 ## Running the tests and the benchmarks
@@ -81,9 +81,9 @@ hipMM, HIP Python, ROCm LLVM Python) that need to be installed into the
 hipDF Conda environment before you can build and run the package. The
 following diagram gives an overview:
 
-![hipDF Cython (build) and Python (runtime) dependencies.](docs/data/install/hipdf_cypy_deps.svg)
+![hipDF Cython (build) and Python (runtime) dependencies.](../data/install/hipdf_cypy_deps.svg)
 
-On an x86 Linux machine it is possible to download and install [Miniforge](https://conda-forge.org/download/) via
+On an x86 Linux machine it is possible to download and install [Miniforge](https://conda-forge.org/download/) with the following command:
 
 ```bash
 wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
@@ -94,7 +94,7 @@ For other architectures and operating systems take a look at the webpage of [Min
 
 ### Step 2: Clone the hipDF repository
 
-We create a work directory `/tmp/hipdf` and clone hipDF into this repository:
+Create a work directory `/tmp/hipdf` and clone hipDF into this repository:
 
 ```bash
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
@@ -105,7 +105,7 @@ git clone https://github.com/ROCm-DS/hipDF hipdf -b release/rocmds-ga-25.10
 
 ### Step 3: Create and activate hipDF Conda environment `hipdf_dev`.
 
-We create and activate the `hipdf_dev` Conda environment via:
+Create and activate the `hipdf_dev` Conda environment via:
 
 ```bash
 cd /tmp/hipdf/hipdf
@@ -125,10 +125,9 @@ pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
 
 #### From source
 
-> [!NOTE]
-> These instructions use the AMD MI300 GPU (gfx942 architecture). However,
-> this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
-> [any supported architecture ](docs/install/hipDF-support.rst).
+These instructions use the AMD MI300 GPU (gfx942 architecture). However,
+this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
+[any supported architecture ](docs/install/hipDF-support.rst).
 
 1. In order to build CuPy from source, you will not only require the library
    packages (`hipblas`, `hipfft`, ...) but also additional development packages
@@ -144,7 +143,7 @@ pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
                   hiprand rocsolver rocrand-dev
    ```
 
-   > [!NOTE]
+   > **Note**
    > Some ROCm installations may require that you append the ROCm version
    > as suffix to the package names (example: `hipblas-dev7.0.0`). You can
    > understand what to do via the `rocm-core` package, which will be installed
@@ -174,17 +173,15 @@ pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
    pip install ${CUPY_WHEEL}
    ```
 
-> [!IMPORTANT]
-> We provide AMD GPU architectures here via the `HCC_AMDGPU_TARGET`
-> environment variable (separator: `,`).
-> Refer to [Release Compatibility](https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html)
-> for supported GPU architectures.
+You can specify the AMD GPU architectures via the `HCC_AMDGPU_TARGET`
+environment variable (add a separator if needed: `,`) as shown.
+Refer to [Release Compatibility](https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html)
+for supported GPU architectures.
 
 ### Step 5: Install Numba HIP into `hipdf_dev`.
 
-> [!IMPORTANT]
-> You must provide the version of your ROCm installation here via the
-> optional dependency key `rocm-X-Y-Z`.
+Provide the version of your ROCm installation here via the
+optional dependency key `rocm-X-Y-Z`, as shown in the following command.
 
 ```bash
 conda activate hipdf_dev
@@ -205,10 +202,9 @@ pip install amd-hipmm==3.0.0 --extra-index-url=https://pypi.amd.com/simple
 
 #### From source
 
-> [!NOTE]
-> These instructions use the AMD MI300 GPU (gfx942 architecture). However, this
-> is only for example purposes. ``RAPIDS_CMAKE_HIP_ARCHITECTURES`` can be
-> set to [any supported architecture ](docs/install/hipDF-support.rst).
+The following instructions use the AMD MI300 GPU (gfx942 architecture). However, this
+is only for example purposes. ``RAPIDS_CMAKE_HIP_ARCHITECTURES`` can be
+set to [any supported architecture ](docs/install/hipDF-support.rst).
 
 1. Clone hipMM into the work directory:
 
@@ -230,17 +226,14 @@ pip install amd-hipmm==3.0.0 --extra-index-url=https://pypi.amd.com/simple
    ./build.sh librmm rmm # Build rmm and install into `hipdf_dev` conda env.
    ```
 
-   > [!IMPORTANT]
-   > Set the AMD GPU architecture(s) to build for via the
-   > `RAPIDS_CMAKE_HIP_ARCHITECTURES` environment variable (separator: `;`)
-   > or rely on auto detection.
+You can set the AMD GPU architecture(s) to build for via the
+`RAPIDS_CMAKE_HIP_ARCHITECTURES` environment variable (separator: `;`), or rely on auto detection.
 
 ### Step 7: Install hipDF into `hipdf_dev`
 
-> [!NOTE]
-> These instructions use the AMD MI300 GPU (gfx942 architecture). However, this
-> is only for example purposes. ``CUDF_CMAKE_HIP_ARCHITECTURES`` can be set
-> to [any supported architecture ](docs/install/hipDF-support.rst).
+These instructions use the AMD MI300 GPU (gfx942 architecture). However, this
+is only for example purposes. ``CUDF_CMAKE_HIP_ARCHITECTURES`` can be set
+to [any supported architecture ](docs/install/hipDF-support.rst).
 
 Install the `amd-hipdf` Python package as shown below:
 
@@ -260,15 +253,13 @@ export CUDF_CMAKE_HIP_ARCHITECTURES="gfx942" # NOTE: adapt to your AMD GPU archi
 bash build.sh libcudf pylibcudf cudf # NOTE: the build target is called 'cudf'
 ```
 
-> [!IMPORTANT]
-> Set the AMD GPU architecture(s) to build for via the
-> `CUDF_CMAKE_HIP_ARCHITECTURES` environment variable (separator: `;`) or rely
-> on auto detection.
+You can set the AMD GPU architecture(s) to build for via the
+`CUDF_CMAKE_HIP_ARCHITECTURES` environment variable (separator: `;`), or rely on auto detection.
 
 ### Step 8: Verify correct installation
 
-> [!IMPORTANT]
-> Running the instructions in this section requires an AMD GPU.
+> **Important**
+> Running the instructions in this section requires an AMD GPU in your system.
 
 You have just completed installing hipDF for use in the Conda environment
 `hipdf_dev`. To verify the correctness of the installation, run:
