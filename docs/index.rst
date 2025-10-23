@@ -72,7 +72,7 @@ The hipDF code is open and hosted at `https://github.com/ROCm-DS/hipDF <https://
 
 The hipDF documentation is structured as follows:
 
-.. grid:: 3
+.. grid:: 2
   :gutter: 3
 
   .. grid-item-card:: Installation

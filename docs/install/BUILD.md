@@ -26,7 +26,7 @@
 
 The following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
-into the [install_hipdf.sh](install_hipdf.sh) script. Read and edit the
+into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/2.0.x/install_hipdf.sh) script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
 The following provides detailed instructions on how to build the C++ components, how to run the tests
@@ -42,8 +42,9 @@ Building the C++/HIP components of hipDF can be achieved via the following comma
 
 Here, `tests` and `benchmarks` are optional flags that enable the respective additional functionalities. 
 
-> **Note**
-> In order to fetch the dependencies `git` needs to be installed on your system.
+```{note}
+In order to fetch the dependencies `git` needs to be installed on your system.
+```
 
 ## Running the tests and the benchmarks
 
@@ -143,13 +144,14 @@ this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
                   hiprand rocsolver rocrand-dev
    ```
 
-   > **Note**
-   > Some ROCm installations may require that you append the ROCm version
-   > as suffix to the package names (example: `hipblas-dev7.0.0`). You can
-   > understand what to do via the `rocm-core` package, which will be installed
-   > for any ROCm installation. Check if the installed `rocm-core` package has
-   > the ROCm version as suffix via `apt list`, then install the CuPy build
-   > dependencies accordingly.
+   ```{note}
+   Some ROCm installations may require that you append the ROCm version
+   as suffix to the package names (example: `hipblas-dev7.0.0`). You can
+   understand what to do via the `rocm-core` package, which will be installed
+   for any ROCm installation. Check if the installed `rocm-core` package has
+   the ROCm version as suffix via `apt list`, then install the CuPy build
+   dependencies accordingly.
+   ```
 
 2. Clone CuPy into the work directory:
 
@@ -258,8 +260,9 @@ You can set the AMD GPU architecture(s) to build for via the
 
 ### Step 8: Verify correct installation
 
-> **Important**
-> Running the instructions in this section requires an AMD GPU in your system.
+```{important}
+Running the instructions in this section requires an AMD GPU in your system.
+```
 
 You have just completed installing hipDF for use in the Conda environment
 `hipdf_dev`. To verify the correctness of the installation, run:

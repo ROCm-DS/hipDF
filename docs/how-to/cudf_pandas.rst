@@ -28,12 +28,12 @@
 .. _how-to-hipDF-pandas:
 
 *****************************************************************************
-Using hipDF's cudf.pandas acceleration with HIP managed memory
+Using hipDF's cudf.pandas with HIP managed memory
 *****************************************************************************
 
 hipDF ports ``cudf.pandas`` to provide a pandas-compatible API backed by hipDF so that existing pandas code can run on AMD GPUs using accelerated DataFrame operations. ``cudf.pandas`` allocates unified (managed) memory by default via ``hipMallocManaged``. On Linux kernels with Heterogeneous Memory Management (HMM) support and on supported AMD GPUs, managed memory pages can be transparently migrated to the device on GPU page faults.
 
-This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP Managed Memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__, and how to configure your environment for best performance on AMD GPUs depending on your use case. 
+This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__, and how to configure your environment for best performance on AMD GPUs depending on your use case. For more information, see `HIP memory management <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html>`__.
 
 Recommended: Enable page migration with HSA_XNACK=1
 ---------------------------------------------------
@@ -45,11 +45,15 @@ Experimental: When to use HSA_XNACK=0
 
 .. warning::
 
-   ``HSA_XNACK=0`` is **officially unsupported** as it may cause stability issues with recent AMDGPU drivers. This configuration is provided for experimental use only and is not recommended for production workloads.
+   ``HSA_XNACK=0`` is **officially unsupported** as it may cause stability issues with recent AMDGPU drivers.
+   This configuration is provided for experimental use only and is not recommended for production workloads.
 
-If ``HSA_XNACK`` is unset or set to ``0``, ``cudf.pandas`` will raise an error by default. To bypass this check for experimental purposes, set:
+   If ``HSA_XNACK`` is unset or set to ``0``, ``cudf.pandas`` will raise an error by default.
+   To bypass this check for experimental purposes, set:
 
-    ``export CUDF_PANDAS_BYPASS_XNACK_CHECK=1``
+   .. code:: bash
+
+      export CUDF_PANDAS_BYPASS_XNACK_CHECK=1
 
 With ``HSA_XNACK=0``, the managed memory will reside on the host (DRAM) and be accessed by the GPU via `zero-copy <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html#zc>`_, which can be beneficial in certain scenarios described below.
 While page migration often improves performance, there are cases where disabling it may be preferable:
@@ -75,11 +79,3 @@ Summary
   - Can avoid thrashing and may be used for datasets exceeding the available device memory.
   - Instablities observed with some recent ROCm driver versions.
   - Not recommended for any production workloads.
-
-References
-----------
-
-- HIP memory management overview:
-  https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html
-- HIP unified (managed) memory details:
-  https://rocm.docs.amd.com/projects/HIP/en/docs-7.0.1/how-to/hip_runtime_api/memory_management/unified_memory.html
