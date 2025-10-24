@@ -24,8 +24,8 @@ defaults:
   numbered: False
 root: index
 subtrees:
-
-- file: ./what-is-hipdf.rst
+- entries:
+  - file: ./what-is-hipdf.rst
 
 - caption: Install
   entries:
