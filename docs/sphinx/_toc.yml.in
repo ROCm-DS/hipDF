@@ -25,6 +25,8 @@ defaults:
 root: index
 subtrees:
 
+- file: ./what-is-hipdf.rst
+
 - caption: Install
   entries:
   - file: install/hipDF-support.rst

@@ -25,24 +25,20 @@
 hipDF supported environments, features, and interfaces
 *******************************************************
 
-hipDF requires ROCm 7.0.0 or later running on a ROCm-supported operating system. Using Ubuntu 22.04 or later is recommended.
+hipDF requires ROCm 7.0.0 or later running on a `ROCm-supported operating system <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html#supported-operating-systems>`__. Using Ubuntu 22.04 or later is recommended.
 See `ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
 for installation instructions.
 
 hipDF is supported on gfx942 and gfx90a only.
 
-There is no support for:
+hipDF only supports features from cuDF 25.02. Support is limited to C++ and Python interfaces.
+A Java interface is not supported.
+
+hipDF does not support:
 
 * zstd compression and decompression
 * GPU direct storage (KvikIO, cuFile)
 * rocTX tracing
-
-Support is limited to C++ and Python interfaces. There is no official Java interface support.
-
-hipDF only supports features from cuDF 25.02.
-
-There is no official support for:
-
 * Per-thread default streams (PTDS)
 * Integration with Dask hipDF or Dask HIP
 * Interoperability with Polars

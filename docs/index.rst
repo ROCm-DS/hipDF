@@ -34,39 +34,10 @@ hipDF documentation
 hipDF enables GPU-accelerated DataFrames based on the Apache Arrow columnar memory
 format. Its API is similar to that of Pandas, letting you accelerate both your existing and new
 data science workloads on AMD GPUs with high-level functions that eliminate the
-need to go into low-level HIP programming. This library enables large scale data processing on AMD Instinct
+need to go into low-level HIP programming. This library enables large-scale data processing on AMD Instinct
 GPUs, enabling data manipulation tasks such as loading, joining, aggregating, and filtering
-to be performed on data in GPU memory. hipDF offers both a Python and C++ API, allowing
-for a wide range of uses. 
-
-In addition to containing all of the necessary tools to build powerful new data
-processing applications, hipDF enables you to easily port your existing Pandas
-and cuDF workloads to AMD GPUs. hipDF is aligned with and is API-compatible with
-RAPIDS cuDF 25.02, allowing for workloads to be transitioned to AMD devices without
-the need for hipification.
-
-hipDF v2.0.0 includes the following features: 
-
-* hipDF offers the Series and DataFrame data structures that can be used to store and manipulate data
-  directly on the GPU. The Series data structure acts as a one-dimensional array, while the DataFrame
-  acts as a two-dimensional array with rows and columns. These data structures are similar to those present
-  in the widely used Pandas library and include similar methods to their Pandas counterparts allowing you
-  to perform basic operations on the data structures and data within. 
-
-* In addition to the data structure methods, more functionality is included to analyze and manipulate the
-  DataFrames and data within them. This functionality includes: 
-
-  - Group data together and perform additional operations on data within the groups. 
-  - Perform statistical operations on windows within the data. 
-  - Perform comparative operations on and within data structures. 
-  - Concatenate, merge, cut, and otherwise manipulate the data structures to better work on or analyze the data. 
-  - Run Sub-word Tokenizers on the data to prepare it for your large language models. 
-  - Perform a variety of commonly used string-handling operations on text data. 
-  - Use well-known and commonly used list operations to process and extract information from the data structures. 
-
-* hipDF supports a wide range of file formats for both input and output, allowing you to read data from various
-  sources and save data to your preferred format. The supported formats are CSV, Text, JSON, Parquet, ORC, HDF5,
-  Feather, and Avro.
+to be performed on data in GPU memory. hipDF offers both a Python and C++ API, supporting
+a wide range of use cases. For more information, see :ref:`what-is-hipdf`
 
 The hipDF code is open and hosted at `https://github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
 

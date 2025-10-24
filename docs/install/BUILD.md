@@ -24,13 +24,16 @@
 
 # Building and installing hipDF from source
 
-The following topic walks you through all necessary steps for building hipDF from source files.
+For developers, the following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
 into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/2.0.x/install_hipdf.sh) script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
 The following provides detailed instructions on how to build the C++ components, how to run the tests
 and the benchmarks, and how to build the full hipDF installation including the Python layer.
+
+The following provides details on building the C++ components, running tests and benchmarks, and for building 
+the full hipDF installation including the Python layer. End users should see the [Installation instructions](./INSTALL.md).
 
 ## Build procedure for the C++ components
 
@@ -46,7 +49,7 @@ Here, `tests` and `benchmarks` are optional flags that enable the respective add
 In order to fetch the dependencies `git` needs to be installed on your system.
 ```
 
-## Running the tests and the benchmarks
+## Running tests and benchmarks
 
 To run the tests use:
 
@@ -264,8 +267,8 @@ You can set the AMD GPU architecture(s) to build for via the
 Running the instructions in this section requires an AMD GPU in your system.
 ```
 
-You have just completed installing hipDF for use in the Conda environment
-`hipdf_dev`. To verify the correctness of the installation, run:
+After building and installing hipDF for use in the Conda environment ``hipdf_dev``, you can
+verify the correctness of the installation as follows:
 
 ```bash
 conda activate hipdf_dev

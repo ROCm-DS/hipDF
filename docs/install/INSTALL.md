@@ -33,14 +33,13 @@ myst:
 
 # Installing hipDF
 
-You can install hipDF via AMD PyPI, which is recommended for regular users, or build
+You can install hipDF via AMD PyPI, which is recommended for end users, or build
 and install it from source as described in [Building hipDF from source](BUILD.md).
 
 ## Requirements
 
-hipDF requires ROCm 7.0.0 or later running on a ROCm-supported operating system. Using Ubuntu 22.04 or later is recommended.
-See [hipDF supported environments, features, and interfaces ](docs/install/hipDF-support.rst)
-for more details, including supported GPU architectures.
+System requirements can be found in `hipDF supported environments, features, and interfaces <./install/hipDF-support.rst>`__,
+including supported GPU architectures.
 
 The following ROCm components must be installed:
 

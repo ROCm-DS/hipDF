@@ -28,24 +28,32 @@
 .. _how-to-hipDF-pandas:
 
 *****************************************************************************
-Using hipDF's cudf.pandas with HIP managed memory
+Using hipDF cudf.pandas with HIP managed memory
 *****************************************************************************
 
-hipDF ports ``cudf.pandas`` to provide a pandas-compatible API backed by hipDF so that existing pandas code can run on AMD GPUs using accelerated DataFrame operations. ``cudf.pandas`` allocates unified (managed) memory by default via ``hipMallocManaged``. On Linux kernels with Heterogeneous Memory Management (HMM) support and on supported AMD GPUs, managed memory pages can be transparently migrated to the device on GPU page faults.
+hipDF ports ``cudf.pandas`` to provide a pandas-compatible API backed by hipDF so that existing pandas code
+can run on AMD GPUs using accelerated DataFrame operations. ``cudf.pandas`` allocates unified (managed) memory
+by default via ``hipMallocManaged``. On Linux kernels with Heterogeneous Memory Management (HMM) support and on
+supported AMD GPUs, managed memory pages can be transparently migrated to the device on GPU page faults.
 
-This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__, and how to configure your environment for best performance on AMD GPUs depending on your use case. For more information, see `HIP memory management <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html>`__.
+This topic describes how the ``cudf.pandas`` acceleration layer uses `HIP unified managed memory <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html>`__, 
+and how to configure your environment for best performance on AMD GPUs depending on your use case. For more information,
+see `HIP memory management <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management.html>`__.
 
 Recommended: Enable page migration with HSA_XNACK=1
 ---------------------------------------------------
 
-Enabling GPU page-fault retry requires running the workload with the environment variable ``HSA_XNACK=1``. This activates page migration and typically provides significant performance gains for ``cudf.pandas``-accelerated workloads for datasets that fit into GPU VRAM and do not cause heavy CPU↔GPU paging. Setting ``export HSA_XNACK=1`` is therefore the recommended and supported default configuration. 
+Enabling GPU page-fault retry requires running the workload with the environment variable ``HSA_XNACK=1``. This activates
+page migration and typically provides significant performance gains for ``cudf.pandas``-accelerated workloads for datasets
+that fit into GPU VRAM and do not cause heavy CPU to GPU paging. Setting ``export HSA_XNACK=1`` is therefore the recommended
+and supported default configuration. 
 
 Experimental: When to use HSA_XNACK=0
 -------------------------------------
 
 .. warning::
 
-   ``HSA_XNACK=0`` is **officially unsupported** as it may cause stability issues with recent AMDGPU drivers.
+   ``HSA_XNACK=0`` is not officially supported as it might cause stability issues with some AMDGPU drivers.
    This configuration is provided for experimental use only and is not recommended for production workloads.
 
    If ``HSA_XNACK`` is unset or set to ``0``, ``cudf.pandas`` will raise an error by default.
@@ -55,12 +63,14 @@ Experimental: When to use HSA_XNACK=0
 
       export CUDF_PANDAS_BYPASS_XNACK_CHECK=1
 
-With ``HSA_XNACK=0``, the managed memory will reside on the host (DRAM) and be accessed by the GPU via `zero-copy <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html#zc>`_, which can be beneficial in certain scenarios described below.
-While page migration often improves performance, there are cases where disabling it may be preferable:
+With ``HSA_XNACK=0``, the managed memory will reside on the host (DRAM) and be accessed by the GPU via
+`zero-copy <https://rocm.docs.amd.com/projects/HIP/en/latest/how-to/hip_runtime_api/memory_management/unified_memory.html#zc>`_,
+which can be beneficial in certain scenarios described below. While page migration often improves performance, there are cases
+where disabling it may be preferable:
 
-- Page thrashing: If your workload frequently oscillates memory pages between CPU and GPU, migration overhead may degrade performance. In such cases, using ``HSA_XNACK=0`` keeps pages resident in host memory and avoids page thrashing.
+- Page thrashing: If your workload frequently oscillates memory pages between CPU and GPU, migration overhead might degrade performance. In such cases, using ``HSA_XNACK=0`` keeps pages resident in host memory and avoids page thrashing.
 
-- Datasets larger than GPU VRAM: For oversized datasets, we have observed performance degradations with ``HSA_XNACK=1`` due to excessive migration pressure. In such cases, using ``HSA_XNACK=0`` can yield better performance by keeping data in host memory and leveraging zero-copy access.
+- Datasets larger than GPU VRAM: For oversized datasets, performance degradations have been observed with ``HSA_XNACK=1`` due to excessive migration pressure. In such cases, setting ``HSA_XNACK=0`` can yield better performance by keeping data in host memory and leveraging zero-copy access.
 
 Summary
 -------
