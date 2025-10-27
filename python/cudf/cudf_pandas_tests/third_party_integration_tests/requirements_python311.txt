@@ -30,9 +30,9 @@ numpy
 --find-links https://repo.radeon.com/rocm/manylinux/rocm-rel-7.0/
 # NOTE(HIP/AMD): tensorflow is not available for Python 3.11
 # tensorflow-rocm==2.18.1
-torch
-torchvision
-torchaudio
+torch==2.8
+torchvision==0.24
+torchaudio==2.8
 
 seaborn
 scipy
