@@ -31,7 +31,7 @@ numpy
 # NOTE(HIP/AMD): tensorflow is not available for Python 3.11
 # tensorflow-rocm==2.18.1
 torch==2.8
-torchvision==0.24
+torchvision==0.23
 torchaudio==2.8
 
 seaborn
