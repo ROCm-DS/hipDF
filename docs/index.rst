@@ -37,7 +37,7 @@ data science workloads on AMD GPUs with high-level functions that eliminate the
 need to go into low-level HIP programming. This library enables large-scale data processing on AMD Instinct
 GPUs, enabling data manipulation tasks such as loading, joining, aggregating, and filtering
 to be performed on data in GPU memory. hipDF offers both a Python and C++ API, supporting
-a wide range of use cases. For more information, see :ref:`what-is-hipdf`
+a wide range of use cases. For more information and to learn about what's new in the latest release, see :ref:`what-is-hipdf`
 
 The hipDF code is open and hosted at `https://github.com/ROCm-DS/hipDF <https://github.com/ROCm-DS/hipDF>`_.
 
@@ -60,6 +60,6 @@ The hipDF documentation is structured as follows:
 
     * :ref:`hipDF-reference`
 
-To contribute to the documentation refer to `Contributing to ROCm  <https://rocm.docs.amd.com/en/latest/contribute/contributing.html>`_.
+To contribute to the documentation refer to `Contributing to ROCm-DS  <https://rocm.docs.amd.com/projects/rocm-ds-internal/en/docs-25.10/contribute/contributing.html>`__.
 
-You can find licensing information on the `Licensing <https://rocm.docs.amd.com/en/latest/about/license.html>`_ page.
+You can find licensing information on the `Licenses <https://rocm.docs.amd.com/projects/rocm-ds-internal/en/docs-25.10/about/license.html>`__ page.
