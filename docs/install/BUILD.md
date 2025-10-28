@@ -131,7 +131,7 @@ pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
 
 These instructions use the AMD MI300 GPU (gfx942 architecture). However,
 this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
-[any supported architecture ](./install/hipDF-support.rst).
+[any supported architecture ](./hipDF-support.rst).
 
 1. In order to build CuPy from source, you will not only require the library
    packages (`hipblas`, `hipfft`, ...) but also additional development packages
@@ -180,7 +180,7 @@ this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
 
 You can specify the AMD GPU architectures via the `HCC_AMDGPU_TARGET`
 environment variable (add a separator if needed: `,`) as shown.
-Refer to [Release Compatibility](https://rocm.docs.amd.com/projects/rocm-ds-internal/en/docs-25.10/about/compatibility-matrix.html)
+Refer to [Release Compatibility](https://rocm.docs.amd.com/projects/rocm-ds-internal/en/latest/about/compatibility-matrix.html)
 for supported GPU architectures.
 
 ### Step 5: Install Numba HIP into hipdf_dev.
@@ -209,7 +209,7 @@ pip install amd-hipmm==3.0.0 --extra-index-url=https://pypi.amd.com/simple
 
 The following instructions use the AMD MI300 GPU (gfx942 architecture). However, this
 is only for example purposes. ``RAPIDS_CMAKE_HIP_ARCHITECTURES`` can be
-set to [any supported architecture ](./install/hipDF-support.rst).
+set to [any supported architecture ](./hipDF-support.rst).
 
 1. Clone hipMM into the work directory:
 
@@ -238,7 +238,7 @@ You can set the AMD GPU architecture(s) to build for via the
 
 These instructions use the AMD MI300 GPU (gfx942 architecture). However, this
 is only for example purposes. ``CUDF_CMAKE_HIP_ARCHITECTURES`` can be set
-to [any supported architecture ](./install/hipDF-support.rst).
+to [any supported architecture ](./hipDF-support.rst).
 
 Install the `amd-hipdf` Python package as shown below:
 
