@@ -33,6 +33,7 @@ import rmm.mr
 from .fast_slow_proxy import is_proxy_instance, is_proxy_object
 from .magics import load_ipython_extension
 from .profiler import Profiler
+from hip import hip
 
 __all__ = [
     "Profiler",
@@ -76,9 +77,17 @@ def install():
     )
     rmm_mode = os.getenv("CUDF_PANDAS_RMM_MODE", default_rmm_mode)
     
+    # TODO(HIP/AMD): On MI300A, prefetching is not supported due to a known ROCm issue. Bypass prefetching by default.
+    is_mi300a = False
+    prop = hip.hipDeviceProp_t()
+    err = hip.hipGetDeviceProperties(prop, 0)
+    arch_name = prop.name.decode('utf-8')
+    if "300A" in arch_name:
+        is_mi300a = True
+    
     # Check HSA_XNACK setting for page migration support, do not use prefetching if not set
     hsa_xnack = os.getenv("HSA_XNACK", "0")
-    use_prefetch_adaptor = hsa_xnack != "0"
+    use_prefetch_adaptor = hsa_xnack != "0" and not is_mi300a
     bypass_check = os.getenv("CUDF_PANDAS_BYPASS_XNACK_CHECK", "0") == "1"
 
     if "managed" in rmm_mode:
@@ -86,13 +95,13 @@ def install():
             raise ValueError(
                 f"Managed memory is not supported on this system, so the requested {rmm_mode=} is invalid."
             )
-        if hsa_xnack == "0" and not bypass_check:
+        if hsa_xnack == "0" and not bypass_check and not is_mi300a:
             raise RuntimeError(
                 "cudf.pandas requires HSA_XNACK=1 for managed memory operations. "
                 f"Current setting HSA_XNACK={hsa_xnack!r}. Please set HSA_XNACK=1 in your environment. "
                 "To bypass this check (experimental, not recommended), set CUDF_PANDAS_BYPASS_XNACK_CHECK=1."
             )
-        elif hsa_xnack == "0" and bypass_check:
+        elif hsa_xnack == "0" and bypass_check and not is_mi300a:
             warnings.warn(
                 f"HSA_XNACK check bypassed. Current HSA_XNACK={hsa_xnack!r}. "
                 "This may cause crashes with managed memory operations on recent AMDGPU drivers.",
