@@ -25,7 +25,7 @@
 hipDF supported environments, features, and interfaces
 *******************************************************
 
-hipDF requires ROCm 7.0.0 or later running on a `ROCm-supported operating system <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/reference/system-requirements.html#supported-operating-systems>`__. Using Ubuntu 22.04 or later is recommended.
+hipDF requires ROCm 7.0.2 running on a `ROCm-supported operating system <https://rocm.docs.amd.com/projects/install-on-linux/en/docs-7.0.2/reference/system-requirements.html#supported-operating-systems>`__. Using Ubuntu 22.04 or later is recommended.
 See `ROCm installation for Linux <https://rocm.docs.amd.com/projects/install-on-linux/en/latest/>`_
 for installation instructions.
 

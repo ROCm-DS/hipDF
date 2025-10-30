@@ -53,7 +53,7 @@ Experimental: When to use HSA_XNACK=0
 
 .. warning::
 
-   ``HSA_XNACK=0`` is not officially supported as it might cause stability issues with some AMDGPU drivers.
+   ``HSA_XNACK=0`` is not officially supported as it might cause stability issues with some AMD GPU drivers.
    This configuration is provided for experimental use only and is not recommended for production workloads.
 
    If ``HSA_XNACK`` is unset or set to ``0``, ``cudf.pandas`` will raise an error by default.

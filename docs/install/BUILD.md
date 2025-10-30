@@ -29,9 +29,6 @@ For your convenience, the steps for the full installation including python enabl
 into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/2.0.x/install_hipdf.sh) script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
-The following provides detailed instructions on how to build the C++ components, how to run the tests
-and the benchmarks, and how to build the full hipDF installation including the Python layer.
-
 The following provides details on building the C++ components, running tests and benchmarks, and for building 
 the full hipDF installation including the Python layer. End users should see the [Installation instructions](./INSTALL.md).
 
@@ -98,13 +95,13 @@ For other architectures and operating systems take a look at the webpage of [Min
 
 ### Step 2: Clone the hipDF repository
 
-Create a work directory `/tmp/hipdf` and clone hipDF into this repository:
+Create a work directory `/tmp/hipdf` and clone the hipDF release branch into this directory:
 
 ```bash
 mkdir -p /tmp/hipdf # NOTE: feel free to adapt
-
 cd /tmp/hipdf
-git clone https://github.com/ROCm-DS/hipDF hipdf -b release/rocmds-ga-25.10
+
+git clone -b release/rocmds-25.10 https://github.com/ROCm-DS/hipDF hipdf
 ```
 
 ### Step 3: Create and activate hipDF Conda environment hipdf_dev.
@@ -129,9 +126,8 @@ pip install amd-cupy~=13.5.1 --extra-index-url=https://pypi.amd.com/simple
 
 #### From source
 
-These instructions use the AMD MI300 GPU (gfx942 architecture). However,
-this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
-[any supported architecture ](./hipDF-support.rst).
+These instructions use the AMD MI300 GPU (gfx942 architecture). The following only serves
+as an example. ``HCC_AMDGPU_TARGET`` can be set to [any supported architecture ](./hipDF-support.rst).
 
 1. In order to build CuPy from source, you will not only require the library
    packages (`hipblas`, `hipfft`, ...) but also additional development packages
@@ -156,11 +152,11 @@ this is only for example purposes. ``HCC_AMDGPU_TARGET`` can be set to
    dependencies accordingly.
    ```
 
-2. Clone CuPy into the work directory:
+2. Clone the CuPy release branch into the work directory:
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm/cupy cupy -b release/rocmds-ga-25.10
+   git clone -b release/rocmds-25.10 https://github.com/ROCm/cupy cupy
    ```
 
 3. Build and install the CuPy wheel:
@@ -193,7 +189,7 @@ conda activate hipdf_dev
 
 pip install --upgrade pip
 pip install --extra-index-url https://pypi.amd.com/simple \
-  numba-hip[rocm-7-0-0]@git+https://github.com/rocm/numba-hip.git
+  numba-hip[rocm-7-0-2]@git+https://github.com/rocm/numba-hip.git
   # NOTE: adapt ROCm key to your Python version
 ```
 
@@ -211,11 +207,11 @@ The following instructions use the AMD MI300 GPU (gfx942 architecture). However,
 is only for example purposes. ``RAPIDS_CMAKE_HIP_ARCHITECTURES`` can be
 set to [any supported architecture ](./hipDF-support.rst).
 
-1. Clone hipMM into the work directory:
+1. Clone the hipMM release branch into the work directory:
 
    ```bash
    cd /tmp/hipdf
-   git clone https://github.com/ROCm-DS/hipMM hipmm -b release/rocmds-ga-25.10
+   git clone -b release/rocmds-25.10 https://github.com/ROCm-DS/hipMM hipmm
    ```
 
 2. Build and install the hipMM wheel:

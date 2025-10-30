@@ -34,6 +34,7 @@ subtrees:
   - file: install/hipDF-support.rst
   - file: install/INSTALL.md
   - file: install/BUILD.md
+  - file: install/VERIFY.md
 
 - caption: How to
   entries:

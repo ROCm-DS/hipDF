@@ -38,7 +38,7 @@ and install it from source as described in [Building hipDF from source](BUILD.md
 
 ## Requirements
 
-System requirements can be found in [hipDF supported environments, features, and interfaces](./install/hipDF-support.rst),
+System requirements can be found in [hipDF supported environments, features, and interfaces](./hipDF-support.rst),
 including supported GPU architectures.
 
 The following ROCm components must be installed:
