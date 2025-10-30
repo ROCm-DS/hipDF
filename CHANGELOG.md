@@ -31,7 +31,7 @@ Documentation for hipDF is available at
 
 ### Added
 
- * Major upgrade aligning hipDF APIs with RAPIDS cuDF 25.02 APIs.
+ * Major upgrade aligning hipDF APIs with RAPIDS cuDF 25.02 APIs. For the detailed changes, see the original changelog at [original changelog](CHANGELOG_UPSTREAM_CUDF_25.02.md)
 
 ### Known limitations and notes
  * DEBUG builds with -O0 optimization are not currently supported. Use -Og or higher for DEBUG builds (default setting). Support for -O0 is planned in a future toolchain update.
