@@ -58,11 +58,10 @@ Packaged versions of hipDF and its dependencies are distributed via
 [AMD PyPI](https://pypi.amd.com/simple). This section discusses how to install
 hipDF via this package index.
 
-Create and activate a Conda environment with Python 3.12 and latest `libstdcxx-ng` as shown below:
+Create and activate a Conda environment with Python 3.12 as shown below:
 
 ```bash
 conda create --name hipdf python=3.12
-conda install -c conda-forge libstdcxx-ng # make sure that libstdcxx-ng>=13.2 is installed
 conda activate hipdf
 ```
 
