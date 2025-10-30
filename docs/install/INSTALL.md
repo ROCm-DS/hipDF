@@ -73,31 +73,5 @@ pip install amd-hipdf==2.0.0 --extra-index-url=https://pypi.amd.com/simple
 
 ### Verify correct installation
 
-```{important}
-Running the instructions in this section requires an AMD GPU in your system.
-```
+To verify that hipDF was installed correctly, see [Verifying your hipDF Installation](VERIFY.md).
 
-After building and installing hipDF for use in the Conda environment ``hipdf``, you can
-verify the correctness of the installation as follows:
-
-```bash
-conda activate hipdf_dev
-python3
-```
-
-Then enter the following code commands:
-
-```python3
-import hipdf
-print(hipdf.__version__)
-```
-
-You should see output that is similar to:
-
-```text
-Python 3.12.11 | packaged by conda-forge | (main, Jun  4 2025, 14:45:31) [GCC 13.3.0] on linux
-Type "help", "copyright", "credits" or "license" for more information.
->>> import hipdf
->>> print(hipdf.__version__)
-2.0.00
-```
