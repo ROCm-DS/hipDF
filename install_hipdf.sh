@@ -48,13 +48,13 @@ CUDF_DEBUG_BUILD=${CUDF_DEBUG_BUILD:-"false"}
 CUDF_USE_PER_THREAD_DEFAULT_STREAM=${CUDF_USE_PER_THREAD_DEFAULT_STREAM:-"false"}
 
 NUMBA_URL=${NUMBA_URL:-"https://github.com/${GITHUB_ROCM_ORG}/numba-hip"}
-NUMBA_BRANCH=${NUMBA_BRANCH:-"release/rocmds-ga-25.10"}
+NUMBA_BRANCH=${NUMBA_BRANCH:-"release/rocmds-25.10"}
 CUPY_URL=${CUPY_URL:-"https://github.com/${GITHUB_ROCM_ORG}/cupy"}
-CUPY_BRANCH=${CUPY_BRANCH:-"release/rocmds-ga-25.10"}
+CUPY_BRANCH=${CUPY_BRANCH:-"release/rocmds-25.10"}
 HIPMM_URL=${HIPMM_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipMM"}
-HIPMM_BRANCH=${HIPMM_BRANCH:-"release/rocmds-ga-25.10"}
+HIPMM_BRANCH=${HIPMM_BRANCH:-"release/rocmds-25.10"}
 HIPDF_URL=${HIPDF_URL:-"https://github.com/${GITHUB_ROCM_DS_ORG}/hipDF"}
-HIPDF_BRANCH=${HIPDF_BRANCH:-"release/rocmds-ga-25.10"}
+HIPDF_BRANCH=${HIPDF_BRANCH:-"release/rocmds-25.10"}
 
 AMD_PYPI_URL=${AMD_PYPI_URL:-"https://pypi.amd.com/simple"}
 
