@@ -172,6 +172,9 @@ if [[ -z ${CONDA_EXE} ]]; then
   exit -1
 fi
 
+# Make sure that conda is initialized correctly.
+eval "$(conda shell.bash hook)"
+
 # Step 2: Create build folder
 mkdir -p ${BUILD_DIR}
 cd ${BUILD_DIR}
