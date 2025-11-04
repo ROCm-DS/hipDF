@@ -1,5 +1,25 @@
 {
   "packages" : {
-    
+    "hipco" : {
+      "always_download": false
+    },
+    "hipmm" : {
+      "always_download": false
+    },
+    "hipcomp" : {
+      "always_download": false
+    },
+    "libhipcxx" : {
+      "always_download": false
+    },
+    "hipbench": {
+      "always_download": false
+    },
+    "jitify-hip" : {
+      "always_download": false
+    },
+    "rocmds_logger" : {
+      "always_download": false
+    }
   }
 }
