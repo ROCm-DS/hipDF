@@ -26,20 +26,12 @@
 # Verifying your hipDF Installation
 
 ```{important}
-Running the instructions in this section requires an AMD GPU in your system.
+* Running the instructions in this section requires an AMD GPU in your system.
+* hipDF relies on CuPy with the ROCm backend. You must set the `ROCM_HOME` environment variable to the root of your ROCm installation so CuPy can locate ROCm. If ROCm is installed in the default location, set: `export ROCM_HOME=/opt/rocm`
+* The instructions assume a Conda environment named `hipdf`. If your environment has a different name, replace `hipdf` in the commands with the environment name.
 ```
 
-```{important}
-hipDF relies on CuPy with the ROCm backend. You must set the `ROCM_HOME` environment variable to the root of your ROCm installation so CuPy can locate ROCm.
-If ROCm is installed in the default location, set:
-export ROCM_HOME=/opt/rocm
-```
-
-```{important}
-These instructions assume a Conda environment named "hipdf." If your environment has a different name, replace "hipdf" in the commands with your environment’s name.
-```
-
-After installing hipDF for use in the Conda environment ``hipdf``, you can
+After installing hipDF for use in the Conda environment `hipdf`, you can
 verify the correctness of the installation as follows:
 
 ```bash
