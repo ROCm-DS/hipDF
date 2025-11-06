@@ -27,7 +27,7 @@ root: index
 subtrees:
 - entries:
   - file: what-is-hipdf.rst
-    title: What is hipDF
+    title: What is hipDF?
 
 - caption: Install
   entries:
