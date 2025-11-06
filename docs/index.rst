@@ -61,6 +61,6 @@ The hipDF documentation is structured as follows:
 
     * :ref:`hipDF-reference`
 
-To contribute to the documentation refer to `Contributing to ROCm-DS  <https://rocm.docs.amd.com/projects/rocm-ds-internal/en/latest/contribute/contributing.html>`__.
+To contribute to the documentation refer to `Contributing to ROCm-DS  <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/contribute/contributing.html>`__.
 
-You can find licensing information on the `Licenses <https://rocm.docs.amd.com/projects/rocm-ds-internal/en/latest/about/license.html>`__ page.
+You can find licensing information on the `Licenses <https://rocm.docs.amd.com/projects/rocm-ds/en/latest/about/license.html>`__ page.

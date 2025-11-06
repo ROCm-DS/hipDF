@@ -22,6 +22,15 @@
     SOFTWARE.
 -->
 
+<!---
+---
+myst:
+  html_meta:
+    "description": "ROCm Data Science (ROCm-DS) library for Data Frames."
+    "keywords": "ROCm, ROCm-DS, Data Science, RAPIDS, AMD, CUDA, Data Frames, SDK"
+---
+-->
+
 # Building and installing hipDF from source
 
 For developers, the following topic walks you through all necessary steps for building hipDF from source files.
@@ -176,7 +185,7 @@ as an example. ``HCC_AMDGPU_TARGET`` can be set to [any supported architecture ]
 
 You can specify the AMD GPU architectures via the `HCC_AMDGPU_TARGET`
 environment variable (add a separator if needed: `,`) as shown.
-Refer to [Release Compatibility](https://rocm.docs.amd.com/projects/rocm-ds-internal/en/latest/about/compatibility-matrix.html)
+Refer to [Release Compatibility](https://rocm.docs.amd.com/projects/rocm-ds/en/latest/about/compatibility-matrix.html)
 for supported GPU architectures.
 
 ### Step 5: Install Numba HIP into hipdf_dev.
