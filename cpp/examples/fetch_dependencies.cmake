@@ -44,11 +44,19 @@ file(
 )
 include(${CMAKE_BINARY_DIR}/cmake/get_cpm.cmake)
 
+if(NOT "$ENV{RAPIDS_CMAKE_ROCM_DS_ORG}" STREQUAL "")
+  set(RAPIDS_CMAKE_ROCM_DS_ORG "$ENV{RAPIDS_CMAKE_ROCM_DS_ORG}" CACHE STRING "ROCm-DS GitHub organization.")
+  message(STATUS "RAPIDS_CMAKE_ROCM_DS_ORG=${RAPIDS_CMAKE_ROCM_DS_ORG}")
+else()
+  set(RAPIDS_CMAKE_ROCM_DS_ORG ROCm-DS CACHE STRING "ROCm-DS GitHub organization")
+  message(STATUS "Using default RAPIDS_CMAKE_ROCM_DS_ORG=${RAPIDS_CMAKE_ROCM_DS_ORG}")
+endif()
+
 # find or build it via CPM
 CPMFindPackage(
   NAME cudf
   FIND_PACKAGE_ARGUMENTS "PATHS ${cudf_ROOT} ${cudf_ROOT}/latest" GIT_REPOSITORY
-                         https://github.com/ROCm-DS/hipDF
+                         https://github.com/${RAPIDS_CMAKE_ROCM_DS_ORG}/hipDF
   GIT_TAG ${CUDF_TAG}
   GIT_SHALLOW
     TRUE
