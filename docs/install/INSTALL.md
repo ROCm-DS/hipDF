@@ -54,8 +54,13 @@ A minimal free version of Conda is [Miniforge](https://conda-forge.org/download/
 
 ## Install hipDF via AMD PyPI
 
+```{warning}
+Only install hipDF using AMD’s official package index.
+To ensure security, integrity, and supportability of your builds, consume packages exclusively from AMD’s official package index. Do not install, mirror, or resolve dependencies from any third‑party or unofficial indexes.
+```
+
 Packaged versions of hipDF and its dependencies are distributed via
-[AMD PyPI](https://pypi.amd.com/simple). This section discusses how to install
+[AMD PyPI](https://pypi.amd.com/rocm-7.0.2/simple). This section discusses how to install
 hipDF via this package index.
 
 Create and activate a Conda environment with Python 3.12 as shown below:
@@ -68,10 +73,9 @@ conda activate hipdf
 hipDF can then be installed into this environment using pip and the AMD PyPI URL:
 
 ```bash
-pip install amd-hipdf==2.0.0 --extra-index-url=https://pypi.amd.com/simple
+pip install amd-hipdf==2.0.0 --extra-index-url=https://pypi.amd.com/rocm-7.0.2/simple
 ```
 
 ### Verify correct installation
 
 To verify that hipDF was installed correctly, see [Verifying your hipDF Installation](VERIFY.md).
-
