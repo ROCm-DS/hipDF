@@ -101,6 +101,7 @@ print(tips_df.groupby("size").tip_percentage.mean())
 * Runtime requirements: `rocm-llvm-dev` (Ubuntu)
 * Officially supported architecture (gfx90a, gfx942).
 * Ubuntu 22.04+
+* Python 3.10 or later
 
 <!-- ### CUDA/GPU requirements
 
