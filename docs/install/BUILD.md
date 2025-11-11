@@ -35,7 +35,7 @@ myst:
 
 For developers, the following topic walks you through all necessary steps for building hipDF from source files.
 For your convenience, the steps for the full installation including python enablement are condensed
-into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/2.0.x/install_hipdf.sh) script. Read and edit the
+into the [install_hipdf.sh](https://github.com/ROCm-DS/hipDF/blob/release/rocmds-25.10/install_hipdf.sh) script. Read and edit the
 script carefully to adapt the environment variables for your installation.
 
 The following provides details on building the C++ components, running tests and benchmarks, and for building 
