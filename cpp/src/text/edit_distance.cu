@@ -48,8 +48,7 @@ namespace {
 /**
  * @brief Compute the Levenshtein distance for each string pair
  *
- * Documentation here: https://www.cuelogic.com/blog/the-levenshtein-algorithm
- * And here: https://en.wikipedia.org/wiki/Levenshtein_distance
+ * Documentation here: https://en.wikipedia.org/wiki/Levenshtein_distance
  *
  * @param d_str First string
  * @param d_tgt Second string

@@ -34,7 +34,7 @@ namespace CUDF_EXPORT nvtext {
  *
  * The `output[i]` is the edit distance between `input[i]` and `targets[i]`.
  * This edit distance calculation uses the Levenshtein algorithm as documented here:
- * https://www.cuelogic.com/blog/the-levenshtein-algorithm
+ * https://en.wikipedia.org/wiki/Levenshtein_distance
  *
  * @code{.pseudo}
  * Example:
@@ -69,7 +69,7 @@ std::unique_ptr<cudf::column> edit_distance(
  * @brief Compute the edit distance between all the strings in the input column.
  *
  * This uses the Levenshtein algorithm to calculate the edit distance between
- * two strings as documented here: https://www.cuelogic.com/blog/the-levenshtein-algorithm
+ * two strings as documented here: https://en.wikipedia.org/wiki/Levenshtein_distance
  *
  * The output is essentially a `input.size() x input.size()` square matrix of integers.
  * All values at diagonal `row == col` are 0 since the edit distance between two identical

@@ -5323,7 +5323,7 @@ class StringMethods(ColumnMethods):
         """
         The ``targets`` strings are measured against the strings in this
         instance using the Levenshtein edit distance algorithm.
-        https://www.cuelogic.com/blog/the-levenshtein-algorithm
+        https://en.wikipedia.org/wiki/Levenshtein_distance
 
         The ``targets`` parameter may also be a single string in which
         case the edit distance is computed for all the strings against
@@ -5375,7 +5375,7 @@ class StringMethods(ColumnMethods):
         should not contain nulls.
 
         Edit distance is measured based on the `Levenshtein edit distance
-        algorithm <https://www.cuelogic.com/blog/the-levenshtein-algorithm>`_.
+        algorithm <https://en.wikipedia.org/wiki/Levenshtein_distance>`_.
 
         Returns
         -------
